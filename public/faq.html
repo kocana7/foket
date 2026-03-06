@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>자주하는 질문(FAQ) | FoketCrypto Signals</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-primary: #0a0e1a;
+      --bg-secondary: #0f1629;
+      --bg-card: #131c31;
+      --border-color: #1e2d4a;
+      --text-primary: #e8edf5;
+      --text-secondary: #8fa3c0;
+      --accent-blue: #00b4d8;
+      --gradient-primary: linear-gradient(135deg,#00b4d8 0%,#0077a8 100%);
+      --radius-md: 12px;
+      --radius-sm: 8px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.6}
+    a{color:var(--accent-blue);text-decoration:none}
+    .navbar{position:sticky;top:0;z-index:100;background:rgba(10,14,26,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border-color)}
+    .navbar-inner{max-width:1280px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:70px}
+    .navbar-brand{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:800;color:var(--text-primary)}
+    .navbar-brand .logo-icon{width:38px;height:38px;background:var(--gradient-primary);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;overflow:hidden}
+    .navbar-brand span{color:var(--accent-blue)}
+    .navbar-nav{display:flex;align-items:center;gap:4px}
+    .navbar-nav a{color:var(--text-secondary);font-size:14px;font-weight:500;padding:8px 14px;border-radius:var(--radius-sm)}
+    .navbar-nav a:hover,.navbar-nav a.active{color:var(--text-primary);background:var(--bg-card)}
+    .container{max-width:900px;margin:0 auto;padding:0 24px}
+    .section{padding:60px 0}
+    .sec-title{font-size:28px;font-weight:800;margin-bottom:12px;text-align:center}
+    .sec-sub{color:var(--text-secondary);text-align:center;margin-bottom:40px}
+    .faq-list{display:flex;flex-direction:column;gap:12px}
+    .faq-item{background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);overflow:hidden;transition:all .2s}
+    .faq-item:hover{border-color:rgba(0,180,216,.3)}
+    .faq-q{padding:18px 20px;font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .faq-q i{color:var(--accent-blue);transition:transform .25s;flex-shrink:0}
+    .faq-item.open .faq-q i{transform:rotate(180deg)}
+    .faq-a{padding:0 20px;max-height:0;overflow:hidden;transition:max-height .3s ease}
+    .faq-a-inner{padding:0 0 20px;color:var(--text-secondary);font-size:15px;line-height:1.7;white-space:pre-line}
+    .faq-empty{text-align:center;color:var(--text-secondary);padding:60px 24px}
+    .faq-loading{text-align:center;color:var(--text-secondary);padding:40px}
+    footer{background:var(--bg-secondary);border-top:1px solid var(--border-color);padding:24px;text-align:center;color:var(--text-secondary);font-size:13px}
+    footer a{color:var(--accent-blue)}
+    .hamburger{display:none}
+    @media(max-width:768px){
+      .navbar-nav{display:none}
+      .hamburger{display:block;background:none;border:1px solid var(--border-color);padding:8px;color:var(--text-primary);cursor:pointer;border-radius:var(--radius-sm)}
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand">
+    <div class="logo-icon">
+      <img src="images/logo2.png" alt="FoketSignal 로고" style="width:100%;height:100%;object-fit:contain;border-radius:8px;">
+    </div>
+    Foket<span>Signal</span>
+    </a>
+    <div class="navbar-nav">
+      <a href="index.html" data-i18n="nav.home">홈</a>
+      <a href="index.html#pricing" data-i18n="nav.pricing">요금제</a>
+      <a href="faq.html" class="active" data-i18n="nav.faq">자주하는 질문(FAQ)</a>
+      <a href="index.html#contact" data-i18n="nav.contact">문의</a>
+    </div>
+    <a href="https://t.me/foketsignal_Lobby" target="_blank" rel="noopener noreferrer" class="btn-tg" style="display:inline-flex;align-items:center;gap:6px;background:var(--gradient-primary);color:#fff;padding:9px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;text-decoration:none"><i class="fab fa-telegram-plane"></i> <span data-i18n="nav.join_free">무료 텔레그램 참여</span></a>
+    <button class="hamburger" aria-label="Menu">&#9776;</button>
+  </div>
+</nav>
+
+<main class="section">
+  <div class="container">
+    <h1 class="sec-title" data-i18n="faq.title">자주하는 질문</h1>
+    <p class="sec-sub" data-i18n="faq.subtitle">서비스 이용에 대해 자주 묻는 질문과 답변입니다.</p>
+    <div id="faq-container">
+      <div class="faq-loading" id="faq-loading"><i class="fas fa-spinner fa-spin"></i> 불러오는 중...</div>
+      <div class="faq-list" id="faq-list" style="display:none"></div>
+      <div class="faq-empty" id="faq-empty" style="display:none"><i class="fas fa-info-circle" style="font-size:32px;margin-bottom:12px;opacity:.5"></i><p>등록된 FAQ가 없습니다.</p></div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <a href="index.html">FoketSignal</a> &copy; 2024 · <a href="index.html#contact" data-i18n="nav.contact">문의</a>
+</footer>
+
+<script>
+(function(){
+  // 관리자 페이지(admin.html) '자주하는 질문' 카테고리와 연동: API 또는 localStorage(fk_faq)에서 불러옵니다.
+  function getApiBase(){
+    if (typeof window !== 'undefined' && window.FOKET_API_BASE) return window.FOKET_API_BASE;
+    if (typeof location !== 'undefined' && location.origin && location.protocol !== 'file:') return location.origin + '/api';
+    return 'http://localhost:3000/api';
+  }
+  var apiBase = getApiBase();
+  var faqList = document.getElementById('faq-list');
+  var faqLoading = document.getElementById('faq-loading');
+  var faqEmpty = document.getElementById('faq-empty');
+
+  function escapeHtml(s){
+    if (!s) return '';
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function renderFaq(items) {
+    faqLoading.style.display = 'none';
+    if (!items || items.length === 0) {
+      faqEmpty.style.display = 'block';
+      faqList.style.display = 'none';
+      return;
+    }
+    faqEmpty.style.display = 'none';
+    faqList.style.display = 'flex';
+    var sorted = items.slice().sort(function(a,b){ return (a.order != null ? a.order : 999) - (b.order != null ? b.order : 999); });
+    faqList.innerHTML = sorted.map(function(item) {
+      var q = escapeHtml(item.question || '');
+      var a = escapeHtml(item.answer || '');
+      var id = item.id || '';
+      return '<div class="faq-item" data-id="' + id + '">' +
+        '<div class="faq-q" role="button" tabindex="0" aria-expanded="false">' +
+          '<span>' + q + '</span><i class="fas fa-chevron-down"></i>' +
+        '</div>' +
+        '<div class="faq-a"><div class="faq-a-inner">' + a + '</div></div>' +
+      '</div>';
+    }).join('');
+
+    faqList.querySelectorAll('.faq-q').forEach(function(qEl) {
+      qEl.addEventListener('click', function() {
+        var item = this.closest('.faq-item');
+        var open = item.classList.contains('open');
+        faqList.querySelectorAll('.faq-item').forEach(function(i){ i.classList.remove('open'); });
+        if (!open) item.classList.add('open');
+        this.setAttribute('aria-expanded', !open);
+      });
+    });
+  }
+
+  function applyFaqData(value) {
+    try {
+      var data = typeof value === 'string' ? JSON.parse(value) : value;
+      renderFaq(Array.isArray(data) ? data : []);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function loadFaq() {
+    // 1) API에서 불러오기 (서버 사용 시 = 관리자와 동일 저장소)
+    fetch(apiBase + '/storage/faq')
+      .then(function(r) { return r.json(); })
+      .then(function(j) {
+        if (j.success && j.value != null && applyFaqData(j.value)) return;
+        // API에 데이터 없으면 관리자와 동일한 localStorage 키(fk_faq)에서 시도 (file:// 공유용)
+        var local = typeof localStorage !== 'undefined' ? localStorage.getItem('fk_faq') : null;
+        if (local && applyFaqData(local)) return;
+        renderFaq([]);
+      })
+      .catch(function() {
+        // API 실패 시 관리자 페이지가 저장한 localStorage(fk_faq)에서 불러오기
+        var local = typeof localStorage !== 'undefined' ? localStorage.getItem('fk_faq') : null;
+        if (local && applyFaqData(local)) return;
+        faqLoading.style.display = 'none';
+        faqEmpty.style.display = 'block';
+        faqEmpty.innerHTML = '<p>등록된 FAQ가 없습니다. 관리자 페이지(자주하는 질문)에서 항목을 등록해 주세요.</p>';
+      });
+  }
+
+  loadFaq();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+{
+  "lang_code": "es",
+  "lang_name": "Español",
+  "site_title": "FoketCrypto Señales",
+  "site_tagline": "Señales profesionales de trading de criptomonedas",
+
+  "nav": {
+    "home": "Inicio",
+    "signals": "Señales Crypto",
+    "pricing": "Precios",
+    "news": "Noticias",
+    "contact": "Contacto",
+    "join_free": "Unirse gratis a Telegram",
+    "join_vip": "Unirse VIP"
+  },
+
+  "hero": {
+    "badge": "Mejores señales crypto gratuitas 2024",
+    "title": "Las mejores señales",
+    "title_highlight": "Crypto gratuitas",
+    "subtitle": "Señales de trading de criptomonedas de alta calidad analizadas por nuestro equipo de expertos con algoritmos de IA",
+    "success_rate": "Tasa de éxito",
+    "members": "Miembros",
+    "signals_daily": "Señales diarias",
+    "join_free_btn": "Unirse gratis a Telegram",
+    "view_vip_btn": "Ver planes VIP",
+    "free_signals_week": "3 señales gratuitas por semana",
+    "vip_signals_day": "2-5 señales VIP por día",
+    "money_back": "Garantía de devolución de 30 días"
+  },
+
+  "stats": {
+    "members": "Miembros",
+    "success_rate": "Tasa de éxito",
+    "signals": "Señales enviadas",
+    "years": "Años de actividad"
+  },
+
+  "features": {
+    "title": "¿Por qué nuestras señales?",
+    "subtitle": "El mejor servicio de señales crypto combinando traders profesionales y tecnología IA",
+    "ai_title": "Análisis impulsado por IA",
+    "ai_desc": "Algoritmos de aprendizaje automático e IA que escanean los mercados 24/7",
+    "expert_title": "Equipo de expertos",
+    "expert_desc": "Traders profesionales con más de 10 años de experiencia",
+    "risk_title": "Gestión de riesgos",
+    "risk_desc": "Cada señal incluye stop-loss preciso, take-profit y ratio riesgo/beneficio",
+    "instant_title": "Entrega instantánea",
+    "instant_desc": "Recibe señales instantáneamente a través de Telegram",
+    "support_title": "Soporte 24/7",
+    "support_desc": "Nuestro equipo de soporte dedicado está disponible en cualquier momento",
+    "education_title": "Contenido educativo",
+    "education_desc": "Mejora tus habilidades de trading con análisis detallados"
+  },
+
+  "how_it_works": {
+    "title": "Estructura de la señal",
+    "subtitle": "Lo que se incluye en cada señal",
+    "entry": "Precio de entrada",
+    "entry_desc": "Precio de entrada de compra/venta preciso",
+    "take_profit": "Take Profit",
+    "take_profit_desc": "Objetivos de beneficio en 1-3 etapas",
+    "stop_loss": "Stop Loss",
+    "stop_loss_desc": "Precio de stop-loss para gestión de riesgos",
+    "risk": "Riesgo %",
+    "risk_desc": "Porcentaje de riesgo recomendado por operación",
+    "rr_ratio": "Ratio riesgo/beneficio",
+    "rr_ratio_desc": "Ratio del riesgo frente al beneficio potencial"
+  },
+
+  "coins": {
+    "title": "Criptos soportadas",
+    "subtitle": "Señales para las principales criptomonedas"
+  },
+
+  "free_signals": {
+    "title": "Señales gratuitas",
+    "subtitle": "Experimenta señales de calidad VIP gratis",
+    "badge": "GRATIS",
+    "per_week": "3 por semana",
+    "join_btn": "Obtener gratis"
+  },
+
+  "vip": {
+    "title": "Membresía VIP",
+    "subtitle": "Maximiza tus ganancias con señales premium",
+    "per_day": "2-5 señales por día",
+    "days": "Lunes a viernes",
+    "money_back": "Garantía de devolución de 30 días",
+    "join_btn": "Unirse VIP"
+  },
+
+  "pricing": {
+    "title": "Elige tu plan",
+    "subtitle": "Selecciona el plan que sea adecuado para ti",
+    "most_popular": "Popular",
+    "per_month": "/mes",
+    "per_3months": "/3 meses",
+    "per_6months": "/6 meses",
+    "per_year": "/año",
+    "get_started": "Empezar",
+    "money_back": "Garantía de devolución de 30 días",
+    "lifetime_title": "Acceso VIP gratuito de por vida",
+    "lifetime_desc": "Obtén acceso VIP de por vida depositando $250+ con nuestros brokers asociados",
+    "lifetime_btn": "Saber más"
+  },
+
+  "testimonials": {
+    "title": "Lo que dicen nuestros miembros",
+    "subtitle": "Historias de más de 50.000 miembros en todo el mundo"
+  },
+
+  "news": {
+    "title": "Noticias Crypto",
+    "subtitle": "Últimas novedades del mercado de criptomonedas",
+    "read_more": "Leer más",
+    "view_all": "Ver todas las noticias"
+  },
+
+  "cta": {
+    "title": "Empieza hoy",
+    "subtitle": "Únete a nuestro Telegram gratuito y recibe señales de alta calidad",
+    "btn": "Empezar gratis"
+  },
+
+  "footer": {
+    "tagline": "Servicio profesional de señales de trading de criptomonedas",
+    "quick_links": "Enlaces rápidos",
+    "follow_us": "Síguenos",
+    "disclaimer": "Aviso de inversión: El trading de criptomonedas conlleva alto riesgo. Los resultados pasados no garantizan resultados futuros.",
+    "copyright": "Todos los derechos reservados",
+    "terms": "Términos de servicio",
+    "privacy": "Política de privacidad",
+    "contact": "Contacto"
+  },
+
+  "contact": {
+    "title": "Contáctanos",
+    "subtitle": "No dudes en contactarnos si tienes alguna pregunta",
+    "name": "Nombre",
+    "email": "Correo electrónico",
+    "subject": "Asunto",
+    "message": "Mensaje",
+    "send": "Enviar",
+    "success": "¡Tu mensaje ha sido enviado!"
+  },
+
+  "signals_page": {
+    "title": "Señales Crypto",
+    "subtitle": "Señales de trading en tiempo real",
+    "filter_all": "Todos",
+    "filter_active": "Activo",
+    "filter_closed": "Cerrado",
+    "coin": "Cripto",
+    "type": "Tipo",
+    "entry": "Entrada",
+    "tp": "Take Profit",
+    "sl": "Stop Loss",
+    "risk": "Riesgo",
+    "rr": "R/R",
+    "status": "Estado",
+    "result": "Resultado",
+    "date": "Fecha",
+    "long": "LARGO",
+    "short": "CORTO",
+    "win": "GANANCIA",
+    "loss": "PÉRDIDA",
+    "pending": "PENDIENTE",
+    "active": "ACTIVO",
+    "closed": "CERRADO",
+    "free_badge": "GRATIS",
+    "vip_badge": "VIP",
+    "join_vip_msg": "Suscríbete para ver señales VIP",
+    "join_vip_btn": "Unirse VIP"
+  }
+}

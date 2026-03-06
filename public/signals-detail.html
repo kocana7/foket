@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoketSignal 수익율 상세 | FoketCrypto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-primary: #0a0e1a;
+      --bg-secondary: #0f1629;
+      --bg-card: #131c31;
+      --bg-card-hover: #1a2540;
+      --border-color: #1e2d4a;
+      --text-primary: #e8edf5;
+      --text-secondary: #8fa3c0;
+      --text-muted: #566a85;
+      --accent-blue: #00b4d8;
+      --accent-blue-dark: #0077a8;
+      --accent-green: #00d084;
+      --accent-red: #ff4757;
+      --gradient-primary: linear-gradient(135deg,#00b4d8 0%,#0077a8 100%);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-card: 0 8px 32px rgba(0,0,0,0.4);
+      --transition: all 0.3s ease;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.6}
+    a{color:var(--accent-blue);text-decoration:none;transition:var(--transition)}
+    a:hover{color:#48cae4}
+    .page-header{background:var(--bg-secondary);border-bottom:1px solid var(--border-color);padding:16px 24px}
+    .page-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    .back-link{display:inline-flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:14px;font-weight:500}
+    .back-link:hover{color:var(--accent-blue)}
+    .page-title{font-size:20px;font-weight:800;background:var(--gradient-primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .container{max-width:1280px;margin:0 auto;padding:24px}
+    .sec-title{font-size:18px;font-weight:700;color:var(--text-primary);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+    .sec-title .icon{width:32px;height:32px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:14px}
+    .table-wrap{background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-card);margin-bottom:24px}
+    .detail-table{width:100%;border-collapse:collapse;font-size:14px}
+    .detail-table th{text-align:left;padding:12px 16px;background:var(--bg-secondary);color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;font-size:11px}
+    .detail-table td{padding:12px 16px;border-top:1px solid var(--border-color);color:var(--text-primary)}
+    .detail-table tbody tr:hover{background:var(--bg-card-hover)}
+    .detail-table .sym{font-weight:700;color:var(--text-primary)}
+    .detail-table .name-ko{font-size:12px;color:var(--text-muted);display:block;margin-top:2px}
+    .detail-table .val-up{color:var(--accent-green)}
+    .detail-table .val-dn{color:var(--accent-red)}
+    .detail-table .val-dim{color:var(--text-muted)}
+    .binance-mark{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin-right:6px;background:#f0b90b;color:#0a0e1a;font-size:11px;font-weight:800;border-radius:4px;vertical-align:middle}
+    .empty-msg{padding:48px 24px;text-align:center;color:var(--text-muted);font-size:15px}
+    .empty-msg a{margin-top:12px;display:inline-block}
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <div class="page-inner">
+      <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> 메인으로</a>
+      <h1 class="page-title">FoketSignal 수익율 상세</h1>
+    </div>
+  </header>
+  <main class="container">
+    <div id="content"></div>
+    <div id="empty" class="empty-msg" style="display:none;">
+      등록된 종목 데이터가 없습니다. 관리자 페이지에서 종목을 설정한 후 다시 확인해 주세요.
+      <a href="index.html" class="back-link">메인으로 돌아가기</a>
+    </div>
+  </main>
+  <script>
+    function calcTradingDays(startDateStr) {
+      if (!startDateStr || startDateStr === '') return null;
+      const start = new Date(startDateStr + 'T00:00:00');
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const diff = Math.floor((today - start) / 86400000);
+      return diff >= 0 ? diff : null;
+    }
+    function formatReturn(val) {
+      if (val === '' || val == null) return { text: '—', cls: 'val-dim' };
+      const n = parseFloat(val);
+      if (isNaN(n)) return { text: '—', cls: 'val-dim' };
+      const text = (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
+      const cls = n >= 0 ? 'val-up' : 'val-dn';
+      return { text, cls };
+    }
+    function formatMaxLoss(val) {
+      if (val === '' || val == null) return { text: '—', cls: 'val-dim' };
+      const n = parseFloat(val);
+      if (isNaN(n)) return { text: '—', cls: 'val-dim' };
+      const text = (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
+      const cls = n < 0 ? 'val-dn' : 'val-up';
+      return { text, cls };
+    }
+    function render() {
+      const raw = localStorage.getItem('fk_markets_published') || localStorage.getItem('fk_markets');
+      const content = document.getElementById('content');
+      const empty = document.getElementById('empty');
+      if (!raw) {
+        content.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+      }
+      let markets;
+      try {
+        markets = JSON.parse(raw);
+      } catch (e) {
+        content.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+      }
+      if (!Array.isArray(markets) || markets.length === 0) {
+        content.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+      }
+      const hasAny = markets.some(m => Array.isArray(m.instruments) && m.instruments.length > 0);
+      if (!hasAny) {
+        content.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+      let html = '';
+      markets.forEach(function(m) {
+        const insts = m.instruments || [];
+        if (insts.length === 0) return;
+        const nameKo = m.nameKo || m.nameEn || '종목';
+        const clr = m.clr || 'var(--accent-blue)';
+        const isBinanceCrypto = (m.id === 8);
+        html += '<div class="table-wrap">';
+        html += '<div class="sec-title"><span class="icon" style="background:' + clr + ';">' + (m.icon ? '<i class="' + m.icon + '"></i>' : '') + '</span>' + nameKo + '</div>';
+        html += '<table class="detail-table"><thead><tr>';
+        html += '<th>종목</th><th>월평균 수익률</th><th>일최대 손실변동폭</th><th>거래일수</th>';
+        if (insts.some(i => i.exch)) html += '<th>거래소</th>';
+        html += '</tr></thead><tbody>';
+        insts.forEach(function(inst) {
+          const mr = formatReturn(inst.monthlyReturn);
+          const dl = formatMaxLoss(inst.maxDailyLoss);
+          const days = calcTradingDays(inst.startDate);
+          const symPrefix = isBinanceCrypto ? '<span class="binance-mark" title="Binance">B</span>' : '';
+          html += '<tr>';
+          html += '<td>' + symPrefix + '<span class="sym">' + (inst.sym || '—') + '</span><span class="name-ko">' + (inst.nameKo || inst.nameEn || '') + '</span></td>';
+          html += '<td class="' + mr.cls + '">' + mr.text + '</td>';
+          html += '<td class="' + dl.cls + '">' + dl.text + '</td>';
+          html += '<td>' + (days !== null ? days + '일' : '—') + '</td>';
+          if (insts.some(i => i.exch)) html += '<td>' + (inst.exch || '—') + '</td>';
+          html += '</tr>';
+        });
+        html += '</tbody></table></div>';
+      });
+      content.innerHTML = html;
+    }
+    (async function init() {
+      try {
+        const base = (typeof location !== 'undefined' && location.origin && location.protocol !== 'file:') ? location.origin + '/api' : 'http://localhost:3000/api';
+        const r = await fetch(base + '/public/markets');
+        const j = await r.json();
+        if (j && j.success && j.data) {
+          const raw = typeof j.data === 'string' ? j.data : JSON.stringify(j.data);
+          try { localStorage.setItem('fk_markets_published', raw); } catch (e) {}
+        }
+      } catch (e) {}
+      render();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<%- include('partials/layout') %>
+
+<div class="admin-card">
+  <div class="admin-card-header">
+    <div class="admin-card-title">Users (<%= users.length %>)</div>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Role</th>
+          <th>Plan</th>
+          <th>Telegram</th>
+          <th>Status</th>
+          <th>Last Login</th>
+          <th>Joined</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if(users && users.length > 0) { %>
+          <% users.forEach(u => { %>
+            <tr>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="admin-avatar"><%= (u.username || u.email).charAt(0).toUpperCase() %></div>
+                  <div>
+                    <div class="text-primary" style="font-weight:600;font-size:13px;"><%= u.username || 'N/A' %></div>
+                    <div style="font-size:11px;color:var(--admin-text-muted);"><%= u.email %></div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="badge <%= u.role === 'superadmin' ? 'badge-red' : u.role === 'admin' ? 'badge-yellow' : 'badge-blue' %>"><%= u.role.toUpperCase() %></span></td>
+              <td><span class="badge <%= u.plan_name ? 'badge-purple' : 'badge-gray' %>"><%= u.plan_name || 'Free' %></span></td>
+              <td style="font-size:12px;color:var(--admin-text-muted);">
+                <%= u.telegram_username ? '@' + u.telegram_username : '—' %>
+              </td>
+              <td><span class="badge <%= u.is_active ? 'badge-green' : 'badge-red' %>"><%= u.is_active ? 'Active' : 'Banned' %></span></td>
+              <td style="font-size:11px;color:var(--admin-text-muted);">
+                <%= u.last_login ? new Date(u.last_login).toLocaleDateString() : 'Never' %>
+              </td>
+              <td style="font-size:11px;color:var(--admin-text-muted);"><%= new Date(u.created_at).toLocaleDateString() %></td>
+              <td>
+                <% if(u.role === 'user') { %>
+                  <form action="/admin/users/<%= u.id %>/toggle" method="POST">
+                    <button type="submit" class="btn-admin <%= u.is_active ? 'btn-admin-danger' : 'btn-admin-success' %> btn-admin-sm">
+                      <i class="fas fa-<%= u.is_active ? 'ban' : 'check' %>"></i>
+                    </button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--admin-text-muted);">No users yet</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('partials/layout-end') %>

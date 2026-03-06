@@ -1,0 +1,54 @@
+<%- include('partials/layout') %>
+
+<form action="/admin/settings" method="POST">
+  <% const groupTitles = { general: 'General Settings', social: 'Social Media Links', contact: 'Contact Information', seo: 'SEO Settings', analytics: 'Analytics' }; %>
+  <% Object.entries(grouped).forEach(([group, items]) => { %>
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <div class="admin-card-title"><%= groupTitles[group] || group.charAt(0).toUpperCase() + group.slice(1) %></div>
+      </div>
+      <div class="admin-card-body">
+        <div class="form-grid">
+          <% items.forEach(s => { %>
+            <div class="form-group <%= s.setting_key === 'meta_description' || s.setting_key === 'site_tagline' ? 'form-full' : '' %>">
+              <label class="form-label"><%= s.setting_key.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()) %></label>
+              <% if(s.setting_key === 'maintenance_mode') { %>
+                <select name="<%= s.setting_key %>" class="form-control">
+                  <option value="0" <%= s.setting_value === '0' ? 'selected' : '' %>>Off</option>
+                  <option value="1" <%= s.setting_value === '1' ? 'selected' : '' %>>On (Maintenance Mode)</option>
+                </select>
+              <% } else if(s.setting_key.includes('description') || s.setting_key.includes('tagline')) { %>
+                <textarea name="<%= s.setting_key %>" class="form-control" rows="2"><%= s.setting_value || '' %></textarea>
+              <% } else { %>
+                <input type="text" name="<%= s.setting_key %>" class="form-control" value="<%= s.setting_value || '' %>">
+              <% } %>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+  <% }) %>
+
+  <!-- Site Stats -->
+  <div class="admin-card">
+    <div class="admin-card-header">
+      <div class="admin-card-title">Site Statistics (Homepage Display)</div>
+    </div>
+    <div class="admin-card-body">
+      <p style="font-size:12px;color:var(--admin-text-muted);margin-bottom:16px;">These values are shown on the homepage stats bar</p>
+      <div style="display:flex;gap:12px;">
+        <a href="/admin/settings" style="font-size:12px;color:var(--admin-text-muted);">
+          Stats are managed via SQL database. Update in the <code>stats</code> table directly.
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:12px;">
+    <button type="submit" class="btn-admin btn-admin-primary">
+      <i class="fas fa-save"></i> Save All Settings
+    </button>
+  </div>
+</form>
+
+<%- include('partials/layout-end') %>

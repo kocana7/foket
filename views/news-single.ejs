@@ -1,0 +1,52 @@
+<%- include('partials/head') %>
+<%- include('partials/navbar') %>
+
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="/">Home</a> › <a href="/news"><%= t.news.title %></a> › <span><%= article.category %></span></div>
+  </div>
+</div>
+
+<section class="section" style="padding-top:40px;">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:48px;">
+      <div>
+        <div class="news-category"><%= article.category %></div>
+        <h1 style="font-size:32px;font-weight:800;margin:12px 0 16px;line-height:1.3;"><%= article.title %></h1>
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;font-size:13px;color:var(--text-muted);">
+          <span><i class="fas fa-calendar"></i> <%= article.published_at ? new Date(article.published_at).toLocaleDateString() : '' %></span>
+          <span><i class="fas fa-eye"></i> <%= article.views %> views</span>
+        </div>
+        <% if(article.featured_image) { %>
+          <div style="border-radius:var(--radius-xl);overflow:hidden;margin-bottom:32px;"><img src="<%= article.featured_image %>" alt="<%= article.title %>" style="width:100%;height:400px;object-fit:cover;"></div>
+        <% } %>
+        <div style="color:var(--text-secondary);line-height:1.8;font-size:16px;">
+          <%- article.content %>
+        </div>
+      </div>
+      <div>
+        <!-- Related Articles -->
+        <% if(related && related.length > 0) { %>
+        <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:20px;margin-bottom:24px;">
+          <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:16px;">Related Articles</div>
+          <% related.forEach(r => { %>
+            <a href="/news/<%= r.slug %>" style="display:block;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border-color);">
+              <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:4px;line-height:1.4;"><%= r.title %></div>
+              <div style="font-size:11px;color:var(--text-muted);"><%= r.published_at ? new Date(r.published_at).toLocaleDateString() : '' %></div>
+            </a>
+          <% }) %>
+        </div>
+        <% } %>
+        <!-- CTA Box -->
+        <div style="background:linear-gradient(135deg,rgba(0,180,216,0.1),rgba(124,58,237,0.1));border:1px solid rgba(0,180,216,0.3);border-radius:var(--radius-lg);padding:24px;text-align:center;">
+          <div style="font-size:32px;margin-bottom:12px;">📊</div>
+          <h3 style="font-size:18px;font-weight:700;margin-bottom:8px;">Free Signals</h3>
+          <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Get VIP-quality signals 3x per week, free!</p>
+          <a href="#" class="btn btn-primary" style="width:100%;justify-content:center;"><i class="fab fa-telegram-plane"></i> <%= t.hero.join_free_btn %></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

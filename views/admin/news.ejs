@@ -1,0 +1,56 @@
+<%- include('partials/layout') %>
+
+<div class="admin-card">
+  <div class="admin-card-header">
+    <div class="admin-card-title">News Articles (<%= articles.length %>)</div>
+    <a href="/admin/news/new" class="topbar-btn primary"><i class="fas fa-plus"></i> New Article</a>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Category</th>
+          <th>Language</th>
+          <th>Status</th>
+          <th>Author</th>
+          <th>Published</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if(articles && articles.length > 0) { %>
+          <% articles.forEach(a => { %>
+            <tr>
+              <td>
+                <div class="text-primary" style="font-weight:600;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><%= a.title %></div>
+                <div style="font-size:11px;color:var(--admin-text-muted);">/news/<%= a.slug %></div>
+              </td>
+              <td><span class="badge badge-blue"><%= a.category %></span></td>
+              <td><span class="badge badge-gray"><%= a.language.toUpperCase() %></span></td>
+              <td>
+                <span class="badge <%= a.is_published ? 'badge-green' : 'badge-yellow' %>">
+                  <%= a.is_published ? 'Published' : 'Draft' %>
+                </span>
+              </td>
+              <td style="font-size:12px;"><%= a.author_name || 'Admin' %></td>
+              <td style="font-size:12px;"><%= a.published_at ? new Date(a.published_at).toLocaleDateString() : '—' %></td>
+              <td>
+                <div style="display:flex;gap:6px;">
+                  <a href="/admin/news/<%= a.id %>/edit" class="btn-admin btn-admin-outline btn-admin-sm"><i class="fas fa-edit"></i></a>
+                  <form action="/admin/news/<%= a.id %>/delete" method="POST" data-confirm="Delete this article?">
+                    <button type="submit" class="btn-admin btn-admin-danger btn-admin-sm"><i class="fas fa-trash"></i></button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--admin-text-muted);">No articles yet</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('partials/layout-end') %>

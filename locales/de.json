@@ -1,0 +1,176 @@
+{
+  "lang_code": "de",
+  "lang_name": "Deutsch",
+  "site_title": "FoketCrypto Signale",
+  "site_tagline": "Professionelle Kryptowährungs-Handelssignale",
+
+  "nav": {
+    "home": "Startseite",
+    "signals": "Krypto-Signale",
+    "pricing": "Preise",
+    "news": "Nachrichten",
+    "contact": "Kontakt",
+    "join_free": "Kostenlos beitreten",
+    "join_vip": "VIP beitreten"
+  },
+
+  "hero": {
+    "badge": "Beste kostenlose Krypto-Signale 2024",
+    "title": "Beste kostenlose",
+    "title_highlight": "Krypto-Signale",
+    "subtitle": "Hochwertige Kryptowährungs-Handelssignale, analysiert von unserem Expertenteam mit KI-Algorithmen",
+    "success_rate": "Erfolgsquote",
+    "members": "Mitglieder",
+    "signals_daily": "Tägliche Signale",
+    "join_free_btn": "Kostenlos beitreten",
+    "view_vip_btn": "VIP-Pläne ansehen",
+    "free_signals_week": "3 kostenlose Signale pro Woche",
+    "vip_signals_day": "2-5 VIP-Signale pro Tag",
+    "money_back": "30-Tage-Geld-zurück-Garantie"
+  },
+
+  "stats": {
+    "members": "Mitglieder",
+    "success_rate": "Erfolgsquote",
+    "signals": "Gesendete Signale",
+    "years": "Jahre aktiv"
+  },
+
+  "features": {
+    "title": "Warum unsere Signale?",
+    "subtitle": "Der beste Krypto-Signal-Service mit professionellen Tradern und KI-Technologie",
+    "ai_title": "KI-gestützte Analyse",
+    "ai_desc": "Machine-Learning und KI-Algorithmen scannen den Markt 24/7",
+    "expert_title": "Expertenteam",
+    "expert_desc": "Professionelle Trader mit über 10 Jahren Erfahrung",
+    "risk_title": "Risikomanagement",
+    "risk_desc": "Jedes Signal enthält Stop-Loss, Take-Profit und Risiko/Ertrags-Verhältnis",
+    "instant_title": "Sofortige Lieferung",
+    "instant_desc": "Signale sofort über Telegram erhalten",
+    "support_title": "24/7 Support",
+    "support_desc": "Unser Support-Team ist jederzeit für Sie da",
+    "education_title": "Bildungsinhalte",
+    "education_desc": "Verbessern Sie Ihre Trading-Fähigkeiten mit detaillierten Analysen"
+  },
+
+  "how_it_works": {
+    "title": "Signal-Struktur",
+    "subtitle": "Was in jedem Signal enthalten ist",
+    "entry": "Einstiegspreis",
+    "entry_desc": "Genauer Kauf-/Verkaufs-Einstiegspreis",
+    "take_profit": "Take Profit",
+    "take_profit_desc": "1-3 Gewinnziele",
+    "stop_loss": "Stop Loss",
+    "stop_loss_desc": "Stop-Loss-Preis für Risikomanagement",
+    "risk": "Risiko %",
+    "risk_desc": "Empfohlener Risikoprozentsatz pro Trade",
+    "rr_ratio": "Risiko/Ertrags-Verhältnis",
+    "rr_ratio_desc": "Verhältnis von Risiko zu potenziellem Ertrag"
+  },
+
+  "coins": {
+    "title": "Unterstützte Coins",
+    "subtitle": "Signale für wichtige Kryptowährungen"
+  },
+
+  "free_signals": {
+    "title": "Kostenlose Signale",
+    "subtitle": "Erleben Sie VIP-Qualitätssignale kostenlos",
+    "badge": "KOSTENLOS",
+    "per_week": "3 pro Woche",
+    "join_btn": "Kostenlos erhalten"
+  },
+
+  "vip": {
+    "title": "VIP-Mitgliedschaft",
+    "subtitle": "Maximieren Sie Ihren Gewinn mit Premium-Signalen",
+    "per_day": "2-5 Signale pro Tag",
+    "days": "Montag bis Freitag",
+    "money_back": "30-Tage-Geld-zurück-Garantie",
+    "join_btn": "VIP beitreten"
+  },
+
+  "pricing": {
+    "title": "Plan wählen",
+    "subtitle": "Wählen Sie den Plan, der für Sie geeignet ist",
+    "most_popular": "Beliebt",
+    "per_month": "/Monat",
+    "per_3months": "/3 Monate",
+    "per_6months": "/6 Monate",
+    "per_year": "/Jahr",
+    "get_started": "Loslegen",
+    "money_back": "30-Tage-Geld-zurück-Garantie",
+    "lifetime_title": "Lebenslanger kostenloser VIP-Zugang",
+    "lifetime_desc": "Lebenslangen VIP-Zugang durch Einzahlung von $250+ erhalten",
+    "lifetime_btn": "Mehr erfahren"
+  },
+
+  "testimonials": {
+    "title": "Was unsere Mitglieder sagen",
+    "subtitle": "Geschichten von über 50.000 Mitgliedern weltweit"
+  },
+
+  "news": {
+    "title": "Krypto-Nachrichten",
+    "subtitle": "Neueste Kryptowährungs-Marktnachrichten",
+    "read_more": "Mehr lesen",
+    "view_all": "Alle Nachrichten anzeigen"
+  },
+
+  "cta": {
+    "title": "Jetzt starten",
+    "subtitle": "Treten Sie unserem kostenlosen Telegram bei und erhalten Sie hochwertige Signale",
+    "btn": "Kostenlos starten"
+  },
+
+  "footer": {
+    "tagline": "Professioneller Kryptowährungs-Handelssignal-Service",
+    "quick_links": "Schnelllinks",
+    "follow_us": "Folgen Sie uns",
+    "disclaimer": "Investitionshinweis: Der Handel mit Kryptowährungen ist mit hohem Risiko verbunden. Vergangene Leistungen garantieren keine zukünftigen Ergebnisse.",
+    "copyright": "Alle Rechte vorbehalten",
+    "terms": "Nutzungsbedingungen",
+    "privacy": "Datenschutzrichtlinie",
+    "contact": "Kontakt"
+  },
+
+  "contact": {
+    "title": "Kontaktieren Sie uns",
+    "subtitle": "Zögern Sie nicht, uns zu kontaktieren",
+    "name": "Name",
+    "email": "E-Mail",
+    "subject": "Betreff",
+    "message": "Nachricht",
+    "send": "Senden",
+    "success": "Ihre Nachricht wurde gesendet!"
+  },
+
+  "signals_page": {
+    "title": "Krypto-Signale",
+    "subtitle": "Echtzeit-Handelssignale",
+    "filter_all": "Alle",
+    "filter_active": "Aktiv",
+    "filter_closed": "Geschlossen",
+    "coin": "Coin",
+    "type": "Typ",
+    "entry": "Einstieg",
+    "tp": "Take Profit",
+    "sl": "Stop Loss",
+    "risk": "Risiko",
+    "rr": "R/R",
+    "status": "Status",
+    "result": "Ergebnis",
+    "date": "Datum",
+    "long": "LONG",
+    "short": "SHORT",
+    "win": "GEWINN",
+    "loss": "VERLUST",
+    "pending": "AUSSTEHEND",
+    "active": "AKTIV",
+    "closed": "GESCHLOSSEN",
+    "free_badge": "KOSTENLOS",
+    "vip_badge": "VIP",
+    "join_vip_msg": "Abonnieren Sie, um VIP-Signale zu sehen",
+    "join_vip_btn": "VIP beitreten"
+  }
+}

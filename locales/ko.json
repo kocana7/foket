@@ -1,0 +1,176 @@
+{
+  "lang_code": "ko",
+  "lang_name": "한국어",
+  "site_title": "FoketCrypto 시그널",
+  "site_tagline": "전문 암호화폐 트레이딩 시그널",
+
+  "nav": {
+    "home": "홈",
+    "signals": "크립토 시그널",
+    "pricing": "요금제",
+    "news": "뉴스",
+    "contact": "문의",
+    "join_free": "무료 텔레그램 참여",
+    "join_vip": "VIP 가입"
+  },
+
+  "hero": {
+    "badge": "2024년 최고의 무료 크립토 시그널",
+    "title": "최고의 무료",
+    "title_highlight": "크립토 시그널",
+    "subtitle": "전문가 팀이 AI 알고리즘으로 분석한 고품질 암호화폐 트레이딩 시그널",
+    "success_rate": "성공률",
+    "members": "회원",
+    "signals_daily": "일일 시그널",
+    "join_free_btn": "무료 텔레그램 참여",
+    "view_vip_btn": "VIP 플랜 보기",
+    "free_signals_week": "무료 시그널 주 3회",
+    "vip_signals_day": "VIP 시그널 하루 2-5회",
+    "money_back": "30일 환불 보장"
+  },
+
+  "stats": {
+    "members": "회원",
+    "success_rate": "성공률",
+    "signals": "시그널 발송",
+    "years": "년 경력"
+  },
+
+  "features": {
+    "title": "왜 저희 시그널인가요?",
+    "subtitle": "전문 트레이더 팀과 AI 기술이 결합된 최고의 크립토 시그널 서비스",
+    "ai_title": "AI 기반 분석",
+    "ai_desc": "머신러닝과 AI 알고리즘이 24/7 시장을 스캔하여 최적의 진입점을 찾습니다",
+    "expert_title": "전문가 팀",
+    "expert_desc": "10년 이상의 경험을 가진 전문 트레이더들이 모든 시그널을 검토합니다",
+    "risk_title": "리스크 관리",
+    "risk_desc": "각 시그널에는 정확한 손절, 목표가, 리스크/수익 비율이 포함됩니다",
+    "instant_title": "즉시 전달",
+    "instant_desc": "텔레그램을 통해 시그널을 즉시 받아보세요. 모바일로 언제 어디서나",
+    "support_title": "24/7 지원",
+    "support_desc": "전담 지원팀이 언제든지 도움을 드립니다",
+    "education_title": "교육 콘텐츠",
+    "education_desc": "각 시그널과 함께 제공되는 분석 자료로 트레이딩 실력을 향상시키세요"
+  },
+
+  "how_it_works": {
+    "title": "시그널 구성",
+    "subtitle": "각 시그널에 포함된 정보",
+    "entry": "진입가",
+    "entry_desc": "정확한 매수/매도 진입 가격",
+    "take_profit": "목표가",
+    "take_profit_desc": "1~3단계 이익 실현 목표",
+    "stop_loss": "손절가",
+    "stop_loss_desc": "리스크 관리를 위한 손절 가격",
+    "risk": "리스크 비율",
+    "risk_desc": "거래당 권장 리스크 비율",
+    "rr_ratio": "리스크/수익 비율",
+    "rr_ratio_desc": "잠재 수익 대비 리스크 비율"
+  },
+
+  "coins": {
+    "title": "지원 코인",
+    "subtitle": "주요 암호화폐 시그널 제공"
+  },
+
+  "free_signals": {
+    "title": "무료 시그널",
+    "subtitle": "VIP 품질의 시그널을 무료로 경험해보세요",
+    "badge": "FREE",
+    "per_week": "주 3회",
+    "join_btn": "무료로 받기"
+  },
+
+  "vip": {
+    "title": "VIP 멤버십",
+    "subtitle": "프리미엄 시그널로 수익을 극대화하세요",
+    "per_day": "하루 2-5개 시그널",
+    "days": "월요일~금요일",
+    "money_back": "30일 환불 보장",
+    "join_btn": "VIP 가입하기"
+  },
+
+  "pricing": {
+    "title": "요금제 선택",
+    "subtitle": "나에게 맞는 플랜을 선택하세요",
+    "most_popular": "인기",
+    "per_month": "/월",
+    "per_3months": "/3개월",
+    "per_6months": "/6개월",
+    "per_year": "/년",
+    "get_started": "시작하기",
+    "money_back": "30일 환불 보장",
+    "lifetime_title": "평생 무료 VIP 액세스",
+    "lifetime_desc": "파트너 브로커에 $250 이상 입금 시 평생 VIP 이용권 제공",
+    "lifetime_btn": "자세히 알아보기"
+  },
+
+  "testimonials": {
+    "title": "사용자 후기",
+    "subtitle": "전 세계 50,000명+ 회원들의 이야기"
+  },
+
+  "news": {
+    "title": "크립토 뉴스",
+    "subtitle": "최신 암호화폐 시장 소식",
+    "read_more": "더 읽기",
+    "view_all": "모든 뉴스 보기"
+  },
+
+  "cta": {
+    "title": "지금 시작하세요",
+    "subtitle": "무료로 텔레그램에 참여하고 고품질 시그널을 받아보세요",
+    "btn": "무료로 시작하기"
+  },
+
+  "footer": {
+    "tagline": "전문 암호화폐 트레이딩 시그널 서비스",
+    "quick_links": "빠른 링크",
+    "follow_us": "소셜 미디어",
+    "disclaimer": "투자 고지: 암호화폐 거래는 높은 리스크를 수반합니다. 과거 성과가 미래 수익을 보장하지 않습니다. 투자에 앞서 충분한 주의를 기울이시기 바랍니다.",
+    "copyright": "All rights reserved",
+    "terms": "이용약관",
+    "privacy": "개인정보처리방침",
+    "contact": "문의"
+  },
+
+  "contact": {
+    "title": "문의하기",
+    "subtitle": "궁금한 점이 있으시면 언제든지 연락해 주세요",
+    "name": "이름",
+    "email": "이메일",
+    "subject": "제목",
+    "message": "메시지",
+    "send": "보내기",
+    "success": "메시지가 전송되었습니다!"
+  },
+
+  "signals_page": {
+    "title": "크립토 시그널",
+    "subtitle": "실시간 트레이딩 시그널",
+    "filter_all": "전체",
+    "filter_active": "활성",
+    "filter_closed": "종료",
+    "coin": "코인",
+    "type": "유형",
+    "entry": "진입가",
+    "tp": "목표가",
+    "sl": "손절가",
+    "risk": "리스크",
+    "rr": "R/R",
+    "status": "상태",
+    "result": "결과",
+    "date": "날짜",
+    "long": "롱",
+    "short": "숏",
+    "win": "수익",
+    "loss": "손실",
+    "pending": "대기중",
+    "active": "활성",
+    "closed": "종료",
+    "free_badge": "무료",
+    "vip_badge": "VIP",
+    "join_vip_msg": "VIP 시그널을 보려면 가입하세요",
+    "join_vip_btn": "VIP 가입"
+  }
+}

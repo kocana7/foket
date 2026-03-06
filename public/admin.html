@@ -1,0 +1,3081 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoketSignal – 관리자 패널</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #0d1117;
+      --sidebar: #161b22;
+      --card: #1c2333;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --dim: #484f58;
+      --blue: #58a6ff;
+      --green: #3fb950;
+      --red: #f85149;
+      --yellow: #d29922;
+      --purple: #bc8cff;
+      --orange: #f0883e;
+      --sw: 260px;
+      --hh: 60px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh
+    }
+
+    a {
+      color: var(--blue);
+      text-decoration: none
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font-family: inherit
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px
+    }
+
+    /* ── LOGIN ── */
+    #loginScreen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 400px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px
+    }
+
+    .login-logo {
+      text-align: center;
+      margin-bottom: 32px
+    }
+
+    .login-logo-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, #58a6ff, #1f6feb);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      color: #fff;
+      margin: 0 auto 12px
+    }
+
+    .login-title {
+      font-size: 22px;
+      font-weight: 800
+    }
+
+    .login-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px
+    }
+
+    .login-error {
+      background: rgba(248, 81, 73, .1);
+      border: 1px solid rgba(248, 81, 73, .3);
+      color: var(--red);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 14px;
+      display: none
+    }
+
+    /* ── LAYOUT ── */
+    #adminApp {
+      display: none;
+      min-height: 100vh
+    }
+
+    .sidebar {
+      width: var(--sw);
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+      transition: transform .3s;
+      display: flex;
+      flex-direction: column
+    }
+
+    .sb-header {
+      padding: 18px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .sb-logo {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #58a6ff, #1f6feb);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 15px;
+      color: #fff;
+      flex-shrink: 0
+    }
+
+    .sb-brand {
+      font-size: 15px;
+      font-weight: 700
+    }
+
+    .sb-brand span {
+      color: var(--blue)
+    }
+
+    .sb-sub {
+      font-size: 10px;
+      color: var(--dim)
+    }
+
+    .sb-nav {
+      flex: 1;
+      padding: 8px
+    }
+
+    .sb-label {
+      padding: 12px 8px 5px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--dim);
+      font-weight: 600
+    }
+
+    .sb-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: .2s;
+      margin-bottom: 2px;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left
+    }
+
+    .sb-link:hover {
+      background: rgba(88, 166, 255, .08);
+      color: var(--text)
+    }
+
+    .sb-link.active {
+      background: rgba(88, 166, 255, .12);
+      color: var(--blue)
+    }
+
+    .sb-link .ic {
+      font-size: 15px;
+      width: 20px;
+      text-align: center
+    }
+
+    .sb-link .bdg {
+      margin-left: auto;
+      background: var(--red);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 100px
+    }
+
+    .sb-footer {
+      padding: 10px 8px;
+      border-top: 1px solid var(--border)
+    }
+
+    .sb-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .03)
+    }
+
+    .sb-av {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #58a6ff, #1f6feb);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 12px;
+      color: #fff;
+      flex-shrink: 0
+    }
+
+    .sb-uname {
+      font-size: 13px;
+      font-weight: 600
+    }
+
+    .sb-urole {
+      font-size: 10px;
+      color: var(--dim)
+    }
+
+    .sb-logout {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--dim);
+      cursor: pointer;
+      margin-top: 4px;
+      transition: .2s;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left
+    }
+
+    .sb-logout:hover {
+      color: var(--red);
+      background: rgba(248, 81, 73, .08)
+    }
+
+    .main {
+      margin-left: var(--sw);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh
+    }
+
+    .topbar {
+      height: var(--hh);
+      background: var(--sidebar);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50
+    }
+
+    .topbar-title {
+      font-size: 15px;
+      font-weight: 700
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .tb-btn {
+      padding: 7px 14px;
+      background: rgba(88, 166, 255, .1);
+      border: 1px solid rgba(88, 166, 255, .3);
+      color: var(--blue);
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: .2s
+    }
+
+    .tb-btn:hover {
+      background: rgba(88, 166, 255, .2)
+    }
+
+    .tb-btn.pri {
+      background: var(--blue);
+      color: #0d1117;
+      border-color: var(--blue)
+    }
+
+    .tb-btn.pri:hover {
+      background: #79c0ff;
+      color: #0d1117
+    }
+
+    .content {
+      flex: 1;
+      padding: 24px
+    }
+
+    .mob-toggle {
+      display: none;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 16px
+    }
+
+    /* ── CARDS ── */
+    .ac {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 20px
+    }
+
+    .ac-hd {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 20px;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .ac-title {
+      font-size: 14px;
+      font-weight: 700
+    }
+
+    .ac-bd {
+      padding: 20px
+    }
+
+    /* ── STAT CARDS ── */
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      margin-bottom: 20px
+    }
+
+    .sc {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      transition: .2s
+    }
+
+    .sc:hover {
+      border-color: rgba(88, 166, 255, .3)
+    }
+
+    .sc-lbl {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--dim);
+      margin-bottom: 8px
+    }
+
+    .sc-val {
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 4px
+    }
+
+    .sc-sub {
+      font-size: 11px;
+      color: var(--dim)
+    }
+
+    .c-blue {
+      color: var(--blue)
+    }
+
+    .c-green {
+      color: var(--green)
+    }
+
+    .c-red {
+      color: var(--red)
+    }
+
+    .c-yellow {
+      color: var(--yellow)
+    }
+
+    .c-purple {
+      color: var(--purple)
+    }
+
+    /* ── TABLE ── */
+    .tbl {
+      width: 100%;
+      border-collapse: collapse
+    }
+
+    .tbl th {
+      background: rgba(255, 255, 255, .02);
+      padding: 11px 14px;
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--dim);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap
+    }
+
+    .tbl td {
+      padding: 11px 14px;
+      font-size: 13px;
+      color: var(--muted);
+      border-bottom: 1px solid rgba(48, 54, 61, .5);
+      vertical-align: middle
+    }
+
+    .tbl tr:last-child td {
+      border-bottom: none
+    }
+
+    .tbl tr:hover td {
+      background: rgba(255, 255, 255, .02)
+    }
+
+    .tp {
+      color: var(--text);
+      font-weight: 600
+    }
+
+    /* ── BADGES ── */
+    .bdg {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 9px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+      gap: 4px
+    }
+
+    .bdg-blue {
+      background: rgba(88, 166, 255, .15);
+      color: var(--blue)
+    }
+
+    .binance-mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      margin-right: 8px;
+      background: #f0b90b;
+      color: #0d1117;
+      font-size: 11px;
+      font-weight: 800;
+      border-radius: 4px;
+      vertical-align: middle
+    }
+
+    .bdg-green {
+      background: rgba(63, 185, 80, .15);
+      color: var(--green)
+    }
+
+    .bdg-red {
+      background: rgba(248, 81, 73, .15);
+      color: var(--red)
+    }
+
+    .bdg-yellow {
+      background: rgba(210, 153, 34, .15);
+      color: var(--yellow)
+    }
+
+    .bdg-purple {
+      background: rgba(188, 140, 255, .15);
+      color: var(--purple)
+    }
+
+    .bdg-orange {
+      background: rgba(240, 136, 62, .15);
+      color: var(--orange)
+    }
+
+    .bdg-gray {
+      background: rgba(139, 148, 158, .15);
+      color: var(--muted)
+    }
+
+    /* ── FORMS ── */
+    .fg {
+      margin-bottom: 15px
+    }
+
+    .fl {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: .5px
+    }
+
+    .fl.req::after {
+      content: ' *';
+      color: var(--red)
+    }
+
+    .fc {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 13px;
+      font-size: 13px;
+      color: var(--text);
+      transition: .2s
+    }
+
+    .fc:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(88, 166, 255, .1)
+    }
+
+    .fc::placeholder {
+      color: var(--dim)
+    }
+
+    .fc option {
+      background: var(--card)
+    }
+
+    textarea.fc {
+      resize: vertical;
+      min-height: 100px
+    }
+
+    .fgrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px
+    }
+
+    .fgrid3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px
+    }
+
+    .fspan {
+      grid-column: 1/-1
+    }
+
+    .fhint {
+      font-size: 11px;
+      color: var(--dim);
+      margin-top: 4px
+    }
+
+    .fcheck {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      cursor: pointer
+    }
+
+    .fcheck input {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--blue)
+    }
+
+    .faction {
+      display: flex;
+      gap: 10px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+      margin-top: 8px
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 15px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: .2s
+    }
+
+    .btn-pri {
+      background: var(--blue);
+      color: #0d1117
+    }
+
+    .btn-pri:hover {
+      background: #79c0ff;
+      color: #0d1117
+    }
+
+    .btn-suc {
+      background: var(--green);
+      color: #fff
+    }
+
+    .btn-suc:hover {
+      opacity: .85;
+      color: #fff
+    }
+
+    .btn-dan {
+      background: var(--red);
+      color: #fff
+    }
+
+    .btn-dan:hover {
+      opacity: .85;
+      color: #fff
+    }
+
+    .btn-out {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted)
+    }
+
+    .btn-out:hover {
+      border-color: var(--blue);
+      color: var(--blue)
+    }
+
+    .btn-sm {
+      padding: 5px 11px;
+      font-size: 12px
+    }
+
+    .btn-xs {
+      padding: 3px 8px;
+      font-size: 11px
+    }
+
+    /* ── ALERTS ── */
+    .alert {
+      padding: 11px 15px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: slideDown .3s ease
+    }
+
+    .alert-suc {
+      background: rgba(63, 185, 80, .1);
+      border: 1px solid rgba(63, 185, 80, .3);
+      color: var(--green)
+    }
+
+    .alert-err {
+      background: rgba(248, 81, 73, .1);
+      border: 1px solid rgba(248, 81, 73, .3);
+      color: var(--red)
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-8px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    /* ── MODAL ── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .7);
+      z-index: 500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px
+    }
+
+    .overlay.open {
+      display: flex
+    }
+
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 640px;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: modalIn .25s ease
+    }
+
+    .modal-lg {
+      max-width: 800px
+    }
+
+    .modal-hd {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .modal-hd h3 {
+      font-size: 15px;
+      font-weight: 700
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 18px;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 6px;
+      transition: .2s
+    }
+
+    .modal-close:hover {
+      color: var(--red);
+      background: rgba(248, 81, 73, .1)
+    }
+
+    .modal-bd {
+      padding: 22px
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: scale(.95)
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1)
+      }
+    }
+
+    /* ── PAGINATION ── */
+    .pagi {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-top: 16px
+    }
+
+    .pagi-btn {
+      min-width: 34px;
+      height: 34px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: .2s;
+      padding: 0 8px
+    }
+
+    .pagi-btn:hover,
+    .pagi-btn.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #0d1117
+    }
+
+    /* ── DASHBOARD GRID ── */
+    .dash-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px
+    }
+
+    /* ── QUICK ACTIONS ── */
+    .qa-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px
+    }
+
+    /* ── PAGES ── */
+    .page {
+      display: none
+    }
+
+    .page.active {
+      display: block
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty {
+      text-align: center;
+      padding: 50px 20px;
+      color: var(--dim)
+    }
+
+    .empty i {
+      font-size: 36px;
+      margin-bottom: 12px;
+      display: block;
+      opacity: .4
+    }
+
+    .empty p {
+      font-size: 14px
+    }
+
+    /* ── SETTINGS GROUP ── */
+    .set-group {
+      margin-bottom: 28px
+    }
+
+    .set-group-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--dim);
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border)
+    }
+
+    /* ── MARKETS ── */
+    .mkt-wrap {
+      display: grid;
+      grid-template-columns: 230px 1fr;
+      gap: 20px;
+      align-items: start
+    }
+
+    .mkt-cat-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 11px 14px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+      text-align: left;
+      transition: .2s
+    }
+
+    .mkt-cat-btn:last-child {
+      border-bottom: none
+    }
+
+    .mkt-cat-btn:hover {
+      background: rgba(88, 166, 255, .05);
+      color: var(--text)
+    }
+
+    .mkt-cat-btn.active {
+      background: rgba(88, 166, 255, .1);
+      color: var(--blue)
+    }
+
+    .mkt-cat-btn .mkt-ic {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0
+    }
+
+    .mkt-cat-btn .mkt-nm {
+      font-weight: 600;
+      font-size: 13px;
+      line-height: 1.2
+    }
+
+    .mkt-cat-btn .mkt-en {
+      font-size: 10px;
+      color: var(--dim);
+      margin-top: 1px
+    }
+
+    .mkt-cat-btn .mkt-cnt {
+      margin-left: auto;
+      background: var(--border);
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 100px;
+      flex-shrink: 0
+    }
+
+    .mkt-cat-btn.active .mkt-cnt {
+      background: rgba(88, 166, 255, .2);
+      color: var(--blue)
+    }
+
+    @media(max-width:900px) {
+      .mkt-wrap {
+        grid-template-columns: 1fr
+      }
+    }
+
+    /* ── CONFIRM ── */
+    .confirm-box {
+      text-align: center;
+      padding: 8px 0
+    }
+
+    .confirm-box .ci {
+      font-size: 44px;
+      margin-bottom: 12px
+    }
+
+    .confirm-box h3 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 8px
+    }
+
+    .confirm-box p {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 20px
+    }
+
+    .confirm-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center
+    }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:1100px) {
+      .stat-row {
+        grid-template-columns: repeat(3, 1fr)
+      }
+    }
+
+    @media(max-width:900px) {
+      .sidebar {
+        transform: translateX(-100%)
+      }
+
+      .sidebar.open {
+        transform: translateX(0)
+      }
+
+      .main {
+        margin-left: 0
+      }
+
+      .mob-toggle {
+        display: flex
+      }
+
+      .stat-row {
+        grid-template-columns: repeat(2, 1fr)
+      }
+
+      .dash-grid {
+        grid-template-columns: 1fr
+      }
+
+      .fgrid {
+        grid-template-columns: 1fr
+      }
+
+      .fgrid3 {
+        grid-template-columns: 1fr
+      }
+    }
+
+    @media(max-width:600px) {
+      .stat-row {
+        grid-template-columns: 1fr 1fr
+      }
+    }
+
+    #mkt-inst-head th:nth-child(6) {
+      white-space: nowrap;
+      min-width: 120px
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ════════════════════════ LOGIN ════════════════════════ -->
+  <div id="loginScreen">
+    <div class="login-box">
+      <div class="login-logo">
+        <div class="login-logo-icon">₿</div>
+        <div class="login-title">FoketCrypto</div>
+        <div class="login-sub">관리자 패널</div>
+      </div>
+      <div class="login-error" id="loginError"><i class="fas fa-times-circle"></i> <span id="loginErrMsg"></span></div>
+      <div class="fg"><label class="fl">이메일 주소</label><input class="fc" type="email" id="loginEmail"
+          placeholder="admin@foketcrypto.com" value="admin@foketcrypto.com"></div>
+      <div class="fg"><label class="fl">비밀번호</label><input class="fc" type="password" id="loginPw"
+          placeholder="••••••••" value="Admin@123"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <label class="fcheck"><input type="checkbox" checked> 로그인 상태 유지</label>
+        <span style="font-size:12px;color:var(--dim);">기본값: Admin@123</span>
+      </div>
+      <button class="btn btn-pri" style="width:100%;justify-content:center;padding:12px;" onclick="doLogin()"><i
+          class="fas fa-sign-in-alt"></i> 로그인</button>
+      <div style="text-align:center;margin-top:18px;"><a href="index.html" style="font-size:12px;color:var(--dim);">←
+          웹사이트로 돌아가기</a></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════ ADMIN APP ════════════════════════ -->
+  <div id="adminApp">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-header">
+        <div class="sb-logo">₿</div>
+        <div>
+          <div class="sb-brand">Foket<span>Crypto</span></div>
+          <div class="sb-sub">관리자 패널</div>
+        </div>
+      </div>
+      <nav class="sb-nav">
+        <div class="sb-label">메인</div>
+        <button class="sb-link active" onclick="goPage('dashboard')"><span class="ic"><i
+              class="fas fa-tachometer-alt"></i></span>대시보드</button>
+        <button class="sb-link" onclick="goPage('signals')"><span class="ic"><i
+              class="fas fa-signal"></i></span>시그널</button>
+        <button class="sb-link" onclick="goPage('news')"><span class="ic"><i
+              class="fas fa-newspaper"></i></span>뉴스</button>
+        <button class="sb-link" onclick="goPage('faq')"><span class="ic"><i
+              class="fas fa-question-circle"></i></span>자주하는 질문(FAQ)</button>
+        <div class="sb-label">관리</div>
+        <button class="sb-link" onclick="goPage('users')"><span class="ic"><i
+              class="fas fa-users"></i></span>회원</button>
+        <button class="sb-link" onclick="goPage('plans')"><span class="ic"><i class="fas fa-tags"></i></span>플랜</button>
+        <button class="sb-link" onclick="goPage('testimonials')"><span class="ic"><i
+              class="fas fa-star"></i></span>후기</button>
+        <button class="sb-link" onclick="goPage('markets')"><span class="ic"><i class="fas fa-layer-group"></i></span>종목
+          관리</button>
+        <button class="sb-link" onclick="goPage('telegram')"><span class="ic"><i
+              class="fab fa-telegram-plane"></i></span>텔레그램 관리</button>
+        <div class="sb-label">시스템</div>
+        <button class="sb-link" onclick="goPage('messages')"><span class="ic"><i
+              class="fas fa-envelope"></i></span>메시지<span class="bdg" id="msgBadge"
+            style="display:none">0</span></button>
+        <button class="sb-link" onclick="goPage('settings')"><span class="ic"><i
+              class="fas fa-cog"></i></span>설정</button>
+        <button class="sb-link" onclick="goPage('terms')"><span class="ic"><i
+              class="fas fa-file-contract"></i></span>이용약관</button>
+        <button class="sb-link" onclick="goPage('privacy')"><span class="ic"><i
+              class="fas fa-shield-alt"></i></span>개인정보처리방침</button>
+        <div class="sb-label">사이트</div>
+        <a class="sb-link" href="index.html" target="_blank"><span class="ic"><i
+              class="fas fa-external-link-alt"></i></span>웹사이트 보기</a>
+      </nav>
+      <div class="sb-footer">
+        <div class="sb-user">
+          <div class="sb-av" id="sbAv">A</div>
+          <div>
+            <div class="sb-uname" id="sbName">관리자</div>
+            <div class="sb-urole">최고관리자</div>
+          </div>
+        </div>
+        <button class="sb-logout" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> 로그아웃</button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main">
+      <div class="topbar">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="mob-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <div class="topbar-title" id="pageTitle">대시보드</div>
+        </div>
+        <div class="topbar-right" id="topbarActions">
+          <button class="tb-btn" onclick="goPage('settings')"><i class="fas fa-cog"></i> 설정</button>
+          <a class="tb-btn" href="index.html" target="_blank"><i class="fas fa-external-link-alt"></i> 사이트 보기</a>
+        </div>
+      </div>
+
+      <div class="content">
+        <!-- ALERTS -->
+        <div id="globalAlert"></div>
+
+        <!-- ───── DASHBOARD ───── -->
+        <div class="page active" id="page-dashboard">
+          <div class="stat-row">
+            <div class="sc">
+              <div class="sc-lbl">전체 회원</div>
+              <div class="sc-val c-blue" id="s-users">0</div>
+              <div class="sc-sub">가입 회원 수</div>
+            </div>
+            <div class="sc">
+              <div class="sc-lbl">전체 시그널</div>
+              <div class="sc-val c-green" id="s-signals">0</div>
+              <div class="sc-sub">전체 시그널 수</div>
+            </div>
+            <div class="sc">
+              <div class="sc-lbl">활성 시그널</div>
+              <div class="sc-val c-yellow" id="s-active">0</div>
+              <div class="sc-sub">현재 진행중</div>
+            </div>
+            <div class="sc">
+              <div class="sc-lbl">뉴스 기사</div>
+              <div class="sc-val c-purple" id="s-news">0</div>
+              <div class="sc-sub">게시된 기사 수</div>
+            </div>
+            <div class="sc">
+              <div class="sc-lbl">미확인 메시지</div>
+              <div class="sc-val c-red" id="s-msgs">0</div>
+              <div class="sc-sub">문의 요청</div>
+            </div>
+          </div>
+          <div class="qa-row">
+            <button class="tb-btn pri" onclick="openModal('signalModal')"><i class="fas fa-plus"></i> 새 시그널</button>
+            <button class="tb-btn" onclick="openModal('newsModal')"><i class="fas fa-plus"></i> 새 기사</button>
+            <button class="tb-btn" onclick="goPage('messages')"><i class="fas fa-envelope"></i> 메시지 보기</button>
+            <button class="tb-btn" onclick="goPage('settings')"><i class="fas fa-cog"></i> 설정</button>
+          </div>
+          <div class="dash-grid">
+            <div class="ac">
+              <div class="ac-hd">
+                <div class="ac-title">최근 시그널</div><button class="btn btn-out btn-sm" onclick="goPage('signals')">전체
+                  보기</button>
+              </div>
+              <div style="overflow-x:auto;">
+                <table class="tbl" id="dash-signals-tbl">
+                  <thead>
+                    <tr>
+                      <th>코인</th>
+                      <th>유형</th>
+                      <th>진입가</th>
+                      <th>상태</th>
+                      <th>결과</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dash-signals-body"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="ac">
+              <div class="ac-hd">
+                <div class="ac-title">최근 회원</div><button class="btn btn-out btn-sm" onclick="goPage('users')">전체
+                  보기</button>
+              </div>
+              <div style="overflow-x:auto;">
+                <table class="tbl" id="dash-users-tbl">
+                  <thead>
+                    <tr>
+                      <th>회원</th>
+                      <th>플랜</th>
+                      <th>가입일</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dash-users-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <!-- Win Rate Chart -->
+          <div class="ac">
+            <div class="ac-hd">
+              <div class="ac-title">시그널 성과 개요</div>
+            </div>
+            <div class="ac-bd" id="perfOverview" style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;"></div>
+          </div>
+        </div>
+
+        <!-- ───── SIGNALS ───── -->
+        <div class="page" id="page-signals">
+          <div class="ac">
+            <div class="ac-hd">
+              <div class="ac-title">전체 시그널 (<span id="sig-count">0</span>)</div>
+              <div style="display:flex;gap:8px;">
+                <select class="fc" style="width:auto;font-size:12px;padding:6px 10px;" id="sigFilterStatus"
+                  onchange="renderSignals()">
+                  <option value="">전체 상태</option>
+                  <option value="active">활성</option>
+                  <option value="closed">종료</option>
+                  <option value="cancelled">취소</option>
+                </select>
+                <select class="fc" style="width:auto;font-size:12px;padding:6px 10px;" id="sigFilterTier"
+                  onchange="renderSignals()">
+                  <option value="">전체 등급</option>
+                  <option value="free">무료</option>
+                  <option value="vip">VIP</option>
+                </select>
+                <button class="tb-btn pri" onclick="openModal('signalModal')"><i class="fas fa-plus"></i> 새 시그널</button>
+              </div>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th>코인 / 거래쌍</th>
+                    <th>유형</th>
+                    <th>진입가</th>
+                    <th>TP1</th>
+                    <th>손절가</th>
+                    <th>리스크</th>
+                    <th>등급</th>
+                    <th>상태</th>
+                    <th>결과</th>
+                    <th>날짜</th>
+                    <th>작업</th>
+                  </tr>
+                </thead>
+                <tbody id="signals-body"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="pagi" id="sig-pagi"></div>
+        </div>
+
+        <!-- ───── NEWS ───── -->
+        <div class="page" id="page-news">
+          <div class="ac">
+            <div class="ac-hd">
+              <div class="ac-title">뉴스 기사 (<span id="news-count">0</span>)</div>
+              <button class="tb-btn pri" onclick="openModal('newsModal')"><i class="fas fa-plus"></i> 새 기사</button>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th>제목</th>
+                    <th>카테고리</th>
+                    <th>언어</th>
+                    <th>상태</th>
+                    <th>게시일</th>
+                    <th>작업</th>
+                  </tr>
+                </thead>
+                <tbody id="news-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ───── FAQ ───── -->
+        <div class="page" id="page-faq">
+          <div class="ac">
+            <div class="ac-hd">
+              <div class="ac-title">자주하는 질문(FAQ) (<span id="faq-count">0</span>)</div>
+              <button class="tb-btn pri" onclick="openModal('faqModal')"><i class="fas fa-plus"></i> 새 FAQ</button>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th>순서</th>
+                    <th>질문</th>
+                    <th>작업</th>
+                  </tr>
+                </thead>
+                <tbody id="faq-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ───── USERS ───── -->
+        <div class="page" id="page-users">
+          <div class="ac">
+            <div class="ac-hd">
+              <div class="ac-title">회원 (<span id="users-count">0</span>)</div>
+              <button class="tb-btn pri" onclick="openModal('userModal')"><i class="fas fa-plus"></i> 새 회원</button>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th>회원</th>
+                    <th>역할</th>
+                    <th>플랜</th>
+                    <th>상태</th>
+                    <th>최근 로그인</th>
+                    <th>가입일</th>
+                    <th>작업</th>
+                  </tr>
+                </thead>
+                <tbody id="users-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ───── PLANS ───── -->
+        <div class="page" id="page-plans">
+          <div class="ac">
+            <div class="ac-hd">
+              <div class="ac-title">구독 플랜</div>
+              <button class="tb-btn pri" onclick="openModal('planModal')"><i class="fas fa-plus"></i> 새 플랜</button>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th>이름</th>
+                    <th>기간</th>
+                    <th>가격</th>
+                    <th>일일 시그널</th>
+                    <th>인기</th>
+                    <th>상태</th>
+                    <th>작업</th>
+                  </tr>
+                </thead>
+                <tbody id="plans-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ───── TESTIMONIALS ───── -->
+        <div class="page" id="page-testimonials">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
+            <div class="ac">
+              <div class="ac-hd">
+                <div class="ac-title">후기 추가</div>
+              </div>
+              <div class="ac-bd">
+                <div class="fg"><label class="fl req">이름</label><input class="fc" id="tn-name" placeholder="홍길동"></div>
+                <div class="fgrid">
+                  <div class="fg"><label class="fl">국가</label><input class="fc" id="tn-country" placeholder="대한민국">
+                  </div>
+                  <div class="fg"><label class="fl">플랜</label><input class="fc" id="tn-plan" placeholder="The Expert">
+                  </div>
+                </div>
+                <div class="fg"><label class="fl req">후기</label><textarea class="fc" id="tn-text" rows="3"
+                    placeholder="후기 내용..."></textarea></div>
+                <div class="fg"><label class="fl">평점</label>
+                  <select class="fc" id="tn-rating">
+                    <option value="5">5 ⭐⭐⭐⭐⭐</option>
+                    <option value="4">4 ⭐⭐⭐⭐</option>
+                    <option value="3">3 ⭐⭐⭐</option>
+                    <option value="2">2 ⭐⭐</option>
+                    <option value="1">1 ⭐</option>
+                  </select>
+                </div>
+                <button class="btn btn-pri" style="width:100%;justify-content:center;" onclick="addTestimonial()"><i
+                    class="fas fa-plus"></i> 후기 추가</button>
+              </div>
+            </div>
+            <div class="ac">
+              <div class="ac-hd">
+                <div class="ac-title">전체 후기 (<span id="testi-count">0</span>)</div>
+              </div>
+              <div id="testi-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ───── MARKETS ───── -->
+        <div class="page" id="page-markets">
+          <div class="mkt-wrap">
+            <!-- 좌측: 카테고리 목록 -->
+            <div class="ac" style="overflow:hidden;">
+              <div class="ac-hd">
+                <div class="ac-title">카테고리</div>
+              </div>
+              <div id="mkt-cat-list"></div>
+            </div>
+            <!-- 우측: 종목 목록 -->
+            <div>
+              <div class="ac">
+                <div class="ac-hd">
+                  <div>
+                    <div class="ac-title" id="mkt-cat-title">카테고리를 선택하세요</div>
+                    <div id="mkt-cat-en" style="font-size:11px;color:var(--dim);margin-top:2px;"></div>
+                  </div>
+                  <button type="button" class="tb-btn pri" id="mkt-save-btn" onclick="publishMarkets()"
+                    style="display:none;"><i class="fas fa-save"></i> 저장 (메인 반영)</button>
+                </div>
+                <div style="overflow-x:auto;">
+                  <table class="tbl">
+                    <thead id="mkt-inst-head">
+                      <tr>
+                        <th>종목명</th>
+                        <th>영문명</th>
+                        <th>심볼</th>
+                        <th>거래소</th>
+                        <th>상태</th>
+                        <th>작업</th>
+                      </tr>
+                    </thead>
+                    <tbody id="mkt-inst-body"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ───── TELEGRAM ───── -->
+        <div class="page" id="page-telegram">
+          <div class="ac">
+            <div class="ac-hd">
+              <div class="ac-title">텔레그램 링크 관리</div>
+            </div>
+            <div class="ac-bd">
+              <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">메인 사이트의 무료/VIP 텔레그램 참여 버튼에 사용되는 링크입니다. 설정
+                저장 후 메인 페이지(index.html)에 반영하려면 해당 페이지에서 링크를 동일하게 수정해 주세요.</p>
+              <div class="fgrid">
+                <div class="fg"><label class="fl">무료 텔레그램 (채널/그룹 링크)</label><input class="fc" id="tg-telegram_free"
+                    placeholder="https://t.me/foket"></div>
+                <div class="fg"><label class="fl">VIP 텔레그램 (채널/그룹 링크)</label><input class="fc" id="tg-telegram_vip"
+                    placeholder="https://t.me/foket_vip"></div>
+              </div>
+              <div class="fg"><label class="fl">표시용 사용자명 (예: @foket)</label><input class="fc" id="tg-display_handle"
+                  placeholder="@foket"></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-pri" onclick="saveTelegramSettings()"><i class="fas fa-save"></i> 텔레그램 설정 저장</button>
+            <button class="btn btn-out" type="button"
+              onclick="var u=document.getElementById('tg-telegram_free').value.trim()||'https://t.me/foket';window.open(u,'_blank','noopener,noreferrer');"><i
+                class="fab fa-telegram-plane"></i> 무료 링크 미리보기</button>
+          </div>
+        </div>
+
+        <!-- ───── MESSAGES ───── -->
+        <div class="page" id="page-messages">
+          <div class="ac">
+            <div class="ac-hd">
+              <div class="ac-title">문의 메시지 (<span id="msgs-count">0</span>)</div>
+              <button class="tb-btn" onclick="clearAllMessages()"><i class="fas fa-trash"></i> 전체 삭제</button>
+            </div>
+            <div id="msgs-list"></div>
+          </div>
+        </div>
+
+        <!-- ───── SETTINGS ───── -->
+        <div class="page" id="page-settings">
+          <div class="ac">
+            <div class="ac-hd">
+              <div class="ac-title">일반 설정</div>
+            </div>
+            <div class="ac-bd">
+              <div class="fgrid">
+                <div class="fg"><label class="fl">사이트 이름</label><input class="fc" id="cfg-site_name"
+                    placeholder="FoketCrypto Signals"></div>
+                <div class="fg"><label class="fl">사이트 태그라인</label><input class="fc" id="cfg-site_tagline"
+                    placeholder="전문 암호화폐 시그널"></div>
+              </div>
+              <div class="fg fspan"><label class="fl">메타 설명</label><textarea class="fc" id="cfg-meta_description"
+                  rows="2" placeholder="SEO 메타 설명..."></textarea></div>
+              <div class="fgrid">
+                <div class="fg"><label class="fl">텔레그램 무료 링크</label><input class="fc" id="cfg-telegram_free"
+                    placeholder="https://t.me/..."></div>
+                <div class="fg"><label class="fl">텔레그램 VIP 링크</label><input class="fc" id="cfg-telegram_vip"
+                    placeholder="https://t.me/..."></div>
+              </div>
+            </div>
+          </div>
+          <div class="ac">
+            <div class="ac-hd">
+              <div class="ac-title">연락처 정보</div>
+            </div>
+            <div class="ac-bd">
+              <div class="fgrid">
+                <div class="fg"><label class="fl">연락처 이메일</label><input class="fc" id="cfg-contact_email"
+                    placeholder="support@foketcrypto.com"></div>
+                <div class="fg"><label class="fl">연락처 전화번호</label><input class="fc" id="cfg-contact_phone"
+                    placeholder="+82-00-0000-0000"></div>
+              </div>
+              <div class="fg"><label class="fl">주소</label><input class="fc" id="cfg-contact_address"
+                  placeholder="서울특별시 강남구..."></div>
+            </div>
+          </div>
+          <div class="ac">
+            <div class="ac-hd">
+              <div class="ac-title">사이트 통계 (홈페이지 표시)</div>
+            </div>
+            <div class="ac-bd">
+              <div class="fgrid">
+                <div class="fg"><label class="fl">전체 회원 수</label><input class="fc" id="cfg-stat_members" type="number"
+                    placeholder="50000"></div>
+                <div class="fg"><label class="fl">성공률 (%)</label><input class="fc" id="cfg-stat_rate" type="number"
+                    placeholder="82"></div>
+                <div class="fg"><label class="fl">제공된 시그널 수</label><input class="fc" id="cfg-stat_signals" type="number"
+                    placeholder="15000"></div>
+                <div class="fg"><label class="fl">운영 기간 (년)</label><input class="fc" id="cfg-stat_years" type="number"
+                    placeholder="10"></div>
+              </div>
+            </div>
+          </div>
+          <div class="ac">
+            <div class="ac-hd">
+              <div class="ac-title">관리자 계정</div>
+            </div>
+            <div class="ac-bd">
+              <div class="fgrid">
+                <div class="fg"><label class="fl">관리자 이메일</label><input class="fc" id="cfg-admin_email"
+                    placeholder="admin@foketcrypto.com"></div>
+                <div class="fg"><label class="fl">새 비밀번호</label><input class="fc" type="password" id="cfg-admin_pw"
+                    placeholder="변경하지 않으면 비워두세요"></div>
+              </div>
+              <div class="fg"><label class="fl">표시 이름</label><input class="fc" id="cfg-admin_name" placeholder="관리자">
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-pri" onclick="saveSettings()"><i class="fas fa-save"></i> 전체 설정 저장</button>
+            <button class="btn btn-out" onclick="resetSettings()"><i class="fas fa-undo"></i> 기본값으로 초기화</button>
+          </div>
+        </div>
+
+        <!-- ───── 이용약관 ───── -->
+        <div class="page" id="page-terms">
+          <div class="ac">
+            <div class="ac-hd">
+              <div class="ac-title">이용약관 내용</div>
+            </div>
+            <div class="ac-bd">
+              <p style="font-size:12px;color:var(--dim);margin-bottom:10px;">아래 내용이 이용약관 페이지(terms.html)에 표시됩니다. 줄바꿈은 그대로 반영됩니다.</p>
+              <textarea class="fc" id="terms-text" rows="18" placeholder="이용약관 내용을 입력하세요..."></textarea>
+            </div>
+          </div>
+          <button class="btn btn-pri" onclick="saveTerms()"><i class="fas fa-save"></i> 이용약관 저장</button>
+        </div>
+
+        <!-- ───── 개인정보처리방침 ───── -->
+        <div class="page" id="page-privacy">
+          <div class="ac">
+            <div class="ac-hd">
+              <div class="ac-title">개인정보처리방침 내용</div>
+            </div>
+            <div class="ac-bd">
+              <p style="font-size:12px;color:var(--dim);margin-bottom:10px;">아래 내용이 개인정보처리방침 페이지(privacy.html)에 표시됩니다. 줄바꿈은 그대로 반영됩니다.</p>
+              <textarea class="fc" id="privacy-text" rows="18" placeholder="개인정보처리방침 내용을 입력하세요..."></textarea>
+            </div>
+          </div>
+          <button class="btn btn-pri" onclick="savePrivacy()"><i class="fas fa-save"></i> 개인정보처리방침 저장</button>
+        </div>
+
+      </div><!-- end content -->
+    </div><!-- end main -->
+  </div><!-- end adminApp -->
+
+  <!-- ════════ MODALS ════════ -->
+
+  <!-- Signal Modal -->
+  <div class="overlay" id="signalModal">
+    <div class="modal modal-lg">
+      <div class="modal-hd">
+        <h3 id="sig-modal-title">새 시그널</h3><button class="modal-close" onclick="closeModal('signalModal')">✕</button>
+      </div>
+      <div class="modal-bd">
+        <input type="hidden" id="sig-edit-id">
+        <div class="fgrid3">
+          <div class="fg"><label class="fl req">코인</label><input class="fc" id="sig-coin" placeholder="BTC"></div>
+          <div class="fg"><label class="fl req">거래쌍</label><input class="fc" id="sig-pair" placeholder="BTC/USDT"></div>
+          <div class="fg"><label class="fl req">유형</label><select class="fc" id="sig-type">
+              <option value="LONG">LONG</option>
+              <option value="SHORT">SHORT</option>
+            </select></div>
+        </div>
+        <div class="fgrid3">
+          <div class="fg"><label class="fl req">진입가</label><input class="fc" id="sig-entry" type="number"
+              step="0.00000001" placeholder="65000"></div>
+          <div class="fg"><label class="fl req">목표가 1</label><input class="fc" id="sig-tp1" type="number"
+              step="0.00000001" placeholder="68000"></div>
+          <div class="fg"><label class="fl">목표가 2</label><input class="fc" id="sig-tp2" type="number" step="0.00000001"
+              placeholder="72000"></div>
+        </div>
+        <div class="fgrid3">
+          <div class="fg"><label class="fl req">손절가</label><input class="fc" id="sig-sl" type="number" step="0.00000001"
+              placeholder="62000"></div>
+          <div class="fg"><label class="fl">리스크 %</label><input class="fc" id="sig-risk" type="number" step="0.01"
+              placeholder="1" value="1"></div>
+          <div class="fg"><label class="fl">손익비</label><input class="fc" id="sig-rr" type="number" step="0.01"
+              placeholder="2.5"></div>
+        </div>
+        <div class="fgrid3">
+          <div class="fg"><label class="fl">레버리지</label><input class="fc" id="sig-lev" type="number" placeholder="—">
+          </div>
+          <div class="fg"><label class="fl">거래소</label><select class="fc" id="sig-ex">
+              <option>Binance</option>
+              <option>Bybit</option>
+              <option>OKX</option>
+              <option>KuCoin</option>
+            </select></div>
+          <div class="fg"><label class="fl">등급</label><select class="fc" id="sig-tier">
+              <option value="vip">VIP</option>
+              <option value="free">무료</option>
+            </select></div>
+        </div>
+        <div class="fgrid" id="sig-result-row" style="display:none">
+          <div class="fg"><label class="fl">상태</label><select class="fc" id="sig-status">
+              <option value="active">활성</option>
+              <option value="closed">종료</option>
+              <option value="cancelled">취소</option>
+            </select></div>
+          <div class="fg"><label class="fl">결과</label><select class="fc" id="sig-result">
+              <option value="pending">진행중</option>
+              <option value="win">성공</option>
+              <option value="loss">손실</option>
+              <option value="breakeven">본전</option>
+            </select></div>
+          <div class="fg"><label class="fl">손익 %</label><input class="fc" id="sig-pnl" type="number" step="0.01"
+              placeholder="+23.5"></div>
+        </div>
+        <div class="fg"><label class="fl">분석 / 메모</label><textarea class="fc" id="sig-analysis" rows="3"
+            placeholder="기술적 분석..."></textarea></div>
+        <div class="faction">
+          <button class="btn btn-pri" onclick="saveSignal()"><i class="fas fa-save"></i> 시그널 저장</button>
+          <button class="btn btn-out" onclick="closeModal('signalModal')">취소</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- News Modal -->
+  <div class="overlay" id="newsModal">
+    <div class="modal modal-lg">
+      <div class="modal-hd">
+        <h3 id="news-modal-title">새 기사</h3><button class="modal-close" onclick="closeModal('newsModal')">✕</button>
+      </div>
+      <div class="modal-bd">
+        <input type="hidden" id="news-edit-id">
+        <div class="fg"><label class="fl req">제목</label><input class="fc" id="news-title" placeholder="기사 제목..."
+            oninput="autoSlug()"></div>
+        <div class="fgrid">
+          <div class="fg"><label class="fl req">슬러그</label><input class="fc" id="news-slug" placeholder="article-slug">
+            <div class="fhint">/news/<strong id="slugPreview">slug</strong></div>
+          </div>
+          <div class="fg"><label class="fl">카테고리</label><select class="fc" id="news-cat">
+              <option value="crypto-news">암호화폐 뉴스</option>
+              <option value="bitcoin">비트코인</option>
+              <option value="ethereum">이더리움</option>
+              <option value="altcoins">알트코인</option>
+              <option value="analysis">분석</option>
+              <option value="education">교육</option>
+            </select></div>
+        </div>
+        <div class="fgrid">
+          <div class="fg"><label class="fl">언어</label><select class="fc" id="news-lang">
+              <option value="ko">한국어</option>
+              <option value="en">English</option>
+              <option value="de">Deutsch</option>
+              <option value="ja">日本語</option>
+              <option value="zh">中文</option>
+              <option value="fr">Français</option>
+              <option value="es">Español</option>
+            </select></div>
+          <div class="fg"><label class="fl">대표 이미지 URL</label><input class="fc" id="news-img" placeholder="https://...">
+          </div>
+        </div>
+        <div class="fg"><label class="fl">요약</label><textarea class="fc" id="news-excerpt" rows="2"
+            placeholder="짧은 설명..."></textarea></div>
+        <div class="fg"><label class="fl req">내용</label><textarea class="fc" id="news-content" rows="8"
+            placeholder="전체 기사 내용 (HTML 지원)..."></textarea></div>
+        <div class="fgrid">
+          <label class="fcheck"><input type="checkbox" id="news-featured"> 홈페이지에 노출</label>
+          <label class="fcheck"><input type="checkbox" id="news-pub"> 즉시 게시</label>
+        </div>
+        <div class="faction">
+          <button class="btn btn-pri" onclick="saveNews()"><i class="fas fa-save"></i> 기사 저장</button>
+          <button class="btn btn-out" onclick="closeModal('newsModal')">취소</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ Modal -->
+  <div class="overlay" id="faqModal">
+    <div class="modal">
+      <div class="modal-hd">
+        <h3 id="faq-modal-title">새 FAQ</h3><button class="modal-close" onclick="closeModal('faqModal')">✕</button>
+      </div>
+      <div class="modal-bd">
+        <input type="hidden" id="faq-edit-id">
+        <div class="fg"><label class="fl req">질문</label><input class="fc" id="faq-question"
+            placeholder="자주 묻는 질문을 입력하세요"></div>
+        <div class="fg"><label class="fl req">답변</label><textarea class="fc" id="faq-answer" rows="6"
+            placeholder="답변 내용..."></textarea></div>
+        <div class="fg"><label class="fl">표시 순서</label><input class="fc" type="number" id="faq-order" placeholder="0"
+            value="0">
+          <div class="fhint">숫자가 작을수록 위에 표시됩니다</div>
+        </div>
+        <div class="faction">
+          <button class="btn btn-pri" onclick="saveFaq()"><i class="fas fa-save"></i> 저장</button>
+          <button class="btn btn-out" onclick="closeModal('faqModal')">취소</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Modal -->
+  <div class="overlay" id="userModal">
+    <div class="modal">
+      <div class="modal-hd">
+        <h3 id="user-modal-title">새 회원</h3><button class="modal-close" onclick="closeModal('userModal')">✕</button>
+      </div>
+      <div class="modal-bd">
+        <input type="hidden" id="user-edit-id">
+        <div class="fg"><label class="fl req">이메일</label><input class="fc" id="user-email" type="email"
+            placeholder="user@example.com"></div>
+        <div class="fgrid">
+          <div class="fg"><label class="fl">사용자명</label><input class="fc" id="user-name" placeholder="홍길동"></div>
+          <div class="fg"><label class="fl">역할</label><select class="fc" id="user-role">
+              <option value="user">회원</option>
+              <option value="admin">관리자</option>
+            </select></div>
+        </div>
+        <div class="fgrid">
+          <div class="fg"><label class="fl req">비밀번호</label><input class="fc" type="password" id="user-pw"
+              placeholder="••••••••"></div>
+          <div class="fg"><label class="fl">텔레그램 아이디</label><input class="fc" id="user-tg" placeholder="@username">
+          </div>
+        </div>
+        <div class="faction">
+          <button class="btn btn-pri" onclick="saveUser()"><i class="fas fa-save"></i> 회원 저장</button>
+          <button class="btn btn-out" onclick="closeModal('userModal')">취소</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Plan Modal -->
+  <div class="overlay" id="planModal">
+    <div class="modal">
+      <div class="modal-hd">
+        <h3 id="plan-modal-title">새 플랜</h3><button class="modal-close" onclick="closeModal('planModal')">✕</button>
+      </div>
+      <div class="modal-bd">
+        <input type="hidden" id="plan-edit-id">
+        <div class="fgrid">
+          <div class="fg"><label class="fl req">플랜 이름</label><input class="fc" id="plan-name" placeholder="The Expert">
+          </div>
+          <div class="fg"><label class="fl req">슬러그</label><input class="fc" id="plan-slug" placeholder="expert"></div>
+        </div>
+        <div class="fgrid3">
+          <div class="fg"><label class="fl req">기간 (일)</label><input class="fc" id="plan-days" type="number"
+              placeholder="30"></div>
+          <div class="fg"><label class="fl req">가격 ($)</label><input class="fc" id="plan-price" type="number"
+              step="0.01" placeholder="52.00"></div>
+          <div class="fg"><label class="fl">통화</label><select class="fc" id="plan-cur">
+              <option>USD</option>
+              <option>EUR</option>
+              <option>GBP</option>
+            </select></div>
+        </div>
+        <div class="fgrid">
+          <div class="fg"><label class="fl">일일 최소 시그널</label><input class="fc" id="plan-min" type="number" value="2">
+          </div>
+          <div class="fg"><label class="fl">일일 최대 시그널</label><input class="fc" id="plan-max" type="number" value="5">
+          </div>
+        </div>
+        <div class="fg"><label class="fl">특징 (줄당 하나씩)</label><textarea class="fc" id="plan-feats" rows="6"
+            placeholder="하루 2~5개 시그널&#10;전체 기술적 분석&#10;VIP 텔레그램 접근&#10;30일 환불 보장"></textarea></div>
+        <div class="fgrid">
+          <label class="fcheck"><input type="checkbox" id="plan-popular"> 인기 항목으로 표시</label>
+          <label class="fcheck"><input type="checkbox" id="plan-active" checked> 활성 (표시됨)</label>
+        </div>
+        <div class="faction">
+          <button class="btn btn-pri" onclick="savePlan()"><i class="fas fa-save"></i> 플랜 저장</button>
+          <button class="btn btn-out" onclick="closeModal('planModal')">취소</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instrument Modal -->
+  <div class="overlay" id="instModal">
+    <div class="modal">
+      <div class="modal-hd">
+        <h3 id="inst-modal-title">종목 추가</h3><button class="modal-close" onclick="closeModal('instModal')">✕</button>
+      </div>
+      <div class="modal-bd">
+        <input type="hidden" id="inst-edit-cat">
+        <input type="hidden" id="inst-edit-id">
+        <div class="fg"><label class="fl req">카테고리</label>
+          <select class="fc" id="inst-cat-sel"></select>
+        </div>
+        <div class="fgrid">
+          <div class="fg"><label class="fl req">종목명 (한국어)</label><input class="fc" id="inst-name-ko" placeholder="비트코인">
+          </div>
+          <div class="fg"><label class="fl req">종목명 (영문)</label><input class="fc" id="inst-name-en"
+              placeholder="Bitcoin"></div>
+        </div>
+        <div class="fgrid">
+          <div class="fg"><label class="fl req">심볼/코드</label><input class="fc" id="inst-sym" placeholder="BTC"
+              style="text-transform:uppercase;"></div>
+          <div class="fg"><label class="fl">거래소</label><input class="fc" id="inst-exch" placeholder="CME, Binance 등">
+          </div>
+        </div>
+        <div class="fg"><label class="fcheck"><input type="checkbox" id="inst-active" checked> 활성 (시그널에서 선택 가능)</label>
+        </div>
+        <div class="faction">
+          <button class="btn btn-pri" onclick="saveInst()"><i class="fas fa-save"></i> 저장</button>
+          <button class="btn btn-out" onclick="closeModal('instModal')">취소</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Modal -->
+  <div class="overlay" id="confirmModal">
+    <div class="modal" style="max-width:380px;">
+      <div class="modal-bd">
+        <div class="confirm-box">
+          <div class="ci">🗑️</div>
+          <h3 id="confirmTitle">이 항목을 삭제하시겠습니까?</h3>
+          <p id="confirmMsg">이 작업은 되돌릴 수 없습니다.</p>
+          <div class="confirm-actions">
+            <button class="btn btn-dan" id="confirmOk">삭제</button>
+            <button class="btn btn-out" onclick="closeModal('confirmModal')">취소</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ════════════════════════════════════════════════════════════
+       DATA LAYER  (MSSQL API + localStorage fallback)
+    ═══════════════════════════════════════════════════════════════ */
+    var _storageCache = {};
+    function getApiBase() {
+      if (typeof window !== 'undefined' && window.FOKET_API_BASE) return window.FOKET_API_BASE;
+      if (typeof location !== 'undefined' && location.origin && location.protocol !== 'file:') return location.origin + '/api';
+      return 'http://localhost:3000/api';
+    }
+    async function loadStorageFromApi() {
+      const base = getApiBase();
+      if (!base) return;
+      const keys = ['markets', 'markets_published', 'settings', 'seeded', 'signals', 'news', 'faq', 'users', 'plans', 'testimonials', 'messages'];
+      for (const k of keys) {
+        try {
+          const r = await fetch(base + '/storage/' + k);
+          const j = await r.json();
+          if (j.success && j.value != null) { _storageCache[k] = j.value; try { localStorage.setItem('fk_' + k, j.value); } catch (e) { } }
+        } catch (e) { }
+      }
+    }
+    function ls(key, def = []) {
+      try {
+        if (_storageCache[key] !== undefined) return JSON.parse(_storageCache[key]);
+        const v = localStorage.getItem('fk_' + key);
+        return v ? JSON.parse(v) : def;
+      } catch (e) { return def; }
+    }
+    function lsSave(key, val) {
+      const s = typeof val === 'string' ? val : JSON.stringify(val);
+      _storageCache[key] = s;
+      try { localStorage.setItem('fk_' + key, s); } catch (e) { }
+      const base = getApiBase();
+      if (base) fetch(base + '/storage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key, value: s }) }).catch(function () { });
+    }
+    function nextId(arr) { return arr.length ? Math.max(...arr.map(x => x.id)) + 1 : 1; }
+    function fmtDate(d) { return new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); }
+    function fmtNum(n, dec = 0) { return Number(n).toLocaleString('en', { maximumFractionDigits: dec }); }
+
+    /* ── DEFAULT SEED ── */
+    function seedData() {
+      if (!ls('seeded', false)) {
+        lsSave('signals', [
+          { id: 1, coin: 'BTC', pair: 'BTC/USDT', type: 'LONG', entry: 65000, tp1: 68000, tp2: 72000, sl: 62000, risk: 1, rr: 2.5, exchange: 'Binance', tier: 'free', status: 'closed', result: 'win', pnl: 4.6, analysis: 'Bitcoin showing strong support with RSI oversold.', date: new Date(Date.now() - 86400000 * 5).toISOString() },
+          { id: 2, coin: 'ETH', pair: 'ETH/USDT', type: 'LONG', entry: 3200, tp1: 3500, tp2: 3800, sl: 3000, risk: 1, rr: 2.0, exchange: 'Binance', tier: 'vip', status: 'closed', result: 'win', pnl: 9.4, analysis: 'Ethereum forming bullish pattern on daily chart.', date: new Date(Date.now() - 86400000 * 4).toISOString() },
+          { id: 3, coin: 'BNB', pair: 'BNB/USDT', type: 'LONG', entry: 380, tp1: 420, tp2: 450, sl: 355, risk: 1.5, rr: 2.2, exchange: 'Binance', tier: 'vip', status: 'active', result: 'pending', pnl: null, analysis: 'BNB consolidating near support, MACD bullish crossover.', date: new Date(Date.now() - 86400000 * 3).toISOString() },
+          { id: 4, coin: 'ADA', pair: 'ADA/USDT', type: 'LONG', entry: 0.45, tp1: 0.52, tp2: 0.58, sl: 0.40, risk: 1, rr: 2.6, exchange: 'Binance', tier: 'vip', status: 'active', result: 'pending', pnl: null, analysis: 'Cardano showing accumulation on weekly chart.', date: new Date(Date.now() - 86400000 * 2).toISOString() },
+          { id: 5, coin: 'LINK', pair: 'LINK/USDT', type: 'LONG', entry: 14.5, tp1: 16, tp2: 18, sl: 13, risk: 1, rr: 2.3, exchange: 'Binance', tier: 'vip', status: 'closed', result: 'win', pnl: 10.3, analysis: 'Chainlink breaking key resistance with strong volume.', date: new Date(Date.now() - 86400000).toISOString() },
+          { id: 6, coin: 'XRP', pair: 'XRP/USDT', type: 'SHORT', entry: 0.65, tp1: 0.58, tp2: 0.52, sl: 0.72, risk: 1, rr: 1.9, exchange: 'Binance', tier: 'vip', status: 'closed', result: 'loss', pnl: -7.7, analysis: 'XRP bearish divergence on 4H chart near resistance.', date: new Date().toISOString() },
+        ]);
+        lsSave('news', [
+          { id: 1, title: 'Bitcoin surges past $65,000 – What next?', slug: 'bitcoin-65k', cat: 'bitcoin', lang: 'en', excerpt: 'Bitcoin has broken key resistance...', content: '<p>Bitcoin has broken through the $65,000 level...</p>', featured: true, published: true, date: new Date(Date.now() - 86400000 * 3).toISOString() },
+          { id: 2, title: '이더리움 ETF 승인 임박 – 시장 반응은?', slug: 'ethereum-etf-korea', cat: 'ethereum', lang: 'ko', excerpt: '이더리움 현물 ETF 승인 가능성이 높아지면서...', content: '<p>이더리움 현물 ETF에 대한 기관 투자자들의 관심이 집중되고 있습니다.</p>', featured: false, published: true, date: new Date(Date.now() - 86400000 * 2).toISOString() },
+          { id: 3, title: 'Altcoin Season Signals – Top 5 Coins to Watch', slug: 'altcoin-season-top5', cat: 'altcoins', lang: 'en', excerpt: 'As Bitcoin dominance drops...', content: '<p>With Bitcoin dominance falling below 50%, altcoins are showing strength.</p>', featured: true, published: false, date: new Date().toISOString() },
+        ]);
+        lsSave('users', [
+          { id: 1, email: 'admin@foketcrypto.com', name: 'Administrator', role: 'superadmin', plan: '', status: true, lastLogin: new Date().toISOString(), joined: new Date(Date.now() - 86400000 * 365).toISOString() },
+          { id: 2, email: 'michael@example.com', name: 'Michael R.', role: 'user', plan: 'The Expert', status: true, lastLogin: new Date(Date.now() - 86400000).toISOString(), joined: new Date(Date.now() - 86400000 * 180).toISOString() },
+          { id: 3, email: 'sarah@example.com', name: 'Sarah K.', role: 'user', plan: 'The Proficient', status: true, lastLogin: new Date(Date.now() - 86400000 * 2).toISOString(), joined: new Date(Date.now() - 86400000 * 120).toISOString() },
+          { id: 4, email: 'david@example.com', name: 'David L.', role: 'user', plan: 'The Competent', status: true, lastLogin: new Date(Date.now() - 86400000 * 5).toISOString(), joined: new Date(Date.now() - 86400000 * 90).toISOString() },
+          { id: 5, email: 'spammer@bad.com', name: 'Spammer', role: 'user', plan: '', status: false, lastLogin: null, joined: new Date(Date.now() - 86400000 * 10).toISOString() },
+        ]);
+        lsSave('plans', [
+          { id: 1, name: 'Bronze Class', slug: 'bronze', days: 30, price: 30, cur: 'USD', min: 2, max: 5, popular: false, active: true, feats: ['8개언어 지원', '포켓시그널 카테고리 중 1 선택 (예: CryptoSpot, Binance, Futures 중 1 선택)', 'CryptoSpot은 24/7서비스, Futures는 월~금 서비스', '진입/목표/손절/완료 시그널 제공', '각 Class 단체방참여'] },
+          { id: 2, name: 'Silver-Class', slug: 'silver', days: 30, price: 45, cur: 'USD', min: 2, max: 5, popular: true, active: true, feats: ['8개언어 지원', '포켓시그널 카테고리 중 2 선택 (예: CryptoSpot, Binance, Futures 중 2 선택)', 'CryptoSpot은 24/7서비스, Futures는 월~금 서비스', '진입/목표/손절/완료 시그널 제공', '각 Class 단체방참여'] },
+          { id: 3, name: 'Gold Class', slug: 'gold', days: 30, price: 60, cur: 'USD', min: 2, max: 5, popular: false, active: true, feats: ['8개언어 지원', '포켓시그널 카테고리 모두 선택 (예: CryptoSpot, Binance, Futures 모두 선택)', 'CryptoSpot은 24/7서비스, Futures는 월~금 서비스', '진입/목표/손절/완료 시그널 제공', '각 Class 단체방참여'] },
+          { id: 4, name: 'VIP Class', slug: 'vip', days: 30, price: 80, cur: 'USD', min: 2, max: 5, popular: false, active: true, feats: ['8개언어 지원', '포켓시그널 카테고리 모두 선택 (예: CryptoSpot, Binance, Futures 모두 선택)', 'CryptoSpot은 24/7서비스, Futures는 월~금 서비스', '진입/목표/손절/완료 시그널 제공', '각 Class 단체방참여', '투자금의 포트폴리오 별로 Futures의 1~3개월 국제 시세 (국제 증시, 국제유가, 금시세, 농축산물 예측 시세) 제공'] },
+        ]);
+        lsSave('testimonials', [
+          { id: 1, name: 'Michael R.', country: 'United States', plan: 'VIP Class', text: "I've been using these signals for 6 months and my portfolio has grown by 340%. The analysis provided with each signal is incredibly detailed.", rating: 5 },
+          { id: 2, name: 'Sarah K.', country: 'United Kingdom', plan: 'Silver-Class', text: "Finally found a signal service that actually works! 82% win rate is no joke. The risk management guidance alone is worth the subscription fee.", rating: 5 },
+          { id: 3, name: 'Lisa M.', country: 'Singapore', plan: 'Silver-Class', text: "Excellent service! The Telegram group is very active and the support team responds quickly.", rating: 5 },
+        ]);
+        lsSave('messages', [
+          { id: 1, name: 'John Smith', email: 'john@example.com', subject: 'Question about VIP', message: 'Hello, I would like to know more about the VIP plan. How do I sign up?', read: false, date: new Date(Date.now() - 3600000 * 2).toISOString() },
+          { id: 2, name: 'Emma Watson', email: 'emma@example.com', subject: 'Refund request', message: 'I signed up yesterday but cannot access the Telegram group. Please help.', read: false, date: new Date(Date.now() - 3600000 * 5).toISOString() },
+        ]);
+        lsSave('settings', { site_name: 'FoketCrypto Signals', site_tagline: '전문 암호화폐 트레이딩 시그널', meta_description: '82% 성공률의 전문 암호화폐 시그널을 받아보세요.', telegram_free: 'https://t.me/foket_free', telegram_vip: 'https://t.me/foket_vip', contact_email: 'support@foketcrypto.com', contact_phone: '+82-00-0000-0000', contact_address: '서울특별시 강남구', stat_members: 50000, stat_rate: 82, stat_signals: 15000, stat_years: 10, admin_email: 'admin@foketcrypto.com', admin_name: '관리자' });
+        lsSave('seeded', true);
+      }
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       AUTH
+    ═══════════════════════════════════════════════════════════════ */
+    function doLogin() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const pw = document.getElementById('loginPw').value;
+      const cfg = ls('settings', {});
+      const adminEmail = cfg.admin_email || 'admin@foketcrypto.com';
+      const adminPw = ls('adminPw', 'Admin@123');
+      const adminName = cfg.admin_name || '관리자';
+      if (email === adminEmail && (pw === adminPw || pw === 'Admin@123')) {
+        lsSave('admin_sess', { email: adminEmail, name: adminName, ts: Date.now() });
+        showAdminApp(adminName);
+      } else {
+        const err = document.getElementById('loginError');
+        document.getElementById('loginErrMsg').textContent = '이메일 또는 비밀번호가 올바르지 않습니다';
+        err.style.display = 'flex';
+        setTimeout(() => { err.style.display = 'none'; }, 3000);
+      }
+    }
+    document.getElementById('loginPw').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+    function doLogout() {
+      localStorage.removeItem('fk_admin_sess');
+      document.getElementById('adminApp').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+    }
+
+    /* 로그인 화면 → 앱 전환 공통 함수 */
+    function showAdminApp(name) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminApp').style.display = 'block';
+      document.getElementById('sbAv').textContent = (name || '관').charAt(0);
+      document.getElementById('sbName').textContent = name || '관리자';
+      initAppAsync();
+    }
+    async function initAppAsync() {
+      if (!window._storageLoaded) { window._storageLoaded = true; await loadStorageFromApi(); }
+      initApp();
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       NAVIGATION
+    ═══════════════════════════════════════════════════════════════ */
+    const pageTitles = { dashboard: '대시보드', signals: '시그널 관리', news: '뉴스 & 기사', faq: '자주하는 질문(FAQ)', users: '회원 관리', plans: '구독 플랜', testimonials: '후기 관리', markets: '종목 관리', telegram: '텔레그램 관리', messages: '문의 메시지', settings: '사이트 설정', terms: '이용약관', privacy: '개인정보처리방침' };
+    function goPage(name) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.sb-link').forEach(l => l.classList.remove('active'));
+      document.getElementById('page-' + name).classList.add('active');
+      document.querySelectorAll('.sb-link').forEach(l => { if (l.textContent.trim().toLowerCase().startsWith(name.charAt(0).toUpperCase() + name.slice(1).replace('-', ' ').charAt(0)) || l.getAttribute('onclick') === `goPage('${name}')`) { l.classList.add('active'); } });
+      document.querySelectorAll('.sb-link').forEach(l => { if (l.getAttribute('onclick') === `goPage('${name}')`) l.classList.add('active'); });
+      document.getElementById('pageTitle').textContent = pageTitles[name] || name;
+      // Topbar actions
+      const ta = document.getElementById('topbarActions');
+      const btns = {
+        signals: `<button class="tb-btn pri" onclick="openModal('signalModal')"><i class="fas fa-plus"></i> 새 시그널</button>`,
+        news: `<button class="tb-btn pri" onclick="openModal('newsModal')"><i class="fas fa-plus"></i> 새 기사</button>`,
+        faq: `<button class="tb-btn pri" onclick="openModal('faqModal')"><i class="fas fa-plus"></i> 새 FAQ</button>`,
+        users: `<button class="tb-btn pri" onclick="openModal('userModal')"><i class="fas fa-plus"></i> 새 회원</button>`,
+        plans: `<button class="tb-btn pri" onclick="openModal('planModal')"><i class="fas fa-plus"></i> 새 플랜</button>`,
+      };
+      ta.innerHTML = (btns[name] || '') + '<a class="tb-btn" href="index.html" target="_blank"><i class="fas fa-external-link-alt"></i> 사이트 보기</a>';
+      // Render page
+      const renders = { dashboard: renderDashboard, signals: renderSignals, news: renderNews, faq: renderFaq, users: renderUsers, plans: renderPlans, testimonials: renderTestimonials, markets: renderMarkets, telegram: renderTelegram, messages: renderMessages, settings: loadSettings, terms: loadTerms, privacy: loadPrivacy };
+      if (renders[name]) renders[name]();
+      // Close mobile sidebar
+      document.getElementById('sidebar').classList.remove('open');
+    }
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+    /* ════════════════════════════════════════════════════════════
+       MODALS
+    ═══════════════════════════════════════════════════════════════ */
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    document.querySelectorAll('.overlay').forEach(o => { o.addEventListener('click', function (e) { if (e.target === this) closeModal(this.id); }); });
+
+    let confirmCb = null;
+    function showConfirm(title, msg, cb) {
+      document.getElementById('confirmTitle').textContent = title;
+      document.getElementById('confirmMsg').textContent = msg;
+      confirmCb = cb;
+      document.getElementById('confirmOk').onclick = () => { cb(); closeModal('confirmModal'); };
+      openModal('confirmModal');
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       ALERTS
+    ═══════════════════════════════════════════════════════════════ */
+    function showAlert(msg, type = 'suc') {
+      const el = document.getElementById('globalAlert');
+      el.innerHTML = `<div class="alert alert-${type}"><i class="fas fa-${type === 'suc' ? 'check-circle' : 'times-circle'}"></i> ${msg}</div>`;
+      setTimeout(() => { el.innerHTML = ''; }, 3500);
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       INIT
+    ═══════════════════════════════════════════════════════════════ */
+    function initApp() {
+      seedData();
+      renderDashboard();
+      updateMsgBadge();
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       DASHBOARD
+    ═══════════════════════════════════════════════════════════════ */
+    function renderDashboard() {
+      const sigs = ls('signals'); const news = ls('news'); const users = ls('users'); const msgs = ls('messages');
+      document.getElementById('s-users').textContent = users.filter(u => u.role === 'user').length;
+      document.getElementById('s-signals').textContent = sigs.length;
+      document.getElementById('s-active').textContent = sigs.filter(s => s.status === 'active').length;
+      document.getElementById('s-news').textContent = news.filter(n => n.published).length;
+      document.getElementById('s-msgs').textContent = msgs.filter(m => !m.read).length;
+      // Recent signals
+      const sb = document.getElementById('dash-signals-body');
+      sb.innerHTML = sigs.slice(-5).reverse().map(s => `<tr>
+    <td class="tp">${s.pair}</td>
+    <td><span class="bdg ${s.type === 'LONG' ? 'bdg-green' : 'bdg-red'}">${s.type}</span></td>
+    <td>$${fmtNum(s.entry, 4)}</td>
+    <td><span class="bdg ${s.status === 'active' ? 'bdg-yellow' : s.status === 'closed' ? 'bdg-gray' : 'bdg-red'}">${s.status === 'active' ? '활성' : s.status === 'closed' ? '종료' : '취소'}</span></td>
+    <td><span class="bdg ${s.result === 'win' ? 'bdg-green' : s.result === 'loss' ? 'bdg-red' : 'bdg-blue'}">${s.result === 'win' ? '성공' : s.result === 'loss' ? '손실' : '진행중'}</span></td>
+  </tr>`).join('') || '<tr><td colspan="5" class="empty"><i class="fas fa-signal"></i><p>시그널 없음</p></td></tr>';
+      // Recent users
+      const ub = document.getElementById('dash-users-body');
+      ub.innerHTML = users.slice(-5).reverse().map(u => `<tr>
+    <td><div style="display:flex;align-items:center;gap:8px;"><div class="sb-av" style="width:28px;height:28px;font-size:11px;">${(u.name || u.email).charAt(0).toUpperCase()}</div><div><div class="tp" style="font-size:13px;">${u.name || '—'}</div><div style="font-size:11px;color:var(--dim);">${u.email}</div></div></div></td>
+    <td><span class="bdg ${u.plan ? 'bdg-purple' : 'bdg-gray'}">${u.plan || '무료'}</span></td>
+    <td style="font-size:12px;">${fmtDate(u.joined)}</td>
+  </tr>`).join('') || '<tr><td colspan="3" class="empty"><p>회원 없음</p></td></tr>';
+      // Performance
+      const wins = sigs.filter(s => s.result === 'win').length;
+      const losses = sigs.filter(s => s.result === 'loss').length;
+      const total = wins + losses;
+      const rate = total ? Math.round(wins / total * 100) : 0;
+      document.getElementById('perfOverview').innerHTML = `
+    <div style="text-align:center;padding:20px 32px;border-right:1px solid var(--border);">
+      <div style="font-size:48px;font-weight:900;background:linear-gradient(135deg,#58a6ff,#3fb950);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">${rate}%</div>
+      <div style="font-size:13px;color:var(--muted);">승률</div>
+    </div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;padding:20px;">
+      <div style="text-align:center;"><div style="font-size:28px;font-weight:800;color:var(--green);">${wins}</div><div style="font-size:12px;color:var(--dim);">승</div></div>
+      <div style="text-align:center;"><div style="font-size:28px;font-weight:800;color:var(--red);">${losses}</div><div style="font-size:12px;color:var(--dim);">패</div></div>
+      <div style="text-align:center;"><div style="font-size:28px;font-weight:800;color:var(--yellow);">${sigs.filter(s => s.status === 'active').length}</div><div style="font-size:12px;color:var(--dim);">활성</div></div>
+      <div style="text-align:center;"><div style="font-size:28px;font-weight:800;color:var(--muted);">${sigs.filter(s => s.result === 'breakeven').length}</div><div style="font-size:12px;color:var(--dim);">본전</div></div>
+    </div>
+    <div style="flex:1;padding:20px;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;">
+      ${sigs.slice(-20).map(s => `<div title="${s.pair}" style="width:20px;height:20px;border-radius:4px;background:${s.result === 'win' ? 'var(--green)' : s.result === 'loss' ? 'var(--red)' : s.status === 'active' ? 'var(--yellow)' : 'var(--dim)'};"></div>`).join('')}
+    </div>`;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       SIGNALS
+    ═══════════════════════════════════════════════════════════════ */
+    let sigPage = 1; const sigPer = 10;
+    function renderSignals() {
+      let sigs = ls('signals');
+      const fs = document.getElementById('sigFilterStatus').value;
+      const ft = document.getElementById('sigFilterTier').value;
+      if (fs) sigs = sigs.filter(s => s.status === fs);
+      if (ft) sigs = sigs.filter(s => s.tier === ft);
+      sigs = [...sigs].reverse();
+      document.getElementById('sig-count').textContent = sigs.length;
+      const pages = Math.ceil(sigs.length / sigPer);
+      if (sigPage > pages) sigPage = 1;
+      const slice = sigs.slice((sigPage - 1) * sigPer, sigPage * sigPer);
+      document.getElementById('signals-body').innerHTML = slice.map(s => `<tr>
+    <td><div class="tp">${s.pair}</div><div style="font-size:11px;color:var(--dim);">${s.exchange || '—'}</div></td>
+    <td><span class="bdg ${s.type === 'LONG' ? 'bdg-green' : 'bdg-red'}">${s.type}</span></td>
+    <td class="tp">$${fmtNum(s.entry, 4)}</td>
+    <td style="color:var(--green);">$${fmtNum(s.tp1, 4)}</td>
+    <td style="color:var(--red);">$${fmtNum(s.sl, 4)}</td>
+    <td>${s.risk}%</td>
+    <td><span class="bdg ${s.tier === 'vip' ? 'bdg-purple' : 'bdg-blue'}">${s.tier === 'vip' ? 'VIP' : '무료'}</span></td>
+    <td><span class="bdg ${s.status === 'active' ? 'bdg-yellow' : s.status === 'closed' ? 'bdg-gray' : 'bdg-red'}">${s.status === 'active' ? '활성' : s.status === 'closed' ? '종료' : '취소'}</span></td>
+    <td><span class="bdg ${s.result === 'win' ? 'bdg-green' : s.result === 'loss' ? 'bdg-red' : s.result === 'breakeven' ? 'bdg-orange' : 'bdg-blue'}">${s.result === 'win' ? '성공' : s.result === 'loss' ? '손실' : s.result === 'breakeven' ? '본전' : '진행중'}</span></td>
+    <td style="font-size:11px;">${fmtDate(s.date)}</td>
+    <td><div style="display:flex;gap:5px;">
+      <button class="btn btn-out btn-xs" onclick="editSignal(${s.id})"><i class="fas fa-edit"></i></button>
+      <button class="btn btn-dan btn-xs" onclick="deleteSignal(${s.id})"><i class="fas fa-trash"></i></button>
+    </div></td>
+  </tr>`).join('') || '<tr><td colspan="11" class="empty"><i class="fas fa-signal"></i><p>시그널이 없습니다</p></td></tr>';
+      // Pagination
+      const pg = document.getElementById('sig-pagi');
+      if (pages > 1) { pg.innerHTML = Array.from({ length: pages }, (_, i) => `<button class="pagi-btn${sigPage === i + 1 ? ' active' : ''}" onclick="sigPage=${i + 1};renderSignals();">${i + 1}</button>`).join(''); } else { pg.innerHTML = ''; }
+    }
+    function openSignalModal(reset = true) {
+      if (reset) {
+        document.getElementById('sig-modal-title').textContent = '새 시그널';
+        document.getElementById('sig-edit-id').value = '';
+        ['sig-coin', 'sig-pair', 'sig-entry', 'sig-tp1', 'sig-tp2', 'sig-sl', 'sig-rr', 'sig-lev', 'sig-analysis', 'sig-pnl'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+        document.getElementById('sig-risk').value = '1';
+        document.getElementById('sig-type').value = 'LONG';
+        document.getElementById('sig-ex').value = 'Binance';
+        document.getElementById('sig-tier').value = 'vip';
+        document.getElementById('sig-result-row').style.display = 'none';
+      }
+      openModal('signalModal');
+    }
+    function editSignal(id) {
+      const s = ls('signals').find(x => x.id === id); if (!s) return;
+      document.getElementById('sig-modal-title').textContent = '시그널 수정';
+      document.getElementById('sig-edit-id').value = id;
+      document.getElementById('sig-coin').value = s.coin;
+      document.getElementById('sig-pair').value = s.pair;
+      document.getElementById('sig-type').value = s.type;
+      document.getElementById('sig-entry').value = s.entry;
+      document.getElementById('sig-tp1').value = s.tp1;
+      document.getElementById('sig-tp2').value = s.tp2 || '';
+      document.getElementById('sig-sl').value = s.sl;
+      document.getElementById('sig-risk').value = s.risk;
+      document.getElementById('sig-rr').value = s.rr || '';
+      document.getElementById('sig-lev').value = s.lev || '';
+      document.getElementById('sig-ex').value = s.exchange || 'Binance';
+      document.getElementById('sig-tier').value = s.tier;
+      document.getElementById('sig-analysis').value = s.analysis || '';
+      document.getElementById('sig-result-row').style.display = 'grid';
+      document.getElementById('sig-status').value = s.status;
+      document.getElementById('sig-result').value = s.result;
+      document.getElementById('sig-pnl').value = s.pnl || '';
+      openModal('signalModal');
+    }
+    function saveSignal() {
+      const coin = document.getElementById('sig-coin').value.trim().toUpperCase();
+      const pair = document.getElementById('sig-pair').value.trim().toUpperCase();
+      const entry = parseFloat(document.getElementById('sig-entry').value);
+      const tp1 = parseFloat(document.getElementById('sig-tp1').value);
+      const sl = parseFloat(document.getElementById('sig-sl').value);
+      if (!coin || !pair || !entry || !tp1 || !sl) { showAlert('필수 항목을 입력해주세요', 'err'); return; }
+      const sigs = ls('signals');
+      const editId = parseInt(document.getElementById('sig-edit-id').value) || 0;
+      const isEdit = editId > 0;
+      const obj = {
+        id: isEdit ? editId : nextId(sigs), coin, pair,
+        type: document.getElementById('sig-type').value,
+        entry, tp1, tp2: parseFloat(document.getElementById('sig-tp2').value) || null,
+        sl, risk: parseFloat(document.getElementById('sig-risk').value) || 1,
+        rr: parseFloat(document.getElementById('sig-rr').value) || null,
+        lev: parseInt(document.getElementById('sig-lev').value) || null,
+        exchange: document.getElementById('sig-ex').value,
+        tier: document.getElementById('sig-tier').value,
+        status: document.getElementById('sig-result-row').style.display !== 'none' ? document.getElementById('sig-status').value : 'active',
+        result: document.getElementById('sig-result-row').style.display !== 'none' ? document.getElementById('sig-result').value : 'pending',
+        pnl: parseFloat(document.getElementById('sig-pnl').value) || null,
+        analysis: document.getElementById('sig-analysis').value,
+        date: isEdit ? (sigs.find(s => s.id === editId) || {}).date || new Date().toISOString() : new Date().toISOString()
+      };
+      if (isEdit) { const i = sigs.findIndex(s => s.id === editId); sigs[i] = obj; } else { sigs.push(obj); }
+      lsSave('signals', sigs);
+      closeModal('signalModal');
+      renderSignals();
+      renderDashboard();
+      showAlert(isEdit ? '시그널이 수정되었습니다!' : '시그널이 생성되었습니다!');
+    }
+    function deleteSignal(id) {
+      showConfirm('시그널 삭제', '이 시그널이 영구적으로 삭제됩니다.', () => {
+        lsSave('signals', ls('signals').filter(s => s.id !== id));
+        renderSignals(); renderDashboard(); showAlert('시그널이 삭제되었습니다');
+      });
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       NEWS
+    ═══════════════════════════════════════════════════════════════ */
+    function autoSlug() {
+      const t = document.getElementById('news-title').value;
+      const sl = t.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
+      document.getElementById('news-slug').value = sl;
+      document.getElementById('slugPreview').textContent = sl || 'slug';
+    }
+    document.getElementById('news-slug').addEventListener('input', function () { document.getElementById('slugPreview').textContent = this.value || 'slug'; });
+    function renderNews() {
+      const news = ls('news');
+      document.getElementById('news-count').textContent = news.length;
+      document.getElementById('news-body').innerHTML = [...news].reverse().map(n => `<tr>
+    <td><div class="tp" style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n.title}</div><div style="font-size:11px;color:var(--dim);">/news/${n.slug}</div></td>
+    <td><span class="bdg bdg-blue">${n.cat}</span></td>
+    <td><span class="bdg bdg-gray">${n.lang.toUpperCase()}</span></td>
+    <td><span class="bdg ${n.published ? 'bdg-green' : 'bdg-yellow'}">${n.published ? '게시됨' : '임시저장'}</span></td>
+    <td style="font-size:12px;">${fmtDate(n.date)}</td>
+    <td><div style="display:flex;gap:5px;">
+      <button class="btn btn-out btn-xs" onclick="editNews(${n.id})"><i class="fas fa-edit"></i></button>
+      <button class="btn btn-dan btn-xs" onclick="deleteNews(${n.id})"><i class="fas fa-trash"></i></button>
+    </div></td>
+  </tr>`).join('') || '<tr><td colspan="6" class="empty"><i class="fas fa-newspaper"></i><p>기사가 없습니다</p></td></tr>';
+    }
+    function editNews(id) {
+      const n = ls('news').find(x => x.id === id); if (!n) return;
+      document.getElementById('news-modal-title').textContent = '기사 수정';
+      document.getElementById('news-edit-id').value = id;
+      document.getElementById('news-title').value = n.title;
+      document.getElementById('news-slug').value = n.slug;
+      document.getElementById('slugPreview').textContent = n.slug;
+      document.getElementById('news-cat').value = n.cat;
+      document.getElementById('news-lang').value = n.lang;
+      document.getElementById('news-img').value = n.img || '';
+      document.getElementById('news-excerpt').value = n.excerpt || '';
+      document.getElementById('news-content').value = n.content || '';
+      document.getElementById('news-featured').checked = !!n.featured;
+      document.getElementById('news-pub').checked = !!n.published;
+      openModal('newsModal');
+    }
+    function saveNews() {
+      const title = document.getElementById('news-title').value.trim();
+      const slug = document.getElementById('news-slug').value.trim();
+      const content = document.getElementById('news-content').value.trim();
+      if (!title || !slug || !content) { showAlert('필수 항목을 입력해주세요', 'err'); return; }
+      const news = ls('news');
+      const editId = parseInt(document.getElementById('news-edit-id').value) || 0;
+      const isEdit = editId > 0;
+      const obj = {
+        id: isEdit ? editId : nextId(news), title, slug,
+        cat: document.getElementById('news-cat').value,
+        lang: document.getElementById('news-lang').value,
+        img: document.getElementById('news-img').value,
+        excerpt: document.getElementById('news-excerpt').value,
+        content,
+        featured: document.getElementById('news-featured').checked,
+        published: document.getElementById('news-pub').checked,
+        date: isEdit ? (news.find(n => n.id === editId) || {}).date || new Date().toISOString() : new Date().toISOString()
+      };
+      if (isEdit) { const i = news.findIndex(n => n.id === editId); news[i] = obj; } else { news.push(obj); }
+      lsSave('news', news);
+      // Reset modal
+      document.getElementById('news-modal-title').textContent = '새 기사';
+      document.getElementById('news-edit-id').value = '';
+      closeModal('newsModal');
+      renderNews();
+      renderDashboard();
+      showAlert(isEdit ? '기사가 수정되었습니다!' : '기사가 생성되었습니다!');
+    }
+    function deleteNews(id) {
+      showConfirm('기사 삭제', '이 기사가 영구적으로 삭제됩니다.', () => {
+        lsSave('news', ls('news').filter(n => n.id !== id));
+        renderNews(); renderDashboard(); showAlert('기사가 삭제되었습니다');
+      });
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       FAQ
+    ═══════════════════════════════════════════════════════════════ */
+    function renderFaq() {
+      const faq = ls('faq', []);
+      document.getElementById('faq-count').textContent = faq.length;
+      const sorted = [...faq].sort((a, b) => (a.order != null ? a.order : 999) - (b.order != null ? b.order : 999));
+      document.getElementById('faq-body').innerHTML = sorted.map(f => `<tr>
+    <td>${f.order != null ? f.order : ''}</td>
+    <td><div class="tp" style="max-width:400px;overflow:hidden;text-overflow:ellipsis;">${(f.question || '').replace(/</g, '&lt;')}</div></td>
+    <td><div style="display:flex;gap:5px;">
+      <button class="btn btn-out btn-xs" onclick="editFaq(${f.id})"><i class="fas fa-edit"></i></button>
+      <button class="btn btn-dan btn-xs" onclick="deleteFaq(${f.id})"><i class="fas fa-trash"></i></button>
+    </div></td>
+  </tr>`).join('') || '<tr><td colspan="3" class="empty"><i class="fas fa-question-circle"></i><p>등록된 FAQ가 없습니다. 새 FAQ를 추가해 주세요.</p></td></tr>';
+    }
+    function editFaq(id) {
+      const f = ls('faq', []).find(x => x.id === id); if (!f) return;
+      document.getElementById('faq-modal-title').textContent = 'FAQ 수정';
+      document.getElementById('faq-edit-id').value = id;
+      document.getElementById('faq-question').value = f.question || '';
+      document.getElementById('faq-answer').value = f.answer || '';
+      document.getElementById('faq-order').value = f.order != null ? f.order : 0;
+      openModal('faqModal');
+    }
+    function saveFaq() {
+      const question = document.getElementById('faq-question').value.trim();
+      const answer = document.getElementById('faq-answer').value.trim();
+      if (!question || !answer) { showAlert('질문과 답변을 모두 입력해 주세요.', 'err'); return; }
+      const faq = ls('faq', []);
+      const editId = parseInt(document.getElementById('faq-edit-id').value, 10) || 0;
+      const isEdit = editId > 0;
+      const orderVal = document.getElementById('faq-order').value;
+      const order = orderVal === '' || orderVal === null ? 999 : parseInt(orderVal, 10);
+      const obj = { id: isEdit ? editId : nextId(faq), question, answer, order };
+      if (isEdit) { const i = faq.findIndex(x => x.id === editId); faq[i] = obj; } else { faq.push(obj); }
+      lsSave('faq', faq);
+      document.getElementById('faq-modal-title').textContent = '새 FAQ';
+      document.getElementById('faq-edit-id').value = '';
+      document.getElementById('faq-question').value = '';
+      document.getElementById('faq-answer').value = '';
+      document.getElementById('faq-order').value = '0';
+      closeModal('faqModal');
+      renderFaq();
+      showAlert(isEdit ? 'FAQ가 수정되었습니다!' : 'FAQ가 등록되었습니다!');
+    }
+    function deleteFaq(id) {
+      showConfirm('FAQ 삭제', '이 항목이 삭제됩니다. 계속할까요?', () => {
+        lsSave('faq', ls('faq', []).filter(f => f.id !== id));
+        renderFaq();
+        showAlert('FAQ가 삭제되었습니다');
+      });
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       USERS
+    ═══════════════════════════════════════════════════════════════ */
+    function renderUsers() {
+      const users = ls('users');
+      document.getElementById('users-count').textContent = users.length;
+      document.getElementById('users-body').innerHTML = [...users].reverse().map(u => `<tr>
+    <td><div style="display:flex;align-items:center;gap:8px;"><div class="sb-av">${(u.name || u.email).charAt(0).toUpperCase()}</div><div><div class="tp">${u.name || '—'}</div><div style="font-size:11px;color:var(--dim);">${u.email}</div></div></div></td>
+    <td><span class="bdg ${u.role === 'superadmin' ? 'bdg-red' : u.role === 'admin' ? 'bdg-yellow' : 'bdg-blue'}">${u.role === 'superadmin' ? '최고관리자' : u.role === 'admin' ? '관리자' : '회원'}</span></td>
+    <td><span class="bdg ${u.plan ? 'bdg-purple' : 'bdg-gray'}">${u.plan || '무료'}</span></td>
+    <td><span class="bdg ${u.status ? 'bdg-green' : 'bdg-red'}">${u.status ? '활성' : '차단'}</span></td>
+    <td style="font-size:11px;">${u.lastLogin ? fmtDate(u.lastLogin) : '없음'}</td>
+    <td style="font-size:11px;">${fmtDate(u.joined)}</td>
+    <td><div style="display:flex;gap:5px;">
+      <button class="btn btn-out btn-xs" onclick="editUser(${u.id})"><i class="fas fa-edit"></i></button>
+      ${u.role === 'user' ? `<button class="btn btn-xs ${u.status ? 'btn-dan' : 'btn-suc'}" onclick="toggleUser(${u.id})"><i class="fas fa-${u.status ? 'ban' : 'check'}"></i></button>` : ''}
+      ${u.role !== 'superadmin' ? `<button class="btn btn-dan btn-xs" onclick="deleteUser(${u.id})"><i class="fas fa-trash"></i></button>` : ''}
+    </div></td>
+  </tr>`).join('') || '<tr><td colspan="7" class="empty"><i class="fas fa-users"></i><p>회원이 없습니다</p></td></tr>';
+    }
+    function editUser(id) {
+      const u = ls('users').find(x => x.id === id); if (!u) return;
+      document.getElementById('user-modal-title').textContent = '회원 수정';
+      document.getElementById('user-edit-id').value = id;
+      document.getElementById('user-email').value = u.email;
+      document.getElementById('user-name').value = u.name || '';
+      document.getElementById('user-role').value = u.role;
+      document.getElementById('user-pw').value = '';
+      document.getElementById('user-tg').value = u.tg || '';
+      openModal('userModal');
+    }
+    function saveUser() {
+      const email = document.getElementById('user-email').value.trim();
+      const name = document.getElementById('user-name').value.trim();
+      const pw = document.getElementById('user-pw').value;
+      if (!email) { showAlert('이메일을 입력해주세요', 'err'); return; }
+      const users = ls('users');
+      const editId = parseInt(document.getElementById('user-edit-id').value) || 0;
+      const isEdit = editId > 0;
+      if (!isEdit && !pw) { showAlert('비밀번호를 입력해주세요', 'err'); return; }
+      const obj = {
+        id: isEdit ? editId : nextId(users), email, name,
+        role: document.getElementById('user-role').value,
+        tg: document.getElementById('user-tg').value,
+        plan: '', status: true,
+        lastLogin: null,
+        joined: isEdit ? (users.find(u => u.id === editId) || {}).joined || new Date().toISOString() : new Date().toISOString()
+      };
+      if (isEdit) { const i = users.findIndex(u => u.id === editId); obj.plan = users[i].plan; obj.status = users[i].status; obj.lastLogin = users[i].lastLogin; users[i] = obj; } else { users.push(obj); }
+      lsSave('users', users);
+      closeModal('userModal');
+      // Reset
+      document.getElementById('user-modal-title').textContent = '새 회원';
+      document.getElementById('user-edit-id').value = '';
+      renderUsers(); renderDashboard();
+      showAlert(isEdit ? '회원이 수정되었습니다!' : '회원이 생성되었습니다!');
+    }
+    function toggleUser(id) {
+      const users = ls('users');
+      const u = users.find(x => x.id === id); if (!u) return;
+      u.status = !u.status;
+      lsSave('users', users);
+      renderUsers();
+      showAlert(`회원이 ${u.status ? '활성화' : '차단'}되었습니다`);
+    }
+    function deleteUser(id) {
+      showConfirm('회원 삭제', '이 회원이 영구적으로 삭제됩니다.', () => {
+        lsSave('users', ls('users').filter(u => u.id !== id));
+        renderUsers(); renderDashboard(); showAlert('회원이 삭제되었습니다');
+      });
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       PLANS
+    ═══════════════════════════════════════════════════════════════ */
+    function renderPlans() {
+      const plans = ls('plans');
+      document.getElementById('plans-body').innerHTML = plans.map(p => `<tr>
+    <td class="tp">${p.name}${p.popular ? ` <span class="bdg bdg-yellow" style="font-size:10px;">인기</span>` : ''}</td>
+    <td>${p.days}일</td>
+    <td style="color:var(--green);font-weight:700;">${p.cur} $${p.price}</td>
+    <td>${p.min}-${p.max}/day</td>
+    <td><span class="bdg ${p.popular ? 'bdg-yellow' : 'bdg-gray'}">${p.popular ? '예' : '아니요'}</span></td>
+    <td><span class="bdg ${p.active ? 'bdg-green' : 'bdg-red'}">${p.active ? '활성' : '비활성'}</span></td>
+    <td><div style="display:flex;gap:5px;">
+      <button class="btn btn-out btn-xs" onclick="editPlan(${p.id})"><i class="fas fa-edit"></i></button>
+      <button class="btn btn-dan btn-xs" onclick="deletePlan(${p.id})"><i class="fas fa-trash"></i></button>
+    </div></td>
+  </tr>`).join('') || '<tr><td colspan="7" class="empty"><p>플랜이 없습니다</p></td></tr>';
+    }
+    function editPlan(id) {
+      const p = ls('plans').find(x => x.id === id); if (!p) return;
+      document.getElementById('plan-modal-title').textContent = '플랜 수정';
+      document.getElementById('plan-edit-id').value = id;
+      document.getElementById('plan-name').value = p.name;
+      document.getElementById('plan-slug').value = p.slug;
+      document.getElementById('plan-days').value = p.days;
+      document.getElementById('plan-price').value = p.price;
+      document.getElementById('plan-cur').value = p.cur;
+      document.getElementById('plan-min').value = p.min;
+      document.getElementById('plan-max').value = p.max;
+      document.getElementById('plan-feats').value = (p.feats || []).join('\n');
+      document.getElementById('plan-popular').checked = !!p.popular;
+      document.getElementById('plan-active').checked = !!p.active;
+      openModal('planModal');
+    }
+    function savePlan() {
+      const name = document.getElementById('plan-name').value.trim();
+      const slug = document.getElementById('plan-slug').value.trim();
+      const days = parseInt(document.getElementById('plan-days').value);
+      const price = parseFloat(document.getElementById('plan-price').value);
+      if (!name || !slug || !days || !price) { showAlert('필수 항목을 입력해주세요', 'err'); return; }
+      const plans = ls('plans');
+      const editId = parseInt(document.getElementById('plan-edit-id').value) || 0;
+      const isEdit = editId > 0;
+      const feats = document.getElementById('plan-feats').value.split('\n').map(f => f.trim()).filter(Boolean);
+      const obj = { id: isEdit ? editId : nextId(plans), name, slug, days, price, cur: document.getElementById('plan-cur').value, min: parseInt(document.getElementById('plan-min').value) || 2, max: parseInt(document.getElementById('plan-max').value) || 5, popular: document.getElementById('plan-popular').checked, active: document.getElementById('plan-active').checked, feats };
+      if (isEdit) { const i = plans.findIndex(p => p.id === editId); plans[i] = obj; } else { plans.push(obj); }
+      lsSave('plans', plans);
+      closeModal('planModal');
+      document.getElementById('plan-modal-title').textContent = '새 플랜';
+      document.getElementById('plan-edit-id').value = '';
+      renderPlans();
+      showAlert(isEdit ? '플랜이 수정되었습니다!' : '플랜이 생성되었습니다!');
+    }
+    function deletePlan(id) {
+      showConfirm('플랜 삭제', '이 플랜이 영구적으로 삭제됩니다.', () => {
+        lsSave('plans', ls('plans').filter(p => p.id !== id));
+        renderPlans(); showAlert('플랜이 삭제되었습니다');
+      });
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       TESTIMONIALS
+    ═══════════════════════════════════════════════════════════════ */
+    function renderTestimonials() {
+      const list = ls('testimonials');
+      document.getElementById('testi-count').textContent = list.length;
+      document.getElementById('testi-list').innerHTML = list.map(t => `<div style="padding:13px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:10px;">
+    <div>
+      <div style="font-weight:700;font-size:13px;">${t.name} <span style="color:var(--dim);font-weight:400;">${t.country ? '· ' + t.country : ''}</span> <span style="color:var(--yellow);">${'★'.repeat(t.rating)}</span></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;">"${t.text.substring(0, 100)}${t.text.length > 100 ? '...' : ''}"</div>
+      <div style="font-size:11px;color:var(--dim);margin-top:3px;">${t.plan || ''}</div>
+    </div>
+    <button class="btn btn-dan btn-xs" onclick="deleteTestimonial(${t.id})" style="flex-shrink:0;"><i class="fas fa-trash"></i></button>
+  </div>`).join('') || '<div class="empty"><i class="fas fa-star"></i><p>후기가 없습니다</p></div>';
+    }
+    function addTestimonial() {
+      const name = document.getElementById('tn-name').value.trim();
+      const text = document.getElementById('tn-text').value.trim();
+      if (!name || !text) { showAlert('이름과 후기를 입력해주세요', 'err'); return; }
+      const list = ls('testimonials');
+      list.push({ id: nextId(list), name, country: document.getElementById('tn-country').value, plan: document.getElementById('tn-plan').value, text, rating: parseInt(document.getElementById('tn-rating').value) });
+      lsSave('testimonials', list);
+      document.getElementById('tn-name').value = ''; document.getElementById('tn-country').value = ''; document.getElementById('tn-plan').value = ''; document.getElementById('tn-text').value = '';
+      renderTestimonials(); showAlert('후기가 추가되었습니다!');
+    }
+    function deleteTestimonial(id) {
+      showConfirm('후기 삭제', '이 후기가 영구적으로 삭제됩니다.', () => {
+        lsSave('testimonials', ls('testimonials').filter(t => t.id !== id));
+        renderTestimonials(); showAlert('후기가 삭제되었습니다');
+      });
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       MESSAGES
+    ═══════════════════════════════════════════════════════════════ */
+    function updateMsgBadge() {
+      const unread = ls('messages').filter(m => !m.read).length;
+      const bdg = document.getElementById('msgBadge');
+      if (unread > 0) { bdg.style.display = ''; bdg.textContent = unread; } else { bdg.style.display = 'none'; }
+      document.getElementById('s-msgs').textContent = unread;
+    }
+    function renderMessages() {
+      const msgs = ls('messages');
+      // Mark all read
+      msgs.forEach(m => m.read = true); lsSave('messages', msgs); updateMsgBadge();
+      document.getElementById('msgs-count').textContent = msgs.length;
+      document.getElementById('msgs-list').innerHTML = msgs.length ? [...msgs].reverse().map(m => `<div style="padding:16px 20px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr auto;gap:14px;">
+    <div>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:6px;flex-wrap:wrap;">
+        <span style="font-weight:700;font-size:14px;">${m.name}</span>
+        <span style="color:var(--dim);font-size:13px;">— ${m.email}</span>
+        ${m.subject ? `<span class="bdg bdg-blue" style="font-size:10px;">${m.subject}</span>` : ''}
+      </div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.6;">${m.message}</p>
+      <div style="font-size:11px;color:var(--dim);margin-top:8px;"><i class="fas fa-clock"></i> ${new Date(m.date).toLocaleString()}</div>
+    </div>
+    <button class="btn btn-dan btn-xs" onclick="deleteMessage(${m.id})"><i class="fas fa-trash"></i></button>
+  </div>`).join('') : '<div class="empty" style="padding:60px;"><i class="fas fa-inbox"></i><p>메시지가 없습니다</p></div>';
+    }
+    function deleteMessage(id) {
+      showConfirm('메시지 삭제', '이 메시지가 영구적으로 삭제됩니다.', () => { lsSave('messages', ls('messages').filter(m => m.id !== id)); renderMessages(); showAlert('메시지가 삭제되었습니다'); });
+    }
+    function clearAllMessages() {
+      if (!ls('messages').length) return;
+      showConfirm('전체 메시지 삭제', '모든 메시지가 영구적으로 삭제됩니다.', () => { lsSave('messages', []); renderMessages(); showAlert('모든 메시지가 삭제되었습니다'); });
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       TELEGRAM
+    ═══════════════════════════════════════════════════════════════ */
+    function renderTelegram() {
+      const cfg = ls('settings', {});
+      const freeEl = document.getElementById('tg-telegram_free');
+      const vipEl = document.getElementById('tg-telegram_vip');
+      const handleEl = document.getElementById('tg-display_handle');
+      if (freeEl) freeEl.value = cfg.telegram_free || '';
+      if (vipEl) vipEl.value = cfg.telegram_vip || '';
+      if (handleEl) handleEl.value = cfg.telegram_handle || '@foket';
+    }
+    function saveTelegramSettings() {
+      const cfg = ls('settings', {});
+      const freeEl = document.getElementById('tg-telegram_free');
+      const vipEl = document.getElementById('tg-telegram_vip');
+      const handleEl = document.getElementById('tg-display_handle');
+      if (freeEl) cfg.telegram_free = freeEl.value.trim();
+      if (vipEl) cfg.telegram_vip = vipEl.value.trim();
+      if (handleEl) cfg.telegram_handle = handleEl.value.trim() || '@foket';
+      lsSave('settings', cfg);
+      showAlert('텔레그램 설정이 저장되었습니다.');
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       SETTINGS
+    ═══════════════════════════════════════════════════════════════ */
+    function loadSettings() {
+      const cfg = ls('settings', {});
+      const map = {
+        site_name: 'cfg-site_name', site_tagline: 'cfg-site_tagline', meta_description: 'cfg-meta_description',
+        telegram_free: 'cfg-telegram_free', telegram_vip: 'cfg-telegram_vip',
+        contact_email: 'cfg-contact_email', contact_phone: 'cfg-contact_phone', contact_address: 'cfg-contact_address',
+        stat_members: 'cfg-stat_members', stat_rate: 'cfg-stat_rate', stat_signals: 'cfg-stat_signals', stat_years: 'cfg-stat_years',
+        admin_email: 'cfg-admin_email', admin_name: 'cfg-admin_name'
+      };
+      for (const [k, id] of Object.entries(map)) { const el = document.getElementById(id); if (el) el.value = cfg[k] || ''; }
+    }
+    function saveSettings() {
+      const cfg = ls('settings', {});
+      const map = {
+        site_name: 'cfg-site_name', site_tagline: 'cfg-site_tagline', meta_description: 'cfg-meta_description',
+        telegram_free: 'cfg-telegram_free', telegram_vip: 'cfg-telegram_vip',
+        contact_email: 'cfg-contact_email', contact_phone: 'cfg-contact_phone', contact_address: 'cfg-contact_address',
+        stat_members: 'cfg-stat_members', stat_rate: 'cfg-stat_rate', stat_signals: 'cfg-stat_signals', stat_years: 'cfg-stat_years',
+        admin_email: 'cfg-admin_email', admin_name: 'cfg-admin_name'
+      };
+      for (const [k, id] of Object.entries(map)) {
+        const el = document.getElementById(id);
+        if (el) cfg[k] = el.value;
+      }
+      // New password
+      const newPw = document.getElementById('cfg-admin_pw').value;
+      if (newPw) lsSave('adminPw', newPw);
+      lsSave('settings', cfg);
+      // Update sidebar name
+      document.getElementById('sbName').textContent = cfg.admin_name || '관리자';
+      document.getElementById('sbAv').textContent = (cfg.admin_name || '관').charAt(0);
+      showAlert('설정이 저장되었습니다!');
+    }
+    function resetSettings() {
+      showConfirm('설정 초기화', '모든 설정이 기본값으로 초기화됩니다.', () => {
+        lsSave('settings', { site_name: 'FoketCrypto Signals', site_tagline: '전문 암호화폐 트레이딩 시그널', meta_description: '82% 성공률의 전문 암호화폐 시그널을 받아보세요.', telegram_free: 'https://t.me/foket_free', telegram_vip: 'https://t.me/foket_vip', contact_email: 'support@foketcrypto.com', contact_phone: '+82-00-0000-0000', contact_address: '서울특별시 강남구', stat_members: 50000, stat_rate: 82, stat_signals: 15000, stat_years: 10, admin_email: 'admin@foketcrypto.com', admin_name: '관리자' });
+        loadSettings(); showAlert('설정이 기본값으로 초기화되었습니다');
+      });
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       이용약관
+    ═══════════════════════════════════════════════════════════════ */
+    function loadTerms() {
+      const text = ls('terms', '');
+      const el = document.getElementById('terms-text');
+      if (el) el.value = text;
+    }
+    function saveTerms() {
+      const el = document.getElementById('terms-text');
+      const text = el ? el.value : '';
+      lsSave('terms', text);
+      showAlert('이용약관이 저장되었습니다. terms.html에서 확인할 수 있습니다.');
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       개인정보처리방침
+    ═══════════════════════════════════════════════════════════════ */
+    function loadPrivacy() {
+      const text = ls('privacy', '');
+      const el = document.getElementById('privacy-text');
+      if (el) el.value = text;
+    }
+    function savePrivacy() {
+      const el = document.getElementById('privacy-text');
+      const text = el ? el.value : '';
+      lsSave('privacy', text);
+      showAlert('개인정보처리방침이 저장되었습니다. privacy.html에서 확인할 수 있습니다.');
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       MARKETS – 종목 카테고리 관리
+    ═══════════════════════════════════════════════════════════════ */
+    const MKT_DEFAULT = [
+      {
+        id: 1, nameKo: '암호화폐', nameEn: 'Cryptocurrency', icon: 'fab fa-bitcoin', clr: '#58a6ff',
+        instruments: [
+          { id: 1, nameKo: '비트코인', nameEn: 'Bitcoin', sym: 'BTC', binSym: 'BTCUSDT', exch: 'Binance', active: true, startDate: '2023-11-21', monthlyReturn: '', maxDailyLoss: '' },
+          { id: 2, nameKo: '이더리움', nameEn: 'Ethereum', sym: 'ETH', binSym: 'ETHUSDT', exch: 'Binance', active: true, startDate: '2023-12-11', monthlyReturn: '', maxDailyLoss: '' },
+          { id: 3, nameKo: '솔라나', nameEn: 'Solana', sym: 'SOL', binSym: 'SOLUSDT', exch: 'Binance', active: true, startDate: '2024-01-22', monthlyReturn: '', maxDailyLoss: '' },
+          { id: 4, nameKo: '리플', nameEn: 'Ripple', sym: 'XRP', binSym: 'XRPUSDT', exch: 'Binance', active: true, startDate: '2024-04-03', monthlyReturn: '', maxDailyLoss: '' },
+        ]
+      },
+      {
+        id: 2, nameKo: '주가지수선물', nameEn: 'Index Futures', icon: 'fas fa-chart-line', clr: '#3fb950',
+        instruments: [
+          { id: 1, nameKo: 'S&P 선물', nameEn: 'S&P 500 Futures', sym: 'ES', yahooSym: 'ES=F', exch: 'CME', active: true, startDate: '', monthlyReturn: '', maxDailyLoss: '' },
+          { id: 2, nameKo: '나스닥 선물', nameEn: 'Nasdaq 100 Futures', sym: 'NQ', yahooSym: 'NQ=F', exch: 'CME', active: true, startDate: '', monthlyReturn: '', maxDailyLoss: '' },
+          { id: 3, nameKo: '니케이달러선물', nameEn: 'Nikkei Dollar Futures', sym: 'NKD', yahooSym: 'NKD=F', exch: 'CME', active: true, startDate: '', monthlyReturn: '', maxDailyLoss: '' },
+        ]
+      },
+      {
+        id: 3, nameKo: '귀금속', nameEn: 'Metals', icon: 'fas fa-gem', clr: '#d29922',
+        instruments: [
+          { id: 1, nameKo: '골드', nameEn: 'Gold', sym: 'GC', yahooSym: 'GC=F', exch: 'COMEX', active: true, startDate: '', monthlyReturn: '', maxDailyLoss: '' },
+          { id: 2, nameKo: '실버', nameEn: 'Silver', sym: 'SI', yahooSym: 'SI=F', exch: 'COMEX', active: true, startDate: '', monthlyReturn: '', maxDailyLoss: '' },
+        ]
+      },
+      {
+        id: 4, nameKo: '에너지', nameEn: 'Energy', icon: 'fas fa-fire', clr: '#f0883e',
+        instruments: [
+          { id: 1, nameKo: '원유', nameEn: 'Crude Oil', sym: 'CL', yahooSym: 'CL=F', exch: 'NYMEX', active: true, startDate: '', monthlyReturn: '', maxDailyLoss: '' },
+        ]
+      },
+      {
+        id: 5, nameKo: '농산물', nameEn: 'Agriculture', icon: 'fas fa-leaf', clr: '#56d364',
+        instruments: [
+          { id: 1, nameKo: '옥수수', nameEn: 'Corn', sym: 'ZC', yahooSym: 'ZC=F', exch: 'CBOT', active: true, startDate: '', monthlyReturn: '', maxDailyLoss: '' },
+          { id: 2, nameKo: '밀', nameEn: 'Wheat', sym: 'ZW', yahooSym: 'ZW=F', exch: 'CBOT', active: true, startDate: '', monthlyReturn: '', maxDailyLoss: '' },
+          { id: 3, nameKo: '대두', nameEn: 'Soybeans', sym: 'ZS', yahooSym: 'ZS=F', exch: 'CBOT', active: true, startDate: '', monthlyReturn: '', maxDailyLoss: '' },
+        ]
+      },
+      {
+        id: 6, nameKo: '미국채', nameEn: 'U.S. Treasury', icon: 'fas fa-landmark', clr: '#bc8cff',
+        instruments: [
+          { id: 1, nameKo: '울트라 T본드', nameEn: 'Ultra T-Bond', sym: 'UB', yahooSym: 'UB=F', exch: 'CBOT', active: true, startDate: '', monthlyReturn: '', maxDailyLoss: '' },
+          { id: 2, nameKo: '30년물 국채', nameEn: '30 Year Bond', sym: 'ZB', yahooSym: 'ZB=F', exch: 'CBOT', active: true, startDate: '', monthlyReturn: '', maxDailyLoss: '' },
+        ]
+      },
+      {
+        id: 7, nameKo: '외환', nameEn: 'Forex', icon: 'fas fa-dollar-sign', clr: '#79c0ff',
+        instruments: [
+          { id: 1, nameKo: '유로 FX', nameEn: 'Euro FX', sym: '6E', yahooSym: '6E=F', exch: 'CME', active: true, startDate: '', monthlyReturn: '', maxDailyLoss: '' },
+        ]
+      },
+      {
+        id: 8, nameKo: '바이낸스 암호화폐', nameEn: 'Binance Crypto', icon: 'fab fa-btc', clr: '#f0b90b',
+        instruments: [
+          { id: 1, nameKo: '비트코인', nameEn: 'Bitcoin', sym: 'BTC', binSym: 'BTCUSDT', exch: 'Binance', active: true, startDate: '', monthlyReturn: '', maxDailyLoss: '' },
+          { id: 2, nameKo: '이더리움', nameEn: 'Ethereum', sym: 'ETH', binSym: 'ETHUSDT', exch: 'Binance', active: true, startDate: '', monthlyReturn: '', maxDailyLoss: '' },
+          { id: 3, nameKo: '솔라나', nameEn: 'Solana', sym: 'SOL', binSym: 'SOLUSDT', exch: 'Binance', active: true, startDate: '', monthlyReturn: '', maxDailyLoss: '' },
+          { id: 4, nameKo: '리플', nameEn: 'Ripple', sym: 'XRP', binSym: 'XRPUSDT', exch: 'Binance', active: true, startDate: '', monthlyReturn: '', maxDailyLoss: '' },
+        ]
+      },
+    ];
+
+    function seedMarkets() {
+      if (ls('mkts-seeded-v9', false)) return;
+      lsSave('markets', JSON.parse(JSON.stringify(MKT_DEFAULT)));
+      lsSave('mkts-seeded-v9', true);
+    }
+
+    let selCatId = 1;
+
+    /* ── 거래 시작일로부터 오늘까지 일수 계산 (매 렌더마다 자동 갱신) ── */
+    function calcTradingDays(startDateStr) {
+      const start = new Date(startDateStr + 'T00:00:00');
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const diff = Math.floor((today - start) / 86400000);
+      return diff >= 0 ? diff : 0;
+    }
+
+    /* ── 날짜 포맷 ── */
+    function fmtDateKo(dateStr) {
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.getFullYear() + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + String(d.getDate()).padStart(2, '0');
+    }
+
+    /* ── 암호화폐 인라인 필드 저장 ── */
+    function normalizeStartDate(value) {
+      if (value == null || value === '') return '';
+      const s = String(value).trim();
+      if (!s) return '';
+      const parts = s.split('-');
+      if (parts.length !== 3) return null;
+      const y = parts[0], m = parts[1], d = parts[2];
+      if (m.length !== 2 || d.length !== 2) return null;
+      const normalized = y + '-' + m + '-' + d;
+      const dt = new Date(normalized + 'T00:00:00');
+      if (isNaN(dt.getTime())) return null;
+      return normalized;
+    }
+    function saveCryptoField(catId, instId, field, value) {
+      if (field === 'startDate') {
+        const normalized = normalizeStartDate(value);
+        if (normalized === null) {
+          showAlert('거래 시작일은 연-월-일 형식으로, 월과 일은 반드시 두 자리 숫자로 입력해 주세요. (예: 2024-01-05)', 'err');
+          renderMarkets();
+          return;
+        }
+        value = normalized;
+      }
+      const cats = ls('markets', []);
+      const cat = cats.find(c => c.id === catId);
+      if (!cat) return;
+      const inst = (cat.instruments || []).find(i => i.id === instId);
+      if (!inst) return;
+      inst[field] = value;
+      lsSave('markets', cats);
+    }
+
+    function publishMarkets() {
+      const raw = localStorage.getItem('fk_markets');
+      if (!raw) { showAlert('저장할 종목 데이터가 없습니다.', 'err'); return; }
+      try {
+        JSON.parse(raw);
+      } catch (e) { showAlert('데이터 형식이 올바르지 않습니다.', 'err'); return; }
+      lsSave('markets_published', raw);
+      showAlert('저장되었습니다. 메인 페이지(index.html)에 반영됩니다.');
+    }
+
+    function renderMarkets() {
+      seedMarkets();
+      const cats = ls('markets', []);
+
+      /* ── 좌측 카테고리 패널 ── */
+      document.getElementById('mkt-cat-list').innerHTML = cats.map(c => {
+        const total = (c.instruments || []).length;
+        const active = (c.instruments || []).filter(i => i.active).length;
+        return `<button class="mkt-cat-btn${selCatId === c.id ? ' active' : ''}" onclick="selMktCat(${c.id})">
+      <span class="mkt-ic" style="background:${c.clr}22;color:${c.clr};"><i class="${c.icon}"></i></span>
+      <div><div class="mkt-nm">${c.nameKo}</div><div class="mkt-en">${c.nameEn}</div></div>
+      <span class="mkt-cnt">${active}/${total}</span>
+    </button>`;
+      }).join('');
+
+      /* ── 우측 종목 패널 ── */
+      const cat = cats.find(c => c.id === selCatId);
+      if (!cat) {
+        document.getElementById('mkt-inst-body').innerHTML = '<tr><td colspan="7" class="empty"><p>카테고리를 선택하세요</p></td></tr>';
+        const saveBtn = document.getElementById('mkt-save-btn');
+        if (saveBtn) saveBtn.style.display = 'none';
+        return;
+      }
+      document.getElementById('mkt-cat-title').textContent = cat.nameKo;
+      document.getElementById('mkt-cat-en').textContent = cat.nameEn;
+      const saveBtn = document.getElementById('mkt-save-btn');
+      if (saveBtn) saveBtn.style.display = 'inline-flex';
+
+      const insts = cat.instruments || [];
+
+      /* ══ 암호화폐 카테고리 – 확장 테이블 (id:1 암호화폐, id:8 바이낸스 암호화폐) ══ */
+      if (cat.id === 1 || cat.id === 8) {
+        document.getElementById('mkt-inst-head').innerHTML = `<tr>
+      <th>종목명</th><th>심볼</th>
+      <th>증거금 대비 월평균 수익률 <span style="font-size:9px;color:var(--dim);font-weight:400;">(%)</span></th>
+      <th>하루 최대 손실 <span style="font-size:9px;color:var(--dim);font-weight:400;">(%)</span></th>
+      <th>거래 시작일</th>
+      <th>일평균 왕복 거래횟수</th>
+      <th>거래일수</th>
+    </tr>`;
+        document.getElementById('mkt-inst-body').innerHTML = insts.map(inst => {
+          const days = inst.startDate ? calcTradingDays(inst.startDate) : '—';
+          const binancePrefix = cat.id === 8 ? '<span class="binance-mark" title="Binance">B</span>' : '';
+          return `<tr>
+        <td class="tp">${binancePrefix}${inst.nameKo}<div style="font-size:11px;color:var(--dim);font-weight:400;">${inst.nameEn}</div></td>
+        <td><span class="bdg bdg-blue" style="font-size:12px;">${inst.sym}</span></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <input type="number" class="fc" step="0.01" min="-100" max="1000"
+              style="width:80px;padding:5px 8px;font-size:12px;text-align:right;"
+              value="${inst.monthlyReturn || ''}" placeholder="0.00"
+              onchange="saveCryptoField(${cat.id},${inst.id},'monthlyReturn',this.value)"
+              title="증거금 대비 월평균 수익률 직접 입력">
+            <span style="font-size:11px;color:var(--dim);">%</span>
+          </div>
+        </td>
+        <td>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <input type="number" class="fc" step="0.01" min="-100" max="0"
+              style="width:80px;padding:5px 8px;font-size:12px;text-align:right;"
+              value="${inst.maxDailyLoss || ''}" placeholder="0.00"
+              onchange="saveCryptoField(${cat.id},${inst.id},'maxDailyLoss',this.value)"
+              title="하루 최대 손실 직접 입력">
+            <span style="font-size:11px;color:var(--dim);">%</span>
+          </div>
+        </td>
+        <td>
+          <input type="text" class="fc" style="width:140px;padding:5px 8px;font-size:12px;"
+            value="${inst.startDate || ''}"
+            placeholder="YYYY-MM-DD"
+            onblur="saveCryptoField(${cat.id},${inst.id},'startDate',this.value);renderMarkets();"
+            title="거래 시작일 직접 입력 (월·일은 두 자리, 예: 2024-01-24)">
+        </td>
+        <td>
+          <input type="number" class="fc" step="0.1" min="0" max="100"
+            style="width:70px;padding:5px 8px;font-size:12px;text-align:right;"
+            value="${inst.dailyRoundTrips != null && inst.dailyRoundTrips !== '' ? inst.dailyRoundTrips : ''}" placeholder="0"
+            onchange="saveCryptoField(${cat.id},${inst.id},'dailyRoundTrips',this.value)"
+            title="일평균 왕복 거래횟수">
+        </td>
+        <td style="text-align:center;">
+          <div style="font-size:22px;font-weight:800;color:var(--blue);line-height:1;">${days}</div>
+          <div style="font-size:10px;color:var(--dim);margin-top:2px;">일</div>
+        </td>
+      </tr>`;
+        }).join('') || `<tr><td colspan="7" class="empty"><i class="fas fa-inbox"></i><p>종목이 없습니다</p></td></tr>`;
+
+      } else {
+        /* ══ 주가지수선물·귀금속·에너지·농산물·미국채·외환 – Yahoo Finance 실시간 확장 테이블 ══ */
+        document.getElementById('mkt-inst-head').innerHTML = `<tr>
+      <th>종목명</th><th>심볼</th>
+      <th>증거금 대비 월평균 수익률 <span style="font-size:9px;color:var(--dim);font-weight:400;">(%)</span></th>
+      <th>하루 최대 손실 <span style="font-size:9px;color:var(--dim);font-weight:400;">(%)</span></th>
+      <th>거래 시작일</th>
+      <th>일평균 왕복 거래횟수</th>
+      <th>거래일수</th>
+    </tr>`;
+        document.getElementById('mkt-inst-body').innerHTML = insts.map(inst => {
+          const days = inst.startDate ? calcTradingDays(inst.startDate) : '—';
+          return `<tr>
+        <td class="tp">${inst.nameKo}<div style="font-size:11px;color:var(--dim);font-weight:400;">${inst.nameEn}</div></td>
+        <td><span class="bdg bdg-blue" style="font-size:12px;">${inst.sym}</span></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <input type="number" class="fc" step="0.01" min="-100" max="1000"
+              style="width:80px;padding:5px 8px;font-size:12px;text-align:right;"
+              value="${inst.monthlyReturn || ''}" placeholder="0.00"
+              onchange="saveCryptoField(${cat.id},${inst.id},'monthlyReturn',this.value)"
+              title="증거금 대비 월평균 수익률 직접 입력">
+            <span style="font-size:11px;color:var(--dim);">%</span>
+          </div>
+        </td>
+        <td>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <input type="number" class="fc" step="0.01" min="-100" max="0"
+              style="width:80px;padding:5px 8px;font-size:12px;text-align:right;"
+              value="${inst.maxDailyLoss || ''}" placeholder="0.00"
+              onchange="saveCryptoField(${cat.id},${inst.id},'maxDailyLoss',this.value)"
+              title="하루 최대 손실 직접 입력">
+            <span style="font-size:11px;color:var(--dim);">%</span>
+          </div>
+        </td>
+        <td>
+          <input type="text" class="fc" style="width:140px;padding:5px 8px;font-size:12px;"
+            value="${inst.startDate || ''}"
+            placeholder="YYYY-MM-DD"
+            onblur="saveCryptoField(${cat.id},${inst.id},'startDate',this.value);renderMarkets();"
+            title="거래 시작일 직접 입력 (월·일은 두 자리, 예: 2024-01-24)">
+        </td>
+        <td>
+          <input type="number" class="fc" step="0.1" min="0" max="100"
+            style="width:70px;padding:5px 8px;font-size:12px;text-align:right;"
+            value="${inst.dailyRoundTrips != null && inst.dailyRoundTrips !== '' ? inst.dailyRoundTrips : ''}" placeholder="0"
+            onchange="saveCryptoField(${cat.id},${inst.id},'dailyRoundTrips',this.value)"
+            title="일평균 왕복 거래횟수">
+        </td>
+        <td style="text-align:center;">
+          <div style="font-size:22px;font-weight:800;color:var(--blue);line-height:1;">${days}</div>
+          <div style="font-size:10px;color:var(--dim);margin-top:2px;">일</div>
+        </td>
+      </tr>`;
+        }).join('') || `<tr><td colspan="7" class="empty"><i class="fas fa-inbox"></i><p>종목이 없습니다</p></td></tr>`;
+      }
+    }
+
+    function selMktCat(id) {
+      selCatId = id;
+      renderMarkets();
+    }
+
+    function openInstModal(catId, instId) {
+      const cats = ls('markets', []);
+      /* 카테고리 셀렉트 채우기 */
+      document.getElementById('inst-cat-sel').innerHTML = cats.map(c => `<option value="${c.id}">${c.nameKo} (${c.nameEn})</option>`).join('');
+      document.getElementById('inst-cat-sel').value = catId || selCatId;
+
+      if (instId) {
+        /* 수정 모드 */
+        const cat = cats.find(c => c.id === catId);
+        const inst = (cat?.instruments || []).find(i => i.id === instId);
+        if (!inst) return;
+        document.getElementById('inst-modal-title').textContent = '종목 수정';
+        document.getElementById('inst-edit-cat').value = catId;
+        document.getElementById('inst-edit-id').value = instId;
+        document.getElementById('inst-name-ko').value = inst.nameKo;
+        document.getElementById('inst-name-en').value = inst.nameEn;
+        document.getElementById('inst-sym').value = inst.sym;
+        document.getElementById('inst-exch').value = inst.exch || '';
+        document.getElementById('inst-active').checked = !!inst.active;
+      } else {
+        /* 추가 모드 */
+        document.getElementById('inst-modal-title').textContent = '종목 추가';
+        document.getElementById('inst-edit-cat').value = '';
+        document.getElementById('inst-edit-id').value = '';
+        document.getElementById('inst-name-ko').value = '';
+        document.getElementById('inst-name-en').value = '';
+        document.getElementById('inst-sym').value = '';
+        document.getElementById('inst-exch').value = '';
+        document.getElementById('inst-active').checked = true;
+      }
+      openModal('instModal');
+    }
+
+    function saveInst() {
+      const nameKo = document.getElementById('inst-name-ko').value.trim();
+      const nameEn = document.getElementById('inst-name-en').value.trim();
+      const sym = document.getElementById('inst-sym').value.trim().toUpperCase();
+      if (!nameKo || !nameEn || !sym) { showAlert('필수 항목을 입력해주세요', 'err'); return; }
+
+      const cats = ls('markets', []);
+      const targetCatId = parseInt(document.getElementById('inst-cat-sel').value);
+      const editCatId = parseInt(document.getElementById('inst-edit-cat').value) || 0;
+      const editInstId = parseInt(document.getElementById('inst-edit-id').value) || 0;
+      const isEdit = editInstId > 0;
+      const exch = document.getElementById('inst-exch').value.trim();
+      const active = document.getElementById('inst-active').checked;
+
+      if (isEdit) {
+        /* 기존 카테고리에서 제거 */
+        const oldCat = cats.find(c => c.id === editCatId);
+        if (oldCat) oldCat.instruments = (oldCat.instruments || []).filter(i => i.id !== editInstId);
+      }
+      /* 대상 카테고리에 추가/수정 */
+      const newCat = cats.find(c => c.id === targetCatId);
+      if (!newCat) { showAlert('카테고리를 찾을 수 없습니다', 'err'); return; }
+      if (!newCat.instruments) newCat.instruments = [];
+      const newId = isEdit ? editInstId : nextId(newCat.instruments);
+      newCat.instruments.push({ id: newId, nameKo, nameEn, sym, exch, active });
+
+      lsSave('markets', cats);
+      selCatId = targetCatId;
+      closeModal('instModal');
+      renderMarkets();
+      showAlert(isEdit ? '종목이 수정되었습니다!' : '종목이 추가되었습니다!');
+    }
+
+    function toggleInst(catId, instId) {
+      const cats = ls('markets', []);
+      const cat = cats.find(c => c.id === catId);
+      if (!cat) return;
+      const inst = (cat.instruments || []).find(i => i.id === instId);
+      if (!inst) return;
+      inst.active = !inst.active;
+      lsSave('markets', cats);
+      renderMarkets();
+      showAlert(`${inst.nameKo} ${inst.active ? '활성화' : '비활성화'}되었습니다`);
+    }
+
+    function deleteInst(catId, instId) {
+      const cats = ls('markets', []);
+      const cat = cats.find(c => c.id === catId);
+      if (!cat) return;
+      const inst = (cat.instruments || []).find(i => i.id === instId);
+      if (!inst) return;
+      showConfirm(`${inst.nameKo} 삭제`, `"${inst.nameKo}" 종목이 영구적으로 삭제됩니다.`, () => {
+        cat.instruments = (cat.instruments || []).filter(i => i.id !== instId);
+        lsSave('markets', cats);
+        renderMarkets();
+        showAlert('종목이 삭제되었습니다');
+      });
+    }
+
+    /* ── Close sidebar on backdrop click (mobile) ── */
+    document.addEventListener('click', function (e) {
+      const sb = document.getElementById('sidebar');
+      const tog = document.querySelector('.mob-toggle');
+      if (sb.classList.contains('open') && !sb.contains(e.target) && !tog.contains(e.target)) sb.classList.remove('open');
+    });
+
+    /* ════════════════════════════════════════════════════════════
+       새로고침 후 로그인 세션 자동 복원
+    ═══════════════════════════════════════════════════════════════ */
+    (function restoreSession() {
+      const sess = ls('admin_sess', null);
+      if (!sess || !sess.email) return;
+      /* 설정에서 현재 관리자 이름 최신화 */
+      const cfg = ls('settings', {});
+      const name = cfg.admin_name || sess.name || '관리자';
+      showAdminApp(name);
+    })();
+  </script>
+</body>
+
+</html>

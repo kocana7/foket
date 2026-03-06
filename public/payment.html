@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>결제 - FoketCrypto Signals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-primary: #0a0e1a;
+      --bg-secondary: #0f1629;
+      --bg-card: #131c31;
+      --border-color: #1e2d4a;
+      --text-primary: #e8edf5;
+      --text-secondary: #8fa3c0;
+      --text-muted: #566a85;
+      --accent-blue: #00b4d8;
+      --accent-blue-dark: #0077a8;
+      --accent-green: #00d084;
+      --gradient-primary: linear-gradient(135deg,#00b4d8 0%,#0077a8 100%);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-xl: 24px;
+      --transition: all 0.3s ease;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-height:100vh}
+    a{color:var(--accent-blue);text-decoration:none;transition:var(--transition)}
+    a:hover{color:#48cae4}
+
+    .navbar{background:rgba(10,14,26,0.95);border-bottom:1px solid var(--border-color)}
+    .navbar-inner{max-width:1280px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:70px}
+    .navbar-brand{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:800;color:var(--text-primary)}
+    .navbar-brand span{color:var(--accent-blue)}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;border:none;cursor:pointer;transition:var(--transition);text-decoration:none}
+    .btn-primary{background:var(--gradient-primary);color:white}
+    .btn-primary:hover{opacity:.9;transform:translateY(-2px);color:white}
+    .btn-outline{background:transparent;color:var(--accent-blue);border:2px solid var(--accent-blue)}
+    .btn-outline:hover{background:var(--accent-blue);color:white}
+
+    .pay-wrap{max-width:560px;margin:0 auto;padding:48px 24px 80px}
+    .pay-title{font-size:28px;font-weight:800;margin-bottom:8px}
+    .pay-sub{font-size:14px;color:var(--text-secondary);margin-bottom:32px}
+    .pay-card{background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-xl);padding:32px;margin-bottom:32px}
+    .pay-summary-title{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:16px}
+    .pay-plan{font-size:22px;font-weight:700;margin-bottom:8px}
+    .pay-meta{font-size:14px;color:var(--text-secondary);margin-bottom:20px}
+    .pay-total{display:flex;justify-content:space-between;align-items:center;padding-top:20px;border-top:1px solid var(--border-color);font-size:18px;font-weight:700}
+    .pay-total .amt{font-size:28px;background:var(--gradient-primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+    .form-group{margin-bottom:20px}
+    .form-group label{display:block;font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:8px}
+    .form-group input{width:100%;padding:14px 16px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:var(--radius-sm);font-size:15px;color:var(--text-primary);transition:var(--transition)}
+    .form-group input:focus{outline:none;border-color:var(--accent-blue);box-shadow:0 0 0 3px rgba(0,180,216,.15)}
+    .form-group input::placeholder{color:var(--text-muted)}
+    .pay-btn{width:100%;padding:16px;border-radius:var(--radius-md);font-size:16px;font-weight:700;background:var(--gradient-primary);color:white;border:none;cursor:pointer;transition:var(--transition);margin-top:8px}
+    .pay-btn:hover{opacity:.9;transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,180,216,.3)}
+    .back-link{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--text-secondary);margin-bottom:24px;transition:var(--transition)}
+    .back-link:hover{color:var(--accent-blue)}
+    .pay-error{background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.3);color:#ff4757;padding:12px 16px;border-radius:var(--radius-sm);font-size:14px;margin-bottom:20px;display:none}
+    .pay-error.show{display:block}
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-brand">
+        <span style="width:32px;height:32px;background:var(--gradient-primary);border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;">F</span>
+        Foket<span>Signal</span>
+      </a>
+      <a href="index.html#pricing" class="btn btn-outline"><i class="fas fa-arrow-left"></i> 요금제로 돌아가기</a>
+    </div>
+  </nav>
+
+  <div class="pay-wrap">
+    <a href="index.html#pricing" class="back-link"><i class="fas fa-chevron-left"></i> 요금제로 돌아가기</a>
+    <h1 class="pay-title">결제</h1>
+    <p class="pay-sub">선택하신 플랜으로 결제를 진행합니다.</p>
+
+    <div id="payError" class="pay-error"></div>
+
+    <div class="pay-card">
+      <div class="pay-summary-title">주문 요약</div>
+      <div class="pay-plan" id="payPlanName">—</div>
+      <div class="pay-meta" id="payPlanMeta">이용 기간: 1개월</div>
+      <div class="pay-total">
+        <span>총 결제 금액</span>
+        <span class="amt" id="payAmount">$—</span>
+      </div>
+    </div>
+
+    <form id="payForm">
+      <div class="form-group">
+        <label for="email">이메일</label>
+        <input type="email" id="email" name="email" placeholder="your@email.com" required>
+      </div>
+      <div class="form-group">
+        <label for="name">이름</label>
+        <input type="text" id="name" name="name" placeholder="홍길동" required>
+      </div>
+      <div class="form-group">
+        <label for="telegram">텔레그램 ID (선택)</label>
+        <input type="text" id="telegram" name="telegram" placeholder="@username">
+      </div>
+      <button type="submit" class="pay-btn"><i class="fas fa-lock"></i> 결제하기</button>
+    </form>
+  </div>
+
+  <script>
+    const PLANS = {
+      bronze: { name: 'Bronze Class', price: 30 },
+      silver: { name: 'Silver-Class', price: 45 },
+      gold:   { name: 'Gold Class',  price: 60 },
+      vip:    { name: 'VIP Class',   price: 80 }
+    };
+
+    const params = new URLSearchParams(location.search);
+    const planId = (params.get('plan') || '').toLowerCase();
+    const plan = PLANS[planId];
+
+    const payPlanName = document.getElementById('payPlanName');
+    const payPlanMeta = document.getElementById('payPlanMeta');
+    const payAmount = document.getElementById('payAmount');
+    const payError = document.getElementById('payError');
+    const payForm = document.getElementById('payForm');
+
+    if (plan) {
+      payPlanName.textContent = plan.name;
+      payAmount.textContent = '$' + plan.price;
+      payPlanMeta.textContent = '이용 기간: 1개월';
+      document.title = plan.name + ' 결제 - FoketCrypto Signals';
+    } else {
+      payPlanName.textContent = '플랜을 선택해 주세요';
+      payAmount.textContent = '$—';
+      payError.textContent = '유효한 플랜이 없습니다. 요금제에서 플랜을 선택한 뒤 다시 시도해 주세요.';
+      payError.classList.add('show');
+    }
+
+    payForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (!plan) return;
+      const email = document.getElementById('email').value.trim();
+      const name = document.getElementById('name').value.trim();
+      const telegram = document.getElementById('telegram').value.trim();
+      // 실제 결제 연동 시 여기서 PG사 API 호출
+      alert('결제 요청이 접수되었습니다.\n\n플랜: ' + plan.name + '\n금액: $' + plan.price + '/월\n이메일: ' + email + '\n이름: ' + name + (telegram ? '\n텔레그램: ' + telegram : '') + '\n\n실제 결제는 PG 연동 후 진행됩니다.');
+    });
+  </script>
+</body>
+</html>

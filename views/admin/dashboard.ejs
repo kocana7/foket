@@ -1,0 +1,133 @@
+<%- include('partials/layout') %>
+
+<!-- Stats Overview -->
+<div class="stats-overview">
+  <div class="stat-card">
+    <div class="stat-card-label">Total Users</div>
+    <div class="stat-card-value blue"><%= stats.totalUsers || 0 %></div>
+    <div class="stat-card-sub">Registered members</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-label">Total Signals</div>
+    <div class="stat-card-value green"><%= stats.totalSignals || 0 %></div>
+    <div class="stat-card-sub">All time signals</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-label">Active Signals</div>
+    <div class="stat-card-value yellow"><%= stats.activeSignals || 0 %></div>
+    <div class="stat-card-sub">Currently open</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-label">News Articles</div>
+    <div class="stat-card-value purple"><%= stats.totalNews || 0 %></div>
+    <div class="stat-card-sub">Published articles</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-label">Unread Messages</div>
+    <div class="stat-card-value red"><%= stats.unreadMessages || 0 %></div>
+    <div class="stat-card-sub">Contact requests</div>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div style="display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;">
+  <a href="/admin/signals/new" class="topbar-btn primary"><i class="fas fa-plus"></i> New Signal</a>
+  <a href="/admin/news/new" class="topbar-btn"><i class="fas fa-plus"></i> New Article</a>
+  <a href="/admin/messages" class="topbar-btn"><i class="fas fa-envelope"></i> View Messages</a>
+  <a href="/admin/settings" class="topbar-btn"><i class="fas fa-cog"></i> Settings</a>
+</div>
+
+<!-- Recent Data -->
+<div class="dashboard-grid">
+  <!-- Recent Signals -->
+  <div class="admin-card">
+    <div class="admin-card-header">
+      <div class="admin-card-title">Recent Signals</div>
+      <a href="/admin/signals" class="topbar-btn" style="font-size:11px;padding:4px 10px;">View All</a>
+    </div>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Coin</th>
+          <th>Type</th>
+          <th>Entry</th>
+          <th>Status</th>
+          <th>Result</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if(recentSignals && recentSignals.length > 0) { %>
+          <% recentSignals.forEach(sig => { %>
+            <tr>
+              <td class="text-primary"><strong><%= sig.pair %></strong></td>
+              <td>
+                <span class="badge <%= sig.signal_type === 'LONG' ? 'badge-green' : 'badge-red' %>">
+                  <%= sig.signal_type %>
+                </span>
+              </td>
+              <td>$<%= Number(sig.entry_price).toLocaleString() %></td>
+              <td>
+                <span class="badge <%= sig.status === 'active' ? 'badge-yellow' : sig.status === 'closed' ? 'badge-gray' : 'badge-red' %>">
+                  <%= sig.status.toUpperCase() %>
+                </span>
+              </td>
+              <td>
+                <span class="badge <%= sig.result === 'win' ? 'badge-green' : sig.result === 'loss' ? 'badge-red' : 'badge-blue' %>">
+                  <%= sig.result.toUpperCase() %>
+                </span>
+              </td>
+              <td><%= new Date(sig.created_at).toLocaleDateString() %></td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--admin-text-muted);">No signals yet</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Recent Users -->
+  <div class="admin-card">
+    <div class="admin-card-header">
+      <div class="admin-card-title">Recent Users</div>
+      <a href="/admin/users" class="topbar-btn" style="font-size:11px;padding:4px 10px;">View All</a>
+    </div>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Plan</th>
+          <th>Joined</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if(recentUsers && recentUsers.length > 0) { %>
+          <% recentUsers.forEach(user => { %>
+            <tr>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="admin-avatar" style="width:28px;height:28px;font-size:11px;"><%= user.email.charAt(0).toUpperCase() %></div>
+                  <div>
+                    <div class="text-primary" style="font-size:13px;"><%= user.username || 'User' %></div>
+                    <div style="font-size:11px;color:var(--admin-text-muted);"><%= user.email %></div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="badge <%= user.plan_id ? 'badge-blue' : 'badge-gray' %>">
+                  <%= user.plan_id ? 'VIP' : 'Free' %>
+                </span>
+              </td>
+              <td style="font-size:12px;"><%= new Date(user.created_at).toLocaleDateString() %></td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="3" style="text-align:center;padding:20px;color:var(--admin-text-muted);">No users yet</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('partials/layout-end') %>

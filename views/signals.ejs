@@ -1,0 +1,111 @@
+<%- include('partials/head') %>
+<%- include('partials/navbar') %>
+
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="/">Home</a> › <span><%= t.signals_page.title %></span></div>
+    <h1><%= t.signals_page.title %></h1>
+    <p><%= t.signals_page.subtitle %></p>
+  </div>
+</div>
+
+<section class="section" style="padding-top:40px;">
+  <div class="container">
+    <!-- Filters -->
+    <div class="filters-bar">
+      <a href="/crypto-signals" class="filter-btn <%= !status && !coin ? 'active' : '' %>"><%= t.signals_page.filter_all %></a>
+      <a href="/crypto-signals?status=active" class="filter-btn <%= status === 'active' ? 'active' : '' %>"><%= t.signals_page.filter_active %></a>
+      <a href="/crypto-signals?status=closed" class="filter-btn <%= status === 'closed' ? 'active' : '' %>"><%= t.signals_page.filter_closed %></a>
+      <div style="margin-left:auto;display:flex;gap:8px;">
+        <% ['BTC','ETH','BNB','ADA','LINK','XRP'].forEach(c => { %>
+          <a href="/crypto-signals?coin=<%= c %>" class="filter-btn <%= coin === c ? 'active' : '' %>"><%= c %></a>
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- Signals Table -->
+    <div class="signals-table">
+      <table>
+        <thead>
+          <tr>
+            <th><%= t.signals_page.coin %></th>
+            <th><%= t.signals_page.type %></th>
+            <th><%= t.signals_page.entry %></th>
+            <th><%= t.signals_page.tp %></th>
+            <th><%= t.signals_page.sl %></th>
+            <th><%= t.signals_page.risk %></th>
+            <th><%= t.signals_page.rr %></th>
+            <th><%= t.signals_page.status %></th>
+            <th><%= t.signals_page.result %></th>
+            <th><%= t.signals_page.date %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if(signals && signals.length > 0) { %>
+            <% signals.forEach(sig => { %>
+              <tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div class="mini-coin-icon" style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;color:white;background:linear-gradient(135deg,#f7931a,#f9a832);flex-shrink:0;"><%= sig.coin.substring(0,2) %></div>
+                    <div>
+                      <div style="font-weight:700;font-size:13px;color:var(--text-primary);"><%= sig.pair %></div>
+                      <div style="font-size:11px;color:var(--text-muted);">
+                        <span style="background:rgba(0,180,216,0.1);color:var(--accent-blue);padding:1px 6px;border-radius:100px;font-size:10px;"><%= sig.tier.toUpperCase() %></span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="signal-type-badge <%= sig.signal_type.toLowerCase() %>"><%= sig.signal_type %></span>
+                </td>
+                <td class="<%= sig.tier === 'vip' ? 'vip-blur' : '' %>" style="font-weight:600;">
+                  $<%= Number(sig.entry_price).toLocaleString('en', {maximumFractionDigits:4}) %>
+                </td>
+                <td style="color:var(--accent-green);font-weight:600;">
+                  $<%= Number(sig.take_profit_1).toLocaleString('en', {maximumFractionDigits:4}) %>
+                </td>
+                <td style="color:var(--accent-red);font-weight:600;">
+                  $<%= Number(sig.stop_loss).toLocaleString('en', {maximumFractionDigits:4}) %>
+                </td>
+                <td><%= sig.risk_percentage %>%</td>
+                <td>1:<%= sig.risk_reward_ratio || '—' %></td>
+                <td>
+                  <span class="result-badge <%= sig.status === 'active' ? 'active' : sig.status === 'closed' ? 'pending' : '' %>">
+                    <%= sig.status.toUpperCase() %>
+                  </span>
+                </td>
+                <td>
+                  <span class="result-badge <%= sig.result %>"><%= sig.result.toUpperCase() %></span>
+                </td>
+                <td style="font-size:12px;color:var(--text-muted);">
+                  <%= new Date(sig.created_at).toLocaleDateString() %>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr><td colspan="10" style="text-align:center;padding:40px;color:var(--text-muted);">No signals found</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- VIP CTA -->
+    <div class="vip-overlay">
+      <div style="font-size:36px;margin-bottom:12px;">🔒</div>
+      <h3 style="font-size:22px;font-weight:700;margin-bottom:8px;"><%= t.signals_page.join_vip_msg %></h3>
+      <p style="color:var(--text-secondary);margin-bottom:20px;">Get 2-5 premium signals per day, Monday to Friday</p>
+      <a href="/pricing" class="btn btn-primary btn-lg"><%= t.signals_page.join_vip_btn %></a>
+    </div>
+
+    <!-- Pagination -->
+    <% if(pages > 1) { %>
+    <div class="pagination">
+      <% for(let i=1;i<=pages;i++) { %>
+        <a href="?page=<%= i %>" class="page-btn <%= page === i ? 'active' : '' %>"><%= i %></a>
+      <% } %>
+    </div>
+    <% } %>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

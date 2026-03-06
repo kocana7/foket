@@ -1,0 +1,78 @@
+<%- include('partials/layout') %>
+
+<div class="admin-card">
+  <div class="admin-card-header">
+    <div class="admin-card-title"><%= plan ? 'Edit Plan' : 'New Plan' %></div>
+    <a href="/admin/plans" class="btn-admin btn-admin-outline btn-admin-sm"><i class="fas fa-arrow-left"></i> Back</a>
+  </div>
+  <div class="admin-card-body">
+    <form action="<%= action %>" method="POST" class="admin-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label required">Plan Name</label>
+          <input type="text" name="name" class="form-control" value="<%= plan ? plan.name : '' %>" placeholder="The Expert" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Slug</label>
+          <input type="text" name="slug" class="form-control" value="<%= plan ? plan.slug : '' %>" placeholder="expert" required>
+        </div>
+      </div>
+      <div class="form-grid three">
+        <div class="form-group">
+          <label class="form-label required">Duration (days)</label>
+          <input type="number" name="duration_days" class="form-control" value="<%= plan ? plan.duration_days : '30' %>" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Price</label>
+          <input type="number" step="0.01" name="price" class="form-control" value="<%= plan ? plan.price : '' %>" placeholder="52.00" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Currency</label>
+          <select name="currency" class="form-control">
+            <option value="USD" <%= !plan || plan.currency === 'USD' ? 'selected' : '' %>>USD</option>
+            <option value="EUR" <%= plan && plan.currency === 'EUR' ? 'selected' : '' %>>EUR</option>
+            <option value="GBP" <%= plan && plan.currency === 'GBP' ? 'selected' : '' %>>GBP</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Signals/Day Min</label>
+          <input type="number" name="signals_per_day_min" class="form-control" value="<%= plan ? plan.signals_per_day_min : '2' %>">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Signals/Day Max</label>
+          <input type="number" name="signals_per_day_max" class="form-control" value="<%= plan ? plan.signals_per_day_max : '5' %>">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Features (one per line)</label>
+        <textarea name="features" class="form-control" rows="8" placeholder="2-5 signals per day&#10;Full technical analysis&#10;VIP Telegram access&#10;30-day money-back guarantee"><% if(plan && plan.features) { const feats = typeof plan.features === 'string' ? JSON.parse(plan.features) : plan.features; %><%= feats.join('\n') %><% } %></textarea>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-check">
+            <input type="checkbox" name="is_popular" value="1" <%= plan && plan.is_popular ? 'checked' : '' %>>
+            Mark as Popular (highlighted)
+          </label>
+        </div>
+        <% if(plan) { %>
+        <div class="form-group">
+          <label class="form-check">
+            <input type="checkbox" name="is_active" value="1" <%= plan && plan.is_active ? 'checked' : '' %>>
+            Active (visible on website)
+          </label>
+        </div>
+        <% } %>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-admin btn-admin-primary">
+          <i class="fas fa-save"></i> <%= plan ? 'Update Plan' : 'Create Plan' %>
+        </button>
+        <a href="/admin/plans" class="btn-admin btn-admin-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/layout-end') %>

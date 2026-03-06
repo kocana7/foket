@@ -1,0 +1,176 @@
+{
+  "lang_code": "ja",
+  "lang_name": "日本語",
+  "site_title": "FoketCrypto シグナル",
+  "site_tagline": "プロフェッショナル暗号通貨取引シグナル",
+
+  "nav": {
+    "home": "ホーム",
+    "signals": "暗号シグナル",
+    "pricing": "料金",
+    "news": "ニュース",
+    "contact": "お問い合わせ",
+    "join_free": "無料Telegram参加",
+    "join_vip": "VIP参加"
+  },
+
+  "hero": {
+    "badge": "2024年最高の無料暗号シグナル",
+    "title": "最高の無料",
+    "title_highlight": "暗号シグナル",
+    "subtitle": "AIアルゴリズムを使用した専門チームによる高品質な暗号通貨取引シグナル",
+    "success_rate": "成功率",
+    "members": "会員",
+    "signals_daily": "デイリーシグナル",
+    "join_free_btn": "無料Telegram参加",
+    "view_vip_btn": "VIPプランを見る",
+    "free_signals_week": "週3回無料シグナル",
+    "vip_signals_day": "VIPシグナル1日2-5回",
+    "money_back": "30日間返金保証"
+  },
+
+  "stats": {
+    "members": "会員",
+    "success_rate": "成功率",
+    "signals": "シグナル送信",
+    "years": "年の実績"
+  },
+
+  "features": {
+    "title": "なぜ私たちのシグナルなのか",
+    "subtitle": "プロのトレーダーとAI技術を組み合わせた最高の暗号シグナルサービス",
+    "ai_title": "AI駆動の分析",
+    "ai_desc": "機械学習とAIアルゴリズムが24時間365日市場をスキャン",
+    "expert_title": "専門家チーム",
+    "expert_desc": "10年以上の経験を持つプロのトレーダーが全シグナルをレビュー",
+    "risk_title": "リスク管理",
+    "risk_desc": "各シグナルには正確なストップロス、利確、リスク/報酬比が含まれます",
+    "instant_title": "即時配信",
+    "instant_desc": "Telegramを通じて即座にシグナルを受信",
+    "support_title": "24/7サポート",
+    "support_desc": "専任サポートチームがいつでもお手伝いします",
+    "education_title": "教育コンテンツ",
+    "education_desc": "各シグナルとともに提供される詳細な分析でトレードスキルを向上"
+  },
+
+  "how_it_works": {
+    "title": "シグナル構成",
+    "subtitle": "各シグナルに含まれる情報",
+    "entry": "エントリー価格",
+    "entry_desc": "正確な買い/売りエントリー価格",
+    "take_profit": "利確目標",
+    "take_profit_desc": "1〜3段階の利益確定目標",
+    "stop_loss": "ストップロス",
+    "stop_loss_desc": "リスク管理のためのストップロス価格",
+    "risk": "リスク%",
+    "risk_desc": "1トレードあたりの推奨リスク割合",
+    "rr_ratio": "リスク/報酬比",
+    "rr_ratio_desc": "潜在的な報酬に対するリスクの比率"
+  },
+
+  "coins": {
+    "title": "対応コイン",
+    "subtitle": "主要暗号通貨のシグナル提供"
+  },
+
+  "free_signals": {
+    "title": "無料シグナル",
+    "subtitle": "VIP品質のシグナルを無料で体験",
+    "badge": "無料",
+    "per_week": "週3回",
+    "join_btn": "無料で受け取る"
+  },
+
+  "vip": {
+    "title": "VIPメンバーシップ",
+    "subtitle": "プレミアムシグナルで利益を最大化",
+    "per_day": "1日2-5個のシグナル",
+    "days": "月曜〜金曜",
+    "money_back": "30日間返金保証",
+    "join_btn": "VIPに参加"
+  },
+
+  "pricing": {
+    "title": "プランを選択",
+    "subtitle": "あなたに合ったプランをお選びください",
+    "most_popular": "人気",
+    "per_month": "/月",
+    "per_3months": "/3ヶ月",
+    "per_6months": "/6ヶ月",
+    "per_year": "/年",
+    "get_started": "始める",
+    "money_back": "30日間返金保証",
+    "lifetime_title": "生涯無料VIPアクセス",
+    "lifetime_desc": "パートナーブローカーへの$250以上の入金で生涯VIPアクセスを取得",
+    "lifetime_btn": "詳しく見る"
+  },
+
+  "testimonials": {
+    "title": "会員の声",
+    "subtitle": "世界中の50,000人以上の会員からのストーリー"
+  },
+
+  "news": {
+    "title": "暗号ニュース",
+    "subtitle": "最新の暗号通貨市場情報",
+    "read_more": "続きを読む",
+    "view_all": "すべてのニュースを見る"
+  },
+
+  "cta": {
+    "title": "今すぐ始めよう",
+    "subtitle": "無料のTelegramに参加して高品質のシグナルを受け取ろう",
+    "btn": "無料で始める"
+  },
+
+  "footer": {
+    "tagline": "プロフェッショナル暗号通貨取引シグナルサービス",
+    "quick_links": "クイックリンク",
+    "follow_us": "フォローする",
+    "disclaimer": "投資免責事項：暗号通貨取引は高いリスクを伴います。過去の実績は将来の結果を保証しません。",
+    "copyright": "All rights reserved",
+    "terms": "利用規約",
+    "privacy": "プライバシーポリシー",
+    "contact": "お問い合わせ"
+  },
+
+  "contact": {
+    "title": "お問い合わせ",
+    "subtitle": "ご質問があればお気軽にお問い合わせください",
+    "name": "名前",
+    "email": "メール",
+    "subject": "件名",
+    "message": "メッセージ",
+    "send": "送信",
+    "success": "メッセージが送信されました！"
+  },
+
+  "signals_page": {
+    "title": "暗号シグナル",
+    "subtitle": "リアルタイム取引シグナル",
+    "filter_all": "すべて",
+    "filter_active": "アクティブ",
+    "filter_closed": "クローズ",
+    "coin": "コイン",
+    "type": "タイプ",
+    "entry": "エントリー",
+    "tp": "利確",
+    "sl": "損切",
+    "risk": "リスク",
+    "rr": "R/R",
+    "status": "ステータス",
+    "result": "結果",
+    "date": "日付",
+    "long": "ロング",
+    "short": "ショート",
+    "win": "勝ち",
+    "loss": "負け",
+    "pending": "待機中",
+    "active": "アクティブ",
+    "closed": "クローズ",
+    "free_badge": "無料",
+    "vip_badge": "VIP",
+    "join_vip_msg": "VIPシグナルを見るには登録してください",
+    "join_vip_btn": "VIPに参加"
+  }
+}

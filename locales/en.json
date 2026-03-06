@@ -1,0 +1,176 @@
+{
+  "lang_code": "en",
+  "lang_name": "English",
+  "site_title": "FoketCrypto Signals",
+  "site_tagline": "Professional Cryptocurrency Trading Signals",
+
+  "nav": {
+    "home": "Home",
+    "signals": "Crypto Signals",
+    "pricing": "Pricing",
+    "news": "News",
+    "contact": "Contact",
+    "join_free": "Join Free Telegram",
+    "join_vip": "Join VIP"
+  },
+
+  "hero": {
+    "badge": "Best Free Crypto Signals 2024",
+    "title": "Best Free",
+    "title_highlight": "Crypto Signals",
+    "subtitle": "High-quality cryptocurrency trading signals analyzed by our expert team using AI algorithms",
+    "success_rate": "Success Rate",
+    "members": "Members",
+    "signals_daily": "Daily Signals",
+    "join_free_btn": "Join Free Telegram",
+    "view_vip_btn": "View VIP Plans",
+    "free_signals_week": "3 free signals per week",
+    "vip_signals_day": "2-5 VIP signals per day",
+    "money_back": "30-day money-back guarantee"
+  },
+
+  "stats": {
+    "members": "Members",
+    "success_rate": "Success Rate",
+    "signals": "Signals Sent",
+    "years": "Years Active"
+  },
+
+  "features": {
+    "title": "Why Choose Our Signals?",
+    "subtitle": "The best crypto signal service combining professional traders and AI technology",
+    "ai_title": "AI-Powered Analysis",
+    "ai_desc": "Machine learning and AI algorithms scan markets 24/7 to find optimal entry points",
+    "expert_title": "Expert Team",
+    "expert_desc": "Professional traders with 10+ years of experience review every signal",
+    "risk_title": "Risk Management",
+    "risk_desc": "Every signal includes precise stop-loss, take-profit, and risk/reward ratio",
+    "instant_title": "Instant Delivery",
+    "instant_desc": "Receive signals instantly via Telegram. Anytime, anywhere on mobile",
+    "support_title": "24/7 Support",
+    "support_desc": "Our dedicated support team is available to help you at any time",
+    "education_title": "Educational Content",
+    "education_desc": "Improve your trading skills with analysis provided alongside each signal"
+  },
+
+  "how_it_works": {
+    "title": "Signal Structure",
+    "subtitle": "What's included in each signal",
+    "entry": "Entry Price",
+    "entry_desc": "Precise buy/sell entry price",
+    "take_profit": "Take Profit",
+    "take_profit_desc": "1-3 stage profit targets",
+    "stop_loss": "Stop Loss",
+    "stop_loss_desc": "Stop-loss price for risk management",
+    "risk": "Risk %",
+    "risk_desc": "Recommended risk percentage per trade",
+    "rr_ratio": "Risk/Reward Ratio",
+    "rr_ratio_desc": "Ratio of risk vs potential reward"
+  },
+
+  "coins": {
+    "title": "Supported Coins",
+    "subtitle": "Signals for major cryptocurrencies"
+  },
+
+  "free_signals": {
+    "title": "Free Signals",
+    "subtitle": "Experience VIP-quality signals for free",
+    "badge": "FREE",
+    "per_week": "3 per week",
+    "join_btn": "Get For Free"
+  },
+
+  "vip": {
+    "title": "VIP Membership",
+    "subtitle": "Maximize your profits with premium signals",
+    "per_day": "2-5 signals per day",
+    "days": "Monday to Friday",
+    "money_back": "30-day money-back guarantee",
+    "join_btn": "Join VIP"
+  },
+
+  "pricing": {
+    "title": "Choose Your Plan",
+    "subtitle": "Select the plan that's right for you",
+    "most_popular": "Popular",
+    "per_month": "/month",
+    "per_3months": "/3 months",
+    "per_6months": "/6 months",
+    "per_year": "/year",
+    "get_started": "Get Started",
+    "money_back": "30-day money-back guarantee",
+    "lifetime_title": "Lifetime Free VIP Access",
+    "lifetime_desc": "Get lifetime VIP access by depositing $250+ with our partner brokers",
+    "lifetime_btn": "Learn More"
+  },
+
+  "testimonials": {
+    "title": "What Our Members Say",
+    "subtitle": "Stories from 50,000+ members worldwide"
+  },
+
+  "news": {
+    "title": "Crypto News",
+    "subtitle": "Latest cryptocurrency market updates",
+    "read_more": "Read More",
+    "view_all": "View All News"
+  },
+
+  "cta": {
+    "title": "Start Today",
+    "subtitle": "Join our free Telegram and receive high-quality signals",
+    "btn": "Start For Free"
+  },
+
+  "footer": {
+    "tagline": "Professional cryptocurrency trading signal service",
+    "quick_links": "Quick Links",
+    "follow_us": "Follow Us",
+    "disclaimer": "Investment Disclaimer: Cryptocurrency trading carries high risk. Past performance does not guarantee future results. Please exercise caution before investing.",
+    "copyright": "All rights reserved",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "contact": "Contact"
+  },
+
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "Feel free to contact us if you have any questions",
+    "name": "Name",
+    "email": "Email",
+    "subject": "Subject",
+    "message": "Message",
+    "send": "Send Message",
+    "success": "Your message has been sent!"
+  },
+
+  "signals_page": {
+    "title": "Crypto Signals",
+    "subtitle": "Real-time trading signals",
+    "filter_all": "All",
+    "filter_active": "Active",
+    "filter_closed": "Closed",
+    "coin": "Coin",
+    "type": "Type",
+    "entry": "Entry",
+    "tp": "Take Profit",
+    "sl": "Stop Loss",
+    "risk": "Risk",
+    "rr": "R/R",
+    "status": "Status",
+    "result": "Result",
+    "date": "Date",
+    "long": "LONG",
+    "short": "SHORT",
+    "win": "WIN",
+    "loss": "LOSS",
+    "pending": "PENDING",
+    "active": "ACTIVE",
+    "closed": "CLOSED",
+    "free_badge": "FREE",
+    "vip_badge": "VIP",
+    "join_vip_msg": "Subscribe to view VIP signals",
+    "join_vip_btn": "Join VIP"
+  }
+}

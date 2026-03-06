@@ -1,0 +1,86 @@
+<%- include('partials/layout') %>
+
+<div class="admin-card">
+  <div class="admin-card-header">
+    <div class="admin-card-title"><%= article ? 'Edit Article' : 'New Article' %></div>
+    <a href="/admin/news" class="btn-admin btn-admin-outline btn-admin-sm"><i class="fas fa-arrow-left"></i> Back</a>
+  </div>
+  <div class="admin-card-body">
+    <form action="<%= action %>" method="POST" class="admin-form" style="max-width:900px;">
+      <div class="form-group">
+        <label class="form-label required">Title</label>
+        <input type="text" name="title" class="form-control" value="<%= article ? article.title : '' %>"
+          placeholder="Article title..." required data-slug-source>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label required">Slug (URL)</label>
+          <input type="text" name="slug" class="form-control" value="<%= article ? article.slug : '' %>"
+            placeholder="article-slug" required data-slug-target>
+          <div class="form-hint">URL: /news/<strong>slug</strong></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select name="category" class="form-control">
+            <option value="crypto-news" <%= !article || article.category === 'crypto-news' ? 'selected' : '' %>>Crypto News</option>
+            <option value="bitcoin" <%= article && article.category === 'bitcoin' ? 'selected' : '' %>>Bitcoin</option>
+            <option value="ethereum" <%= article && article.category === 'ethereum' ? 'selected' : '' %>>Ethereum</option>
+            <option value="altcoins" <%= article && article.category === 'altcoins' ? 'selected' : '' %>>Altcoins</option>
+            <option value="analysis" <%= article && article.category === 'analysis' ? 'selected' : '' %>>Analysis</option>
+            <option value="education" <%= article && article.category === 'education' ? 'selected' : '' %>>Education</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Language</label>
+          <select name="language" class="form-control">
+            <option value="ko" <%= !article || article.language === 'ko' ? 'selected' : '' %>>Korean (한국어)</option>
+            <option value="en" <%= article && article.language === 'en' ? 'selected' : '' %>>English</option>
+            <option value="de" <%= article && article.language === 'de' ? 'selected' : '' %>>Deutsch</option>
+            <option value="ja" <%= article && article.language === 'ja' ? 'selected' : '' %>>日本語</option>
+            <option value="zh" <%= article && article.language === 'zh' ? 'selected' : '' %>>中文</option>
+            <option value="fr" <%= article && article.language === 'fr' ? 'selected' : '' %>>Français</option>
+            <option value="es" <%= article && article.language === 'es' ? 'selected' : '' %>>Español</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Featured Image URL</label>
+          <input type="text" name="featured_image" class="form-control"
+            value="<%= article && article.featured_image ? article.featured_image : '' %>"
+            placeholder="https://...">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Excerpt (Short Description)</label>
+        <textarea name="excerpt" class="form-control" rows="2" placeholder="Brief description for listing pages..."><%= article ? article.excerpt || '' : '' %></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label required">Content (HTML)</label>
+        <textarea name="content" class="form-control" rows="14" placeholder="Full article content (HTML supported)..." required><%= article ? article.content || '' : '' %></textarea>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-check">
+            <input type="checkbox" name="is_featured" value="1" <%= article && article.is_featured ? 'checked' : '' %>>
+            Feature this article (show on homepage)
+          </label>
+        </div>
+        <div class="form-group">
+          <label class="form-check">
+            <input type="checkbox" name="is_published" value="1" <%= article && article.is_published ? 'checked' : '' %>>
+            Publish immediately
+          </label>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-admin btn-admin-primary">
+          <i class="fas fa-save"></i> <%= article ? 'Update Article' : 'Create Article' %>
+        </button>
+        <a href="/admin/news" class="btn-admin btn-admin-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/layout-end') %>

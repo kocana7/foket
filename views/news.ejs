@@ -1,0 +1,44 @@
+<%- include('partials/head') %>
+<%- include('partials/navbar') %>
+
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="/">Home</a> › <span><%= t.news.title %></span></div>
+    <h1><%= t.news.title %></h1>
+    <p><%= t.news.subtitle %></p>
+  </div>
+</div>
+
+<section class="section" style="padding-top:40px;">
+  <div class="container">
+    <% if(articles && articles.length > 0) { %>
+      <div class="news-grid">
+        <% articles.forEach(article => { %>
+          <div class="news-card">
+            <div class="news-img">
+              <% if(article.featured_image) { %>
+                <img src="<%= article.featured_image %>" alt="<%= article.title %>">
+              <% } else { %>📊<% } %>
+            </div>
+            <div class="news-body">
+              <div class="news-category"><%= article.category %></div>
+              <h3 class="news-title"><%= article.title %></h3>
+              <p class="news-excerpt"><%= article.excerpt || '' %></p>
+              <div class="news-footer">
+                <span class="news-date"><%= article.published_at ? new Date(article.published_at).toLocaleDateString() : '' %></span>
+                <a href="/news/<%= article.slug %>" class="news-read-more"><%= t.news.read_more %> →</a>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div style="text-align:center;padding:60px;color:var(--text-muted);">
+        <div style="font-size:48px;margin-bottom:16px;">📰</div>
+        <p>No articles yet. Check back soon!</p>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

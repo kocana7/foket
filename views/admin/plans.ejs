@@ -1,0 +1,40 @@
+<%- include('partials/layout') %>
+
+<div class="admin-card">
+  <div class="admin-card-header">
+    <div class="admin-card-title">Subscription Plans</div>
+    <a href="/admin/plans/new" class="topbar-btn primary"><i class="fas fa-plus"></i> New Plan</a>
+  </div>
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Duration</th>
+        <th>Price</th>
+        <th>Signals/Day</th>
+        <th>Popular</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if(plans && plans.length > 0) { %>
+        <% plans.forEach(p => { %>
+          <tr>
+            <td class="text-primary" style="font-weight:700;"><%= p.name %></td>
+            <td><%= p.duration_days %> days</td>
+            <td style="color:#3fb950;font-weight:700;">$<%= p.price %></td>
+            <td><%= p.signals_per_day_min %>-<%= p.signals_per_day_max %>/day</td>
+            <td><span class="badge <%= p.is_popular ? 'badge-yellow' : 'badge-gray' %>"><%= p.is_popular ? 'Yes' : 'No' %></span></td>
+            <td><span class="badge <%= p.is_active ? 'badge-green' : 'badge-red' %>"><%= p.is_active ? 'Active' : 'Inactive' %></span></td>
+            <td>
+              <a href="/admin/plans/<%= p.id %>/edit" class="btn-admin btn-admin-outline btn-admin-sm"><i class="fas fa-edit"></i></a>
+            </td>
+          </tr>
+        <% }) %>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('partials/layout-end') %>

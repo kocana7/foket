@@ -1,0 +1,124 @@
+<%- include('partials/layout') %>
+
+<div class="admin-card">
+  <div class="admin-card-header">
+    <div class="admin-card-title"><%= signal ? 'Edit Signal' : 'New Signal' %></div>
+    <a href="/admin/signals" class="btn-admin btn-admin-outline btn-admin-sm"><i class="fas fa-arrow-left"></i> Back</a>
+  </div>
+  <div class="admin-card-body">
+    <form action="<%= action %>" method="POST" class="admin-form">
+      <div class="form-grid three">
+        <div class="form-group">
+          <label class="form-label required">Coin Symbol</label>
+          <input type="text" name="coin" class="form-control" value="<%= signal ? signal.coin : '' %>" placeholder="BTC" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Trading Pair</label>
+          <input type="text" name="pair" class="form-control" value="<%= signal ? signal.pair : '' %>" placeholder="BTC/USDT" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Signal Type</label>
+          <select name="signal_type" class="form-control" required>
+            <option value="LONG" <%= signal && signal.signal_type === 'LONG' ? 'selected' : '' %>>LONG</option>
+            <option value="SHORT" <%= signal && signal.signal_type === 'SHORT' ? 'selected' : '' %>>SHORT</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid three">
+        <div class="form-group">
+          <label class="form-label required">Entry Price</label>
+          <input type="number" step="0.00000001" name="entry_price" class="form-control" value="<%= signal ? signal.entry_price : '' %>" placeholder="65000" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Take Profit 1</label>
+          <input type="number" step="0.00000001" name="take_profit_1" class="form-control" value="<%= signal ? signal.take_profit_1 : '' %>" placeholder="68000" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Take Profit 2</label>
+          <input type="number" step="0.00000001" name="take_profit_2" class="form-control" value="<%= signal && signal.take_profit_2 ? signal.take_profit_2 : '' %>" placeholder="72000">
+        </div>
+      </div>
+      <div class="form-grid three">
+        <div class="form-group">
+          <label class="form-label">Take Profit 3</label>
+          <input type="number" step="0.00000001" name="take_profit_3" class="form-control" value="<%= signal && signal.take_profit_3 ? signal.take_profit_3 : '' %>" placeholder="75000">
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Stop Loss</label>
+          <input type="number" step="0.00000001" name="stop_loss" class="form-control" value="<%= signal ? signal.stop_loss : '' %>" placeholder="62000" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Risk %</label>
+          <input type="number" step="0.01" name="risk_percentage" class="form-control" value="<%= signal ? signal.risk_percentage : '1' %>" placeholder="1" required>
+        </div>
+      </div>
+      <div class="form-grid three">
+        <div class="form-group">
+          <label class="form-label">Risk/Reward Ratio</label>
+          <input type="number" step="0.01" name="risk_reward_ratio" class="form-control" value="<%= signal && signal.risk_reward_ratio ? signal.risk_reward_ratio : '' %>" placeholder="2.5">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Leverage (optional)</label>
+          <input type="number" name="leverage" class="form-control" value="<%= signal && signal.leverage ? signal.leverage : '' %>" placeholder="10">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Exchange</label>
+          <select name="exchange" class="form-control">
+            <option value="Binance" <%= signal && signal.exchange === 'Binance' ? 'selected' : '' %>>Binance</option>
+            <option value="Bybit" <%= signal && signal.exchange === 'Bybit' ? 'selected' : '' %>>Bybit</option>
+            <option value="OKX" <%= signal && signal.exchange === 'OKX' ? 'selected' : '' %>>OKX</option>
+            <option value="KuCoin" <%= signal && signal.exchange === 'KuCoin' ? 'selected' : '' %>>KuCoin</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label required">Tier</label>
+          <select name="tier" class="form-control" required>
+            <option value="free" <%= signal && signal.tier === 'free' ? 'selected' : '' %>>Free</option>
+            <option value="vip" <%= !signal || signal.tier === 'vip' ? 'selected' : '' %>>VIP</option>
+          </select>
+        </div>
+        <% if(signal) { %>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-control">
+            <option value="active" <%= signal.status === 'active' ? 'selected' : '' %>>Active</option>
+            <option value="closed" <%= signal.status === 'closed' ? 'selected' : '' %>>Closed</option>
+            <option value="cancelled" <%= signal.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+          </select>
+        </div>
+        <% } %>
+      </div>
+      <% if(signal) { %>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Result</label>
+          <select name="result" class="form-control">
+            <option value="pending" <%= signal.result === 'pending' ? 'selected' : '' %>>Pending</option>
+            <option value="win" <%= signal.result === 'win' ? 'selected' : '' %>>Win</option>
+            <option value="loss" <%= signal.result === 'loss' ? 'selected' : '' %>>Loss</option>
+            <option value="breakeven" <%= signal.result === 'breakeven' ? 'selected' : '' %>>Breakeven</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Profit/Loss %</label>
+          <input type="number" step="0.01" name="profit_loss_percent" class="form-control" value="<%= signal && signal.profit_loss_percent ? signal.profit_loss_percent : '' %>" placeholder="+23.5">
+        </div>
+      </div>
+      <% } %>
+      <div class="form-group form-full">
+        <label class="form-label">Analysis / Notes</label>
+        <textarea name="analysis" class="form-control" rows="4" placeholder="Technical analysis and reasoning for this signal..."><%= signal ? signal.analysis || '' : '' %></textarea>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-admin btn-admin-primary">
+          <i class="fas fa-save"></i> <%= signal ? 'Update Signal' : 'Create Signal' %>
+        </button>
+        <a href="/admin/signals" class="btn-admin btn-admin-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/layout-end') %>

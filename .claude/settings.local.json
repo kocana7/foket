@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:cryptosignals.org)",
+      "WebSearch",
+      "WebFetch(domain:coinweb.com)",
+      "WebFetch(domain:fundevity.com)",
+      "WebFetch(domain:cryptonews.com)",
+      "WebFetch(domain:web.archive.org)",
+      "WebFetch(domain:www.crypto-signals-telegram.com)"
+    ]
+  }
+}

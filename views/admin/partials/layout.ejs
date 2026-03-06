@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | FoketCrypto Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+<div class="admin-wrapper">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">₿</div>
+      <div>
+        <div class="sidebar-title">Foket<span>Crypto</span></div>
+        <div class="sidebar-subtitle">Admin Panel</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Main</div>
+      <a href="/admin" class="sidebar-link"><span class="icon"><i class="fas fa-tachometer-alt"></i></span>Dashboard</a>
+      <a href="/admin/signals" class="sidebar-link"><span class="icon"><i class="fas fa-signal"></i></span>Signals</a>
+      <a href="/admin/news" class="sidebar-link"><span class="icon"><i class="fas fa-newspaper"></i></span>News</a>
+
+      <div class="sidebar-section-label">Management</div>
+      <a href="/admin/users" class="sidebar-link"><span class="icon"><i class="fas fa-users"></i></span>Users</a>
+      <a href="/admin/plans" class="sidebar-link"><span class="icon"><i class="fas fa-tags"></i></span>Plans</a>
+      <a href="/admin/testimonials" class="sidebar-link"><span class="icon"><i class="fas fa-star"></i></span>Testimonials</a>
+
+      <div class="sidebar-section-label">System</div>
+      <a href="/admin/messages" class="sidebar-link"><span class="icon"><i class="fas fa-envelope"></i></span>Messages
+        <% if(locals.unreadMessages > 0) { %><span class="badge"><%= locals.unreadMessages %></span><% } %>
+      </a>
+      <a href="/admin/settings" class="sidebar-link"><span class="icon"><i class="fas fa-cog"></i></span>Settings</a>
+
+      <div class="sidebar-section-label">Site</div>
+      <a href="/" target="_blank" class="sidebar-link"><span class="icon"><i class="fas fa-external-link-alt"></i></span>View Website</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="admin-user-info">
+        <div class="admin-avatar"><%= admin ? admin.username.charAt(0).toUpperCase() : 'A' %></div>
+        <div>
+          <div class="admin-user-name"><%= admin ? admin.username : 'Admin' %></div>
+          <div class="admin-user-role"><%= admin ? admin.role : 'admin' %></div>
+        </div>
+      </div>
+      <a href="/admin/logout" class="sidebar-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button id="sidebarToggle" style="background:none;border:1px solid var(--admin-border);border-radius:6px;padding:6px 10px;color:var(--admin-text);cursor:pointer;display:none;">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="topbar-title"><%= title %></div>
+      </div>
+      <div class="topbar-actions">
+        <a href="/" target="_blank" class="topbar-btn"><i class="fas fa-external-link-alt"></i> View Site</a>
+        <%- typeof topbarAction !== 'undefined' ? topbarAction : '' %>
+      </div>
+    </div>
+
+    <div class="admin-content">
+      <% if(success_msg && success_msg.length > 0) { %>
+        <div class="admin-alert admin-alert-success"><i class="fas fa-check-circle"></i> <%= success_msg %></div>
+      <% } %>
+      <% if(error_msg && error_msg.length > 0) { %>
+        <div class="admin-alert admin-alert-error"><i class="fas fa-times-circle"></i> <%= error_msg %></div>
+      <% } %>

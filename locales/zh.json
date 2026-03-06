@@ -1,0 +1,176 @@
+{
+  "lang_code": "zh",
+  "lang_name": "中文",
+  "site_title": "FoketCrypto 信号",
+  "site_tagline": "专业加密货币交易信号",
+
+  "nav": {
+    "home": "首页",
+    "signals": "加密信号",
+    "pricing": "定价",
+    "news": "新闻",
+    "contact": "联系我们",
+    "join_free": "免费加入Telegram",
+    "join_vip": "加入VIP"
+  },
+
+  "hero": {
+    "badge": "2024年最佳免费加密信号",
+    "title": "最佳免费",
+    "title_highlight": "加密信号",
+    "subtitle": "由我们的专家团队使用AI算法分析的高质量加密货币交易信号",
+    "success_rate": "成功率",
+    "members": "会员",
+    "signals_daily": "每日信号",
+    "join_free_btn": "免费加入Telegram",
+    "view_vip_btn": "查看VIP计划",
+    "free_signals_week": "每周3个免费信号",
+    "vip_signals_day": "每天2-5个VIP信号",
+    "money_back": "30天退款保证"
+  },
+
+  "stats": {
+    "members": "会员",
+    "success_rate": "成功率",
+    "signals": "已发送信号",
+    "years": "年经验"
+  },
+
+  "features": {
+    "title": "为什么选择我们的信号？",
+    "subtitle": "结合专业交易员和AI技术的最佳加密信号服务",
+    "ai_title": "AI驱动分析",
+    "ai_desc": "机器学习和AI算法全天候扫描市场，寻找最佳入场点",
+    "expert_title": "专家团队",
+    "expert_desc": "拥有10年以上经验的专业交易员审查每个信号",
+    "risk_title": "风险管理",
+    "risk_desc": "每个信号包含精确的止损、止盈和风险/回报比",
+    "instant_title": "即时推送",
+    "instant_desc": "通过Telegram即时接收信号，随时随地使用手机",
+    "support_title": "全天候支持",
+    "support_desc": "我们的专业支持团队随时为您提供帮助",
+    "education_title": "教育内容",
+    "education_desc": "通过每个信号附带的详细分析提升您的交易技能"
+  },
+
+  "how_it_works": {
+    "title": "信号结构",
+    "subtitle": "每个信号包含的内容",
+    "entry": "入场价格",
+    "entry_desc": "精确的买入/卖出入场价格",
+    "take_profit": "止盈",
+    "take_profit_desc": "1-3级获利目标",
+    "stop_loss": "止损",
+    "stop_loss_desc": "用于风险管理的止损价格",
+    "risk": "风险%",
+    "risk_desc": "每笔交易的建议风险比例",
+    "rr_ratio": "风险/回报比",
+    "rr_ratio_desc": "风险与潜在回报的比率"
+  },
+
+  "coins": {
+    "title": "支持的币种",
+    "subtitle": "主要加密货币信号"
+  },
+
+  "free_signals": {
+    "title": "免费信号",
+    "subtitle": "免费体验VIP质量信号",
+    "badge": "免费",
+    "per_week": "每周3次",
+    "join_btn": "免费获取"
+  },
+
+  "vip": {
+    "title": "VIP会员",
+    "subtitle": "通过高级信号最大化您的利润",
+    "per_day": "每天2-5个信号",
+    "days": "周一至周五",
+    "money_back": "30天退款保证",
+    "join_btn": "加入VIP"
+  },
+
+  "pricing": {
+    "title": "选择计划",
+    "subtitle": "选择适合您的计划",
+    "most_popular": "热门",
+    "per_month": "/月",
+    "per_3months": "/3个月",
+    "per_6months": "/6个月",
+    "per_year": "/年",
+    "get_started": "立即开始",
+    "money_back": "30天退款保证",
+    "lifetime_title": "终身免费VIP访问",
+    "lifetime_desc": "通过向合作经纪商存入250美元以上获得终身VIP访问",
+    "lifetime_btn": "了解更多"
+  },
+
+  "testimonials": {
+    "title": "会员评价",
+    "subtitle": "来自全球50,000多名会员的故事"
+  },
+
+  "news": {
+    "title": "加密新闻",
+    "subtitle": "最新加密货币市场资讯",
+    "read_more": "阅读更多",
+    "view_all": "查看所有新闻"
+  },
+
+  "cta": {
+    "title": "立即开始",
+    "subtitle": "加入我们的免费Telegram群组，接收高质量信号",
+    "btn": "免费开始"
+  },
+
+  "footer": {
+    "tagline": "专业加密货币交易信号服务",
+    "quick_links": "快速链接",
+    "follow_us": "关注我们",
+    "disclaimer": "投资免责声明：加密货币交易具有高风险。过去的表现不保证未来的结果。请在投资前谨慎考虑。",
+    "copyright": "版权所有",
+    "terms": "服务条款",
+    "privacy": "隐私政策",
+    "contact": "联系我们"
+  },
+
+  "contact": {
+    "title": "联系我们",
+    "subtitle": "如有任何问题，请随时联系我们",
+    "name": "姓名",
+    "email": "电子邮件",
+    "subject": "主题",
+    "message": "消息",
+    "send": "发送",
+    "success": "您的消息已发送！"
+  },
+
+  "signals_page": {
+    "title": "加密信号",
+    "subtitle": "实时交易信号",
+    "filter_all": "全部",
+    "filter_active": "活跃",
+    "filter_closed": "已关闭",
+    "coin": "币种",
+    "type": "类型",
+    "entry": "入场",
+    "tp": "止盈",
+    "sl": "止损",
+    "risk": "风险",
+    "rr": "R/R",
+    "status": "状态",
+    "result": "结果",
+    "date": "日期",
+    "long": "做多",
+    "short": "做空",
+    "win": "盈利",
+    "loss": "亏损",
+    "pending": "待定",
+    "active": "活跃",
+    "closed": "已关闭",
+    "free_badge": "免费",
+    "vip_badge": "VIP",
+    "join_vip_msg": "订阅以查看VIP信号",
+    "join_vip_btn": "加入VIP"
+  }
+}

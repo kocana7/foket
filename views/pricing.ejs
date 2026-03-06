@@ -1,0 +1,74 @@
+<%- include('partials/head') %>
+<%- include('partials/navbar') %>
+
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="/">Home</a> › <span><%= t.pricing.title %></span></div>
+    <h1><%= t.pricing.title %></h1>
+    <p><%= t.pricing.subtitle %></p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <div class="pricing-grid">
+      <% if(plans && plans.length > 0) { %>
+        <% plans.forEach(plan => { %>
+          <div class="pricing-card <%= plan.is_popular ? 'popular' : '' %>">
+            <% if(plan.is_popular) { %><div class="popular-badge"><%= t.pricing.most_popular %></div><% } %>
+            <div class="plan-name"><%= plan.name %></div>
+            <div class="plan-duration">
+              <%= plan.duration_days === 30 ? '1 Month' : plan.duration_days === 90 ? '3 Months' : plan.duration_days === 180 ? '6 Months' : '1 Year' %>
+            </div>
+            <div class="plan-price">
+              <span class="plan-price-currency">$</span>
+              <span class="plan-price-amount"><%= plan.price %></span>
+            </div>
+            <div class="plan-price-period">
+              <%= plan.duration_days === 30 ? t.pricing.per_month : plan.duration_days === 90 ? t.pricing.per_3months : plan.duration_days === 180 ? t.pricing.per_6months : t.pricing.per_year %>
+            </div>
+            <div class="plan-features">
+              <% const features = typeof plan.features === 'string' ? JSON.parse(plan.features) : (plan.features || []); %>
+              <% features.forEach(f => { %>
+                <div class="plan-feature"><span class="check">✓</span><span><%= f %></span></div>
+              <% }) %>
+            </div>
+            <a href="#" class="plan-cta <%= plan.is_popular ? 'primary-cta' : 'outline-cta' %>">
+              <%= t.pricing.get_started %>
+            </a>
+            <div style="text-align:center;margin-top:12px;font-size:11px;color:var(--text-muted);">
+              <%= t.pricing.money_back %>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+
+    <!-- Lifetime -->
+    <div class="lifetime-box" style="margin-top:40px;">
+      <div>
+        <div style="font-size:36px;margin-bottom:8px;">♾️</div>
+        <h3><%= t.pricing.lifetime_title %></h3>
+        <p style="color:var(--text-secondary);max-width:500px;margin-top:8px;"><%= t.pricing.lifetime_desc %></p>
+      </div>
+      <a href="#" class="btn btn-primary btn-lg"><%= t.pricing.lifetime_btn %> <i class="fas fa-arrow-right"></i></a>
+    </div>
+
+    <!-- FAQ / Comparison -->
+    <div style="margin-top:80px;">
+      <div class="section-header">
+        <h2 class="section-title">All Plans Include</h2>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card"><div class="feature-icon">📱</div><div class="feature-title">Telegram Access</div><div class="feature-desc">Instant signal delivery to your mobile via Telegram</div></div>
+        <div class="feature-card"><div class="feature-icon">📊</div><div class="feature-title">Full Analysis</div><div class="feature-desc">Each signal includes complete technical analysis</div></div>
+        <div class="feature-card"><div class="feature-icon">🛡️</div><div class="feature-title">Risk Management</div><div class="feature-desc">Entry, take profit, stop loss and risk percentage</div></div>
+        <div class="feature-card"><div class="feature-icon">🔄</div><div class="feature-title">30-Day Guarantee</div><div class="feature-desc">Full refund if not satisfied within 30 days</div></div>
+        <div class="feature-card"><div class="feature-icon">💬</div><div class="feature-title">Community Access</div><div class="feature-desc">Join 50,000+ traders in our private community</div></div>
+        <div class="feature-card"><div class="feature-icon">📈</div><div class="feature-title">Track Record</div><div class="feature-desc">82% success rate verified with full history</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

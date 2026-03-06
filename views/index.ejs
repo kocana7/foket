@@ -1,0 +1,496 @@
+<%- include('partials/head') %>
+<%- include('partials/navbar') %>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-container">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <div class="dot"></div>
+        <%= t.hero.badge %>
+      </div>
+      <h1 class="hero-title">
+        <%= t.hero.title %>
+        <br><span class="highlight"><%= t.hero.title_highlight %></span>
+      </h1>
+      <p class="hero-subtitle"><%= t.hero.subtitle %></p>
+      <div class="hero-perks">
+        <div class="hero-perk"><div class="check"><i class="fas fa-check"></i></div><%= t.hero.free_signals_week %></div>
+        <div class="hero-perk"><div class="check"><i class="fas fa-check"></i></div><%= t.hero.vip_signals_day %></div>
+        <div class="hero-perk"><div class="check"><i class="fas fa-check"></i></div><%= t.hero.money_back %></div>
+      </div>
+      <div class="hero-buttons">
+        <a href="#" class="btn btn-primary btn-lg">
+          <i class="fab fa-telegram-plane"></i>
+          <%= t.hero.join_free_btn %>
+        </a>
+        <a href="/pricing" class="btn btn-outline btn-lg">
+          <%= t.hero.view_vip_btn %>
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-value" data-count="<%= stats.total_members || '50000' %>+">50,000+</div>
+          <div class="hero-stat-label"><%= t.stats.members %></div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value" data-count="<%= stats.success_rate || '82' %>%">82%</div>
+          <div class="hero-stat-label"><%= t.stats.success_rate %></div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value" data-count="<%= stats.years_active || '10' %>+">10+</div>
+          <div class="hero-stat-label"><%= t.stats.years %></div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card-main">
+        <div class="signal-card-header">
+          <div class="signal-card-coin">
+            <div class="coin-icon btc-color">BTC</div>
+            <div>
+              <div class="coin-name">Bitcoin</div>
+              <div class="coin-pair">BTC/USDT</div>
+            </div>
+          </div>
+          <div class="signal-type-badge long">LONG</div>
+        </div>
+        <div class="signal-grid">
+          <div class="signal-item">
+            <div class="signal-item-label">Entry Price</div>
+            <div class="signal-item-value">$65,000</div>
+          </div>
+          <div class="signal-item">
+            <div class="signal-item-label">Take Profit</div>
+            <div class="signal-item-value green">$68,500</div>
+          </div>
+          <div class="signal-item">
+            <div class="signal-item-label">Stop Loss</div>
+            <div class="signal-item-value red">$62,000</div>
+          </div>
+          <div class="signal-item">
+            <div class="signal-item-label">Risk/Reward</div>
+            <div class="signal-item-value">1:2.5</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:12px;">Risk: 1% &nbsp;|&nbsp; Exchange: Binance</div>
+        <div class="signal-progress">
+          <div class="signal-progress-bar"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-top:6px;">
+          <span>Entry</span><span style="color:var(--accent-blue)">+65% to TP</span>
+        </div>
+      </div>
+      <!-- Floating badges -->
+      <div style="margin-top:16px;">
+        <div class="floating-badge">
+          <span style="color:var(--accent-green);font-size:20px;">✓</span>
+          <div>
+            <div style="font-weight:700;font-size:13px;">ETH/USDT +23.4%</div>
+            <div style="font-size:11px;color:var(--text-muted);">Target reached</div>
+          </div>
+        </div>
+        <div class="floating-badge">
+          <span style="font-size:20px;">📊</span>
+          <div>
+            <div style="font-weight:700;font-size:13px;">82% Win Rate</div>
+            <div style="font-size:11px;color:var(--text-muted);">This month</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stats-grid">
+    <div>
+      <div class="stat-item-num" data-count="<%= stats.total_members || '50000' %>+">50,000+</div>
+      <div class="stat-item-label"><%= t.stats.members %></div>
+    </div>
+    <div>
+      <div class="stat-item-num" data-count="<%= stats.success_rate || '82' %>%">82%</div>
+      <div class="stat-item-label"><%= t.stats.success_rate %></div>
+    </div>
+    <div>
+      <div class="stat-item-num" data-count="<%= stats.signals_delivered || '15000' %>+">15,000+</div>
+      <div class="stat-item-label"><%= t.stats.signals %></div>
+    </div>
+    <div>
+      <div class="stat-item-num" data-count="<%= stats.years_active || '10' %>+">10+</div>
+      <div class="stat-item-label"><%= t.stats.years %></div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-badge">⚡ Features</div>
+      <h2 class="section-title"><%= t.features.title %></h2>
+      <p class="section-subtitle"><%= t.features.subtitle %></p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <div class="feature-title"><%= t.features.ai_title %></div>
+        <div class="feature-desc"><%= t.features.ai_desc %></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">👨‍💼</div>
+        <div class="feature-title"><%= t.features.expert_title %></div>
+        <div class="feature-desc"><%= t.features.expert_desc %></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🛡️</div>
+        <div class="feature-title"><%= t.features.risk_title %></div>
+        <div class="feature-desc"><%= t.features.risk_desc %></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title"><%= t.features.instant_title %></div>
+        <div class="feature-desc"><%= t.features.instant_desc %></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💬</div>
+        <div class="feature-title"><%= t.features.support_title %></div>
+        <div class="feature-desc"><%= t.features.support_desc %></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📚</div>
+        <div class="feature-title"><%= t.features.education_title %></div>
+        <div class="feature-desc"><%= t.features.education_desc %></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section how-it-works" id="how-it-works">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-badge">📋 Signal Format</div>
+      <h2 class="section-title"><%= t.how_it_works.title %></h2>
+      <p class="section-subtitle"><%= t.how_it_works.subtitle %></p>
+    </div>
+    <div class="signal-format-grid">
+      <div class="signal-format-item">
+        <div class="format-num">1</div>
+        <div class="format-title"><%= t.how_it_works.entry %></div>
+        <div class="format-desc"><%= t.how_it_works.entry_desc %></div>
+      </div>
+      <div class="signal-format-item">
+        <div class="format-num">2</div>
+        <div class="format-title"><%= t.how_it_works.take_profit %></div>
+        <div class="format-desc"><%= t.how_it_works.take_profit_desc %></div>
+      </div>
+      <div class="signal-format-item">
+        <div class="format-num">3</div>
+        <div class="format-title"><%= t.how_it_works.stop_loss %></div>
+        <div class="format-desc"><%= t.how_it_works.stop_loss_desc %></div>
+      </div>
+      <div class="signal-format-item">
+        <div class="format-num">4</div>
+        <div class="format-title"><%= t.how_it_works.risk %></div>
+        <div class="format-desc"><%= t.how_it_works.risk_desc %></div>
+      </div>
+      <div class="signal-format-item">
+        <div class="format-num">5</div>
+        <div class="format-title"><%= t.how_it_works.rr_ratio %></div>
+        <div class="format-desc"><%= t.how_it_works.rr_ratio_desc %></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SUPPORTED COINS -->
+<section class="section" id="coins">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-badge">💰 Assets</div>
+      <h2 class="section-title"><%= t.coins.title %></h2>
+      <p class="section-subtitle"><%= t.coins.subtitle %></p>
+    </div>
+    <div class="coins-grid">
+      <div class="coin-card">
+        <div class="coin-card-icon btc-color">₿</div>
+        <div class="coin-card-symbol">BTC</div>
+        <div class="coin-card-price" data-coin-price="BTC">$65,432</div>
+        <div class="coin-card-change up" data-coin-change="BTC">+2.34%</div>
+      </div>
+      <div class="coin-card">
+        <div class="coin-card-icon eth-color">Ξ</div>
+        <div class="coin-card-symbol">ETH</div>
+        <div class="coin-card-price" data-coin-price="ETH">$3,241</div>
+        <div class="coin-card-change up" data-coin-change="ETH">+1.87%</div>
+      </div>
+      <div class="coin-card">
+        <div class="coin-card-icon bnb-color">B</div>
+        <div class="coin-card-symbol">BNB</div>
+        <div class="coin-card-price" data-coin-price="BNB">$385</div>
+        <div class="coin-card-change down" data-coin-change="BNB">-0.54%</div>
+      </div>
+      <div class="coin-card">
+        <div class="coin-card-icon ada-color">A</div>
+        <div class="coin-card-symbol">ADA</div>
+        <div class="coin-card-price" data-coin-price="ADA">$0.452</div>
+        <div class="coin-card-change up" data-coin-change="ADA">+3.12%</div>
+      </div>
+      <div class="coin-card">
+        <div class="coin-card-icon dot-color">●</div>
+        <div class="coin-card-symbol">DOT</div>
+        <div class="coin-card-price" data-coin-price="DOT">$8.32</div>
+        <div class="coin-card-change up" data-coin-change="DOT">+1.45%</div>
+      </div>
+      <div class="coin-card">
+        <div class="coin-card-icon link-color">⬡</div>
+        <div class="coin-card-symbol">LINK</div>
+        <div class="coin-card-price" data-coin-price="LINK">$14.87</div>
+        <div class="coin-card-change up" data-coin-change="LINK">+2.91%</div>
+      </div>
+      <div class="coin-card">
+        <div class="coin-card-icon xrp-color">X</div>
+        <div class="coin-card-symbol">XRP</div>
+        <div class="coin-card-price" data-coin-price="XRP">$0.623</div>
+        <div class="coin-card-change down" data-coin-change="XRP">-1.23%</div>
+      </div>
+      <div class="coin-card">
+        <div class="coin-card-icon ltc-color">Ł</div>
+        <div class="coin-card-symbol">LTC</div>
+        <div class="coin-card-price" data-coin-price="LTC">$82.41</div>
+        <div class="coin-card-change up" data-coin-change="LTC">+0.87%</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FREE SIGNALS -->
+<section class="section free-signals-section" id="free-signals">
+  <div class="container">
+    <div class="free-signals-grid">
+      <div class="free-signals-content">
+        <div class="section-badge">🆓 <%= t.free_signals.badge %></div>
+        <h2 class="section-title" style="text-align:left;"><%= t.free_signals.title %></h2>
+        <p style="color:var(--text-secondary);margin-bottom:24px;line-height:1.7;"><%= t.free_signals.subtitle %></p>
+        <div class="free-perks">
+          <div class="free-perk"><div class="perk-icon"><i class="fas fa-check"></i></div>VIP-quality signals - <%= t.free_signals.per_week %></div>
+          <div class="free-perk"><div class="perk-icon"><i class="fas fa-check"></i></div>Full technical analysis included</div>
+          <div class="free-perk"><div class="perk-icon"><i class="fas fa-check"></i></div>Instant Telegram delivery</div>
+          <div class="free-perk"><div class="perk-icon"><i class="fas fa-check"></i></div>No credit card required</div>
+        </div>
+        <a href="#" class="btn btn-primary btn-lg">
+          <i class="fab fa-telegram-plane"></i>
+          <%= t.free_signals.join_btn %>
+        </a>
+      </div>
+      <div class="signals-preview">
+        <% if(signals && signals.length > 0) { %>
+          <% signals.slice(0,3).forEach(sig => { %>
+          <div class="mini-signal-card">
+            <div class="mini-coin-icon <%= sig.coin.toLowerCase() %>-color" style="background:linear-gradient(135deg,#f7931a,#f9a832);"><%= sig.coin.substring(0,2) %></div>
+            <div>
+              <div class="mini-coin-name"><%= sig.pair %></div>
+              <div class="mini-coin-pair">Entry: $<%= Number(sig.entry_price).toLocaleString() %></div>
+            </div>
+            <div>
+              <div class="mini-signal-price" style="color:var(--accent-green);">TP: $<%= Number(sig.take_profit_1).toLocaleString() %></div>
+              <div class="mini-signal-label">SL: $<%= Number(sig.stop_loss).toLocaleString() %></div>
+            </div>
+            <div class="result-badge <%= sig.result %>"><%= sig.result.toUpperCase() %></div>
+          </div>
+          <% }) %>
+        <% } else { %>
+          <div class="mini-signal-card">
+            <div class="mini-coin-icon" style="background:linear-gradient(135deg,#f7931a,#f9a832);">BT</div>
+            <div><div class="mini-coin-name">BTC/USDT</div><div class="mini-coin-pair">Entry: $65,000</div></div>
+            <div><div class="mini-signal-price" style="color:var(--accent-green);">TP: $68,000</div><div class="mini-signal-label">SL: $62,000</div></div>
+            <div class="result-badge win">WIN</div>
+          </div>
+          <div class="mini-signal-card">
+            <div class="mini-coin-icon" style="background:linear-gradient(135deg,#627eea,#8ea1e5);">ET</div>
+            <div><div class="mini-coin-name">ETH/USDT</div><div class="mini-coin-pair">Entry: $3,200</div></div>
+            <div><div class="mini-signal-price" style="color:var(--accent-green);">TP: $3,500</div><div class="mini-signal-label">SL: $3,000</div></div>
+            <div class="result-badge win">WIN</div>
+          </div>
+          <div class="mini-signal-card">
+            <div class="mini-coin-icon" style="background:linear-gradient(135deg,#2a5ada,#4c73e0);">LI</div>
+            <div><div class="mini-coin-name">LINK/USDT</div><div class="mini-coin-pair">Entry: $14.50</div></div>
+            <div><div class="mini-signal-price" style="color:var(--accent-yellow);">TP: $16.00</div><div class="mini-signal-label">SL: $13.00</div></div>
+            <div class="result-badge active">ACTIVE</div>
+          </div>
+        <% } %>
+        <div style="text-align:center;margin-top:16px;">
+          <a href="/crypto-signals" style="font-size:13px;color:var(--accent-blue);">View all signals →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section" id="pricing">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-badge">💎 VIP</div>
+      <h2 class="section-title"><%= t.pricing.title %></h2>
+      <p class="section-subtitle"><%= t.pricing.subtitle %></p>
+    </div>
+    <div class="pricing-grid">
+      <% if(plans && plans.length > 0) { %>
+        <% plans.forEach(plan => { %>
+          <div class="pricing-card <%= plan.is_popular ? 'popular' : '' %>">
+            <% if(plan.is_popular) { %><div class="popular-badge"><%= t.pricing.most_popular %></div><% } %>
+            <div class="plan-name"><%= plan.name %></div>
+            <div class="plan-duration">
+              <%= plan.duration_days === 30 ? '1 Month' : plan.duration_days === 90 ? '3 Months' : plan.duration_days === 180 ? '6 Months' : '1 Year' %>
+            </div>
+            <div class="plan-price">
+              <span class="plan-price-currency">$</span>
+              <span class="plan-price-amount"><%= plan.price %></span>
+            </div>
+            <div class="plan-price-period">
+              <%= plan.duration_days === 30 ? t.pricing.per_month : plan.duration_days === 90 ? t.pricing.per_3months : plan.duration_days === 180 ? t.pricing.per_6months : t.pricing.per_year %>
+            </div>
+            <div class="plan-features">
+              <% const features = typeof plan.features === 'string' ? JSON.parse(plan.features) : (plan.features || []); %>
+              <% features.forEach(f => { %>
+                <div class="plan-feature"><span class="check">✓</span><span><%= f %></span></div>
+              <% }) %>
+            </div>
+            <a href="#" class="plan-cta <%= plan.is_popular ? 'primary-cta' : 'outline-cta' %>">
+              <%= t.pricing.get_started %>
+            </a>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <div class="pricing-card">
+          <div class="plan-name">The Novice</div>
+          <div class="plan-duration">1 Month</div>
+          <div class="plan-price"><span class="plan-price-currency">$</span><span class="plan-price-amount">52</span></div>
+          <div class="plan-price-period"><%= t.pricing.per_month %></div>
+          <a href="#" class="plan-cta outline-cta"><%= t.pricing.get_started %></a>
+        </div>
+        <div class="pricing-card popular">
+          <div class="popular-badge"><%= t.pricing.most_popular %></div>
+          <div class="plan-name">The Proficient</div>
+          <div class="plan-duration">3 Months</div>
+          <div class="plan-price"><span class="plan-price-currency">$</span><span class="plan-price-amount">78</span></div>
+          <div class="plan-price-period"><%= t.pricing.per_3months %></div>
+          <a href="#" class="plan-cta primary-cta"><%= t.pricing.get_started %></a>
+        </div>
+        <div class="pricing-card">
+          <div class="plan-name">The Competent</div>
+          <div class="plan-duration">6 Months</div>
+          <div class="plan-price"><span class="plan-price-currency">$</span><span class="plan-price-amount">114</span></div>
+          <div class="plan-price-period"><%= t.pricing.per_6months %></div>
+          <a href="#" class="plan-cta outline-cta"><%= t.pricing.get_started %></a>
+        </div>
+        <div class="pricing-card">
+          <div class="plan-name">The Expert</div>
+          <div class="plan-duration">1 Year</div>
+          <div class="plan-price"><span class="plan-price-currency">$</span><span class="plan-price-amount">210</span></div>
+          <div class="plan-price-period"><%= t.pricing.per_year %></div>
+          <a href="#" class="plan-cta outline-cta"><%= t.pricing.get_started %></a>
+        </div>
+      <% } %>
+    </div>
+    <!-- Lifetime Box -->
+    <div class="lifetime-box">
+      <div>
+        <div style="font-size:36px;margin-bottom:8px;">♾️</div>
+        <h3 class="lifetime-text"><%= t.pricing.lifetime_title %></h3>
+        <p style="color:var(--text-secondary);max-width:500px;"><%= t.pricing.lifetime_desc %></p>
+      </div>
+      <a href="#" class="btn btn-primary btn-lg" style="white-space:nowrap;">
+        <%= t.pricing.lifetime_btn %>
+        <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section testimonials" id="testimonials">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-badge">⭐ Reviews</div>
+      <h2 class="section-title"><%= t.testimonials.title %></h2>
+      <p class="section-subtitle"><%= t.testimonials.subtitle %></p>
+    </div>
+    <div class="testimonials-grid">
+      <% if(testimonials && testimonials.length > 0) { %>
+        <% testimonials.forEach(review => { %>
+          <div class="testimonial-card">
+            <div class="testimonial-stars">
+              <% for(let i=0;i<review.rating;i++) { %><i class="fas fa-star"></i><% } %>
+            </div>
+            <p class="testimonial-text">"<%= review.text %>"</p>
+            <div class="testimonial-author">
+              <div class="testimonial-avatar"><%= review.name.charAt(0) %></div>
+              <div>
+                <div class="testimonial-name"><%= review.name %></div>
+                <div class="testimonial-plan"><%= review.plan_name || 'Member' %> <%= review.country ? '· ' + review.country : '' %></div>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<!-- NEWS -->
+<% if(news && news.length > 0) { %>
+<section class="section" id="news">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-badge">📰 News</div>
+      <h2 class="section-title"><%= t.news.title %></h2>
+      <p class="section-subtitle"><%= t.news.subtitle %></p>
+    </div>
+    <div class="news-grid">
+      <% news.forEach(article => { %>
+        <div class="news-card">
+          <div class="news-img">
+            <% if(article.featured_image) { %>
+              <img src="<%= article.featured_image %>" alt="<%= article.title %>">
+            <% } else { %>📊<% } %>
+          </div>
+          <div class="news-body">
+            <div class="news-category"><%= article.category %></div>
+            <h3 class="news-title"><%= article.title %></h3>
+            <p class="news-excerpt"><%= article.excerpt || '' %></p>
+            <div class="news-footer">
+              <span class="news-date"><%= article.published_at ? new Date(article.published_at).toLocaleDateString() : '' %></span>
+              <a href="/news/<%= article.slug %>" class="news-read-more"><%= t.news.read_more %> →</a>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+    <div style="text-align:center;margin-top:40px;">
+      <a href="/news" class="btn btn-outline"><%= t.news.view_all %> <i class="fas fa-arrow-right"></i></a>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<!-- CTA -->
+<section class="cta-section" id="cta">
+  <div class="container">
+    <h2><%= t.cta.title %></h2>
+    <p><%= t.cta.subtitle %></p>
+    <div class="cta-buttons">
+      <a href="#" class="btn btn-primary btn-lg">
+        <i class="fab fa-telegram-plane"></i>
+        <%= t.cta.btn %>
+      </a>
+      <a href="/pricing" class="btn btn-outline btn-lg"><%= t.pricing.title %></a>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
