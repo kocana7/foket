@@ -7,18 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    :root {
-      --bg-primary: #0a0e1a;
-      --bg-secondary: #0f1629;
-      --bg-card: #131c31;
-      --border-color: #1e2d4a;
-      --text-primary: #e8edf5;
-      --text-secondary: #8fa3c0;
-      --accent-blue: #00b4d8;
-      --gradient-primary: linear-gradient(135deg,#00b4d8 0%,#0077a8 100%);
-      --radius-md: 12px;
-      --radius-sm: 8px;
-    }
+    :root{--bg-primary:#0a0e1a;--bg-secondary:#0f1629;--bg-card:#131c31;--bg-card-hover:#1a2540;--border-color:#1e2d4a;--text-primary:#e8edf5;--text-secondary:#8fa3c0;--accent-blue:#00b4d8;--gradient-primary:linear-gradient(135deg,#00b4d8 0%,#0077a8 100%);--radius-md:12px;--radius-sm:8px;--shadow-card:0 8px 32px rgba(0,0,0,0.4)}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.6}
     a{color:var(--accent-blue);text-decoration:none}
@@ -29,7 +18,16 @@
     .navbar-brand span{color:var(--accent-blue)}
     .navbar-nav{display:flex;align-items:center;gap:4px}
     .navbar-nav a{color:var(--text-secondary);font-size:14px;font-weight:500;padding:8px 14px;border-radius:var(--radius-sm)}
-    .navbar-nav a:hover,.navbar-nav a.active{color:var(--text-primary);background:var(--bg-card)}
+    .navbar-nav a:hover{color:var(--text-primary);background:var(--bg-card)}
+    .navbar-actions{display:flex;align-items:center;gap:10px}
+    .lang-dropdown{position:relative}
+    .lang-btn{display:flex;align-items:center;gap:6px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:7px 12px;font-size:12px;color:var(--text-secondary);cursor:pointer;font-family:inherit}
+    .lang-btn:hover{border-color:var(--accent-blue);color:var(--accent-blue)}
+    .lang-menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:6px;min-width:155px;display:none;z-index:200;box-shadow:var(--shadow-card)}
+    .lang-menu.open{display:block}
+    .lang-opt{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);cursor:pointer;text-decoration:none}
+    .lang-opt:hover{background:var(--bg-card-hover);color:var(--text-primary)}
+    .lang-opt.cur{color:var(--accent-blue)}
     .container{max-width:900px;margin:0 auto;padding:0 24px}
     .section{padding:60px 0}
     .sec-title{font-size:28px;font-weight:800;margin-bottom:24px}
@@ -43,47 +41,93 @@
 <nav class="navbar">
   <div class="navbar-inner">
     <a href="index.html" class="navbar-brand">
-      <div class="logo-icon">
-        <img src="images/logo2.png" alt="FoketSignal 로고" style="width:100%;height:100%;object-fit:contain;border-radius:8px;">
-      </div>
+      <div class="logo-icon"><img src="images/logo2.png" alt="FoketSignal" style="width:100%;height:100%;object-fit:contain;border-radius:8px;"></div>
       Foket<span>Signal</span>
     </a>
     <div class="navbar-nav">
-      <a href="index.html">홈</a>
-      <a href="index.html#pricing">요금제</a>
-      <a href="faq.html">자주하는 질문(FAQ)</a>
-      <a href="index.html#contact">문의</a>
+      <a href="index.html" data-i18n="h">홈</a>
+      <a href="index.html#pricing" data-i18n="p">요금제</a>
+      <a href="faq.html" data-i18n="f">자주하는 질문(FAQ)</a>
+      <a href="index.html#contact" data-i18n="c">문의</a>
     </div>
-    <a href="https://t.me/foketsignal_Lobby" target="_blank" rel="noopener noreferrer" class="btn-tg" style="display:inline-flex;align-items:center;gap:6px;background:var(--gradient-primary);color:#fff;padding:9px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;text-decoration:none"><i class="fab fa-telegram-plane"></i> 무료 텔레그램 참여</a>
+    <div class="navbar-actions">
+      <div class="lang-dropdown">
+        <button class="lang-btn" id="langToggle"><span id="curFlag">🇰🇷</span><span id="curLang">한국어</span><span>▾</span></button>
+        <div class="lang-menu" id="langMenu">
+          <a class="lang-opt" data-lang="ko" href="#">🇰🇷 한국어</a>
+          <a class="lang-opt" data-lang="en" href="#">🇺🇸 English</a>
+          <a class="lang-opt" data-lang="de" href="#">🇩🇪 Deutsch</a>
+          <a class="lang-opt" data-lang="ja" href="#">🇯🇵 日本語</a>
+          <a class="lang-opt" data-lang="zh" href="#">🇨🇳 中文</a>
+          <a class="lang-opt" data-lang="fr" href="#">🇫🇷 Français</a>
+          <a class="lang-opt" data-lang="es" href="#">🇪🇸 Español</a>
+        </div>
+      </div>
+      <a href="https://t.me/foketsignal_Lobby" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;background:var(--gradient-primary);color:#fff;padding:9px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;text-decoration:none"><i class="fab fa-telegram-plane"></i> <span data-i18n="j">무료 텔레그램 참여</span></a>
+    </div>
   </div>
 </nav>
-
 <main class="section">
   <div class="container">
-    <h1 class="sec-title">이용약관</h1>
-    <div id="terms-content" class="terms-body"></div>
-    <div id="terms-empty" class="terms-empty" style="display:none">등록된 이용약관이 없습니다. 관리자 페이지에서 이용약관 내용을 입력해 주세요.</div>
+    <h1 class="sec-title" data-i18n="pt">이용약관</h1>
+    <div id="terms-content" class="terms-body" style="display:none"></div>
+    <div id="terms-empty" class="terms-empty" data-i18n="e">등록된 이용약관이 없습니다. 관리자 페이지에서 이용약관 내용을 입력해 주세요.</div>
   </div>
 </main>
-
 <footer>
-  <a href="index.html">FoketSignal</a> &copy; 2026 · <a href="index.html#contact">문의</a>
+  <a href="index.html">FoketSignal</a> &copy; 2026 · <a href="index.html#contact" data-i18n="c">문의</a>
 </footer>
-
 <script>
 (function(){
-  var raw = '';
-  try { raw = localStorage.getItem('fk_terms') || ''; } catch (e) {}
-  var content = document.getElementById('terms-content');
-  var empty = document.getElementById('terms-empty');
-  if (raw && raw.trim()) {
-    content.textContent = raw;
-    content.style.display = 'block';
-    empty.style.display = 'none';
-  } else {
-    content.style.display = 'none';
-    empty.style.display = 'block';
+  var T={
+    ko:{title:'이용약관',h:'홈',p:'요금제',f:'자주하는 질문(FAQ)',c:'문의',j:'무료 텔레그램 참여',pt:'이용약관',e:'등록된 이용약관이 없습니다. 관리자 페이지에서 이용약관 내용을 입력해 주세요.'},
+    en:{title:'Terms of Service',h:'Home',p:'Pricing',f:'FAQ',c:'Contact',j:'Join Free Telegram',pt:'Terms of Service',e:'No terms of service registered.'},
+    de:{title:'Nutzungsbedingungen',h:'Startseite',p:'Preise',f:'Häufige Fragen (FAQ)',c:'Kontakt',j:'Kostenlos beitreten',pt:'Nutzungsbedingungen',e:'Keine Nutzungsbedingungen registriert.'},
+    ja:{title:'利用規約',h:'ホーム',p:'料金',f:'よくある質問(FAQ)',c:'お問い合わせ',j:'無料Telegram参加',pt:'利用規約',e:'利用規約が登録されていません。'},
+    zh:{title:'服务条款',h:'首页',p:'定价',f:'常见问题(FAQ)',c:'联系我们',j:'免费加入Telegram',pt:'服务条款',e:'未登记服务条款。'},
+    fr:{title:"Conditions d'utilisation",h:'Accueil',p:'Tarifs',f:'FAQ',c:'Contact',j:'Rejoindre Telegram gratuitement',pt:"Conditions d'utilisation",e:"Aucune conditions d'utilisation enregistrée."},
+    es:{title:'Términos de servicio',h:'Inicio',p:'Precios',f:'Preguntas frecuentes (FAQ)',c:'Contacto',j:'Unirse gratis a Telegram',pt:'Términos de servicio',e:'No hay términos de servicio registrados.'}
+  };
+  var LANG_META={ko:{flag:'🇰🇷',name:'한국어'},en:{flag:'🇺🇸',name:'English'},de:{flag:'🇩🇪',name:'Deutsch'},ja:{flag:'🇯🇵',name:'日本語'},zh:{flag:'🇨🇳',name:'中文'},fr:{flag:'🇫🇷',name:'Français'},es:{flag:'🇪🇸',name:'Español'}};
+  var rawData=''; try{rawData=localStorage.getItem('fk_terms')||'';}catch(e){}
+
+  function getLocalized(lang){
+    if(!rawData)return'';
+    try{var o=JSON.parse(rawData);if(o&&typeof o==='object')return o[lang]||o['ko']||'';}catch(e){}
+    return rawData;
   }
+  function applyLang(lang){
+    if(!T[lang])lang='ko';
+    var t=T[lang];
+    document.documentElement.lang=lang;
+    document.title=t.title+' | FoketSignal';
+    document.querySelectorAll('[data-i18n]').forEach(function(el){var k=el.getAttribute('data-i18n');if(t[k]!==undefined)el.textContent=t[k];});
+    var meta=LANG_META[lang];
+    document.getElementById('curFlag').textContent=meta.flag;
+    document.getElementById('curLang').textContent=meta.name;
+    document.querySelectorAll('.lang-opt').forEach(function(opt){opt.classList.toggle('cur',opt.dataset.lang===lang);});
+    // 콘텐츠 갱신
+    var content=document.getElementById('terms-content');
+    var empty=document.getElementById('terms-empty');
+    var text=getLocalized(lang);
+    if(text&&text.trim()){content.textContent=text;content.style.display='block';empty.style.display='none';}
+    else{content.style.display='none';empty.style.display='block';}
+  }
+
+  var currentLang=localStorage.getItem('lang')||'ko';
+  applyLang(currentLang);
+
+  document.getElementById('langToggle').addEventListener('click',function(e){e.stopPropagation();document.getElementById('langMenu').classList.toggle('open');});
+  document.addEventListener('click',function(){document.getElementById('langMenu').classList.remove('open');});
+  document.querySelectorAll('.lang-opt').forEach(function(opt){
+    opt.addEventListener('click',function(e){
+      e.preventDefault();
+      currentLang=opt.dataset.lang;
+      localStorage.setItem('lang',currentLang);
+      document.getElementById('langMenu').classList.remove('open');
+      applyLang(currentLang);
+    });
+  });
 })();
 </script>
 </body>

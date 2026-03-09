@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>개인정보처리방침 | FoketSignal</title>
+  <title>제휴링크고지 | FoketSignal</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
@@ -69,9 +69,9 @@
 </nav>
 <main class="section">
   <div class="container">
-    <h1 class="sec-title" data-i18n="pt">개인정보처리방침</h1>
-    <div id="privacy-content" class="terms-body" style="display:none"></div>
-    <div id="privacy-empty" class="terms-empty" data-i18n="e">등록된 개인정보처리방침이 없습니다. 관리자 페이지에서 내용을 입력해 주세요.</div>
+    <h1 class="sec-title" data-i18n="pt">제휴링크고지</h1>
+    <div id="affiliate-content" class="terms-body" style="display:none"></div>
+    <div id="affiliate-empty" class="terms-empty" data-i18n="e">등록된 제휴링크고지가 없습니다. 관리자 페이지에서 내용을 입력해 주세요.</div>
   </div>
 </main>
 <footer>
@@ -80,21 +80,29 @@
 <script>
 (function(){
   var T={
-    ko:{title:'개인정보처리방침',h:'홈',p:'요금제',f:'자주하는 질문(FAQ)',c:'문의',j:'무료 텔레그램 참여',pt:'개인정보처리방침',e:'등록된 개인정보처리방침이 없습니다. 관리자 페이지에서 내용을 입력해 주세요.'},
-    en:{title:'Privacy Policy',h:'Home',p:'Pricing',f:'FAQ',c:'Contact',j:'Join Free Telegram',pt:'Privacy Policy',e:'No privacy policy registered.'},
-    de:{title:'Datenschutzrichtlinie',h:'Startseite',p:'Preise',f:'Häufige Fragen (FAQ)',c:'Kontakt',j:'Kostenlos beitreten',pt:'Datenschutzrichtlinie',e:'Keine Datenschutzrichtlinie registriert.'},
-    ja:{title:'プライバシーポリシー',h:'ホーム',p:'料金',f:'よくある質問(FAQ)',c:'お問い合わせ',j:'無料Telegram参加',pt:'プライバシーポリシー',e:'プライバシーポリシーが登録されていません。'},
-    zh:{title:'隐私政策',h:'首页',p:'定价',f:'常见问题(FAQ)',c:'联系我们',j:'免费加入Telegram',pt:'隐私政策',e:'未登记隐私政策。'},
-    fr:{title:'Politique de confidentialité',h:'Accueil',p:'Tarifs',f:'FAQ',c:'Contact',j:'Rejoindre Telegram gratuitement',pt:'Politique de confidentialité',e:'Aucune politique de confidentialité enregistrée.'},
-    es:{title:'Política de privacidad',h:'Inicio',p:'Precios',f:'Preguntas frecuentes (FAQ)',c:'Contacto',j:'Unirse gratis a Telegram',pt:'Política de privacidad',e:'No hay política de privacidad registrada.'}
+    ko:{title:'제휴링크고지',h:'홈',p:'요금제',f:'자주하는 질문(FAQ)',c:'문의',j:'무료 텔레그램 참여',pt:'제휴링크고지',e:'등록된 제휴링크고지가 없습니다. 관리자 페이지에서 내용을 입력해 주세요.'},
+    en:{title:'Affiliate Disclosure',h:'Home',p:'Pricing',f:'FAQ',c:'Contact',j:'Join Free Telegram',pt:'Affiliate Disclosure',e:'No affiliate disclosure registered.'},
+    de:{title:'Affiliate-Offenlegung',h:'Startseite',p:'Preise',f:'Häufige Fragen (FAQ)',c:'Kontakt',j:'Kostenlos beitreten',pt:'Affiliate-Offenlegung',e:'Keine Affiliate-Offenlegung registriert.'},
+    ja:{title:'アフィリエイト開示',h:'ホーム',p:'料金',f:'よくある質問(FAQ)',c:'お問い合わせ',j:'無料Telegram参加',pt:'アフィリエイト開示',e:'アフィリエイト開示が登録されていません。'},
+    zh:{title:'联盟链接披露',h:'首页',p:'定价',f:'常见问题(FAQ)',c:'联系我们',j:'免费加入Telegram',pt:'联盟链接披露',e:'未登记联盟链接披露。'},
+    fr:{title:"Divulgation d'affiliation",h:'Accueil',p:'Tarifs',f:'FAQ',c:'Contact',j:'Rejoindre Telegram gratuitement',pt:"Divulgation d'affiliation",e:"Aucune divulgation d'affiliation enregistrée."},
+    es:{title:'Divulgación de afiliados',h:'Inicio',p:'Precios',f:'Preguntas frecuentes (FAQ)',c:'Contacto',j:'Unirse gratis a Telegram',pt:'Divulgación de afiliados',e:'No hay divulgación de afiliados registrada.'}
   };
   var LANG_META={ko:{flag:'🇰🇷',name:'한국어'},en:{flag:'🇺🇸',name:'English'},de:{flag:'🇩🇪',name:'Deutsch'},ja:{flag:'🇯🇵',name:'日本語'},zh:{flag:'🇨🇳',name:'中文'},fr:{flag:'🇫🇷',name:'Français'},es:{flag:'🇪🇸',name:'Español'}};
-  var rawData=''; try{rawData=localStorage.getItem('fk_privacy')||'';}catch(e){}
+  var rawData=''; try{rawData=localStorage.getItem('fk_affiliate')||'';}catch(e){}
+  var currentLang=localStorage.getItem('lang')||'ko';
 
   function getLocalized(lang){
     if(!rawData)return'';
     try{var o=JSON.parse(rawData);if(o&&typeof o==='object')return o[lang]||o['ko']||'';}catch(e){}
     return rawData;
+  }
+  function renderContent(lang){
+    var content=document.getElementById('affiliate-content');
+    var empty=document.getElementById('affiliate-empty');
+    var text=getLocalized(lang);
+    if(text&&text.trim()){content.textContent=text;content.style.display='block';empty.style.display='none';}
+    else{content.style.display='none';empty.style.display='block';}
   }
   function applyLang(lang){
     if(!T[lang])lang='ko';
@@ -106,15 +114,20 @@
     document.getElementById('curFlag').textContent=meta.flag;
     document.getElementById('curLang').textContent=meta.name;
     document.querySelectorAll('.lang-opt').forEach(function(opt){opt.classList.toggle('cur',opt.dataset.lang===lang);});
-    var content=document.getElementById('privacy-content');
-    var empty=document.getElementById('privacy-empty');
-    var text=getLocalized(lang);
-    if(text&&text.trim()){content.textContent=text;content.style.display='block';empty.style.display='none';}
-    else{content.style.display='none';empty.style.display='block';}
+    renderContent(lang);
   }
 
-  var currentLang=localStorage.getItem('lang')||'ko';
   applyLang(currentLang);
+
+  var BASE=(location.protocol!=='file:')?location.origin+'/api':'http://localhost:3000/api';
+  fetch(BASE+'/storage/affiliate',{cache:'no-store'})
+    .then(function(r){return r.json();})
+    .then(function(j){
+      if(j&&j.success&&j.value!=null){try{localStorage.setItem('fk_affiliate',j.value);}catch(e){}rawData=j.value;}
+      else{rawData=localStorage.getItem('fk_affiliate')||'';}
+      renderContent(currentLang);
+    })
+    .catch(function(){rawData=localStorage.getItem('fk_affiliate')||'';renderContent(currentLang);});
 
   document.getElementById('langToggle').addEventListener('click',function(e){e.stopPropagation();document.getElementById('langMenu').classList.toggle('open');});
   document.addEventListener('click',function(){document.getElementById('langMenu').classList.remove('open');});

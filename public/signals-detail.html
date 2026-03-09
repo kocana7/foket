@@ -125,28 +125,31 @@
       empty.style.display = 'none';
       let html = '';
       markets.forEach(function(m) {
-        const insts = m.instruments || [];
+        const insts = (m.instruments || []).filter(function(i) { return i.active !== false; });
         if (insts.length === 0) return;
         const nameKo = m.nameKo || m.nameEn || '종목';
         const clr = m.clr || 'var(--accent-blue)';
         const isBinanceCrypto = (m.id === 8);
+        const hasExch = insts.some(function(i) { return i.exch; });
         html += '<div class="table-wrap">';
-        html += '<div class="sec-title"><span class="icon" style="background:' + clr + ';">' + (m.icon ? '<i class="' + m.icon + '"></i>' : '') + '</span>' + nameKo + '</div>';
+        html += '<div class="sec-title"><span class="icon" style="background:' + clr + '22;color:' + clr + ';">' + (m.icon ? '<i class="' + m.icon + '"></i>' : '') + '</span>' + nameKo + '</div>';
         html += '<table class="detail-table"><thead><tr>';
-        html += '<th>종목</th><th>월평균 수익률</th><th>일최대 손실변동폭</th><th>거래일수</th>';
-        if (insts.some(i => i.exch)) html += '<th>거래소</th>';
+        html += '<th>종목</th><th>월평균 수익률</th><th>일최대 손실변동폭</th><th>일평균 왕복 거래횟수</th><th>거래일수</th>';
+        if (hasExch) html += '<th>거래소</th>';
         html += '</tr></thead><tbody>';
         insts.forEach(function(inst) {
           const mr = formatReturn(inst.monthlyReturn);
           const dl = formatMaxLoss(inst.maxDailyLoss);
           const days = calcTradingDays(inst.startDate);
+          const rt = (inst.dailyRoundTrips !== '' && inst.dailyRoundTrips != null) ? parseFloat(inst.dailyRoundTrips) : null;
           const symPrefix = isBinanceCrypto ? '<span class="binance-mark" title="Binance">B</span>' : '';
           html += '<tr>';
           html += '<td>' + symPrefix + '<span class="sym">' + (inst.sym || '—') + '</span><span class="name-ko">' + (inst.nameKo || inst.nameEn || '') + '</span></td>';
           html += '<td class="' + mr.cls + '">' + mr.text + '</td>';
           html += '<td class="' + dl.cls + '">' + dl.text + '</td>';
+          html += '<td class="val-dim">' + (rt !== null && !isNaN(rt) ? rt : '—') + '</td>';
           html += '<td>' + (days !== null ? days + '일' : '—') + '</td>';
-          if (insts.some(i => i.exch)) html += '<td>' + (inst.exch || '—') + '</td>';
+          if (hasExch) html += '<td>' + (inst.exch || '—') + '</td>';
           html += '</tr>';
         });
         html += '</tbody></table></div>';

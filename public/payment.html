@@ -109,12 +109,22 @@
   </div>
 
   <script>
-    const PLANS = {
-      bronze: { name: 'Bronze Class', price: 30 },
-      silver: { name: 'Silver-Class', price: 45 },
-      gold:   { name: 'Gold Class',  price: 60 },
-      vip:    { name: 'VIP Class',   price: 80 }
+    const PLANS_DEFAULT = {
+      bronze: { name: 'Bronze Class', price: 30, days: 30 },
+      silver: { name: 'Silver Class', price: 45, days: 30 },
+      gold:   { name: 'Gold Class',   price: 60, days: 30 },
+      vip:    { name: 'VIP Class',    price: 80, days: 30 }
     };
+    let PLANS = PLANS_DEFAULT;
+    try {
+      const raw = localStorage.getItem('fk_plans');
+      if (raw) {
+        const arr = JSON.parse(raw);
+        const map = {};
+        arr.forEach(function(p) { if (p.slug) map[p.slug] = { name: p.name, price: p.price, days: p.days }; });
+        if (Object.keys(map).length) PLANS = map;
+      }
+    } catch(e) {}
 
     const params = new URLSearchParams(location.search);
     const planId = (params.get('plan') || '').toLowerCase();
@@ -129,7 +139,7 @@
     if (plan) {
       payPlanName.textContent = plan.name;
       payAmount.textContent = '$' + plan.price;
-      payPlanMeta.textContent = '이용 기간: 1개월';
+      payPlanMeta.textContent = '이용 기간: ' + (plan.days || 30) + '일';
       document.title = plan.name + ' 결제 - FoketCrypto Signals';
     } else {
       payPlanName.textContent = '플랜을 선택해 주세요';

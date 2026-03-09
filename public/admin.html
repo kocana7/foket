@@ -7,6 +7,7 @@
   <title>FoketSignal – 관리자 패널</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <style>
     :root {
       --bg: #0d1117;
@@ -353,6 +354,16 @@
     .tb-btn.pri:hover {
       background: #79c0ff;
       color: #0d1117
+    }
+
+    .tb-btn.del {
+      background: rgba(248, 81, 73, .1);
+      border-color: rgba(248, 81, 73, .3);
+      color: var(--red)
+    }
+
+    .tb-btn.del:hover {
+      background: rgba(248, 81, 73, .2)
     }
 
     .content {
@@ -1144,12 +1155,22 @@
         <button class="sb-link" onclick="goPage('messages')"><span class="ic"><i
               class="fas fa-envelope"></i></span>메시지<span class="bdg" id="msgBadge"
             style="display:none">0</span></button>
+        <button class="sb-link" onclick="goPage('upload')"><span class="ic"><i
+              class="fas fa-file-upload"></i></span>파일 업로드</button>
         <button class="sb-link" onclick="goPage('settings')"><span class="ic"><i
               class="fas fa-cog"></i></span>설정</button>
         <button class="sb-link" onclick="goPage('terms')"><span class="ic"><i
               class="fas fa-file-contract"></i></span>이용약관</button>
         <button class="sb-link" onclick="goPage('privacy')"><span class="ic"><i
               class="fas fa-shield-alt"></i></span>개인정보처리방침</button>
+        <button class="sb-link" onclick="goPage('risk')"><span class="ic"><i
+              class="fas fa-exclamation-triangle"></i></span>투자위험고지</button>
+        <button class="sb-link" onclick="goPage('refund')"><span class="ic"><i
+              class="fas fa-undo"></i></span>환불정책</button>
+        <button class="sb-link" onclick="goPage('affiliate')"><span class="ic"><i
+              class="fas fa-handshake"></i></span>제휴링크고지</button>
+        <button class="sb-link" onclick="goPage('earnings')"><span class="ic"><i
+              class="fas fa-chart-bar"></i></span>수익면책고지</button>
         <div class="sb-label">사이트</div>
         <a class="sb-link" href="index.html" target="_blank"><span class="ic"><i
               class="fas fa-external-link-alt"></i></span>웹사이트 보기</a>
@@ -1424,7 +1445,7 @@
                 <div class="fgrid">
                   <div class="fg"><label class="fl">국가</label><input class="fc" id="tn-country" placeholder="대한민국">
                   </div>
-                  <div class="fg"><label class="fl">플랜</label><input class="fc" id="tn-plan" placeholder="The Expert">
+                  <div class="fg"><label class="fl">플랜</label><input class="fc" id="tn-plan" placeholder="VIP Class">
                   </div>
                 </div>
                 <div class="fg"><label class="fl req">후기</label><textarea class="fc" id="tn-text" rows="3"
@@ -1469,8 +1490,12 @@
                     <div class="ac-title" id="mkt-cat-title">카테고리를 선택하세요</div>
                     <div id="mkt-cat-en" style="font-size:11px;color:var(--dim);margin-top:2px;"></div>
                   </div>
-                  <button type="button" class="tb-btn pri" id="mkt-save-btn" onclick="publishMarkets()"
-                    style="display:none;"><i class="fas fa-save"></i> 저장 (메인 반영)</button>
+                  <div style="display:flex;gap:8px;align-items:center;">
+                    <button type="button" class="tb-btn" id="mkt-add-btn" onclick="openInstModal(selCatId)"
+                      style="display:none;"><i class="fas fa-plus"></i> 종목 추가</button>
+                    <button type="button" class="tb-btn pri" id="mkt-save-btn" onclick="publishMarkets()"
+                      style="display:none;"><i class="fas fa-save"></i> 저장 (메인 반영)</button>
+                  </div>
                 </div>
                 <div style="overflow-x:auto;">
                   <table class="tbl">
@@ -1503,18 +1528,18 @@
                 저장 후 메인 페이지(index.html)에 반영하려면 해당 페이지에서 링크를 동일하게 수정해 주세요.</p>
               <div class="fgrid">
                 <div class="fg"><label class="fl">무료 텔레그램 (채널/그룹 링크)</label><input class="fc" id="tg-telegram_free"
-                    placeholder="https://t.me/foket"></div>
+                    placeholder="https://t.me/foketsignal_Lobby"></div>
                 <div class="fg"><label class="fl">VIP 텔레그램 (채널/그룹 링크)</label><input class="fc" id="tg-telegram_vip"
                     placeholder="https://t.me/foket_vip"></div>
               </div>
-              <div class="fg"><label class="fl">표시용 사용자명 (예: @foket)</label><input class="fc" id="tg-display_handle"
-                  placeholder="@foket"></div>
+              <div class="fg"><label class="fl">표시용 사용자명 (예: @foketsignal_Lobby)</label><input class="fc" id="tg-display_handle"
+                  placeholder="@foketsignal_Lobby"></div>
             </div>
           </div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <button class="btn btn-pri" onclick="saveTelegramSettings()"><i class="fas fa-save"></i> 텔레그램 설정 저장</button>
             <button class="btn btn-out" type="button"
-              onclick="var u=document.getElementById('tg-telegram_free').value.trim()||'https://t.me/foket';window.open(u,'_blank','noopener,noreferrer');"><i
+              onclick="var u=document.getElementById('tg-telegram_free').value.trim()||'https://t.me/foketsignal_Lobby';window.open(u,'_blank','noopener,noreferrer');"><i
                 class="fab fa-telegram-plane"></i> 무료 링크 미리보기</button>
           </div>
         </div>
@@ -1560,7 +1585,7 @@
             <div class="ac-bd">
               <div class="fgrid">
                 <div class="fg"><label class="fl">연락처 이메일</label><input class="fc" id="cfg-contact_email"
-                    placeholder="support@foketcrypto.com"></div>
+                    placeholder="support@foket.com"></div>
                 <div class="fg"><label class="fl">연락처 전화번호</label><input class="fc" id="cfg-contact_phone"
                     placeholder="+82-00-0000-0000"></div>
               </div>
@@ -1607,14 +1632,34 @@
         </div>
 
         <!-- ───── 이용약관 ───── -->
+        <style>
+          .legal-lang-tabs{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap}
+          .legal-tab{padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--dim);font-size:12px;cursor:pointer;font-family:inherit;transition:.15s}
+          .legal-tab:hover:not(.active){background:var(--bg3);color:var(--txt)}
+          .legal-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+        </style>
+
         <div class="page" id="page-terms">
           <div class="ac">
-            <div class="ac-hd">
-              <div class="ac-title">이용약관 내용</div>
-            </div>
+            <div class="ac-hd"><div class="ac-title">이용약관 내용</div></div>
             <div class="ac-bd">
-              <p style="font-size:12px;color:var(--dim);margin-bottom:10px;">아래 내용이 이용약관 페이지(terms.html)에 표시됩니다. 줄바꿈은 그대로 반영됩니다.</p>
-              <textarea class="fc" id="terms-text" rows="18" placeholder="이용약관 내용을 입력하세요..."></textarea>
+              <p style="font-size:12px;color:var(--dim);margin-bottom:10px;">각 언어별 내용을 입력하세요. 미입력 시 한국어 내용이 기본으로 표시됩니다.</p>
+              <div class="legal-lang-tabs" id="terms-tabs">
+                <button class="legal-tab active" onclick="switchLegalTab('terms','ko',this)">🇰🇷 한국어</button>
+                <button class="legal-tab" onclick="switchLegalTab('terms','en',this)">🇺🇸 English</button>
+                <button class="legal-tab" onclick="switchLegalTab('terms','de',this)">🇩🇪 Deutsch</button>
+                <button class="legal-tab" onclick="switchLegalTab('terms','ja',this)">🇯🇵 日本語</button>
+                <button class="legal-tab" onclick="switchLegalTab('terms','zh',this)">🇨🇳 中文</button>
+                <button class="legal-tab" onclick="switchLegalTab('terms','fr',this)">🇫🇷 Français</button>
+                <button class="legal-tab" onclick="switchLegalTab('terms','es',this)">🇪🇸 Español</button>
+              </div>
+              <textarea class="fc" id="terms-text-ko" rows="18" placeholder="한국어 이용약관 내용을 입력하세요..."></textarea>
+              <textarea class="fc" id="terms-text-en" rows="18" placeholder="Enter Terms of Service in English..." style="display:none"></textarea>
+              <textarea class="fc" id="terms-text-de" rows="18" placeholder="Nutzungsbedingungen auf Deutsch eingeben..." style="display:none"></textarea>
+              <textarea class="fc" id="terms-text-ja" rows="18" placeholder="日本語で利用規約を入力してください..." style="display:none"></textarea>
+              <textarea class="fc" id="terms-text-zh" rows="18" placeholder="请输入中文服务条款内容..." style="display:none"></textarea>
+              <textarea class="fc" id="terms-text-fr" rows="18" placeholder="Saisir les conditions d'utilisation en français..." style="display:none"></textarea>
+              <textarea class="fc" id="terms-text-es" rows="18" placeholder="Ingrese los términos de servicio en español..." style="display:none"></textarea>
             </div>
           </div>
           <button class="btn btn-pri" onclick="saveTerms()"><i class="fas fa-save"></i> 이용약관 저장</button>
@@ -1623,16 +1668,226 @@
         <!-- ───── 개인정보처리방침 ───── -->
         <div class="page" id="page-privacy">
           <div class="ac">
-            <div class="ac-hd">
-              <div class="ac-title">개인정보처리방침 내용</div>
-            </div>
+            <div class="ac-hd"><div class="ac-title">개인정보처리방침 내용</div></div>
             <div class="ac-bd">
-              <p style="font-size:12px;color:var(--dim);margin-bottom:10px;">아래 내용이 개인정보처리방침 페이지(privacy.html)에 표시됩니다. 줄바꿈은 그대로 반영됩니다.</p>
-              <textarea class="fc" id="privacy-text" rows="18" placeholder="개인정보처리방침 내용을 입력하세요..."></textarea>
+              <p style="font-size:12px;color:var(--dim);margin-bottom:10px;">각 언어별 내용을 입력하세요. 미입력 시 한국어 내용이 기본으로 표시됩니다.</p>
+              <div class="legal-lang-tabs" id="privacy-tabs">
+                <button class="legal-tab active" onclick="switchLegalTab('privacy','ko',this)">🇰🇷 한국어</button>
+                <button class="legal-tab" onclick="switchLegalTab('privacy','en',this)">🇺🇸 English</button>
+                <button class="legal-tab" onclick="switchLegalTab('privacy','de',this)">🇩🇪 Deutsch</button>
+                <button class="legal-tab" onclick="switchLegalTab('privacy','ja',this)">🇯🇵 日本語</button>
+                <button class="legal-tab" onclick="switchLegalTab('privacy','zh',this)">🇨🇳 中文</button>
+                <button class="legal-tab" onclick="switchLegalTab('privacy','fr',this)">🇫🇷 Français</button>
+                <button class="legal-tab" onclick="switchLegalTab('privacy','es',this)">🇪🇸 Español</button>
+              </div>
+              <textarea class="fc" id="privacy-text-ko" rows="18" placeholder="한국어 개인정보처리방침 내용을 입력하세요..."></textarea>
+              <textarea class="fc" id="privacy-text-en" rows="18" placeholder="Enter Privacy Policy in English..." style="display:none"></textarea>
+              <textarea class="fc" id="privacy-text-de" rows="18" placeholder="Datenschutzrichtlinie auf Deutsch eingeben..." style="display:none"></textarea>
+              <textarea class="fc" id="privacy-text-ja" rows="18" placeholder="日本語でプライバシーポリシーを入力してください..." style="display:none"></textarea>
+              <textarea class="fc" id="privacy-text-zh" rows="18" placeholder="请输入中文隐私政策内容..." style="display:none"></textarea>
+              <textarea class="fc" id="privacy-text-fr" rows="18" placeholder="Saisir la politique de confidentialité en français..." style="display:none"></textarea>
+              <textarea class="fc" id="privacy-text-es" rows="18" placeholder="Ingrese la política de privacidad en español..." style="display:none"></textarea>
             </div>
           </div>
           <button class="btn btn-pri" onclick="savePrivacy()"><i class="fas fa-save"></i> 개인정보처리방침 저장</button>
         </div>
+
+        <!-- ───── 투자위험고지 ───── -->
+        <div class="page" id="page-risk">
+          <div class="ac">
+            <div class="ac-hd"><div class="ac-title">투자위험고지 내용</div></div>
+            <div class="ac-bd">
+              <p style="font-size:12px;color:var(--dim);margin-bottom:10px;">각 언어별 내용을 입력하세요. 미입력 시 한국어 내용이 기본으로 표시됩니다.</p>
+              <div class="legal-lang-tabs" id="risk-tabs">
+                <button class="legal-tab active" onclick="switchLegalTab('risk','ko',this)">🇰🇷 한국어</button>
+                <button class="legal-tab" onclick="switchLegalTab('risk','en',this)">🇺🇸 English</button>
+                <button class="legal-tab" onclick="switchLegalTab('risk','de',this)">🇩🇪 Deutsch</button>
+                <button class="legal-tab" onclick="switchLegalTab('risk','ja',this)">🇯🇵 日本語</button>
+                <button class="legal-tab" onclick="switchLegalTab('risk','zh',this)">🇨🇳 中文</button>
+                <button class="legal-tab" onclick="switchLegalTab('risk','fr',this)">🇫🇷 Français</button>
+                <button class="legal-tab" onclick="switchLegalTab('risk','es',this)">🇪🇸 Español</button>
+              </div>
+              <textarea class="fc" id="risk-text-ko" rows="18" placeholder="한국어 투자위험고지 내용을 입력하세요..."></textarea>
+              <textarea class="fc" id="risk-text-en" rows="18" placeholder="Enter Investment Risk Disclosure in English..." style="display:none"></textarea>
+              <textarea class="fc" id="risk-text-de" rows="18" placeholder="Risikohinweis auf Deutsch eingeben..." style="display:none"></textarea>
+              <textarea class="fc" id="risk-text-ja" rows="18" placeholder="日本語で投資リスク開示を入力してください..." style="display:none"></textarea>
+              <textarea class="fc" id="risk-text-zh" rows="18" placeholder="请输入中文投资风险披露内容..." style="display:none"></textarea>
+              <textarea class="fc" id="risk-text-fr" rows="18" placeholder="Saisir la divulgation des risques en français..." style="display:none"></textarea>
+              <textarea class="fc" id="risk-text-es" rows="18" placeholder="Ingrese la divulgación de riesgos en español..." style="display:none"></textarea>
+            </div>
+          </div>
+          <button class="btn btn-pri" onclick="saveRisk()"><i class="fas fa-save"></i> 투자위험고지 저장</button>
+        </div>
+
+        <!-- ───── 환불정책 ───── -->
+        <div class="page" id="page-refund">
+          <div class="ac">
+            <div class="ac-hd"><div class="ac-title">환불정책 내용</div></div>
+            <div class="ac-bd">
+              <p style="font-size:12px;color:var(--dim);margin-bottom:10px;">각 언어별 내용을 입력하세요. 미입력 시 한국어 내용이 기본으로 표시됩니다.</p>
+              <div class="legal-lang-tabs" id="refund-tabs">
+                <button class="legal-tab active" onclick="switchLegalTab('refund','ko',this)">🇰🇷 한국어</button>
+                <button class="legal-tab" onclick="switchLegalTab('refund','en',this)">🇺🇸 English</button>
+                <button class="legal-tab" onclick="switchLegalTab('refund','de',this)">🇩🇪 Deutsch</button>
+                <button class="legal-tab" onclick="switchLegalTab('refund','ja',this)">🇯🇵 日本語</button>
+                <button class="legal-tab" onclick="switchLegalTab('refund','zh',this)">🇨🇳 中文</button>
+                <button class="legal-tab" onclick="switchLegalTab('refund','fr',this)">🇫🇷 Français</button>
+                <button class="legal-tab" onclick="switchLegalTab('refund','es',this)">🇪🇸 Español</button>
+              </div>
+              <textarea class="fc" id="refund-text-ko" rows="18" placeholder="한국어 환불정책 내용을 입력하세요..."></textarea>
+              <textarea class="fc" id="refund-text-en" rows="18" placeholder="Enter Refund Policy in English..." style="display:none"></textarea>
+              <textarea class="fc" id="refund-text-de" rows="18" placeholder="Rückerstattungsrichtlinie auf Deutsch eingeben..." style="display:none"></textarea>
+              <textarea class="fc" id="refund-text-ja" rows="18" placeholder="日本語で返金ポリシーを入力してください..." style="display:none"></textarea>
+              <textarea class="fc" id="refund-text-zh" rows="18" placeholder="请输入中文退款政策内容..." style="display:none"></textarea>
+              <textarea class="fc" id="refund-text-fr" rows="18" placeholder="Saisir la politique de remboursement en français..." style="display:none"></textarea>
+              <textarea class="fc" id="refund-text-es" rows="18" placeholder="Ingrese la política de reembolso en español..." style="display:none"></textarea>
+            </div>
+          </div>
+          <button class="btn btn-pri" onclick="saveRefund()"><i class="fas fa-save"></i> 환불정책 저장</button>
+        </div>
+
+        <!-- ───── 제휴링크고지 ───── -->
+        <div class="page" id="page-affiliate">
+          <div class="ac">
+            <div class="ac-hd"><div class="ac-title">제휴링크고지 내용</div></div>
+            <div class="ac-bd">
+              <p style="font-size:12px;color:var(--dim);margin-bottom:10px;">각 언어별 내용을 입력하세요. 미입력 시 한국어 내용이 기본으로 표시됩니다.</p>
+              <div class="legal-lang-tabs" id="affiliate-tabs">
+                <button class="legal-tab active" onclick="switchLegalTab('affiliate','ko',this)">🇰🇷 한국어</button>
+                <button class="legal-tab" onclick="switchLegalTab('affiliate','en',this)">🇺🇸 English</button>
+                <button class="legal-tab" onclick="switchLegalTab('affiliate','de',this)">🇩🇪 Deutsch</button>
+                <button class="legal-tab" onclick="switchLegalTab('affiliate','ja',this)">🇯🇵 日本語</button>
+                <button class="legal-tab" onclick="switchLegalTab('affiliate','zh',this)">🇨🇳 中文</button>
+                <button class="legal-tab" onclick="switchLegalTab('affiliate','fr',this)">🇫🇷 Français</button>
+                <button class="legal-tab" onclick="switchLegalTab('affiliate','es',this)">🇪🇸 Español</button>
+              </div>
+              <textarea class="fc" id="affiliate-text-ko" rows="18" placeholder="한국어 제휴링크고지 내용을 입력하세요..."></textarea>
+              <textarea class="fc" id="affiliate-text-en" rows="18" placeholder="Enter Affiliate Disclosure in English..." style="display:none"></textarea>
+              <textarea class="fc" id="affiliate-text-de" rows="18" placeholder="Affiliate-Offenlegung auf Deutsch eingeben..." style="display:none"></textarea>
+              <textarea class="fc" id="affiliate-text-ja" rows="18" placeholder="日本語でアフィリエイト開示を入力してください..." style="display:none"></textarea>
+              <textarea class="fc" id="affiliate-text-zh" rows="18" placeholder="请输入中文联盟链接披露内容..." style="display:none"></textarea>
+              <textarea class="fc" id="affiliate-text-fr" rows="18" placeholder="Saisir la divulgation d'affiliation en français..." style="display:none"></textarea>
+              <textarea class="fc" id="affiliate-text-es" rows="18" placeholder="Ingrese la divulgación de afiliados en español..." style="display:none"></textarea>
+            </div>
+          </div>
+          <button class="btn btn-pri" onclick="saveAffiliate()"><i class="fas fa-save"></i> 제휴링크고지 저장</button>
+        </div>
+
+        <!-- ───── 수익면책고지 ───── -->
+        <div class="page" id="page-earnings">
+          <div class="ac">
+            <div class="ac-hd"><div class="ac-title">수익면책고지 내용</div></div>
+            <div class="ac-bd">
+              <p style="font-size:12px;color:var(--dim);margin-bottom:10px;">각 언어별 내용을 입력하세요. 미입력 시 한국어 내용이 기본으로 표시됩니다.</p>
+              <div class="legal-lang-tabs" id="earnings-tabs">
+                <button class="legal-tab active" onclick="switchLegalTab('earnings','ko',this)">🇰🇷 한국어</button>
+                <button class="legal-tab" onclick="switchLegalTab('earnings','en',this)">🇺🇸 English</button>
+                <button class="legal-tab" onclick="switchLegalTab('earnings','de',this)">🇩🇪 Deutsch</button>
+                <button class="legal-tab" onclick="switchLegalTab('earnings','ja',this)">🇯🇵 日本語</button>
+                <button class="legal-tab" onclick="switchLegalTab('earnings','zh',this)">🇨🇳 中文</button>
+                <button class="legal-tab" onclick="switchLegalTab('earnings','fr',this)">🇫🇷 Français</button>
+                <button class="legal-tab" onclick="switchLegalTab('earnings','es',this)">🇪🇸 Español</button>
+              </div>
+              <textarea class="fc" id="earnings-text-ko" rows="18" placeholder="한국어 수익면책고지 내용을 입력하세요..."></textarea>
+              <textarea class="fc" id="earnings-text-en" rows="18" placeholder="Enter Earnings Disclaimer in English..." style="display:none"></textarea>
+              <textarea class="fc" id="earnings-text-de" rows="18" placeholder="Haftungsausschluss auf Deutsch eingeben..." style="display:none"></textarea>
+              <textarea class="fc" id="earnings-text-ja" rows="18" placeholder="日本語で収益免責事項を入力してください..." style="display:none"></textarea>
+              <textarea class="fc" id="earnings-text-zh" rows="18" placeholder="请输入中文收益免责声明内容..." style="display:none"></textarea>
+              <textarea class="fc" id="earnings-text-fr" rows="18" placeholder="Saisir l'avis de non-responsabilité sur les revenus en français..." style="display:none"></textarea>
+              <textarea class="fc" id="earnings-text-es" rows="18" placeholder="Ingrese el descargo de responsabilidad de ganancias en español..." style="display:none"></textarea>
+            </div>
+          </div>
+          <button class="btn btn-pri" onclick="saveEarnings()"><i class="fas fa-save"></i> 수익면책고지 저장</button>
+        </div>
+
+        <!-- ───── FILE UPLOAD ───── -->
+        <div class="page" id="page-upload">
+          <style>
+            .upload-zone {
+              border: 2px dashed var(--border);
+              border-radius: 12px;
+              padding: 48px 24px;
+              text-align: center;
+              cursor: pointer;
+              transition: .2s;
+              background: rgba(88,166,255,.02);
+            }
+            .upload-zone:hover, .upload-zone.drag-over {
+              border-color: var(--blue);
+              background: rgba(88,166,255,.06);
+            }
+            .upload-zone i { font-size: 40px; color: var(--blue); margin-bottom: 14px; display: block; }
+            .upload-zone p { color: var(--muted); font-size: 14px; }
+            .upload-zone small { color: var(--dim); font-size: 12px; }
+            .upload-type-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+            .upload-type-tab {
+              padding: 7px 16px; border-radius: 8px; font-size: 12px; font-weight: 600;
+              border: 1px solid var(--border); background: none; color: var(--muted); cursor: pointer; transition:.2s;
+            }
+            .upload-type-tab.active { background: var(--blue); color: #0d1117; border-color: var(--blue); }
+            .upload-type-tab:hover:not(.active) { border-color: var(--blue); color: var(--blue); }
+            .schema-box { background: rgba(255,255,255,.02); border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; font-size: 12px; }
+            .schema-box strong { color: var(--text); }
+            .schema-box code { color: var(--blue); font-family: monospace; }
+            .preview-wrap { overflow-x: auto; margin-top: 16px; }
+            .preview-wrap table { min-width: 600px; }
+            .upload-result-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+            .upload-result-chip { padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 600; }
+          </style>
+
+          <!-- 타입 선택 -->
+          <div class="ac">
+            <div class="ac-hd"><div class="ac-title">데이터 유형 선택</div></div>
+            <div class="ac-bd">
+              <div class="upload-type-tabs">
+                <button class="upload-type-tab active" onclick="setUploadType('signals',this)"><i class="fas fa-signal"></i> 시그널</button>
+                <button class="upload-type-tab" onclick="setUploadType('news',this)"><i class="fas fa-newspaper"></i> 뉴스</button>
+                <button class="upload-type-tab" onclick="setUploadType('users',this)"><i class="fas fa-users"></i> 회원</button>
+                <button class="upload-type-tab" onclick="setUploadType('plans',this)"><i class="fas fa-tags"></i> 플랜</button>
+                <button class="upload-type-tab" onclick="setUploadType('testimonials',this)"><i class="fas fa-star"></i> 후기</button>
+                <button class="upload-type-tab" onclick="setUploadType('markets',this)"><i class="fas fa-layer-group"></i> 종목관리</button>
+              </div>
+              <!-- 컬럼 안내 -->
+              <div class="schema-box" id="upload-schema-info"></div>
+            </div>
+          </div>
+
+          <!-- 파일 드롭 -->
+          <div class="ac">
+            <div class="ac-hd"><div class="ac-title">파일 선택</div></div>
+            <div class="ac-bd">
+              <div class="upload-zone" id="uploadZone" onclick="document.getElementById('uploadFileInput').click()"
+                ondragover="uploadDragOver(event)" ondragleave="uploadDragLeave(event)" ondrop="uploadDrop(event)">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>클릭하거나 파일을 드래그하여 업로드</p>
+                <small>지원 형식: .xlsx, .xls, .csv</small>
+              </div>
+              <input type="file" id="uploadFileInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleUploadFile(event)">
+              <div id="uploadFileName" style="margin-top:10px;font-size:13px;color:var(--muted);"></div>
+            </div>
+          </div>
+
+          <!-- 미리보기 -->
+          <div class="ac" id="uploadPreviewCard" style="display:none;">
+            <div class="ac-hd">
+              <div class="ac-title">데이터 미리보기</div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <div class="upload-result-row" id="uploadResultChips"></div>
+                <button class="btn btn-pri" onclick="doImportData()"><i class="fas fa-database"></i> 가져오기</button>
+                <button class="btn btn-out" onclick="resetUpload()"><i class="fas fa-redo"></i> 초기화</button>
+              </div>
+            </div>
+            <div class="ac-bd">
+              <div style="margin-bottom:10px;font-size:12px;color:var(--dim);">
+                <i class="fas fa-info-circle"></i> 기존 데이터에 <strong style="color:var(--text)">추가(merge)</strong>됩니다. 동일 ID가 있으면 덮어씁니다.
+              </div>
+              <div class="preview-wrap">
+                <table class="tbl" id="uploadPreviewTable"><thead id="uploadPreviewHead"></thead><tbody id="uploadPreviewBody"></tbody></table>
+              </div>
+              <div id="uploadPreviewMore" style="text-align:center;padding:10px;font-size:12px;color:var(--dim);"></div>
+            </div>
+          </div>
+        </div><!-- end page-upload -->
 
       </div><!-- end content -->
     </div><!-- end main -->
@@ -1827,7 +2082,7 @@
       <div class="modal-bd">
         <input type="hidden" id="plan-edit-id">
         <div class="fgrid">
-          <div class="fg"><label class="fl req">플랜 이름</label><input class="fc" id="plan-name" placeholder="The Expert">
+          <div class="fg"><label class="fl req">플랜 이름</label><input class="fc" id="plan-name" placeholder="VIP Class">
           </div>
           <div class="fg"><label class="fl req">슬러그</label><input class="fc" id="plan-slug" placeholder="expert"></div>
         </div>
@@ -1971,28 +2226,40 @@
         ]);
         lsSave('users', [
           { id: 1, email: 'admin@foketcrypto.com', name: 'Administrator', role: 'superadmin', plan: '', status: true, lastLogin: new Date().toISOString(), joined: new Date(Date.now() - 86400000 * 365).toISOString() },
-          { id: 2, email: 'michael@example.com', name: 'Michael R.', role: 'user', plan: 'The Expert', status: true, lastLogin: new Date(Date.now() - 86400000).toISOString(), joined: new Date(Date.now() - 86400000 * 180).toISOString() },
-          { id: 3, email: 'sarah@example.com', name: 'Sarah K.', role: 'user', plan: 'The Proficient', status: true, lastLogin: new Date(Date.now() - 86400000 * 2).toISOString(), joined: new Date(Date.now() - 86400000 * 120).toISOString() },
-          { id: 4, email: 'david@example.com', name: 'David L.', role: 'user', plan: 'The Competent', status: true, lastLogin: new Date(Date.now() - 86400000 * 5).toISOString(), joined: new Date(Date.now() - 86400000 * 90).toISOString() },
+          { id: 2, email: 'michael@example.com', name: 'Michael R.', role: 'user', plan: 'VIP Class', status: true, lastLogin: new Date(Date.now() - 86400000).toISOString(), joined: new Date(Date.now() - 86400000 * 180).toISOString() },
+          { id: 3, email: 'sarah@example.com', name: 'Sarah K.', role: 'user', plan: 'Silver Class', status: true, lastLogin: new Date(Date.now() - 86400000 * 2).toISOString(), joined: new Date(Date.now() - 86400000 * 120).toISOString() },
+          { id: 4, email: 'david@example.com', name: 'David L.', role: 'user', plan: 'Gold Class', status: true, lastLogin: new Date(Date.now() - 86400000 * 5).toISOString(), joined: new Date(Date.now() - 86400000 * 90).toISOString() },
           { id: 5, email: 'spammer@bad.com', name: 'Spammer', role: 'user', plan: '', status: false, lastLogin: null, joined: new Date(Date.now() - 86400000 * 10).toISOString() },
         ]);
         lsSave('plans', [
           { id: 1, name: 'Bronze Class', slug: 'bronze', days: 30, price: 30, cur: 'USD', min: 2, max: 5, popular: false, active: true, feats: ['8개언어 지원', '포켓시그널 카테고리 중 1 선택 (예: CryptoSpot, Binance, Futures 중 1 선택)', 'CryptoSpot은 24/7서비스, Futures는 월~금 서비스', '진입/목표/손절/완료 시그널 제공', '각 Class 단체방참여'] },
-          { id: 2, name: 'Silver-Class', slug: 'silver', days: 30, price: 45, cur: 'USD', min: 2, max: 5, popular: true, active: true, feats: ['8개언어 지원', '포켓시그널 카테고리 중 2 선택 (예: CryptoSpot, Binance, Futures 중 2 선택)', 'CryptoSpot은 24/7서비스, Futures는 월~금 서비스', '진입/목표/손절/완료 시그널 제공', '각 Class 단체방참여'] },
+          { id: 2, name: 'Silver Class', slug: 'silver', days: 30, price: 45, cur: 'USD', min: 2, max: 5, popular: true, active: true, feats: ['8개언어 지원', '포켓시그널 카테고리 중 2 선택 (예: CryptoSpot, Binance, Futures 중 2 선택)', 'CryptoSpot은 24/7서비스, Futures는 월~금 서비스', '진입/목표/손절/완료 시그널 제공', '각 Class 단체방참여'] },
           { id: 3, name: 'Gold Class', slug: 'gold', days: 30, price: 60, cur: 'USD', min: 2, max: 5, popular: false, active: true, feats: ['8개언어 지원', '포켓시그널 카테고리 모두 선택 (예: CryptoSpot, Binance, Futures 모두 선택)', 'CryptoSpot은 24/7서비스, Futures는 월~금 서비스', '진입/목표/손절/완료 시그널 제공', '각 Class 단체방참여'] },
           { id: 4, name: 'VIP Class', slug: 'vip', days: 30, price: 80, cur: 'USD', min: 2, max: 5, popular: false, active: true, feats: ['8개언어 지원', '포켓시그널 카테고리 모두 선택 (예: CryptoSpot, Binance, Futures 모두 선택)', 'CryptoSpot은 24/7서비스, Futures는 월~금 서비스', '진입/목표/손절/완료 시그널 제공', '각 Class 단체방참여', '투자금의 포트폴리오 별로 Futures의 1~3개월 국제 시세 (국제 증시, 국제유가, 금시세, 농축산물 예측 시세) 제공'] },
         ]);
         lsSave('testimonials', [
           { id: 1, name: 'Michael R.', country: 'United States', plan: 'VIP Class', text: "I've been using these signals for 6 months and my portfolio has grown by 340%. The analysis provided with each signal is incredibly detailed.", rating: 5 },
-          { id: 2, name: 'Sarah K.', country: 'United Kingdom', plan: 'Silver-Class', text: "Finally found a signal service that actually works! 82% win rate is no joke. The risk management guidance alone is worth the subscription fee.", rating: 5 },
-          { id: 3, name: 'Lisa M.', country: 'Singapore', plan: 'Silver-Class', text: "Excellent service! The Telegram group is very active and the support team responds quickly.", rating: 5 },
+          { id: 2, name: 'Sarah K.', country: 'United Kingdom', plan: 'Silver Class', text: "Finally found a signal service that actually works! 82% win rate is no joke. The risk management guidance alone is worth the subscription fee.", rating: 5 },
+          { id: 3, name: 'Lisa M.', country: 'Singapore', plan: 'Silver Class', text: "Excellent service! The Telegram group is very active and the support team responds quickly.", rating: 5 },
         ]);
         lsSave('messages', [
           { id: 1, name: 'John Smith', email: 'john@example.com', subject: 'Question about VIP', message: 'Hello, I would like to know more about the VIP plan. How do I sign up?', read: false, date: new Date(Date.now() - 3600000 * 2).toISOString() },
           { id: 2, name: 'Emma Watson', email: 'emma@example.com', subject: 'Refund request', message: 'I signed up yesterday but cannot access the Telegram group. Please help.', read: false, date: new Date(Date.now() - 3600000 * 5).toISOString() },
         ]);
-        lsSave('settings', { site_name: 'FoketCrypto Signals', site_tagline: '전문 암호화폐 트레이딩 시그널', meta_description: '82% 성공률의 전문 암호화폐 시그널을 받아보세요.', telegram_free: 'https://t.me/foket_free', telegram_vip: 'https://t.me/foket_vip', contact_email: 'support@foketcrypto.com', contact_phone: '+82-00-0000-0000', contact_address: '서울특별시 강남구', stat_members: 50000, stat_rate: 82, stat_signals: 15000, stat_years: 10, admin_email: 'admin@foketcrypto.com', admin_name: '관리자' });
+        lsSave('settings', { site_name: 'FoketCrypto Signals', site_tagline: '전문 암호화폐 트레이딩 시그널', meta_description: '82% 성공률의 전문 암호화폐 시그널을 받아보세요.', telegram_free: 'https://t.me/foketsignal_Lobby', telegram_vip: 'https://t.me/foket_vip', contact_email: 'support@foket.com', contact_phone: '+82-00-0000-0000', contact_address: '서울특별시 강남구', stat_members: 50000, stat_rate: 82, stat_signals: 15000, stat_years: 10, admin_email: 'admin@foket.com', admin_name: '관리자' });
         lsSave('seeded', true);
+      }
+      /* ── 플랜명·순서 마이그레이션 ── */
+      if (!ls('plan-name-migrated-v3', false)) {
+        const nameMap = { 'The Novice': 'Bronze Class', 'The Proficient': 'Silver Class', 'The Competent': 'Gold Class', 'The Expert': 'VIP Class', 'Silver-Class': 'Silver Class' };
+        const slugMap = { 'Bronze Class': 'bronze', 'Silver Class': 'silver', 'Gold Class': 'gold', 'VIP Class': 'vip' };
+        const migrate = function(arr) { (arr || []).forEach(function(r) { if (r.plan && nameMap[r.plan]) r.plan = nameMap[r.plan]; }); };
+        const plans = ls('plans', []);
+        plans.forEach(function(p) { if (nameMap[p.name]) p.name = nameMap[p.name]; if (!p.slug && slugMap[p.name]) p.slug = slugMap[p.name]; });
+        lsSave('plans', sortPlans(plans));
+        const users = ls('users', []); migrate(users); lsSave('users', users);
+        const tests = ls('testimonials', []); migrate(tests); lsSave('testimonials', tests);
+        lsSave('plan-name-migrated-v3', true);
       }
     }
 
@@ -2039,7 +2306,7 @@
     /* ════════════════════════════════════════════════════════════
        NAVIGATION
     ═══════════════════════════════════════════════════════════════ */
-    const pageTitles = { dashboard: '대시보드', signals: '시그널 관리', news: '뉴스 & 기사', faq: '자주하는 질문(FAQ)', users: '회원 관리', plans: '구독 플랜', testimonials: '후기 관리', markets: '종목 관리', telegram: '텔레그램 관리', messages: '문의 메시지', settings: '사이트 설정', terms: '이용약관', privacy: '개인정보처리방침' };
+    const pageTitles = { dashboard: '대시보드', signals: '시그널 관리', news: '뉴스 & 기사', faq: '자주하는 질문(FAQ)', users: '회원 관리', plans: '구독 플랜', testimonials: '후기 관리', markets: '종목 관리', telegram: '텔레그램 관리', messages: '문의 메시지', upload: '파일 업로드', settings: '사이트 설정', terms: '이용약관', privacy: '개인정보처리방침', risk: '투자위험고지', refund: '환불정책', affiliate: '제휴링크고지', earnings: '수익면책고지' };
     function goPage(name) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.sb-link').forEach(l => l.classList.remove('active'));
@@ -2058,7 +2325,7 @@
       };
       ta.innerHTML = (btns[name] || '') + '<a class="tb-btn" href="index.html" target="_blank"><i class="fas fa-external-link-alt"></i> 사이트 보기</a>';
       // Render page
-      const renders = { dashboard: renderDashboard, signals: renderSignals, news: renderNews, faq: renderFaq, users: renderUsers, plans: renderPlans, testimonials: renderTestimonials, markets: renderMarkets, telegram: renderTelegram, messages: renderMessages, settings: loadSettings, terms: loadTerms, privacy: loadPrivacy };
+      const renders = { dashboard: renderDashboard, signals: renderSignals, news: renderNews, faq: renderFaq, users: renderUsers, plans: renderPlans, testimonials: renderTestimonials, markets: renderMarkets, telegram: renderTelegram, messages: renderMessages, upload: renderUploadPage, settings: loadSettings, terms: loadTerms, privacy: loadPrivacy, risk: loadRisk, refund: loadRefund, affiliate: loadAffiliate, earnings: loadEarnings };
       if (renders[name]) renders[name]();
       // Close mobile sidebar
       document.getElementById('sidebar').classList.remove('open');
@@ -2462,8 +2729,16 @@
     /* ════════════════════════════════════════════════════════════
        PLANS
     ═══════════════════════════════════════════════════════════════ */
+    const PLAN_ORDER = ['bronze', 'silver', 'gold', 'vip'];
+    function sortPlans(arr) {
+      return arr.slice().sort((a, b) => {
+        const ai = PLAN_ORDER.indexOf(a.slug); const bi = PLAN_ORDER.indexOf(b.slug);
+        if (ai === -1 && bi === -1) return a.id - b.id;
+        return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+      });
+    }
     function renderPlans() {
-      const plans = ls('plans');
+      const plans = sortPlans(ls('plans'));
       document.getElementById('plans-body').innerHTML = plans.map(p => `<tr>
     <td class="tp">${p.name}${p.popular ? ` <span class="bdg bdg-yellow" style="font-size:10px;">인기</span>` : ''}</td>
     <td>${p.days}일</td>
@@ -2596,7 +2871,7 @@
       const handleEl = document.getElementById('tg-display_handle');
       if (freeEl) freeEl.value = cfg.telegram_free || '';
       if (vipEl) vipEl.value = cfg.telegram_vip || '';
-      if (handleEl) handleEl.value = cfg.telegram_handle || '@foket';
+      if (handleEl) handleEl.value = cfg.telegram_handle || '@foketsignal_Lobby';
     }
     function saveTelegramSettings() {
       const cfg = ls('settings', {});
@@ -2605,7 +2880,7 @@
       const handleEl = document.getElementById('tg-display_handle');
       if (freeEl) cfg.telegram_free = freeEl.value.trim();
       if (vipEl) cfg.telegram_vip = vipEl.value.trim();
-      if (handleEl) cfg.telegram_handle = handleEl.value.trim() || '@foket';
+      if (handleEl) cfg.telegram_handle = handleEl.value.trim() || '@foketsignal_Lobby';
       lsSave('settings', cfg);
       showAlert('텔레그램 설정이 저장되었습니다.');
     }
@@ -2648,40 +2923,78 @@
     }
     function resetSettings() {
       showConfirm('설정 초기화', '모든 설정이 기본값으로 초기화됩니다.', () => {
-        lsSave('settings', { site_name: 'FoketCrypto Signals', site_tagline: '전문 암호화폐 트레이딩 시그널', meta_description: '82% 성공률의 전문 암호화폐 시그널을 받아보세요.', telegram_free: 'https://t.me/foket_free', telegram_vip: 'https://t.me/foket_vip', contact_email: 'support@foketcrypto.com', contact_phone: '+82-00-0000-0000', contact_address: '서울특별시 강남구', stat_members: 50000, stat_rate: 82, stat_signals: 15000, stat_years: 10, admin_email: 'admin@foketcrypto.com', admin_name: '관리자' });
+        lsSave('settings', { site_name: 'FoketCrypto Signals', site_tagline: '전문 암호화폐 트레이딩 시그널', meta_description: '82% 성공률의 전문 암호화폐 시그널을 받아보세요.', telegram_free: 'https://t.me/foketsignal_Lobby', telegram_vip: 'https://t.me/foket_vip', contact_email: 'support@foket.com', contact_phone: '+82-00-0000-0000', contact_address: '서울특별시 강남구', stat_members: 50000, stat_rate: 82, stat_signals: 15000, stat_years: 10, admin_email: 'admin@foket.com', admin_name: '관리자' });
         loadSettings(); showAlert('설정이 기본값으로 초기화되었습니다');
       });
     }
 
     /* ════════════════════════════════════════════════════════════
+       법적 페이지 공통 유틸 – 언어 탭 전환
+    ═══════════════════════════════════════════════════════════════ */
+    const LEGAL_LANGS = ['ko','en','de','ja','zh','fr','es'];
+    function switchLegalTab(page, lang, btn) {
+      LEGAL_LANGS.forEach(function(l) {
+        const ta = document.getElementById(page + '-text-' + l);
+        if (ta) ta.style.display = l === lang ? 'block' : 'none';
+      });
+      document.querySelectorAll('#' + page + '-tabs .legal-tab').forEach(function(b) {
+        b.classList.toggle('active', b === btn);
+      });
+    }
+    function legalLoad(key) {
+      const raw = ls(key, '');
+      let data = {};
+      try { data = JSON.parse(raw); } catch(e) { if (raw) data = { ko: raw }; }
+      LEGAL_LANGS.forEach(function(l) {
+        const el = document.getElementById(key + '-text-' + l);
+        if (el) el.value = data[l] || '';
+      });
+    }
+    function legalSave(key, label) {
+      const data = {};
+      LEGAL_LANGS.forEach(function(l) {
+        const el = document.getElementById(key + '-text-' + l);
+        data[l] = el ? el.value : '';
+      });
+      lsSave(key, JSON.stringify(data));
+      showAlert(label + '이(가) 저장되었습니다.');
+    }
+
+    /* ════════════════════════════════════════════════════════════
        이용약관
     ═══════════════════════════════════════════════════════════════ */
-    function loadTerms() {
-      const text = ls('terms', '');
-      const el = document.getElementById('terms-text');
-      if (el) el.value = text;
-    }
-    function saveTerms() {
-      const el = document.getElementById('terms-text');
-      const text = el ? el.value : '';
-      lsSave('terms', text);
-      showAlert('이용약관이 저장되었습니다. terms.html에서 확인할 수 있습니다.');
-    }
+    function loadTerms() { legalLoad('terms'); }
+    function saveTerms() { legalSave('terms', '이용약관'); }
 
     /* ════════════════════════════════════════════════════════════
        개인정보처리방침
     ═══════════════════════════════════════════════════════════════ */
-    function loadPrivacy() {
-      const text = ls('privacy', '');
-      const el = document.getElementById('privacy-text');
-      if (el) el.value = text;
-    }
-    function savePrivacy() {
-      const el = document.getElementById('privacy-text');
-      const text = el ? el.value : '';
-      lsSave('privacy', text);
-      showAlert('개인정보처리방침이 저장되었습니다. privacy.html에서 확인할 수 있습니다.');
-    }
+    function loadPrivacy() { legalLoad('privacy'); }
+    function savePrivacy() { legalSave('privacy', '개인정보처리방침'); }
+
+    /* ════════════════════════════════════════════════════════════
+       투자위험고지
+    ═══════════════════════════════════════════════════════════════ */
+    function loadRisk() { legalLoad('risk'); }
+    function saveRisk() { legalSave('risk', '투자위험고지'); }
+
+    /* ════════════════════════════════════════════════════════════
+       환불정책
+    ═══════════════════════════════════════════════════════════════ */
+    function loadRefund() { legalLoad('refund'); }
+    function saveRefund() { legalSave('refund', '환불정책'); }
+
+    /* ════════════════════════════════════════════════════════════
+       제휴링크고지
+    ═══════════════════════════════════════════════════════════════ */
+    function loadAffiliate() { legalLoad('affiliate'); }
+    function saveAffiliate() { legalSave('affiliate', '제휴링크고지'); }
+
+    /* ════════════════════════════════════════════════════════════
+       수익면책고지
+    ═══════════════════════════════════════════════════════════════ */
+    function loadEarnings() { legalLoad('earnings'); }
+    function saveEarnings() { legalSave('earnings', '수익면책고지'); }
 
     /* ════════════════════════════════════════════════════════════
        MARKETS – 종목 카테고리 관리
@@ -2755,6 +3068,22 @@
       lsSave('mkts-seeded-v9', true);
     }
 
+    /* HIS(항셍) 종목 일괄 제거 마이그레이션 */
+    (function removeHIS() {
+      if (ls('mig-remove-his', false)) return;
+      var cats = ls('markets', []);
+      var changed = false;
+      cats.forEach(function(cat) {
+        var before = (cat.instruments || []).length;
+        cat.instruments = (cat.instruments || []).filter(function(i) {
+          return (i.sym || '').toUpperCase() !== 'HIS';
+        });
+        if (cat.instruments.length !== before) changed = true;
+      });
+      if (changed) { lsSave('markets', cats); publishMarkets(true); }
+      lsSave('mig-remove-his', true);
+    })();
+
     let selCatId = 1;
 
     /* ── 거래 시작일로부터 오늘까지 일수 계산 (매 렌더마다 자동 갱신) ── */
@@ -2805,14 +3134,14 @@
       lsSave('markets', cats);
     }
 
-    function publishMarkets() {
+    function publishMarkets(silent) {
       const raw = localStorage.getItem('fk_markets');
-      if (!raw) { showAlert('저장할 종목 데이터가 없습니다.', 'err'); return; }
+      if (!raw) { if (!silent) showAlert('저장할 종목 데이터가 없습니다.', 'err'); return; }
       try {
         JSON.parse(raw);
-      } catch (e) { showAlert('데이터 형식이 올바르지 않습니다.', 'err'); return; }
+      } catch (e) { if (!silent) showAlert('데이터 형식이 올바르지 않습니다.', 'err'); return; }
       lsSave('markets_published', raw);
-      showAlert('저장되었습니다. 메인 페이지(index.html)에 반영됩니다.');
+      if (!silent) showAlert('저장되었습니다. 메인 페이지(index.html)에 반영됩니다.');
     }
 
     function renderMarkets() {
@@ -2836,12 +3165,16 @@
         document.getElementById('mkt-inst-body').innerHTML = '<tr><td colspan="7" class="empty"><p>카테고리를 선택하세요</p></td></tr>';
         const saveBtn = document.getElementById('mkt-save-btn');
         if (saveBtn) saveBtn.style.display = 'none';
+        const addBtnHide = document.getElementById('mkt-add-btn');
+        if (addBtnHide) addBtnHide.style.display = 'none';
         return;
       }
       document.getElementById('mkt-cat-title').textContent = cat.nameKo;
       document.getElementById('mkt-cat-en').textContent = cat.nameEn;
       const saveBtn = document.getElementById('mkt-save-btn');
       if (saveBtn) saveBtn.style.display = 'inline-flex';
+      const addBtn = document.getElementById('mkt-add-btn');
+      if (addBtn) addBtn.style.display = 'inline-flex';
 
       const insts = cat.instruments || [];
 
@@ -2854,6 +3187,7 @@
       <th>거래 시작일</th>
       <th>일평균 왕복 거래횟수</th>
       <th>거래일수</th>
+      <th>작업</th>
     </tr>`;
         document.getElementById('mkt-inst-body').innerHTML = insts.map(inst => {
           const days = inst.startDate ? calcTradingDays(inst.startDate) : '—';
@@ -2899,8 +3233,14 @@
           <div style="font-size:22px;font-weight:800;color:var(--blue);line-height:1;">${days}</div>
           <div style="font-size:10px;color:var(--dim);margin-top:2px;">일</div>
         </td>
+        <td>
+          <div style="display:flex;gap:6px;justify-content:center;">
+            <button class="tb-btn" onclick="openInstModal(${cat.id},${inst.id})" title="수정"><i class="fas fa-pen"></i></button>
+            <button class="tb-btn del" onclick="deleteInst(${cat.id},${inst.id})" title="삭제"><i class="fas fa-trash"></i></button>
+          </div>
+        </td>
       </tr>`;
-        }).join('') || `<tr><td colspan="7" class="empty"><i class="fas fa-inbox"></i><p>종목이 없습니다</p></td></tr>`;
+        }).join('') || `<tr><td colspan="8" class="empty"><i class="fas fa-inbox"></i><p>종목이 없습니다</p></td></tr>`;
 
       } else {
         /* ══ 주가지수선물·귀금속·에너지·농산물·미국채·외환 – Yahoo Finance 실시간 확장 테이블 ══ */
@@ -2911,6 +3251,7 @@
       <th>거래 시작일</th>
       <th>일평균 왕복 거래횟수</th>
       <th>거래일수</th>
+      <th>작업</th>
     </tr>`;
         document.getElementById('mkt-inst-body').innerHTML = insts.map(inst => {
           const days = inst.startDate ? calcTradingDays(inst.startDate) : '—';
@@ -2955,8 +3296,14 @@
           <div style="font-size:22px;font-weight:800;color:var(--blue);line-height:1;">${days}</div>
           <div style="font-size:10px;color:var(--dim);margin-top:2px;">일</div>
         </td>
+        <td>
+          <div style="display:flex;gap:6px;justify-content:center;">
+            <button class="tb-btn" onclick="openInstModal(${cat.id},${inst.id})" title="수정"><i class="fas fa-pen"></i></button>
+            <button class="tb-btn del" onclick="deleteInst(${cat.id},${inst.id})" title="삭제"><i class="fas fa-trash"></i></button>
+          </div>
+        </td>
       </tr>`;
-        }).join('') || `<tr><td colspan="7" class="empty"><i class="fas fa-inbox"></i><p>종목이 없습니다</p></td></tr>`;
+        }).join('') || `<tr><td colspan="8" class="empty"><i class="fas fa-inbox"></i><p>종목이 없습니다</p></td></tr>`;
       }
     }
 
@@ -3075,6 +3422,420 @@
       const name = cfg.admin_name || sess.name || '관리자';
       showAdminApp(name);
     })();
+
+    /* ════════════════════════════════════════════════════════════
+       FILE UPLOAD / EXCEL IMPORT
+    ═══════════════════════════════════════════════════════════════ */
+    var _uploadType = 'signals';
+    var _uploadParsed = [];
+
+    /* 타입별 컬럼 스키마 정의 */
+    /* 엑셀 날짜 → YYYY-MM-DD 변환 헬퍼
+       처리 가능 형식:
+         - Excel 시리얼 숫자 (예: 45292)
+         - JS Date 객체
+         - 문자열: YYYY-MM-DD / YYYY/MM/DD / MM/DD/YYYY / DD/MM/YYYY / YYYYMMDD
+    */
+    function toYMD(val) {
+      if (!val && val !== 0) return '';
+      /* Excel 시리얼 숫자 */
+      if (typeof val === 'number') {
+        var d = new Date(Math.round((val - 25569) * 86400 * 1000));
+        if (isNaN(d.getTime())) return '';
+        var y = d.getUTCFullYear(), m = d.getUTCMonth() + 1, day = d.getUTCDate();
+        return y + '-' + String(m).padStart(2,'0') + '-' + String(day).padStart(2,'0');
+      }
+      /* JS Date 객체 */
+      if (val instanceof Date) {
+        if (isNaN(val.getTime())) return '';
+        var y = val.getFullYear(), m = val.getMonth() + 1, day = val.getDate();
+        return y + '-' + String(m).padStart(2,'0') + '-' + String(day).padStart(2,'0');
+      }
+      var s = String(val).trim();
+      if (!s) return '';
+      /* YYYYMMDD (8자리 숫자) */
+      if (/^\d{8}$/.test(s)) return s.slice(0,4) + '-' + s.slice(4,6) + '-' + s.slice(6,8);
+      /* YYYY-MM-DD 또는 YYYY/MM/DD */
+      var m1 = s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+      if (m1) return m1[1] + '-' + String(m1[2]).padStart(2,'0') + '-' + String(m1[3]).padStart(2,'0');
+      /* MM/DD/YYYY 또는 MM-DD-YYYY */
+      var m2 = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+      if (m2) return m2[3] + '-' + String(m2[1]).padStart(2,'0') + '-' + String(m2[2]).padStart(2,'0');
+      return s; /* 그 외 원본 반환 */
+    }
+
+    var UPLOAD_SCHEMAS = {
+      signals: {
+        label: '시그널',
+        cols: ['coin','pair','type','entry','tp1','tp2','sl','risk','rr','exchange','tier','status','result','pnl','analysis'],
+        required: ['coin','pair','type','entry','tp1','sl'],
+        hints: {
+          type: 'LONG 또는 SHORT',
+          tier: 'free 또는 vip',
+          status: 'active / closed / cancelled',
+          result: 'win / loss / pending'
+        },
+        map: function(row) {
+          return {
+            id: row.id ? Number(row.id) : null,
+            coin: String(row.coin || '').toUpperCase(),
+            pair: String(row.pair || '').toUpperCase(),
+            type: String(row.type || 'LONG').toUpperCase(),
+            entry: Number(row.entry) || 0,
+            tp1: Number(row.tp1) || 0,
+            tp2: row.tp2 ? Number(row.tp2) : null,
+            sl: Number(row.sl) || 0,
+            risk: Number(row.risk) || 1,
+            rr: row.rr ? Number(row.rr) : null,
+            exchange: String(row.exchange || 'Binance'),
+            tier: String(row.tier || 'free'),
+            status: String(row.status || 'active'),
+            result: String(row.result || 'pending'),
+            pnl: row.pnl !== undefined && row.pnl !== '' ? Number(row.pnl) : null,
+            analysis: String(row.analysis || ''),
+            date: row.date || new Date().toISOString()
+          };
+        },
+        displayCols: ['coin','pair','type','entry','tp1','sl','tier','status','result']
+      },
+      news: {
+        label: '뉴스',
+        cols: ['title','slug','cat','lang','excerpt','content','featured','published'],
+        required: ['title','slug'],
+        hints: {
+          cat: 'bitcoin / ethereum / altcoins / defi / nft / regulation / market',
+          lang: 'ko / en / de / ja / zh / fr / es',
+          featured: '1 또는 0',
+          published: '1 또는 0'
+        },
+        map: function(row) {
+          return {
+            id: row.id ? Number(row.id) : null,
+            title: String(row.title || ''),
+            slug: String(row.slug || '').toLowerCase().replace(/\s+/g,'-'),
+            cat: String(row.cat || 'market'),
+            lang: String(row.lang || 'ko'),
+            excerpt: String(row.excerpt || ''),
+            content: String(row.content || ''),
+            featured: row.featured == '1' || row.featured === true || row.featured === 1,
+            published: row.published == '1' || row.published === true || row.published === 1,
+            date: row.date || new Date().toISOString()
+          };
+        },
+        displayCols: ['title','slug','cat','lang','featured','published']
+      },
+      users: {
+        label: '회원',
+        cols: ['email','name','role','plan','status'],
+        required: ['email'],
+        hints: {
+          role: 'user / admin / superadmin',
+          status: '1(활성) 또는 0(비활성)',
+          plan: 'Bronze Class / Silver Class / Gold Class / VIP Class'
+        },
+        map: function(row) {
+          return {
+            id: row.id ? Number(row.id) : null,
+            email: String(row.email || ''),
+            name: String(row.name || ''),
+            role: String(row.role || 'user'),
+            plan: String(row.plan || ''),
+            status: row.status == '1' || row.status === true || row.status === 1,
+            lastLogin: row.lastLogin || null,
+            joined: row.joined || new Date().toISOString()
+          };
+        },
+        displayCols: ['email','name','role','plan','status']
+      },
+      plans: {
+        label: '플랜',
+        cols: ['name','slug','days','price','cur','min','max','popular','active','feats'],
+        required: ['name','price'],
+        hints: {
+          cur: 'USD / KRW 등',
+          popular: '1 또는 0',
+          active: '1 또는 0',
+          feats: '기능 목록 (쉼표로 구분)'
+        },
+        map: function(row) {
+          var feats = [];
+          if (row.feats) {
+            if (Array.isArray(row.feats)) feats = row.feats;
+            else feats = String(row.feats).split(',').map(function(f){ return f.trim(); }).filter(Boolean);
+          }
+          return {
+            id: row.id ? Number(row.id) : null,
+            name: String(row.name || ''),
+            slug: String(row.slug || row.name || '').toLowerCase().replace(/\s+/g,'-'),
+            days: Number(row.days) || 30,
+            price: Number(row.price) || 0,
+            cur: String(row.cur || 'USD'),
+            min: Number(row.min) || 2,
+            max: Number(row.max) || 5,
+            popular: row.popular == '1' || row.popular === true || row.popular === 1,
+            active: row.active !== '0' && row.active !== false && row.active !== 0,
+            feats: feats
+          };
+        },
+        displayCols: ['name','slug','days','price','cur','popular','active']
+      },
+      testimonials: {
+        label: '후기',
+        cols: ['name','country','plan','text','rating'],
+        required: ['name','text'],
+        hints: {
+          rating: '1 ~ 5',
+          plan: 'Bronze Class / Silver Class / Gold Class / VIP Class'
+        },
+        map: function(row) {
+          return {
+            id: row.id ? Number(row.id) : null,
+            name: String(row.name || ''),
+            country: String(row.country || ''),
+            plan: String(row.plan || ''),
+            text: String(row.text || ''),
+            rating: Number(row.rating) || 5
+          };
+        },
+        displayCols: ['name','country','plan','rating']
+      },
+      markets: {
+        label: '종목관리',
+        cols: ['catId','sym','nameKo','nameEn','monthlyReturn','maxDailyLoss','startDate','dailyRoundTrips','active'],
+        required: ['catid','sym'],
+        hints: {
+          catId: '카테고리 ID (숫자)',
+          sym: '심볼 (예: BTC, ES=F)',
+          monthlyReturn: '월평균수익율 % (예: 12.5)',
+          maxDailyLoss: '하루최대손실 % (예: -3.2)',
+          startDate: '거래시작일 YYYY-MM-DD',
+          dailyRoundTrips: '일평균왕복거래횟수 (예: 4.5)',
+          active: '활성: 1 또는 0'
+        },
+        map: function(row) {
+          /* 파싱 시 헤더가 소문자로 normalize됨 */
+          var mr = row.monthlyreturn; var mdl = row.maxdailyloss; var drt = row.dailyroundtrips;
+          return {
+            catId: Number(row.catid || 0),
+            sym: String(row.sym || '').toUpperCase(),
+            nameKo: String(row.nameko || ''),
+            nameEn: String(row.nameen || ''),
+            monthlyReturn: (mr !== undefined && mr !== '') ? Number(mr) : null,
+            maxDailyLoss: (mdl !== undefined && mdl !== '') ? Number(mdl) : null,
+            startDate: toYMD(row.startdate),
+            dailyRoundTrips: (drt !== undefined && drt !== '') ? Number(drt) : null,
+            active: (row.active === undefined || row.active === '') ? true : (row.active == '1' || row.active === true || row.active === 1)
+          };
+        },
+        displayCols: ['catId','sym','nameKo','monthlyReturn','maxDailyLoss','startDate','dailyRoundTrips','active']
+      }
+    };
+
+    function renderUploadPage() {
+      setUploadType(_uploadType, null);
+    }
+
+    function setUploadType(type, btn) {
+      _uploadType = type;
+      _uploadParsed = [];
+      /* 탭 active */
+      document.querySelectorAll('.upload-type-tab').forEach(function(b){ b.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      else {
+        document.querySelectorAll('.upload-type-tab').forEach(function(b){
+          if (b.getAttribute('onclick') && b.getAttribute('onclick').indexOf("'"+type+"'") !== -1) b.classList.add('active');
+        });
+      }
+      /* 스키마 안내 */
+      var schema = UPLOAD_SCHEMAS[type];
+      var hintsHtml = '';
+      if (schema.hints) {
+        var hintParts = [];
+        Object.entries(schema.hints).forEach(function(kv){ hintParts.push('<code>' + kv[0] + '</code>: ' + kv[1]); });
+        hintsHtml = '<div style="margin-top:8px;color:var(--dim);">' + hintParts.join(' &nbsp;|&nbsp; ') + '</div>';
+      }
+      document.getElementById('upload-schema-info').innerHTML =
+        '<strong>필요 컬럼 (헤더 1행):</strong> ' +
+        schema.cols.map(function(c){
+          var req = schema.required.indexOf(c) !== -1;
+          return '<code style="color:' + (req ? 'var(--green)' : 'var(--blue)') + '">' + c + (req ? '*' : '') + '</code>';
+        }).join(' &nbsp; ') +
+        '<div style="margin-top:6px;font-size:11px;color:var(--dim);"><span style="color:var(--green)">*</span> 필수 &nbsp; 나머지는 선택사항 &nbsp; | &nbsp; 첫 번째 행이 헤더(컬럼명)여야 합니다. &nbsp; id 컬럼이 있으면 기존 항목을 덮어씁니다.</div>' +
+        hintsHtml;
+      /* 미리보기 초기화 */
+      document.getElementById('uploadPreviewCard').style.display = 'none';
+      document.getElementById('uploadFileName').textContent = '';
+      document.getElementById('uploadFileInput').value = '';
+      document.getElementById('uploadResultChips').innerHTML = '';
+    }
+
+    function uploadDragOver(e) {
+      e.preventDefault();
+      document.getElementById('uploadZone').classList.add('drag-over');
+    }
+    function uploadDragLeave(e) {
+      document.getElementById('uploadZone').classList.remove('drag-over');
+    }
+    function uploadDrop(e) {
+      e.preventDefault();
+      document.getElementById('uploadZone').classList.remove('drag-over');
+      var files = e.dataTransfer.files;
+      if (files && files[0]) parseUploadFile(files[0]);
+    }
+    function handleUploadFile(e) {
+      var file = e.target.files[0];
+      if (file) parseUploadFile(file);
+    }
+
+    function parseUploadFile(file) {
+      if (!window.XLSX) { showAlert('SheetJS 라이브러리가 로드되지 않았습니다. 인터넷 연결을 확인하세요.', 'err'); return; }
+      document.getElementById('uploadFileName').textContent = '📄 ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          var data = new Uint8Array(e.target.result);
+          var workbook = XLSX.read(data, { type: 'array' });
+          var sheetName = workbook.SheetNames[0];
+          var sheet = workbook.Sheets[sheetName];
+          var rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+          if (!rows || rows.length === 0) { showAlert('파일에 데이터가 없습니다.', 'err'); return; }
+          /* 컬럼명 소문자 정규화 */
+          var normalized = rows.map(function(row) {
+            var nr = {};
+            Object.keys(row).forEach(function(k){ nr[k.toLowerCase().trim()] = row[k]; });
+            return nr;
+          });
+          /* 필수 컬럼 체크 */
+          var schema = UPLOAD_SCHEMAS[_uploadType];
+          var firstRow = normalized[0];
+          var missing = schema.required.filter(function(c){ return !(c in firstRow); });
+          if (missing.length) {
+            showAlert('필수 컬럼 누락: ' + missing.join(', '), 'err');
+            return;
+          }
+          /* 매핑 */
+          var mapped = normalized.map(function(row, idx) {
+            try { return schema.map(row); } catch(ex) { return null; }
+          }).filter(Boolean);
+          _uploadParsed = mapped;
+          showUploadPreview(mapped, schema);
+        } catch(ex) {
+          showAlert('파일 파싱 오류: ' + ex.message, 'err');
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function showUploadPreview(data, schema) {
+      var MAX_PREVIEW = 50;
+      var cols = schema.displayCols;
+      /* 헤더 */
+      document.getElementById('uploadPreviewHead').innerHTML =
+        '<tr>' + cols.map(function(c){ return '<th>' + c + '</th>'; }).join('') + '</tr>';
+      /* 바디 */
+      var rows = data.slice(0, MAX_PREVIEW);
+      document.getElementById('uploadPreviewBody').innerHTML = rows.map(function(row){
+        return '<tr>' + cols.map(function(c){
+          var val = row[c];
+          if (val === null || val === undefined) val = '';
+          if (typeof val === 'boolean') val = val ? '✓' : '✗';
+          return '<td>' + String(val).substring(0, 60) + '</td>';
+        }).join('') + '</tr>';
+      }).join('');
+      if (data.length > MAX_PREVIEW) {
+        document.getElementById('uploadPreviewMore').textContent = '... 외 ' + (data.length - MAX_PREVIEW) + '개 행 (총 ' + data.length + '행)';
+      } else {
+        document.getElementById('uploadPreviewMore').textContent = '총 ' + data.length + '행';
+      }
+      /* 칩 */
+      document.getElementById('uploadResultChips').innerHTML =
+        '<span class="upload-result-chip" style="background:rgba(63,185,80,.15);color:var(--green);">' +
+        '<i class="fas fa-table"></i> ' + data.length + '행 파싱됨</span>';
+      document.getElementById('uploadPreviewCard').style.display = 'block';
+    }
+
+    function doImportData() {
+      if (!_uploadParsed || _uploadParsed.length === 0) { showAlert('가져올 데이터가 없습니다.', 'err'); return; }
+      var type = _uploadType;
+      var added = 0, updated = 0;
+
+      if (type === 'markets') {
+        /* 종목관리 전용 병합: catId + sym 기준으로 instrument 업데이트 */
+        seedMarkets(); /* 카테고리 미초기화 상태 방지 */
+        var cats = ls('markets', []);
+        var skipped = 0;
+        _uploadParsed.forEach(function(row) {
+          var cat = cats.find(function(c){ return c.id === row.catId; });
+          if (!cat) { skipped++; return; } /* 카테고리 없으면 건너뜀 */
+          if (!cat.instruments) cat.instruments = [];
+          var instIdx = cat.instruments.findIndex(function(i){ return i.sym && i.sym.toUpperCase() === row.sym.toUpperCase(); });
+          if (instIdx !== -1) {
+            var inst = cat.instruments[instIdx];
+            if (row.nameKo) inst.nameKo = row.nameKo;
+            if (row.nameEn) inst.nameEn = row.nameEn;
+            if (row.monthlyReturn !== null && row.monthlyReturn !== undefined) inst.monthlyReturn = row.monthlyReturn;
+            if (row.maxDailyLoss !== null && row.maxDailyLoss !== undefined) inst.maxDailyLoss = row.maxDailyLoss;
+            if (row.startDate) inst.startDate = row.startDate;
+            if (row.dailyRoundTrips !== null && row.dailyRoundTrips !== undefined) inst.dailyRoundTrips = row.dailyRoundTrips;
+            if (row.active !== undefined) inst.active = row.active;
+            updated++;
+          } else {
+            /* 새 종목 추가 */
+            var newInst = {
+              id: nextId(cat.instruments),
+              sym: row.sym,
+              nameKo: row.nameKo || row.sym,
+              nameEn: row.nameEn || row.sym,
+              monthlyReturn: row.monthlyReturn !== null ? row.monthlyReturn : null,
+              maxDailyLoss: row.maxDailyLoss !== null ? row.maxDailyLoss : null,
+              startDate: row.startDate || '',
+              dailyRoundTrips: row.dailyRoundTrips !== null ? row.dailyRoundTrips : null,
+              active: row.active !== undefined ? row.active : true
+            };
+            cat.instruments.push(newInst);
+            added++;
+          }
+        });
+        lsSave('markets', cats);
+        publishMarkets(true); /* markets_published 동기화 (메인 반영), 알림 생략 */
+        if (skipped > 0) showAlert('경고: ' + skipped + '행은 catId가 없거나 일치하는 카테고리가 없어 건너뛰었습니다.', 'err');
+      } else {
+        var existing = ls(type, []);
+        var merged = existing.slice();
+        _uploadParsed.forEach(function(newRow) {
+          if (newRow.id) {
+            var idx = merged.findIndex(function(r){ return r.id === newRow.id; });
+            if (idx !== -1) { merged[idx] = newRow; updated++; }
+            else { merged.push(newRow); added++; }
+          } else {
+            newRow.id = nextId(merged);
+            merged.push(newRow);
+            added++;
+          }
+        });
+        lsSave(type, merged);
+      }
+
+      showAlert('가져오기 완료: 추가 ' + added + '건 / 수정 ' + updated + '건', 'suc');
+      document.getElementById('uploadResultChips').innerHTML =
+        '<span class="upload-result-chip" style="background:rgba(63,185,80,.15);color:var(--green);">' +
+        '<i class="fas fa-check-circle"></i> 추가 ' + added + '건</span>' +
+        '<span class="upload-result-chip" style="background:rgba(88,166,255,.15);color:var(--blue);">' +
+        '<i class="fas fa-sync"></i> 수정 ' + updated + '건</span>';
+      /* 관련 페이지 강제 갱신 */
+      var refreshers = { signals: renderSignals, news: renderNews, users: renderUsers, plans: renderPlans, testimonials: renderTestimonials, markets: renderMarkets };
+      if (refreshers[type]) try { refreshers[type](); } catch(e){}
+      /* 종목관리는 성공 시 해당 페이지로 이동 */
+      if (type === 'markets' && (added + updated) > 0) setTimeout(function(){ goPage('markets'); }, 1200);
+    }
+
+    function resetUpload() {
+      _uploadParsed = [];
+      document.getElementById('uploadFileInput').value = '';
+      document.getElementById('uploadFileName').textContent = '';
+      document.getElementById('uploadPreviewCard').style.display = 'none';
+      document.getElementById('uploadResultChips').innerHTML = '';
+    }
   </script>
 </body>
 

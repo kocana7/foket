@@ -1923,6 +1923,23 @@
       .foot-bottom {
         flex-direction: column
       }
+
+      .best10-inner {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 0 12px
+      }
+
+      #best10Card {
+        min-width: 560px
+      }
+
+      #best10Card .csp-cols-5,
+      #best10Card .csp-row {
+        grid-template-columns: 36px 1fr .9fr .9fr .85fr .7fr;
+        font-size: 12px;
+        padding: 8px 10px
+      }
     }
 
     @media(max-width:480px) {
@@ -1989,7 +2006,7 @@
         <a href="#pricing" data-i18n="nav.pricing">요금제</a>
         <a href="faq.html" data-i18n="nav.faq">자주하는 질문(FAQ)</a>
         <a href="https://t.me/foketsignal_Lobby" target="_blank" rel="noopener noreferrer"
-          data-i18n="nav.contact">문의</a>
+          data-i18n="nav.contact" data-tg="free">문의</a>
       </div>
       <div class="navbar-actions">
         <div class="lang-dropdown">
@@ -2008,7 +2025,7 @@
             <a class="lang-opt" data-lang="es" href="#">🇪🇸 Español</a>
           </div>
         </div>
-        <a href="https://t.me/foketsignal_Lobby" target="_blank" rel="noopener noreferrer" class="btn-tg"><i
+        <a href="https://t.me/foketsignal_Lobby" target="_blank" rel="noopener noreferrer" class="btn-tg" data-tg="free"><i
             class="fab fa-telegram-plane"></i> <span data-i18n="nav.join_free">무료 텔레그램 참여</span></a>
       </div>
       <button class="hamburger" id="hamburger">&#9776;</button>
@@ -2018,8 +2035,8 @@
       <a href="#signals" data-i18n="nav.signals">FoketSignal 안내</a>
       <a href="#pricing" data-i18n="nav.pricing">요금제</a>
       <a href="faq.html" data-i18n="nav.faq">자주하는 질문(FAQ)</a>
-      <a href="https://t.me/foketsignal_Lobby" target="_blank" rel="noopener noreferrer" data-i18n="nav.contact">문의</a>
-      <a href="https://t.me/foketsignal_Lobby" target="_blank" rel="noopener noreferrer" class="btn-tg"
+      <a href="https://t.me/foketsignal_Lobby" target="_blank" rel="noopener noreferrer" data-i18n="nav.contact" data-tg="free">문의</a>
+      <a href="https://t.me/foketsignal_Lobby" target="_blank" rel="noopener noreferrer" class="btn-tg" data-tg="free"
         style="margin:12px 16px 0;"><i class="fab fa-telegram-plane"></i> <span data-i18n="nav.join_free">무료 텔레그램
           참여</span></a>
     </div>
@@ -2031,13 +2048,13 @@
       <div class="csp" id="best10Card">
         <div class="csp-hd">
           <div class="csp-title">
-            <div class="csp-dot"></div>FoketSignal 수익율 베스트10
+            <div class="csp-dot"></div><span data-i18n="best10.title">FoketSignal 수익율 베스트10</span>
           </div>
           <div class="csp-live">TOP 10</div>
         </div>
         <div class="csp-cols csp-cols-5">
-          <span>순위</span><span>종목</span><span>월평균 수익률</span><span>일최대 손실변동폭</span><span>일평균 왕복
-            거래횟수</span><span>거래일수</span>
+          <span data-i18n="best10.col_rank">순위</span><span data-i18n="best10.col_symbol">종목</span><span data-i18n="best10.col_monthly_return">월평균 수익률</span><span data-i18n="best10.col_max_loss">일최대 손실변동폭</span><span data-i18n="best10.col_daily_trades">일평균 왕복
+            거래횟수</span><span data-i18n="best10.col_trade_days">거래일수</span>
         </div>
         <div id="best10Rows">
           <div class="csp-row" style="opacity:.3">
@@ -2089,7 +2106,7 @@
         </div>
         <div class="hero-btns">
           <a href="https://t.me/foketsignal_Lobby" target="_blank" rel="noopener noreferrer"
-            class="btn btn-primary btn-lg"><i class="fab fa-telegram-plane"></i> <span data-i18n="hero.join_free_btn">무료
+            class="btn btn-primary btn-lg" data-tg="free"><i class="fab fa-telegram-plane"></i> <span data-i18n="hero.join_free_btn">무료
               텔레그램 참여</span></a>
           <a href="#pricing" class="btn btn-outline btn-lg"><span data-i18n="hero.view_vip_btn">요금제 보기</span> <i
               class="fas fa-arrow-right"></i></a>
@@ -2305,79 +2322,7 @@
         <h2 class="sec-title" data-i18n="pricing.title">요금제 선택</h2>
         <p class="sec-sub" data-i18n="pricing.subtitle">나에게 맞는 플랜을 선택하세요</p>
       </div>
-      <div class="pricing-grid">
-        <div class="plan-card">
-          <div class="pname" data-i18n="pricing.plan_bronze">Bronze Class</div>
-          <div class="pdur" data-i18n="pricing.dur_1month">1개월</div>
-          <div class="pprice-wrap"><span class="pcur">$</span><span class="pamt">30</span></div>
-          <div class="pper" data-i18n="pricing.per_month">/월</div>
-          <div class="pfeats">
-            <div class="pfeat"><span class="chk">✓</span><span data-i18n="pricing.feat_8lang">8개언어 지원</span></div>
-            <div class="pfeat"><span class="chk">✓</span><span data-i18n="pricing.feat_cat1">포켓시그널 카테고리 중 1 선택 (예:
-                CryptoSpot, Binance, Futures 중 1 선택)</span></div>
-            <div class="pfeat"><span class="chk">✓</span><span data-i18n="pricing.feat_247">CryptoSpot은 24/7서비스,
-                Futures는 월~금 서비스</span></div>
-            <div class="pfeat"><span class="chk">✓</span><span data-i18n="pricing.feat_signals">진입/목표/손절/완료 시그널
-                제공</span></div>
-            <div class="pfeat"><span class="chk">✓</span><span data-i18n="pricing.feat_group">각 Class 단체방참여</span></div>
-          </div>
-          <a href="payment.html?plan=bronze" class="plan-btn out" data-i18n="pricing.get_started">시작하기</a>
-        </div>
-        <div class="plan-card popular">
-          <div class="pop-badge" data-i18n="pricing.most_popular">인기</div>
-          <div class="pname" data-i18n="pricing.plan_silver">Silver-Class</div>
-          <div class="pdur" data-i18n="pricing.dur_1month">1개월</div>
-          <div class="pprice-wrap"><span class="pcur">$</span><span class="pamt">45</span></div>
-          <div class="pper" data-i18n="pricing.per_month">/월</div>
-          <div class="pfeats">
-            <div class="pfeat"><span class="chk">✓</span><span data-i18n="pricing.feat_8lang">8개언어 지원</span></div>
-            <div class="pfeat"><span class="chk">✓</span><span data-i18n="pricing.feat_cat2">포켓시그널 카테고리 중 2 선택 (예:
-                CryptoSpot, Binance, Futures 중 2 선택)</span></div>
-            <div class="pfeat"><span class="chk">✓</span><span data-i18n="pricing.feat_247">CryptoSpot은 24/7서비스,
-                Futures는 월~금 서비스</span></div>
-            <div class="pfeat"><span class="chk">✓</span><span data-i18n="pricing.feat_signals">진입/목표/손절/완료 시그널
-                제공</span></div>
-            <div class="pfeat"><span class="chk">✓</span><span data-i18n="pricing.feat_group">각 Class 단체방참여</span></div>
-          </div>
-          <a href="payment.html?plan=silver" class="plan-btn pri" data-i18n="pricing.get_started">시작하기</a>
-        </div>
-        <div class="plan-card">
-          <div class="pname" data-i18n="pricing.plan_gold">Gold Class</div>
-          <div class="pdur" data-i18n="pricing.dur_1month">1개월</div>
-          <div class="pprice-wrap"><span class="pcur">$</span><span class="pamt">60</span></div>
-          <div class="pper" data-i18n="pricing.per_month">/월</div>
-          <div class="pfeats">
-            <div class="pfeat"><span class="chk">✓</span><span data-i18n="pricing.feat_8lang">8개언어 지원</span></div>
-            <div class="pfeat"><span class="chk">✓</span><span data-i18n="pricing.feat_cat_all">포켓시그널 카테고리 모두 선택 (예:
-                CryptoSpot, Binance, Futures 모두 선택)</span></div>
-            <div class="pfeat"><span class="chk">✓</span><span data-i18n="pricing.feat_247">CryptoSpot은 24/7서비스,
-                Futures는 월~금 서비스</span></div>
-            <div class="pfeat"><span class="chk">✓</span><span data-i18n="pricing.feat_signals">진입/목표/손절/완료 시그널
-                제공</span></div>
-            <div class="pfeat"><span class="chk">✓</span><span data-i18n="pricing.feat_group">각 Class 단체방참여</span></div>
-          </div>
-          <a href="payment.html?plan=gold" class="plan-btn out" data-i18n="pricing.get_started">시작하기</a>
-        </div>
-        <div class="plan-card">
-          <div class="pname" data-i18n="pricing.plan_vip">VIP Class</div>
-          <div class="pdur" data-i18n="pricing.dur_1month">1개월</div>
-          <div class="pprice-wrap"><span class="pcur">$</span><span class="pamt">80</span></div>
-          <div class="pper" data-i18n="pricing.per_month">/월</div>
-          <div class="pfeats">
-            <div class="pfeat"><span class="chk">✓</span><span data-i18n="pricing.feat_8lang">8개언어 지원</span></div>
-            <div class="pfeat"><span class="chk">✓</span><span data-i18n="pricing.feat_cat_all">포켓시그널 카테고리 모두 선택 (예:
-                CryptoSpot, Binance, Futures 모두 선택)</span></div>
-            <div class="pfeat"><span class="chk">✓</span><span data-i18n="pricing.feat_247">CryptoSpot은 24/7서비스,
-                Futures는 월~금 서비스</span></div>
-            <div class="pfeat"><span class="chk">✓</span><span data-i18n="pricing.feat_signals">진입/목표/손절/완료 시그널
-                제공</span></div>
-            <div class="pfeat"><span class="chk">✓</span><span data-i18n="pricing.feat_group">각 Class 단체방참여</span></div>
-            <div class="pfeat"><span class="chk">✓</span><span data-i18n="pricing.feat_futures">투자금의 포트폴리오 별로 Futures의
-                1~3개월 국제 시세 (국제 증시, 국제유가, 금시세, 농축산물 예측 시세) 제공</span></div>
-          </div>
-          <a href="payment.html?plan=vip" class="plan-btn out" data-i18n="pricing.get_started">시작하기</a>
-        </div>
-      </div>
+      <div class="pricing-grid" id="pricingGrid"></div>
     </div>
   </section>
 
@@ -2401,7 +2346,7 @@
       <p data-i18n="cta.subtitle">무료로 텔레그램에 참여하고 고품질 시그널을 받아보세요</p>
       <div class="cta-btns">
         <a href="https://t.me/foketsignal_Lobby" target="_blank" rel="noopener noreferrer"
-          class="btn btn-primary btn-lg"><i class="fab fa-telegram-plane"></i> <span data-i18n="cta.btn">무료로
+          class="btn btn-primary btn-lg" data-tg="free"><i class="fab fa-telegram-plane"></i> <span data-i18n="cta.btn">무료로
             시작하기</span></a>
         <a href="#pricing" class="btn btn-outline btn-lg" data-i18n="pricing.title">요금제 보기</a>
       </div>
@@ -2424,7 +2369,7 @@
           <p class="ftagline" data-i18n="footer.tagline">AI Trading Signal</p>
           <div class="slinks">
             <a href="https://t.me/foketsignal_Lobby" target="_blank" rel="noopener noreferrer" class="slink"
-              title="Telegram"><i class="fab fa-telegram-plane"></i></a>
+              title="Telegram" data-tg="free"><i class="fab fa-telegram-plane"></i></a>
             <a href="#" class="slink" title="Twitter"><i class="fab fa-twitter"></i></a>
             <a href="#" class="slink" title="Instagram"><i class="fab fa-instagram"></i></a>
             <a href="#" class="slink" title="YouTube"><i class="fab fa-youtube"></i></a>
@@ -2438,14 +2383,14 @@
             <a href="#pricing" data-i18n="nav.pricing">요금제</a>
             <a href="faq.html" data-i18n="nav.faq">자주하는 질문(FAQ)</a>
             <a href="https://t.me/foketsignal_Lobby" target="_blank" rel="noopener noreferrer"
-              data-i18n="nav.contact">문의</a>
+              data-i18n="nav.contact" data-tg="free">문의</a>
           </div>
         </div>
         <div>
           <div class="fhead" data-i18n="footer.follow_us">소셜 미디어</div>
           <div class="flinks">
-            <a href="https://t.me/foketsignal_Lobby" target="_blank" rel="noopener noreferrer">Telegram (Free)</a>
-            <a href="#">Telegram (VIP)</a>
+            <a href="https://t.me/foketsignal_Lobby" target="_blank" rel="noopener noreferrer" data-tg="free">Telegram (Free)</a>
+            <a href="#" target="_blank" rel="noopener noreferrer" data-tg="vip">Telegram (VIP)</a>
             <a href="#">Twitter / X</a>
             <a href="#">YouTube</a>
             <a href="#">Instagram</a>
@@ -2454,10 +2399,10 @@
         <div>
           <div class="fhead">Contact</div>
           <div class="flinks">
-            <a href="mailto:support@foketcrypto.com"><i class="fas fa-envelope"
-                style="margin-right:6px;"></i>support@foketcrypto.com</a>
-            <a href="https://t.me/foketsignal_Lobby" target="_blank" rel="noopener noreferrer"><i
-                class="fab fa-telegram-plane" style="margin-right:6px;"></i>foketsignal_Lobby</a>
+            <a href="mailto:support@foket.com"><i class="fas fa-envelope"
+                style="margin-right:6px;"></i>support@foket.com</a>
+            <a href="https://t.me/foketsignal_Lobby" target="_blank" rel="noopener noreferrer" data-tg="free" id="tgContactHandle"><i
+                class="fab fa-telegram-plane" style="margin-right:6px;"></i><span id="tgHandleText">foketsignal_Lobby</span></a>
             <a href="#"><i class="fas fa-map-marker-alt" style="margin-right:6px;"></i>London, EC1R 5HL</a>
           </div>
         </div>
@@ -2465,11 +2410,16 @@
       <div class="foot-bottom">
         <p class="fdisclaimer" data-i18n="footer.disclaimer">투자 고지: 암호화폐 및 선물 거래는 높은 리스크를 수반합니다. 과거 성과가 미래 수익을 보장하지
           않습니다. 투자에 앞서 충분한 주의를 기울이시기 바랍니다.</p>
+        <p class="fdisclaimer" style="margin-top:6px;opacity:.75;">For educational purposes only. Not financial advice. Trading involves risk. Past performance does not guarantee future results.</p>
         <div>
           <p class="fcopy">&copy; 2026 FoketSignal. <span data-i18n="footer.copyright">All rights reserved</span>.</p>
           <div class="flegal">
             <a href="terms.html" data-i18n="footer.terms">이용약관</a>
             <a href="privacy.html" data-i18n="footer.privacy">개인정보처리방침</a>
+            <a href="risk.html" data-i18n="footer.risk">투자위험고지</a>
+            <a href="refund.html" data-i18n="footer.refund">환불정책</a>
+            <a href="affiliate.html" data-i18n="footer.affiliate">제휴링크고지</a>
+            <a href="earnings.html" data-i18n="footer.earnings">수익면책고지</a>
           </div>
         </div>
       </div>
@@ -2487,11 +2437,13 @@
         "how_it_works.title": "시그널 구성", "how_it_works.subtitle": "각 시그널에 포함된 정보", "how_it_works.entry": "진입 시그널", "how_it_works.entry_desc": "현물 매수(Futures는 매도 포함)의 시장가 진행", "how_it_works.take_profit": "목표가", "how_it_works.take_profit_desc": "목표가 제시를 기본으로 하지만 초과 수익 후 청산 신호가 나올 수도 있습니다.", "how_it_works.stop_loss": "손절가", "how_it_works.stop_loss_desc": "과거 로직에서 기록했던 평균적 및 최소 기록 모두 제시해 드립니다. 즉 데이터 상 평가손익의 기록이며 과거 해당 수치에서 거래를 종료한 것은 아닙니다.", "how_it_works.risk": "진행 중 트레이딩 종료 시그널", "how_it_works.risk_desc": "현물의 시장가 매도, Futures의 포지션 청산 시그널 입니다.\n현재 진행 중인 트레이딩을 종료하고 다음 진입 시그널을 기다립니다.",
         "coins.title": "지원 코인", "coins.subtitle": "주요 암호화폐 시그널 제공",
         "free_signals.title": "무료 시그널", "free_signals.subtitle": "VIP 품질의 시그널을 무료로 경험해보세요", "free_signals.join_btn": "무료로 받기",
-        "pricing.title": "요금제 선택", "pricing.subtitle": "나에게 맞는 플랜을 선택하세요", "pricing.most_popular": "인기", "pricing.plan_bronze": "Bronze Class", "pricing.plan_silver": "Silver-Class", "pricing.plan_gold": "Gold Class", "pricing.plan_vip": "VIP Class", "pricing.dur_1month": "1개월", "pricing.per_month": "/월", "pricing.per_3months": "/3개월", "pricing.per_6months": "/6개월", "pricing.per_year": "/년", "pricing.feat_8lang": "8개언어 지원", "pricing.feat_cat1": "포켓시그널 카테고리 중 1 선택 (예: CryptoSpot, Binance, Futures 중 1 선택)", "pricing.feat_cat2": "포켓시그널 카테고리 중 2 선택 (예: CryptoSpot, Binance, Futures 중 2 선택)", "pricing.feat_cat_all": "포켓시그널 카테고리 모두 선택 (예: CryptoSpot, Binance, Futures 모두 선택)", "pricing.feat_247": "CryptoSpot은 24/7서비스, Futures는 월~금 서비스", "pricing.feat_signals": "진입/목표/손절/완료 시그널 제공", "pricing.feat_group": "각 Class 단체방참여", "pricing.feat_futures": "투자금의 포트폴리오 별로 Futures의 1~3개월 국제 시세 (국제 증시, 국제유가, 금시세, 농축산물 예측 시세) 제공", "pricing.get_started": "시작하기",
+        "pricing.title": "요금제 선택", "pricing.subtitle": "나에게 맞는 플랜을 선택하세요", "pricing.most_popular": "인기", "pricing.plan_bronze": "Bronze Class", "pricing.plan_silver": "Silver Class", "pricing.plan_gold": "Gold Class", "pricing.plan_vip": "VIP Class", "pricing.dur_1month": "1개월", "pricing.per_month": "/월", "pricing.per_3months": "/3개월", "pricing.per_6months": "/6개월", "pricing.per_year": "/년", "pricing.feat_8lang": "8개언어 지원", "pricing.feat_cat1": "포켓시그널 카테고리 중 1 선택 (예: CryptoSpot, Binance, Futures 중 1 선택)", "pricing.feat_cat2": "포켓시그널 카테고리 중 2 선택 (예: CryptoSpot, Binance, Futures 중 2 선택)", "pricing.feat_cat_all": "포켓시그널 카테고리 모두 선택 (예: CryptoSpot, Binance, Futures 모두 선택)", "pricing.feat_247": "CryptoSpot은 24/7서비스, Futures는 월~금 서비스", "pricing.feat_signals": "진입/목표/손절/완료 시그널 제공", "pricing.feat_group": "각 Class 단체방참여", "pricing.feat_futures": "투자금의 포트폴리오 별로 Futures의 1~3개월 국제 시세 (국제 증시, 국제유가, 금시세, 농축산물 예측 시세) 제공", "pricing.get_started": "시작하기",
         "testimonials.title": "사용자 후기",
         "news.title": "크립토 뉴스", "news.subtitle": "최신 암호화폐 시장 소식", "news.read_more": "더 읽기", "news.view_all": "모든 뉴스 보기",
         "cta.title": "지금 시작하세요", "cta.subtitle": "무료로 텔레그램에 참여하고 고품질 시그널을 받아보세요", "cta.btn": "무료로 시작하기",
-        "footer.tagline": "AI Trading Signal", "footer.quick_links": "빠른 링크", "footer.follow_us": "소셜 미디어", "footer.disclaimer": "투자 고지: 암호화폐 및 선물 거래는 높은 리스크를 수반합니다. 과거 성과가 미래 수익을 보장하지 않습니다.", "footer.copyright": "All rights reserved", "footer.terms": "이용약관", "footer.privacy": "개인정보처리방침", "footer.contact": "문의"
+        "footer.tagline": "AI Trading Signal", "footer.quick_links": "빠른 링크", "footer.follow_us": "소셜 미디어", "footer.disclaimer": "투자 고지: 암호화폐 및 선물 거래는 높은 리스크를 수반합니다. 과거 성과가 미래 수익을 보장하지 않습니다.", "footer.copyright": "All rights reserved", "footer.terms": "이용약관", "footer.privacy": "개인정보처리방침", "footer.risk": "투자위험고지", "footer.refund": "환불정책", "footer.affiliate": "제휴링크고지", "footer.earnings": "수익면책고지", "footer.contact": "문의",
+        "best10.title": "FoketSignal 수익율 베스트10", "best10.col_rank": "순위", "best10.col_symbol": "종목", "best10.col_monthly_return": "월평균 수익률", "best10.col_max_loss": "일최대 손실변동폭", "best10.col_daily_trades": "일평균 왕복 거래횟수", "best10.col_trade_days": "거래일수",
+        "best10.days_unit": "일", "best10.no_data": "저장된 종목 데이터가 없습니다", "best10.no_items": "등록된 종목이 없습니다", "best10.load_fail": "로드 실패"
       },
       en: {
         "nav.home": "Home", "nav.signals": "FoketSignal Guide", "nav.pricing": "Pricing", "nav.faq": "FAQ", "nav.contact": "Contact", "nav.join_free": "Join Free Telegram",
@@ -2501,11 +2453,13 @@
         "how_it_works.title": "Signal Structure", "how_it_works.subtitle": "What's included in each signal", "how_it_works.entry": "Entry Signal", "how_it_works.entry_desc": "Spot buy (Futures includes sell) executed at market price", "how_it_works.take_profit": "Take Profit", "how_it_works.take_profit_desc": "Take-profit targets are provided by default, but a close signal may also be sent after excess profit.", "how_it_works.stop_loss": "Stop Loss", "how_it_works.stop_loss_desc": "We provide both average and minimum records from past logic. These are unrealized P&L records in the data; past trades were not necessarily closed at those levels.", "how_it_works.risk": "Active Trading Close Signal", "how_it_works.risk_desc": "Spot market sell, Futures position close signal.\nClose your current trade and wait for the next entry signal.",
         "coins.title": "Supported Coins", "coins.subtitle": "Signals for major cryptocurrencies",
         "free_signals.title": "Free Signals", "free_signals.subtitle": "Experience VIP-quality signals for free", "free_signals.join_btn": "Get For Free",
-        "pricing.title": "Choose Your Plan", "pricing.subtitle": "Select the plan that's right for you", "pricing.most_popular": "Popular", "pricing.plan_bronze": "Bronze Class", "pricing.plan_silver": "Silver-Class", "pricing.plan_gold": "Gold Class", "pricing.plan_vip": "VIP Class", "pricing.dur_1month": "1 month", "pricing.per_month": "/month", "pricing.per_3months": "/3 months", "pricing.per_6months": "/6 months", "pricing.per_year": "/year", "pricing.feat_8lang": "8 languages supported", "pricing.feat_cat1": "Choose 1 Pocket Signal category (e.g. CryptoSpot, Binance, or Futures)", "pricing.feat_cat2": "Choose 2 Pocket Signal categories (e.g. CryptoSpot, Binance, Futures – pick 2)", "pricing.feat_cat_all": "All Pocket Signal categories (e.g. CryptoSpot, Binance, Futures – all 3)", "pricing.feat_247": "CryptoSpot 24/7 service, Futures Mon–Fri", "pricing.feat_signals": "Entry / target / stop-loss / completion signals", "pricing.feat_group": "Class group chat access", "pricing.feat_futures": "1–3 month global Futures outlook by portfolio (global indices, oil, gold, softs)", "pricing.get_started": "Get Started",
+        "pricing.title": "Choose Your Plan", "pricing.subtitle": "Select the plan that's right for you", "pricing.most_popular": "Popular", "pricing.plan_bronze": "Bronze Class", "pricing.plan_silver": "Silver Class", "pricing.plan_gold": "Gold Class", "pricing.plan_vip": "VIP Class", "pricing.dur_1month": "1 month", "pricing.per_month": "/month", "pricing.per_3months": "/3 months", "pricing.per_6months": "/6 months", "pricing.per_year": "/year", "pricing.feat_8lang": "8 languages supported", "pricing.feat_cat1": "Choose 1 Pocket Signal category (e.g. CryptoSpot, Binance, or Futures)", "pricing.feat_cat2": "Choose 2 Pocket Signal categories (e.g. CryptoSpot, Binance, Futures – pick 2)", "pricing.feat_cat_all": "All Pocket Signal categories (e.g. CryptoSpot, Binance, Futures – all 3)", "pricing.feat_247": "CryptoSpot 24/7 service, Futures Mon–Fri", "pricing.feat_signals": "Entry / target / stop-loss / completion signals", "pricing.feat_group": "Class group chat access", "pricing.feat_futures": "1–3 month global Futures outlook by portfolio (global indices, oil, gold, softs)", "pricing.get_started": "Get Started",
         "testimonials.title": "What Our Members Say",
         "news.title": "Crypto News", "news.subtitle": "Latest cryptocurrency market updates", "news.read_more": "Read More", "news.view_all": "View All News",
         "cta.title": "Start Today", "cta.subtitle": "Join our free Telegram and receive high-quality signals", "cta.btn": "Start For Free",
-        "footer.tagline": "Professional cryptocurrency trading signal service", "footer.quick_links": "Quick Links", "footer.follow_us": "Follow Us", "footer.disclaimer": "Investment Disclaimer: Cryptocurrency and futures trading carries high risk. Past performance does not guarantee future results.", "footer.copyright": "All rights reserved", "footer.terms": "Terms of Service", "footer.privacy": "Privacy Policy", "footer.contact": "Contact"
+        "footer.tagline": "Professional cryptocurrency trading signal service", "footer.quick_links": "Quick Links", "footer.follow_us": "Follow Us", "footer.disclaimer": "Investment Disclaimer: Cryptocurrency and futures trading carries high risk. Past performance does not guarantee future results.", "footer.copyright": "All rights reserved", "footer.terms": "Terms of Service", "footer.privacy": "Privacy Policy", "footer.risk": "Investment Risk Disclosure", "footer.refund": "Refund Policy", "footer.affiliate": "Affiliate Disclosure", "footer.earnings": "Earnings Disclaimer", "footer.contact": "Contact",
+        "best10.title": "FoketSignal Top 10 Returns", "best10.col_rank": "Rank", "best10.col_symbol": "Symbol", "best10.col_monthly_return": "Avg Monthly Return", "best10.col_max_loss": "Max Daily Drawdown", "best10.col_daily_trades": "Avg Daily Round Trips", "best10.col_trade_days": "Trading Days",
+        "best10.days_unit": "d", "best10.no_data": "No market data saved", "best10.no_items": "No instruments registered", "best10.load_fail": "Load failed"
       },
       de: {
         "nav.home": "Startseite", "nav.signals": "FoketSignal Anleitung", "nav.pricing": "Preise", "nav.faq": "Häufige Fragen (FAQ)", "nav.contact": "Kontakt", "nav.join_free": "Kostenlos beitreten",
@@ -2515,11 +2469,13 @@
         "how_it_works.title": "Signal-Struktur", "how_it_works.subtitle": "Was in jedem Signal enthalten ist", "how_it_works.entry": "Einstiegssignal", "how_it_works.entry_desc": "Spot-Kauf (Futures inkl. Verkauf) zum Marktpreis", "how_it_works.take_profit": "Take Profit", "how_it_works.take_profit_desc": "Gewinnziele werden standardmäßig angegeben, ein Schließungssignal kann jedoch auch nach Übergewinn erfolgen.", "how_it_works.stop_loss": "Stop Loss", "how_it_works.stop_loss_desc": "Wir liefern Durchschnitts- und Mindestwerte aus vergangener Logik. Es handelt sich um buchmäßige Gewinn-/Verlustwerte; vergangene Trades wurden nicht zwingend zu diesen Werten geschlossen.", "how_it_works.risk": "Signal zum Beenden laufender Trades", "how_it_works.risk_desc": "Spot-Verkauf zum Marktpreis, Futures-Positionsschließsignal.\nBeenden Sie den aktuellen Trade und warten Sie auf das nächste Einstiegssignal.",
         "coins.title": "Unterstützte Coins", "coins.subtitle": "Signale für wichtige Kryptowährungen",
         "free_signals.title": "Kostenlose Signale", "free_signals.subtitle": "Erleben Sie VIP-Qualitätssignale kostenlos", "free_signals.join_btn": "Kostenlos erhalten",
-        "pricing.title": "Plan wählen", "pricing.subtitle": "Wählen Sie den Plan, der für Sie geeignet ist", "pricing.most_popular": "Beliebt", "pricing.plan_bronze": "Bronze Class", "pricing.plan_silver": "Silver-Class", "pricing.plan_gold": "Gold Class", "pricing.plan_vip": "VIP Class", "pricing.dur_1month": "1 Monat", "pricing.per_month": "/Monat", "pricing.per_3months": "/3 Monate", "pricing.per_6months": "/6 Monate", "pricing.per_year": "/Jahr", "pricing.feat_8lang": "8 Sprachen", "pricing.feat_cat1": "1 Pocket-Signal-Kategorie wählen (z. B. CryptoSpot, Binance oder Futures)", "pricing.feat_cat2": "2 Pocket-Signal-Kategorien wählen (z. B. CryptoSpot, Binance, Futures – 2 wählen)", "pricing.feat_cat_all": "Alle Pocket-Signal-Kategorien (z. B. CryptoSpot, Binance, Futures – alle 3)", "pricing.feat_247": "CryptoSpot 24/7, Futures Mo–Fr", "pricing.feat_signals": "Einstieg-/Ziel-/Stopp-/Abschlusssignale", "pricing.feat_group": "Zugang zum Klassen-Gruppenchat", "pricing.feat_futures": "1–3 Monate globale Futures-Aussichten nach Portfolio (Indizes, Öl, Gold, Agrar)", "pricing.get_started": "Loslegen",
+        "pricing.title": "Plan wählen", "pricing.subtitle": "Wählen Sie den Plan, der für Sie geeignet ist", "pricing.most_popular": "Beliebt", "pricing.plan_bronze": "Bronze Class", "pricing.plan_silver": "Silver Class", "pricing.plan_gold": "Gold Class", "pricing.plan_vip": "VIP Class", "pricing.dur_1month": "1 Monat", "pricing.per_month": "/Monat", "pricing.per_3months": "/3 Monate", "pricing.per_6months": "/6 Monate", "pricing.per_year": "/Jahr", "pricing.feat_8lang": "8 Sprachen", "pricing.feat_cat1": "1 Pocket-Signal-Kategorie wählen (z. B. CryptoSpot, Binance oder Futures)", "pricing.feat_cat2": "2 Pocket-Signal-Kategorien wählen (z. B. CryptoSpot, Binance, Futures – 2 wählen)", "pricing.feat_cat_all": "Alle Pocket-Signal-Kategorien (z. B. CryptoSpot, Binance, Futures – alle 3)", "pricing.feat_247": "CryptoSpot 24/7, Futures Mo–Fr", "pricing.feat_signals": "Einstieg-/Ziel-/Stopp-/Abschlusssignale", "pricing.feat_group": "Zugang zum Klassen-Gruppenchat", "pricing.feat_futures": "1–3 Monate globale Futures-Aussichten nach Portfolio (Indizes, Öl, Gold, Agrar)", "pricing.get_started": "Loslegen",
         "testimonials.title": "Was unsere Mitglieder sagen",
         "news.title": "Krypto-Nachrichten", "news.subtitle": "Neueste Kryptowährungs-Marktnachrichten", "news.read_more": "Mehr lesen", "news.view_all": "Alle Nachrichten anzeigen",
         "cta.title": "Jetzt starten", "cta.subtitle": "Treten Sie unserem kostenlosen Telegram bei und erhalten Sie hochwertige Signale", "cta.btn": "Kostenlos starten",
-        "footer.tagline": "Professioneller Kryptowährungs-Handelssignal-Service", "footer.quick_links": "Schnelllinks", "footer.follow_us": "Folgen Sie uns", "footer.disclaimer": "Investitionshinweis: Der Handel mit Kryptowährungen und Futures ist mit hohem Risiko verbunden.", "footer.copyright": "Alle Rechte vorbehalten", "footer.terms": "Nutzungsbedingungen", "footer.privacy": "Datenschutzrichtlinie", "footer.contact": "Kontakt"
+        "footer.tagline": "Professioneller Kryptowährungs-Handelssignal-Service", "footer.quick_links": "Schnelllinks", "footer.follow_us": "Folgen Sie uns", "footer.disclaimer": "Investitionshinweis: Der Handel mit Kryptowährungen und Futures ist mit hohem Risiko verbunden.", "footer.copyright": "Alle Rechte vorbehalten", "footer.terms": "Nutzungsbedingungen", "footer.privacy": "Datenschutzrichtlinie", "footer.risk": "Risikohinweis", "footer.refund": "Rückerstattungsrichtlinie", "footer.affiliate": "Affiliate-Offenlegung", "footer.earnings": "Haftungsausschluss Einnahmen", "footer.contact": "Kontakt",
+        "best10.title": "FoketSignal Top 10 Renditen", "best10.col_rank": "Rang", "best10.col_symbol": "Symbol", "best10.col_monthly_return": "Ø Monatsrendite", "best10.col_max_loss": "Max. Tages-Drawdown", "best10.col_daily_trades": "Ø Tägliche Roundtrips", "best10.col_trade_days": "Handelstage",
+        "best10.days_unit": "T", "best10.no_data": "Keine Marktdaten gespeichert", "best10.no_items": "Keine Instrumente registriert", "best10.load_fail": "Ladefehler"
       },
       ja: {
         "nav.home": "ホーム", "nav.signals": "FoketSignal ご案内", "nav.pricing": "料金", "nav.faq": "よくある質問(FAQ)", "nav.contact": "お問い合わせ", "nav.join_free": "無料Telegram参加",
@@ -2529,11 +2485,13 @@
         "how_it_works.title": "シグナル構成", "how_it_works.subtitle": "各シグナルに含まれる情報", "how_it_works.entry": "エントリーシグナル", "how_it_works.entry_desc": "現物買い（Futuresは売り含む）の成行で実行", "how_it_works.take_profit": "利確目標", "how_it_works.take_profit_desc": "目標価格の提示を基本としますが、超過利益後に決済シグナルが出る場合もあります。", "how_it_works.stop_loss": "ストップロス", "how_it_works.stop_loss_desc": "過去ロジックで記録した平均値・最小値の両方を提示します。つまりデータ上の評価損益の記録であり、過去にその数値で決済したわけではありません。", "how_it_works.risk": "進行中トレード終了シグナル", "how_it_works.risk_desc": "現物の成行売り、Futuresのポジション決済シグナルです。\n現在のトレードを終了し、次のエントリーシグナルをお待ちください。",
         "coins.title": "対応コイン", "coins.subtitle": "主要暗号通貨のシグナル提供",
         "free_signals.title": "無料シグナル", "free_signals.subtitle": "VIP品質のシグナルを無料で体験", "free_signals.join_btn": "無料で受け取る",
-        "pricing.title": "プランを選択", "pricing.subtitle": "あなたに合ったプランをお選びください", "pricing.most_popular": "人気", "pricing.plan_bronze": "Bronze Class", "pricing.plan_silver": "Silver-Class", "pricing.plan_gold": "Gold Class", "pricing.plan_vip": "VIP Class", "pricing.dur_1month": "1ヶ月", "pricing.per_month": "/月", "pricing.per_3months": "/3ヶ月", "pricing.per_6months": "/6ヶ月", "pricing.per_year": "/年", "pricing.feat_8lang": "8言語対応", "pricing.feat_cat1": "ポケットシグナル 1カテゴリ選択（例：CryptoSpot、Binance、Futuresのいずれか1つ）", "pricing.feat_cat2": "ポケットシグナル 2カテゴリ選択（例：CryptoSpot、Binance、Futuresから2つ）", "pricing.feat_cat_all": "ポケットシグナル 全カテゴリ（例：CryptoSpot、Binance、Futures すべて）", "pricing.feat_247": "CryptoSpot 24時間対応、Futures 月〜金", "pricing.feat_signals": "エントリー・目標・損切り・決済シグナル", "pricing.feat_group": "各Classグループチャット参加", "pricing.feat_futures": "投資額・ポートフォリオに応じたFutures 1〜3ヶ月国際相場（国際株価・原油・金・農産物予測）", "pricing.get_started": "始める",
+        "pricing.title": "プランを選択", "pricing.subtitle": "あなたに合ったプランをお選びください", "pricing.most_popular": "人気", "pricing.plan_bronze": "Bronze Class", "pricing.plan_silver": "Silver Class", "pricing.plan_gold": "Gold Class", "pricing.plan_vip": "VIP Class", "pricing.dur_1month": "1ヶ月", "pricing.per_month": "/月", "pricing.per_3months": "/3ヶ月", "pricing.per_6months": "/6ヶ月", "pricing.per_year": "/年", "pricing.feat_8lang": "8言語対応", "pricing.feat_cat1": "ポケットシグナル 1カテゴリ選択（例：CryptoSpot、Binance、Futuresのいずれか1つ）", "pricing.feat_cat2": "ポケットシグナル 2カテゴリ選択（例：CryptoSpot、Binance、Futuresから2つ）", "pricing.feat_cat_all": "ポケットシグナル 全カテゴリ（例：CryptoSpot、Binance、Futures すべて）", "pricing.feat_247": "CryptoSpot 24時間対応、Futures 月〜金", "pricing.feat_signals": "エントリー・目標・損切り・決済シグナル", "pricing.feat_group": "各Classグループチャット参加", "pricing.feat_futures": "投資額・ポートフォリオに応じたFutures 1〜3ヶ月国際相場（国際株価・原油・金・農産物予測）", "pricing.get_started": "始める",
         "testimonials.title": "会員の声",
         "news.title": "暗号ニュース", "news.subtitle": "最新の暗号通貨市場情報", "news.read_more": "続きを読む", "news.view_all": "すべてのニュースを見る",
         "cta.title": "今すぐ始めよう", "cta.subtitle": "無料のTelegramに参加して高品質のシグナルを受け取ろう", "cta.btn": "無料で始める",
-        "footer.tagline": "プロフェッショナル暗号通貨取引シグナルサービス", "footer.quick_links": "クイックリンク", "footer.follow_us": "フォローする", "footer.disclaimer": "投資免責事項：暗号通貨および先物取引は高いリスクを伴います。過去の実績は将来の結果を保証しません。", "footer.copyright": "All rights reserved", "footer.terms": "利用規約", "footer.privacy": "プライバシーポリシー", "footer.contact": "お問い合わせ"
+        "footer.tagline": "プロフェッショナル暗号通貨取引シグナルサービス", "footer.quick_links": "クイックリンク", "footer.follow_us": "フォローする", "footer.disclaimer": "投資免責事項：暗号通貨および先物取引は高いリスクを伴います。過去の実績は将来の結果を保証しません。", "footer.copyright": "All rights reserved", "footer.terms": "利用規約", "footer.privacy": "プライバシーポリシー", "footer.risk": "投資リスク開示", "footer.refund": "返金ポリシー", "footer.affiliate": "アフィリエイト開示", "footer.earnings": "収益免責事項", "footer.contact": "お問い合わせ",
+        "best10.title": "FoketSignal 収益率ベスト10", "best10.col_rank": "順位", "best10.col_symbol": "銘柄", "best10.col_monthly_return": "月平均収益率", "best10.col_max_loss": "日最大損失変動幅", "best10.col_daily_trades": "日平均往復取引回数", "best10.col_trade_days": "取引日数",
+        "best10.days_unit": "日", "best10.no_data": "保存された銘柄データがありません", "best10.no_items": "登録された銘柄がありません", "best10.load_fail": "読み込み失敗"
       },
       zh: {
         "nav.home": "首页", "nav.signals": "FoketSignal 指南", "nav.pricing": "定价", "nav.faq": "常见问题(FAQ)", "nav.contact": "联系我们", "nav.join_free": "免费加入Telegram",
@@ -2543,11 +2501,13 @@
         "how_it_works.title": "信号结构", "how_it_works.subtitle": "每个信号包含的内容", "how_it_works.entry": "入场信号", "how_it_works.entry_desc": "现货买入（Futures含卖出）以市价执行", "how_it_works.take_profit": "止盈", "how_it_works.take_profit_desc": "原则上提供目标价，但超额收益后也可能发出平仓信号。", "how_it_works.stop_loss": "止损", "how_it_works.stop_loss_desc": "提供过去逻辑记录的平均值及最小值。即数据上的评估损益记录，并非表示过去曾于该数值平仓。", "how_it_works.risk": "进行中交易结束信号", "how_it_works.risk_desc": "现货市价卖出、Futures仓位平仓信号。\n结束当前交易，等待下一次入场信号。",
         "coins.title": "支持的币种", "coins.subtitle": "主要加密货币信号",
         "free_signals.title": "免费信号", "free_signals.subtitle": "免费体验VIP质量信号", "free_signals.join_btn": "免费获取",
-        "pricing.title": "选择计划", "pricing.subtitle": "选择适合您的计划", "pricing.most_popular": "热门", "pricing.plan_bronze": "Bronze Class", "pricing.plan_silver": "Silver-Class", "pricing.plan_gold": "Gold Class", "pricing.plan_vip": "VIP Class", "pricing.dur_1month": "1个月", "pricing.per_month": "/月", "pricing.per_3months": "/3个月", "pricing.per_6months": "/6个月", "pricing.per_year": "/年", "pricing.feat_8lang": "8种语言支持", "pricing.feat_cat1": "选择1个 Pocket Signal 类别（如 CryptoSpot、Binance、Futures 选1）", "pricing.feat_cat2": "选择2个 Pocket Signal 类别（如 CryptoSpot、Binance、Futures 选2）", "pricing.feat_cat_all": "Pocket Signal 全部类别（如 CryptoSpot、Binance、Futures 全部）", "pricing.feat_247": "CryptoSpot 24/7服务，Futures 周一至周五", "pricing.feat_signals": "入场/目标/止损/完成信号", "pricing.feat_group": "各 Class 群组参与", "pricing.feat_futures": "按投资组合提供 Futures 1~3个月国际行情（国际股市、原油、金价、农产品预测）", "pricing.get_started": "立即开始",
+        "pricing.title": "选择计划", "pricing.subtitle": "选择适合您的计划", "pricing.most_popular": "热门", "pricing.plan_bronze": "Bronze Class", "pricing.plan_silver": "Silver Class", "pricing.plan_gold": "Gold Class", "pricing.plan_vip": "VIP Class", "pricing.dur_1month": "1个月", "pricing.per_month": "/月", "pricing.per_3months": "/3个月", "pricing.per_6months": "/6个月", "pricing.per_year": "/年", "pricing.feat_8lang": "8种语言支持", "pricing.feat_cat1": "选择1个 Pocket Signal 类别（如 CryptoSpot、Binance、Futures 选1）", "pricing.feat_cat2": "选择2个 Pocket Signal 类别（如 CryptoSpot、Binance、Futures 选2）", "pricing.feat_cat_all": "Pocket Signal 全部类别（如 CryptoSpot、Binance、Futures 全部）", "pricing.feat_247": "CryptoSpot 24/7服务，Futures 周一至周五", "pricing.feat_signals": "入场/目标/止损/完成信号", "pricing.feat_group": "各 Class 群组参与", "pricing.feat_futures": "按投资组合提供 Futures 1~3个月国际行情（国际股市、原油、金价、农产品预测）", "pricing.get_started": "立即开始",
         "testimonials.title": "会员评价",
         "news.title": "加密新闻", "news.subtitle": "最新加密货币市场资讯", "news.read_more": "阅读更多", "news.view_all": "查看所有新闻",
         "cta.title": "立即开始", "cta.subtitle": "加入我们的免费Telegram群组，接收高质量信号", "cta.btn": "免费开始",
-        "footer.tagline": "专业加密货币交易信号服务", "footer.quick_links": "快速链接", "footer.follow_us": "关注我们", "footer.disclaimer": "投资免责声明：加密货币及期货交易具有高风险。过去的表现不保证未来的结果。", "footer.copyright": "版权所有", "footer.terms": "服务条款", "footer.privacy": "隐私政策", "footer.contact": "联系我们"
+        "footer.tagline": "专业加密货币交易信号服务", "footer.quick_links": "快速链接", "footer.follow_us": "关注我们", "footer.disclaimer": "投资免责声明：加密货币及期货交易具有高风险。过去的表现不保证未来的结果。", "footer.copyright": "版权所有", "footer.terms": "服务条款", "footer.privacy": "隐私政策", "footer.risk": "投资风险披露", "footer.refund": "退款政策", "footer.affiliate": "联盟链接披露", "footer.earnings": "收益免责声明", "footer.contact": "联系我们",
+        "best10.title": "FoketSignal 收益率前10名", "best10.col_rank": "排名", "best10.col_symbol": "标的", "best10.col_monthly_return": "月均收益率", "best10.col_max_loss": "日最大亏损幅度", "best10.col_daily_trades": "日均往返交易次数", "best10.col_trade_days": "交易天数",
+        "best10.days_unit": "天", "best10.no_data": "暂无保存的标的数据", "best10.no_items": "暂无注册标的", "best10.load_fail": "加载失败"
       },
       fr: {
         "nav.home": "Accueil", "nav.signals": "FoketSignal Guide", "nav.pricing": "Tarifs", "nav.faq": "FAQ", "nav.contact": "Contact", "nav.join_free": "Rejoindre Telegram gratuitement",
@@ -2557,11 +2517,13 @@
         "how_it_works.title": "Structure du signal", "how_it_works.subtitle": "Ce qui est inclus dans chaque signal", "how_it_works.entry": "Signal d'entrée", "how_it_works.entry_desc": "Achat au comptant (Futures inclut la vente) au prix du marché", "how_it_works.take_profit": "Take Profit", "how_it_works.take_profit_desc": "Les objectifs de prise de bénéfices sont fournis par défaut, mais un signal de clôture peut être envoyé après un excédent de profit.", "how_it_works.stop_loss": "Stop Loss", "how_it_works.stop_loss_desc": "Nous fournissons les enregistrements moyens et minimaux de la logique passée. Il s'agit d'enregistrements de P&L évalués en données ; les trades passés n'ont pas nécessairement été clôturés à ces niveaux.", "how_it_works.risk": "Signal de clôture du trading en cours", "how_it_works.risk_desc": "Vente au comptant au prix du marché, signal de clôture de position Futures.\nClôturez le trade en cours et attendez le prochain signal d'entrée.",
         "coins.title": "Cryptos supportées", "coins.subtitle": "Signaux pour les principales cryptomonnaies",
         "free_signals.title": "Signaux gratuits", "free_signals.subtitle": "Expérimentez des signaux de qualité VIP gratuitement", "free_signals.join_btn": "Obtenir gratuitement",
-        "pricing.title": "Choisissez votre plan", "pricing.subtitle": "Sélectionnez le plan qui vous convient", "pricing.most_popular": "Populaire", "pricing.plan_bronze": "Bronze Class", "pricing.plan_silver": "Silver-Class", "pricing.plan_gold": "Gold Class", "pricing.plan_vip": "VIP Class", "pricing.dur_1month": "1 mois", "pricing.per_month": "/mois", "pricing.per_3months": "/3 mois", "pricing.per_6months": "/6 mois", "pricing.per_year": "/an", "pricing.feat_8lang": "8 langues", "pricing.feat_cat1": "Choisir 1 catégorie Pocket Signal (ex. CryptoSpot, Binance ou Futures)", "pricing.feat_cat2": "Choisir 2 catégories Pocket Signal (ex. CryptoSpot, Binance, Futures – 2 au choix)", "pricing.feat_cat_all": "Toutes les catégories Pocket Signal (ex. CryptoSpot, Binance, Futures – les 3)", "pricing.feat_247": "CryptoSpot 24/7, Futures lun.–ven.", "pricing.feat_signals": "Signaux entrée / objectif / stop / clôture", "pricing.feat_group": "Accès au groupe de la classe", "pricing.feat_futures": "Perspectives Futures 1–3 mois par portefeuille (indices, pétrole, or, matières premières)", "pricing.get_started": "Commencer",
+        "pricing.title": "Choisissez votre plan", "pricing.subtitle": "Sélectionnez le plan qui vous convient", "pricing.most_popular": "Populaire", "pricing.plan_bronze": "Bronze Class", "pricing.plan_silver": "Silver Class", "pricing.plan_gold": "Gold Class", "pricing.plan_vip": "VIP Class", "pricing.dur_1month": "1 mois", "pricing.per_month": "/mois", "pricing.per_3months": "/3 mois", "pricing.per_6months": "/6 mois", "pricing.per_year": "/an", "pricing.feat_8lang": "8 langues", "pricing.feat_cat1": "Choisir 1 catégorie Pocket Signal (ex. CryptoSpot, Binance ou Futures)", "pricing.feat_cat2": "Choisir 2 catégories Pocket Signal (ex. CryptoSpot, Binance, Futures – 2 au choix)", "pricing.feat_cat_all": "Toutes les catégories Pocket Signal (ex. CryptoSpot, Binance, Futures – les 3)", "pricing.feat_247": "CryptoSpot 24/7, Futures lun.–ven.", "pricing.feat_signals": "Signaux entrée / objectif / stop / clôture", "pricing.feat_group": "Accès au groupe de la classe", "pricing.feat_futures": "Perspectives Futures 1–3 mois par portefeuille (indices, pétrole, or, matières premières)", "pricing.get_started": "Commencer",
         "testimonials.title": "Ce que disent nos membres",
         "news.title": "Actualités Crypto", "news.subtitle": "Dernières nouvelles du marché des cryptomonnaies", "news.read_more": "Lire la suite", "news.view_all": "Voir toutes les actualités",
         "cta.title": "Commencez aujourd'hui", "cta.subtitle": "Rejoignez notre Telegram gratuit et recevez des signaux de haute qualité", "cta.btn": "Commencer gratuitement",
-        "footer.tagline": "Service professionnel de signaux de trading de cryptomonnaies", "footer.quick_links": "Liens rapides", "footer.follow_us": "Suivez-nous", "footer.disclaimer": "Avertissement sur les investissements : Le trading de cryptomonnaies et de contrats à terme comporte des risques élevés.", "footer.copyright": "Tous droits réservés", "footer.terms": "Conditions d'utilisation", "footer.privacy": "Politique de confidentialité", "footer.contact": "Contact"
+        "footer.tagline": "Service professionnel de signaux de trading de cryptomonnaies", "footer.quick_links": "Liens rapides", "footer.follow_us": "Suivez-nous", "footer.disclaimer": "Avertissement sur les investissements : Le trading de cryptomonnaies et de contrats à terme comporte des risques élevés.", "footer.copyright": "Tous droits réservés", "footer.terms": "Conditions d'utilisation", "footer.privacy": "Politique de confidentialité", "footer.risk": "Divulgation des risques", "footer.refund": "Politique de remboursement", "footer.affiliate": "Divulgation d'affiliation", "footer.earnings": "Avis de non-responsabilité sur les revenus", "footer.contact": "Contact",
+        "best10.title": "FoketSignal Top 10 Rendements", "best10.col_rank": "Rang", "best10.col_symbol": "Symbole", "best10.col_monthly_return": "Rendement mensuel moy.", "best10.col_max_loss": "Perte max journalière", "best10.col_daily_trades": "Opérations/jour moy.", "best10.col_trade_days": "Jours de trading",
+        "best10.days_unit": "j", "best10.no_data": "Aucune donnée de marché enregistrée", "best10.no_items": "Aucun instrument enregistré", "best10.load_fail": "Échec du chargement"
       },
       es: {
         "nav.home": "Inicio", "nav.signals": "FoketSignal Guía", "nav.pricing": "Precios", "nav.faq": "Preguntas frecuentes (FAQ)", "nav.contact": "Contacto", "nav.join_free": "Unirse gratis a Telegram",
@@ -2571,11 +2533,13 @@
         "how_it_works.title": "Estructura de la señal", "how_it_works.subtitle": "Lo que se incluye en cada señal", "how_it_works.entry": "Señal de entrada", "how_it_works.entry_desc": "Compra al contado (Futures incluye venta) al precio de mercado", "how_it_works.take_profit": "Take Profit", "how_it_works.take_profit_desc": "Se ofrecen objetivos de toma de beneficios por defecto, pero también puede enviarse una señal de cierre tras beneficio excedente.", "how_it_works.stop_loss": "Stop Loss", "how_it_works.stop_loss_desc": "Proporcionamos los registros medios y mínimos de la lógica pasada. Son registros de P&L evaluado en datos; los trades pasados no se cerraron necesariamente en esos niveles.", "how_it_works.risk": "Señal de cierre de trading en curso", "how_it_works.risk_desc": "Venta al contado al precio de mercado, señal de cierre de posición Futures.\nCierre el trade actual y espere la siguiente señal de entrada.",
         "coins.title": "Criptos soportadas", "coins.subtitle": "Señales para las principales criptomonedas",
         "free_signals.title": "Señales gratuitas", "free_signals.subtitle": "Experimenta señales de calidad VIP gratis", "free_signals.join_btn": "Obtener gratis",
-        "pricing.title": "Elige tu plan", "pricing.subtitle": "Selecciona el plan que sea adecuado para ti", "pricing.most_popular": "Popular", "pricing.plan_bronze": "Bronze Class", "pricing.plan_silver": "Silver-Class", "pricing.plan_gold": "Gold Class", "pricing.plan_vip": "VIP Class", "pricing.dur_1month": "1 mes", "pricing.per_month": "/mes", "pricing.per_3months": "/3 meses", "pricing.per_6months": "/6 meses", "pricing.per_year": "/año", "pricing.feat_8lang": "8 idiomas", "pricing.feat_cat1": "Elegir 1 categoría Pocket Signal (ej. CryptoSpot, Binance o Futures)", "pricing.feat_cat2": "Elegir 2 categorías Pocket Signal (ej. CryptoSpot, Binance, Futures – 2 a elegir)", "pricing.feat_cat_all": "Todas las categorías Pocket Signal (ej. CryptoSpot, Binance, Futures – las 3)", "pricing.feat_247": "CryptoSpot 24/7, Futures lun.–vie.", "pricing.feat_signals": "Señales de entrada / objetivo / stop / cierre", "pricing.feat_group": "Acceso al grupo de la clase", "pricing.feat_futures": "Perspectivas Futures 1–3 meses por cartera (índices, petróleo, oro, materias primas)", "pricing.get_started": "Empezar",
+        "pricing.title": "Elige tu plan", "pricing.subtitle": "Selecciona el plan que sea adecuado para ti", "pricing.most_popular": "Popular", "pricing.plan_bronze": "Bronze Class", "pricing.plan_silver": "Silver Class", "pricing.plan_gold": "Gold Class", "pricing.plan_vip": "VIP Class", "pricing.dur_1month": "1 mes", "pricing.per_month": "/mes", "pricing.per_3months": "/3 meses", "pricing.per_6months": "/6 meses", "pricing.per_year": "/año", "pricing.feat_8lang": "8 idiomas", "pricing.feat_cat1": "Elegir 1 categoría Pocket Signal (ej. CryptoSpot, Binance o Futures)", "pricing.feat_cat2": "Elegir 2 categorías Pocket Signal (ej. CryptoSpot, Binance, Futures – 2 a elegir)", "pricing.feat_cat_all": "Todas las categorías Pocket Signal (ej. CryptoSpot, Binance, Futures – las 3)", "pricing.feat_247": "CryptoSpot 24/7, Futures lun.–vie.", "pricing.feat_signals": "Señales de entrada / objetivo / stop / cierre", "pricing.feat_group": "Acceso al grupo de la clase", "pricing.feat_futures": "Perspectivas Futures 1–3 meses por cartera (índices, petróleo, oro, materias primas)", "pricing.get_started": "Empezar",
         "testimonials.title": "Lo que dicen nuestros miembros",
         "news.title": "Noticias Crypto", "news.subtitle": "Últimas novedades del mercado de criptomonedas", "news.read_more": "Leer más", "news.view_all": "Ver todas las noticias",
         "cta.title": "Empieza hoy", "cta.subtitle": "Únete a nuestro Telegram gratuito y recibe señales de alta calidad", "cta.btn": "Empezar gratis",
-        "footer.tagline": "Servicio profesional de señales de trading de criptomonedas", "footer.quick_links": "Enlaces rápidos", "footer.follow_us": "Síguenos", "footer.disclaimer": "Aviso de inversión: El trading de criptomonedas y futuros conlleva alto riesgo. Los resultados pasados no garantizan resultados futuros.", "footer.copyright": "Todos los derechos reservados", "footer.terms": "Términos de servicio", "footer.privacy": "Política de privacidad", "footer.contact": "Contacto"
+        "footer.tagline": "Servicio profesional de señales de trading de criptomonedas", "footer.quick_links": "Enlaces rápidos", "footer.follow_us": "Síguenos", "footer.disclaimer": "Aviso de inversión: El trading de criptomonedas y futuros conlleva alto riesgo. Los resultados pasados no garantizan resultados futuros.", "footer.copyright": "Todos los derechos reservados", "footer.terms": "Términos de servicio", "footer.privacy": "Política de privacidad", "footer.risk": "Divulgación de riesgos", "footer.refund": "Política de reembolso", "footer.affiliate": "Divulgación de afiliados", "footer.earnings": "Descargo de responsabilidad de ganancias", "footer.contact": "Contacto",
+        "best10.title": "FoketSignal Top 10 Rendimientos", "best10.col_rank": "Rango", "best10.col_symbol": "Símbolo", "best10.col_monthly_return": "Rentabilidad mensual media", "best10.col_max_loss": "Pérdida máx. diaria", "best10.col_daily_trades": "Operaciones/día medias", "best10.col_trade_days": "Días de trading",
+        "best10.days_unit": "d", "best10.no_data": "No hay datos de mercado guardados", "best10.no_items": "No hay instrumentos registrados", "best10.load_fail": "Error de carga"
       }
     };
 
@@ -2958,20 +2922,35 @@
       }
     }
 
-    function loadBest10() {
+    async function loadBest10() {
       const container = document.getElementById('best10Rows');
       if (!container) return;
+      /* 서버에서 최신 markets_published 데이터 fetch (캐시 무시) */
+      try {
+        const base = (location.protocol !== 'file:') ? location.origin + '/api' : 'http://localhost:3000/api';
+        const r = await fetch(base + '/public/markets', { cache: 'no-store' });
+        const j = await r.json();
+        if (j && j.success && j.data) {
+          const raw = typeof j.data === 'string' ? j.data : JSON.stringify(j.data);
+          try { localStorage.setItem('fk_markets_published', raw); } catch(e) {}
+        }
+      } catch(e) { /* 서버 없으면 localStorage 사용 */ }
+      const lang = (typeof currentLang !== 'undefined') ? currentLang : 'ko';
+      const t = (typeof TRANSLATIONS !== 'undefined' && TRANSLATIONS[lang]) ? TRANSLATIONS[lang] : TRANSLATIONS['ko'];
+      const daysUnit  = t['best10.days_unit'] || '일';
+      const noData    = t['best10.no_data']   || '저장된 종목 데이터가 없습니다';
+      const noItems   = t['best10.no_items']  || '등록된 종목이 없습니다';
+      const loadFail  = t['best10.load_fail'] || '로드 실패';
+      const emptyRow  = (msg) => '<div class="csp-row" style="opacity:0.7"><div class="csp-rank">—</div><div class="csp-sym">' + msg + '</div><div class="csp-val dim">—</div><div class="csp-val dim">—</div><div class="csp-val dim">—</div><div class="csp-days">—</div></div>';
       try {
         const raw = localStorage.getItem('fk_markets_published') || localStorage.getItem('fk_markets');
-        if (!raw) {
-          container.innerHTML = '<div class="csp-row" style="opacity:0.7"><div class="csp-rank">—</div><div class="csp-sym">저장된 종목 데이터가 없습니다</div><div class="csp-val dim">—</div><div class="csp-val dim">—</div><div class="csp-val dim">—</div><div class="csp-days">—</div></div>';
-          return;
-        }
+        if (!raw) { container.innerHTML = emptyRow(noData); return; }
         const markets = JSON.parse(raw);
         const list = [];
         markets.forEach(function (m) {
           (m.instruments || []).forEach(function (inst) {
-            list.push({ ...inst, _catName: m.nameKo, _catId: m.id });
+            if ((inst.sym || '').toUpperCase() === 'HIS') return; /* HIS(항셍) 제외 */
+            list.push({ ...inst, _catName: m.nameKo, _catNameEn: m.nameEn || m.nameKo, _catId: m.id });
           });
         });
         function mr(inst) {
@@ -2979,9 +2958,19 @@
           const n = parseFloat(inst.monthlyReturn);
           return isNaN(n) ? -Infinity : n;
         }
-        list.sort(function (a, b) { return mr(b) - mr(a); });
-        const top10 = list.slice(0, 10);
-        const isKo = (typeof currentLang !== 'undefined' && currentLang === 'ko');
+        /* sym 기준 중복 제거: 같은 심볼이 여러 카테고리에 있을 경우 monthlyReturn 높은 것 우선 */
+        const symMap = {};
+        list.forEach(function (inst) {
+          const key = (inst.sym || '').toUpperCase() || ('__' + Math.random());
+          if (!(key in symMap) || mr(inst) > mr(symMap[key])) symMap[key] = inst;
+        });
+        const deduped = Object.values(symMap);
+        deduped.sort(function (a, b) { return mr(b) - mr(a); });
+        const top10 = deduped.slice(0, 10);
+        if (top10.length === 0) { container.innerHTML = emptyRow(noItems); return; }
+        const isKo = (lang === 'ko');
+        const instName = (inst) => isKo ? (inst.nameKo || inst.sym) : (inst.nameEn || inst.nameKo || inst.sym);
+        const catLabel = (inst) => isKo ? (inst._catName || '') : (inst._catNameEn || '');
         container.innerHTML = top10.map(function (inst, idx) {
           const rank = idx + 1;
           const mrVal = inst.monthlyReturn !== '' && inst.monthlyReturn != null ? parseFloat(inst.monthlyReturn) : null;
@@ -2994,42 +2983,28 @@
           const dlCls = dlVal !== null ? (dlVal < 0 ? 'dn' : 'up') : 'dim';
           const binancePrefix = (inst._catId === 8) ? '<span class="binance-mark" title="Binance">B</span>' : '';
           const symCell = isKo
-            ? binancePrefix + inst.nameKo + '<small>' + (inst.sym || '') + ' · ' + (inst._catName || '') + '</small>'
-            : binancePrefix + (inst.sym || '') + '<small>' + inst.nameKo + ' · ' + (inst._catName || '') + '</small>';
+            ? binancePrefix + instName(inst) + '<small>' + (inst.sym || '') + ' · ' + catLabel(inst) + '</small>'
+            : binancePrefix + (inst.sym || '') + '<small>' + instName(inst) + ' · ' + catLabel(inst) + '</small>';
           return '<div class="csp-row" style="animation:cspRowIn .45s cubic-bezier(.22,.68,0,1.2) ' + (idx * 0.06) + 's forwards;">' +
             '<div class="csp-rank">' + rank + '</div>' +
             '<div class="csp-sym">' + symCell + '</div>' +
             '<div class="csp-val ' + mrCls + '">' + mrStr + '</div>' +
             '<div class="csp-val ' + dlCls + '">' + dlStr + '</div>' +
             '<div class="csp-val dim">' + (roundTrips !== null ? roundTrips : '—') + '</div>' +
-            '<div class="csp-days">' + (days !== null ? days : '—') + (days !== null ? '<small>일</small>' : '') + '</div>' +
+            '<div class="csp-days">' + (days !== null ? days : '—') + (days !== null ? '<small>' + daysUnit + '</small>' : '') + '</div>' +
             '</div>';
         }).join('');
-        if (top10.length === 0) {
-          container.innerHTML = '<div class="csp-row" style="opacity:0.7"><div class="csp-rank">—</div><div class="csp-sym">등록된 종목이 없습니다</div><div class="csp-val dim">—</div><div class="csp-val dim">—</div><div class="csp-val dim">—</div><div class="csp-days">—</div></div>';
-        }
       } catch (e) {
         console.warn('[Best10] 로드 실패:', e);
-        if (container) container.innerHTML = '<div class="csp-row" style="opacity:0.7"><div class="csp-rank">—</div><div class="csp-sym">로드 실패</div><div class="csp-val dim">—</div><div class="csp-val dim">—</div><div class="csp-val dim">—</div><div class="csp-days">—</div></div>';
+        if (container) container.innerHTML = emptyRow(loadFail);
       }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      (async function initMarketsFromApi() {
-        try {
-          const base = (typeof location !== 'undefined' && location.origin && location.protocol !== 'file:') ? location.origin + '/api' : 'http://localhost:3000/api';
-          const r = await fetch(base + '/public/markets');
-          const j = await r.json();
-          if (j && j.success && j.data) {
-            const raw = typeof j.data === 'string' ? j.data : JSON.stringify(j.data);
-            try { localStorage.setItem('fk_markets_published', raw); } catch (e) { }
-          }
-        } catch (e) { }
-        loadCryptoStats();
-        loadBinanceStats();
-        loadFuturesStats();
-        loadBest10();
-      })();
+      loadCryptoStats();
+      loadBinanceStats();
+      loadFuturesStats();
+      loadBest10();
 
       // Random shuffle of 3 CSP cards periodically
       const heroCspWrap = document.getElementById('heroCspWrap');
@@ -3070,6 +3045,50 @@
         mobileMenu.classList.toggle('open');
         hamburger.innerHTML = mobileMenu.classList.contains('open') ? '&#10005;' : '&#9776;';
       });
+
+      // 텔레그램 링크 동적 연결
+      (function applyTelegramLinks() {
+        let cfg = {};
+        try { const r = localStorage.getItem('fk_settings'); if (r) cfg = JSON.parse(r); } catch(e) {}
+        const freeUrl = cfg.telegram_free || 'https://t.me/foketsignal_Lobby';
+        const vipUrl  = cfg.telegram_vip  || '#';
+        const handle  = cfg.telegram_handle || '';
+        document.querySelectorAll('[data-tg="free"]').forEach(function(el) { el.href = freeUrl; });
+        document.querySelectorAll('[data-tg="vip"]').forEach(function(el) { el.href = vipUrl; });
+        const ht = document.getElementById('tgHandleText');
+        if (ht && handle) ht.textContent = handle;
+      })();
+
+      // 구독 플랜 그리드 동적 렌더링
+      (function renderPricingGrid() {
+        const grid = document.getElementById('pricingGrid');
+        if (!grid) return;
+        const FALLBACK = [
+          { id:1, name:'Bronze Class', slug:'bronze', days:30, price:30, cur:'USD', popular:false, active:true, feats:['8개언어 지원','포켓시그널 카테고리 중 1 선택 (예: CryptoSpot, Binance, Futures 중 1 선택)','CryptoSpot은 24/7서비스, Futures는 월~금 서비스','진입/목표/손절/완료 시그널 제공','각 Class 단체방참여'] },
+          { id:2, name:'Silver Class', slug:'silver', days:30, price:45, cur:'USD', popular:true,  active:true, feats:['8개언어 지원','포켓시그널 카테고리 중 2 선택 (예: CryptoSpot, Binance, Futures 중 2 선택)','CryptoSpot은 24/7서비스, Futures는 월~금 서비스','진입/목표/손절/완료 시그널 제공','각 Class 단체방참여'] },
+          { id:3, name:'Gold Class',   slug:'gold',   days:30, price:60, cur:'USD', popular:false, active:true, feats:['8개언어 지원','포켓시그널 카테고리 모두 선택 (예: CryptoSpot, Binance, Futures 모두 선택)','CryptoSpot은 24/7서비스, Futures는 월~금 서비스','진입/목표/손절/완료 시그널 제공','각 Class 단체방참여'] },
+          { id:4, name:'VIP Class',    slug:'vip',    days:30, price:80, cur:'USD', popular:false, active:true, feats:['8개언어 지원','포켓시그널 카테고리 모두 선택 (예: CryptoSpot, Binance, Futures 모두 선택)','CryptoSpot은 24/7서비스, Futures는 월~금 서비스','진입/목표/손절/완료 시그널 제공','각 Class 단체방참여','투자금의 포트폴리오 별로 Futures의 1~3개월 국제 시세 (국제 증시, 국제유가, 금시세, 농축산물 예측 시세) 제공'] },
+        ];
+        let plans = FALLBACK;
+        try { const r = localStorage.getItem('fk_plans'); if (r) plans = JSON.parse(r); } catch(e) {}
+        if (!Array.isArray(plans) || !plans.length) plans = FALLBACK;
+        const ORDER = ['bronze','silver','gold','vip'];
+        plans.sort((a,b) => { const ai=ORDER.indexOf(a.slug),bi=ORDER.indexOf(b.slug); return (ai<0?99:ai)-(bi<0?99:bi); });
+        const active = plans.filter(p => p.active !== false);
+        grid.innerHTML = active.map(p => {
+          const sym = p.cur === 'USD' ? '$' : (p.cur || '$');
+          const feats = (p.feats || []).map(f => `<div class="pfeat"><span class="chk">✓</span><span>${f}</span></div>`).join('');
+          return `<div class="plan-card${p.popular ? ' popular' : ''}">
+            ${p.popular ? '<div class="pop-badge" data-i18n="pricing.most_popular">인기</div>' : ''}
+            <div class="pname">${p.name}</div>
+            <div class="pdur">${p.days}일</div>
+            <div class="pprice-wrap"><span class="pcur">${sym}</span><span class="pamt">${p.price}</span></div>
+            <div class="pper" data-i18n="pricing.per_month">/월</div>
+            <div class="pfeats">${feats}</div>
+            <a href="payment.html?plan=${p.slug}" class="plan-btn ${p.popular ? 'pri' : 'out'}" data-i18n="pricing.get_started">시작하기</a>
+          </div>`;
+        }).join('');
+      })();
 
       // Apply saved language
       applyLang(currentLang);
