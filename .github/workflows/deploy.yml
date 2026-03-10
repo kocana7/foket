@@ -1,0 +1,27 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 52.39.64.34
+          username: foket
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/foket
+            git pull origin main
+            npm install --production
+            pm2 restart foket || pm2 start server.js --name foket
+            pm2 save
