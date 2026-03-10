@@ -1,4 +1,4 @@
-name: Deploy to AWS EC2
+name: Deploy Foket
 
 on:
   push:
@@ -10,18 +10,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Deploy to EC2
+      - name: Deploy to server
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: 52.39.64.34
+          host: ${{ secrets.SERVER_HOST }}
           username: foket
-          key: ${{ secrets.EC2_SSH_KEY }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
           script: |
             cd /var/www/foket
             git pull origin main
             npm install --production
-            pm2 restart foket || pm2 start server.js --name foket
+            pm2 restart foket
             pm2 save
