@@ -20,7 +20,7 @@ jobs:
           username: foket
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd ~/foket
+            cd /var/www/foket
             git pull origin main
             npm install --production
             pm2 restart foket || pm2 start server.js --name foket
