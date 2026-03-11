@@ -1,17 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
-const storage = require('../config/database-mssql');
 
-// ----- MSSQL AppStorage API (관리자·메인 페이지용) -----
+// ----- MySQL AppStorage API (관리자·메인 페이지용) -----
+
 // GET /api/storage/:key
 router.get('/storage/:key', async (req, res) => {
   try {
     const key = req.params.key.replace(/[^a-z0-9_-]/gi, '') || 'markets';
-    const value = await storage.queryStorage(key);
-    if (value === null && !(await storage.getPool())) {
-      return res.status(503).json({ success: false, error: 'MSSQL not configured', value: null });
-    }
+    const [rows] = await db.query('SELECT value FROM app_storage WHERE `key` = ? LIMIT 1', [key]);
+    const value = rows.length ? rows[0].value : null;
     res.json({ success: true, value });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -24,24 +22,26 @@ router.post('/storage', express.json(), async (req, res) => {
     const key = (req.body && req.body.key) ? String(req.body.key).replace(/[^a-z0-9_-]/gi, '') : null;
     if (!key) return res.status(400).json({ success: false, error: 'key required' });
     const value = req.body.value != null ? (typeof req.body.value === 'string' ? req.body.value : JSON.stringify(req.body.value)) : '';
-    const ok = await storage.saveStorage(key, value);
-    if (!ok && !(await storage.getPool())) {
-      return res.status(503).json({ success: false, error: 'MSSQL not configured' });
-    }
-    res.json({ success: true, saved: ok });
+    await db.query(
+      'INSERT INTO app_storage (`key`, value) VALUES (?, ?) ON DUPLICATE KEY UPDATE value = VALUES(value), updated_at = NOW()',
+      [key, value]
+    );
+    res.json({ success: true, saved: true });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// GET /api/public/markets  (메인 페이지용: markets_published 또는 markets)
+// GET /api/public/markets  (메인 페이지용)
 router.get('/public/markets', async (req, res) => {
   try {
-    let raw = await storage.queryStorage('markets_published');
-    if (raw == null) raw = await storage.queryStorage('markets');
-    if (raw == null) {
-      return res.json({ success: true, data: null });
+    const [rows] = await db.query('SELECT value FROM app_storage WHERE `key` = ? LIMIT 1', ['markets_published']);
+    let raw = rows.length ? rows[0].value : null;
+    if (!raw) {
+      const [rows2] = await db.query('SELECT value FROM app_storage WHERE `key` = ? LIMIT 1', ['markets']);
+      raw = rows2.length ? rows2[0].value : null;
     }
+    if (raw == null) return res.json({ success: true, data: null });
     const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
     res.json({ success: true, data });
   } catch (err) {
@@ -52,16 +52,16 @@ router.get('/public/markets', async (req, res) => {
 // GET /api/public/settings  (메인 페이지용 설정)
 router.get('/public/settings', async (req, res) => {
   try {
-    const raw = await storage.queryStorage('settings');
-    if (raw == null) return res.json({ success: true, data: {} });
-    const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    const [rows] = await db.query('SELECT value FROM app_storage WHERE `key` = ? LIMIT 1', ['settings']);
+    if (!rows.length) return res.json({ success: true, data: {} });
+    const data = typeof rows[0].value === 'string' ? JSON.parse(rows[0].value) : rows[0].value;
     res.json({ success: true, data });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// ----- 기존 MySQL 기반 API (DB 없으면 에러 가능) -----
+// ----- 기존 MySQL 기반 API -----
 router.get('/signals', async (req, res) => {
   try {
     const tier = req.query.tier || 'free';
@@ -75,7 +75,6 @@ router.get('/signals', async (req, res) => {
   }
 });
 
-// Get stats (public)
 router.get('/stats', async (req, res) => {
   try {
     const [rows] = await db.query('SELECT stat_key, stat_value FROM stats');
@@ -87,9 +86,7 @@ router.get('/stats', async (req, res) => {
   }
 });
 
-// Get crypto prices (live ticker - placeholder)
 router.get('/prices', async (req, res) => {
-  // In production, connect to a crypto exchange API
   const mockPrices = [
     { coin: 'BTC', price: 65432.10, change24h: 2.34 },
     { coin: 'ETH', price: 3241.50, change24h: 1.87 },

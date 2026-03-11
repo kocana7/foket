@@ -242,3 +242,14 @@ INSERT IGNORE INTO `settings` (`setting_key`, `setting_value`, `setting_group`) 
 ('meta_description', 'Get professional cryptocurrency trading signals with 82% success rate. Free and VIP plans available.', 'seo'),
 ('google_analytics_id', '', 'analytics'),
 ('maintenance_mode', '0', 'general');
+
+
+-- ============================================================
+-- APP STORAGE TABLE (admin.html SPA 데이터 저장용)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `app_storage` (
+  `key` VARCHAR(100) NOT NULL,
+  `value` LONGTEXT,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
