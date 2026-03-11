@@ -38,4 +38,4 @@ GO
 -- ============================================================
 -- 예: SELECT Value FROM AppStorage WHERE [Key] = N'markets_published';
 
-PRINT N'FoketDB 및 AppStorage 테이블 생성 완료.';
+PRINT N'FoketDB 및 AppStorage 테이블 생성 완료.'
