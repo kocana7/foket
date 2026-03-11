@@ -28,6 +28,7 @@ app.use(helmet({
       fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
       scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.sheetjs.com"],
       scriptSrcAttr: ["'unsafe-inline'"],
+      connectSrc: ["'self'", "https://api.binance.com", "https:"],
       imgSrc: ["'self'", "data:", "https:"],
     }
   }
