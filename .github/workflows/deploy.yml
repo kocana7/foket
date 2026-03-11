@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploy to AWS EC2
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Deploy to server
+      - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -21,8 +21,27 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
           script: |
+            set -e
             cd /var/www/foket
+
+            # Pull latest code
             git pull origin main
+
+            # Install dependencies
             npm install --production
-            pm2 restart foket
+
+            # Write .env if not exists (first deploy)
+            if [ ! -f .env ]; then
+              echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+              echo "DB_PORT=3306" >> .env
+              echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+              echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+              echo "DB_NAME=foketcrypto_db" >> .env
+              echo "SESSION_SECRET=${{ secrets.SESSION_SECRET }}" >> .env
+              echo "NODE_ENV=production" >> .env
+              echo "PORT=3000" >> .env
+            fi
+
+            # Restart app with PM2
+            pm2 describe foket > /dev/null 2>&1 && pm2 restart foket || pm2 start ecosystem.config.js --env production
             pm2 save
