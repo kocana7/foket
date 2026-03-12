@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>마이페이지 | FoketSignal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root{--bg-primary:#0a0e1a;--bg-secondary:#0f1629;--bg-card:#131c31;--bg-card-hover:#1a2540;--border-color:#1e2d4a;--text-primary:#e8edf5;--text-secondary:#8fa3c0;--accent-blue:#00b4d8;--accent-green:#00d084;--gradient-primary:linear-gradient(135deg,#00b4d8 0%,#0077a8 100%);--radius-md:12px;--radius-sm:8px;--shadow-card:0 8px 32px rgba(0,0,0,0.4)}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-height:100vh;display:flex;flex-direction:column}
+    a{color:var(--accent-blue);text-decoration:none}
+    .navbar{position:sticky;top:0;z-index:100;background:rgba(10,14,26,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border-color)}
+    .navbar-inner{max-width:1280px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:70px}
+    .navbar-brand{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:800;color:var(--text-primary)}
+    .navbar-brand .logo-icon{width:38px;height:38px;background:var(--gradient-primary);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .navbar-brand span{color:var(--accent-blue)}
+    .navbar-nav{display:flex;align-items:center;gap:4px}
+    .navbar-nav a{color:var(--text-secondary);font-size:14px;font-weight:500;padding:8px 14px;border-radius:var(--radius-sm)}
+    .navbar-nav a:hover{color:var(--text-primary);background:var(--bg-card)}
+    .navbar-actions{display:flex;align-items:center;gap:10px}
+    .lang-dropdown{position:relative}
+    .lang-btn{display:flex;align-items:center;gap:6px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:7px 12px;font-size:12px;color:var(--text-secondary);cursor:pointer;font-family:inherit}
+    .lang-btn:hover{border-color:var(--accent-blue);color:var(--accent-blue)}
+    .lang-menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:6px;min-width:155px;display:none;z-index:200;box-shadow:var(--shadow-card)}
+    .lang-menu.open{display:block}
+    .lang-opt{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);cursor:pointer;text-decoration:none}
+    .lang-opt:hover{background:var(--bg-card-hover);color:var(--text-primary)}
+    .lang-opt.cur{color:var(--accent-blue)}
+    main{flex:1;padding:48px 24px}
+    .container{max-width:860px;margin:0 auto}
+    .page-header{margin-bottom:32px}
+    .page-header h1{font-size:26px;font-weight:800}
+    .page-header p{color:var(--text-secondary);font-size:15px;margin-top:4px}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+    .card{background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:28px}
+    .card-title{font-size:16px;font-weight:700;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border-color)}
+    .user-av{width:60px;height:60px;background:var(--gradient-primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;margin-bottom:12px}
+    .user-name{font-size:18px;font-weight:700;margin-bottom:2px}
+    .user-email{color:var(--text-secondary);font-size:13px;margin-bottom:8px}
+    .role-badge{display:inline-block;background:rgba(0,180,216,.15);border:1px solid rgba(0,180,216,.3);color:var(--accent-blue);padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;text-transform:uppercase}
+    .info-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-color)}
+    .info-row:last-child{border-bottom:none}
+    .info-label{color:var(--text-secondary);font-size:13px}
+    .info-value{font-size:13px;font-weight:600}
+    .fg{margin-bottom:16px}
+    .fl{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text-secondary)}
+    .fc{width:100%;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:10px 14px;font-size:14px;color:var(--text-primary);font-family:inherit}
+    .fc:focus{outline:none;border-color:var(--accent-blue)}
+    .btn-save{background:var(--gradient-primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer}
+    .btn-save:hover{opacity:0.9}
+    .btn-save:disabled{opacity:0.6;cursor:not-allowed}
+    .btn-logout{background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-secondary);border-radius:var(--radius-sm);padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px}
+    .btn-logout:hover{border-color:#ff4757;color:#ff4757}
+    .msg{border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
+    .msg.err{background:rgba(220,53,69,.15);border:1px solid rgba(220,53,69,.4);color:#ff6b6b}
+    .msg.ok{background:rgba(0,180,100,.15);border:1px solid rgba(0,180,100,.4);color:#2ecc71}
+    footer{background:var(--bg-secondary);border-top:1px solid var(--border-color);padding:24px;text-align:center;color:var(--text-secondary);font-size:13px}
+    footer a{color:var(--accent-blue)}
+    @media(max-width:768px){.navbar-nav{display:none}.grid2{grid-template-columns:1fr}}
+    @media(max-width:480px){main{padding:32px 16px}}
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand">
+      <div class="logo-icon"><img src="images/logo2.png" alt="FoketSignal" style="width:100%;height:100%;object-fit:contain;border-radius:8px;"></div>
+      Foket<span>Signal</span>
+    </a>
+    <div class="navbar-nav">
+      <a href="index.html" data-i18n="h">홈</a>
+      <a href="index.html#pricing" data-i18n="p">요금제</a>
+      <a href="faq.html" data-i18n="f">자주하는 질문(FAQ)</a>
+      <a href="index.html#contact" data-i18n="c">문의</a>
+    </div>
+    <div class="navbar-actions">
+      <div class="lang-dropdown">
+        <button class="lang-btn" id="langToggle"><span id="curFlag">🇰🇷</span><span id="curLang">한국어</span><span>▾</span></button>
+        <div class="lang-menu" id="langMenu">
+          <a class="lang-opt" data-lang="ko" href="#">🇰🇷 한국어</a>
+          <a class="lang-opt" data-lang="en" href="#">🇺🇸 English</a>
+          <a class="lang-opt" data-lang="de" href="#">🇩🇪 Deutsch</a>
+          <a class="lang-opt" data-lang="ja" href="#">🇯🇵 日本語</a>
+          <a class="lang-opt" data-lang="zh" href="#">🇨🇳 中文</a>
+          <a class="lang-opt" data-lang="fr" href="#">🇫🇷 Français</a>
+          <a class="lang-opt" data-lang="es" href="#">🇪🇸 Español</a>
+          <a class="lang-opt" data-lang="ru" href="#">🇷🇺 Русский</a>
+        </div>
+      </div>
+      <a href="https://t.me/foketsignal_Lobby" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;background:var(--gradient-primary);color:#fff;padding:9px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;text-decoration:none"><i class="fab fa-telegram-plane"></i> <span data-i18n="j">무료 텔레그램 참여</span></a>
+    </div>
+  </div>
+</nav>
+<main>
+  <div class="container">
+    <div class="page-header">
+      <h1 data-i18n="title">마이페이지</h1>
+      <p id="welcomeMsg">안녕하세요</p>
+    </div>
+
+    <div class="grid2">
+      <!-- User info card -->
+      <div class="card">
+        <div class="card-title" data-i18n="profile_title">프로필</div>
+        <div class="user-av" id="userAv">?</div>
+        <div class="user-name" id="userName">-</div>
+        <div class="user-email" id="userEmail">-</div>
+        <div><span class="role-badge" id="userRole">user</span></div>
+        <div style="margin-top:16px">
+          <div class="info-row">
+            <span class="info-label" data-i18n="member_since">가입일</span>
+            <span class="info-value" id="memberSince">-</span>
+          </div>
+        </div>
+      </div>
+      <!-- Plan info card -->
+      <div class="card">
+        <div class="card-title" data-i18n="plan_label">구독 플랜</div>
+        <div class="info-row">
+          <span class="info-label" data-i18n="plan_label">플랜</span>
+          <span class="info-value" id="planName">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label" data-i18n="expires">만료일</span>
+          <span class="info-value" id="planExpires">-</span>
+        </div>
+        <div style="margin-top:20px">
+          <button class="btn-logout" id="logoutBtn" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">로그아웃</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit profile form -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title" data-i18n="profile_title">프로필 수정</div>
+      <div class="msg err" id="profileErr"></div>
+      <div class="msg ok" id="profileOk"></div>
+      <div class="fg">
+        <label class="fl" for="editUsername" data-i18n="username">이름</label>
+        <input class="fc" type="text" id="editUsername" autocomplete="name">
+      </div>
+      <div class="fg">
+        <label class="fl" for="editTg" data-i18n="telegram">텔레그램 아이디</label>
+        <input class="fc" type="text" id="editTg" placeholder="@username">
+      </div>
+      <button class="btn-save" id="profileSaveBtn" onclick="saveProfile()" data-i18n="save">저장</button>
+    </div>
+
+    <!-- Change password form -->
+    <div class="card">
+      <div class="card-title" data-i18n="pw_title">비밀번호 변경</div>
+      <div class="msg err" id="pwErr"></div>
+      <div class="msg ok" id="pwOk"></div>
+      <div class="fg">
+        <label class="fl" for="curPw" data-i18n="cur_pw">현재 비밀번호</label>
+        <input class="fc" type="password" id="curPw" autocomplete="current-password">
+      </div>
+      <div class="fg">
+        <label class="fl" for="newPw" data-i18n="new_pw">새 비밀번호</label>
+        <input class="fc" type="password" id="newPw" autocomplete="new-password">
+      </div>
+      <div class="fg">
+        <label class="fl" for="confirmPw" data-i18n="confirm_pw">비밀번호 확인</label>
+        <input class="fc" type="password" id="confirmPw" autocomplete="new-password">
+      </div>
+      <button class="btn-save" id="pwSaveBtn" onclick="changePw()" data-i18n="change_pw">비밀번호 변경</button>
+    </div>
+  </div>
+</main>
+<footer>
+  <a href="index.html">FoketSignal</a> &copy; 2026 · <a href="index.html#contact" data-i18n="c">문의</a>
+</footer>
+<script>
+(function(){
+  var T={
+    ko:{title:'마이페이지',h:'홈',p:'요금제',f:'자주하는 질문(FAQ)',c:'문의',j:'무료 텔레그램 참여',
+      welcome:'안녕하세요,',plan_label:'구독 플랜',no_plan:'무료 플랜',expires:'만료일',
+      profile_title:'프로필 수정',pw_title:'비밀번호 변경',
+      username:'이름',telegram:'텔레그램 아이디',save:'저장',saving:'저장 중...',
+      cur_pw:'현재 비밀번호',new_pw:'새 비밀번호',confirm_pw:'비밀번호 확인',
+      change_pw:'비밀번호 변경',logout:'로그아웃',member_since:'가입일',
+      err_pw_match:'비밀번호가 일치하지 않습니다.',err_pw_len:'비밀번호는 6자 이상이어야 합니다.',
+      save_ok:'저장되었습니다.',pw_ok:'비밀번호가 변경되었습니다.'},
+    en:{title:'My Page',h:'Home',p:'Pricing',f:'FAQ',c:'Contact',j:'Join Free Telegram',
+      welcome:'Hello,',plan_label:'Subscription Plan',no_plan:'Free Plan',expires:'Expires',
+      profile_title:'Edit Profile',pw_title:'Change Password',
+      username:'Name',telegram:'Telegram ID',save:'Save',saving:'Saving...',
+      cur_pw:'Current Password',new_pw:'New Password',confirm_pw:'Confirm Password',
+      change_pw:'Change Password',logout:'Log Out',member_since:'Member since',
+      err_pw_match:'Passwords do not match.',err_pw_len:'Password must be at least 6 characters.',
+      save_ok:'Saved.',pw_ok:'Password changed.'},
+    de:{title:'Mein Konto',h:'Startseite',p:'Preise',f:'Häufige Fragen (FAQ)',c:'Kontakt',j:'Kostenlos beitreten',
+      welcome:'Hallo,',plan_label:'Abonnement-Plan',no_plan:'Kostenloser Plan',expires:'Läuft ab',
+      profile_title:'Profil bearbeiten',pw_title:'Passwort ändern',
+      username:'Name',telegram:'Telegram-ID',save:'Speichern',saving:'Speichern...',
+      cur_pw:'Aktuelles Passwort',new_pw:'Neues Passwort',confirm_pw:'Passwort bestätigen',
+      change_pw:'Passwort ändern',logout:'Abmelden',member_since:'Mitglied seit',
+      err_pw_match:'Passwörter stimmen nicht überein.',err_pw_len:'Passwort muss mindestens 6 Zeichen lang sein.',
+      save_ok:'Gespeichert.',pw_ok:'Passwort geändert.'},
+    ja:{title:'マイページ',h:'ホーム',p:'料金',f:'よくある質問(FAQ)',c:'お問い合わせ',j:'無料Telegram参加',
+      welcome:'こんにちは、',plan_label:'サブスクリプションプラン',no_plan:'無料プラン',expires:'有効期限',
+      profile_title:'プロフィール編集',pw_title:'パスワード変更',
+      username:'名前',telegram:'Telegram ID',save:'保存',saving:'保存中...',
+      cur_pw:'現在のパスワード',new_pw:'新しいパスワード',confirm_pw:'パスワード確認',
+      change_pw:'パスワード変更',logout:'ログアウト',member_since:'登録日',
+      err_pw_match:'パスワードが一致しません。',err_pw_len:'パスワードは6文字以上必要です。',
+      save_ok:'保存しました。',pw_ok:'パスワードを変更しました。'},
+    zh:{title:'我的账户',h:'首页',p:'定价',f:'常见问题(FAQ)',c:'联系我们',j:'免费加入Telegram',
+      welcome:'您好，',plan_label:'订阅计划',no_plan:'免费计划',expires:'到期日',
+      profile_title:'编辑资料',pw_title:'修改密码',
+      username:'姓名',telegram:'Telegram ID',save:'保存',saving:'保存中...',
+      cur_pw:'当前密码',new_pw:'新密码',confirm_pw:'确认密码',
+      change_pw:'修改密码',logout:'退出登录',member_since:'注册日期',
+      err_pw_match:'密码不匹配。',err_pw_len:'密码至少需要6个字符。',
+      save_ok:'已保存。',pw_ok:'密码已修改。'},
+    fr:{title:'Mon compte',h:'Accueil',p:'Tarifs',f:'FAQ',c:'Contact',j:'Rejoindre Telegram gratuitement',
+      welcome:'Bonjour,',plan_label:'Plan d\'abonnement',no_plan:'Plan gratuit',expires:'Expire le',
+      profile_title:'Modifier le profil',pw_title:'Changer le mot de passe',
+      username:'Nom',telegram:'ID Telegram',save:'Enregistrer',saving:'Enregistrement...',
+      cur_pw:'Mot de passe actuel',new_pw:'Nouveau mot de passe',confirm_pw:'Confirmer le mot de passe',
+      change_pw:'Changer le mot de passe',logout:'Se déconnecter',member_since:'Membre depuis',
+      err_pw_match:'Les mots de passe ne correspondent pas.',err_pw_len:'Le mot de passe doit comporter au moins 6 caractères.',
+      save_ok:'Enregistré.',pw_ok:'Mot de passe modifié.'},
+    es:{title:'Mi cuenta',h:'Inicio',p:'Precios',f:'Preguntas frecuentes (FAQ)',c:'Contacto',j:'Unirse gratis a Telegram',
+      welcome:'Hola,',plan_label:'Plan de suscripción',no_plan:'Plan gratuito',expires:'Vence el',
+      profile_title:'Editar perfil',pw_title:'Cambiar contraseña',
+      username:'Nombre',telegram:'ID de Telegram',save:'Guardar',saving:'Guardando...',
+      cur_pw:'Contraseña actual',new_pw:'Nueva contraseña',confirm_pw:'Confirmar contraseña',
+      change_pw:'Cambiar contraseña',logout:'Cerrar sesión',member_since:'Miembro desde',
+      err_pw_match:'Las contraseñas no coinciden.',err_pw_len:'La contraseña debe tener al menos 6 caracteres.',
+      save_ok:'Guardado.',pw_ok:'Contraseña cambiada.'},
+    ru:{title:'Мой аккаунт',h:'Главная',p:'Тарифы',f:'Часто задаваемые вопросы (FAQ)',c:'Контакт',j:'Присоединиться к Telegram бесплатно',
+      welcome:'Привет,',plan_label:'План подписки',no_plan:'Бесплатный план',expires:'Истекает',
+      profile_title:'Редактировать профиль',pw_title:'Изменить пароль',
+      username:'Имя',telegram:'Telegram ID',save:'Сохранить',saving:'Сохранение...',
+      cur_pw:'Текущий пароль',new_pw:'Новый пароль',confirm_pw:'Подтвердите пароль',
+      change_pw:'Изменить пароль',logout:'Выйти',member_since:'Дата регистрации',
+      err_pw_match:'Пароли не совпадают.',err_pw_len:'Пароль должен содержать не менее 6 символов.',
+      save_ok:'Сохранено.',pw_ok:'Пароль изменён.'}
+  };
+  var LANG_META={ko:{flag:'🇰🇷',name:'한국어'},en:{flag:'🇺🇸',name:'English'},de:{flag:'🇩🇪',name:'Deutsch'},ja:{flag:'🇯🇵',name:'日本語'},zh:{flag:'🇨🇳',name:'中文'},fr:{flag:'🇫🇷',name:'Français'},es:{flag:'🇪🇸',name:'Español'},ru:{flag:'🇷🇺',name:'Русский'}};
+  var currentLang=localStorage.getItem('lang')||'ko';
+  var currentUser=null;
+
+  function applyLang(lang){
+    if(!T[lang])lang='ko';
+    var t=T[lang];
+    document.documentElement.lang=lang;
+    document.title=t.title+' | FoketSignal';
+    document.querySelectorAll('[data-i18n]').forEach(function(el){var k=el.getAttribute('data-i18n');if(t[k]!==undefined)el.textContent=t[k];});
+    var meta=LANG_META[lang];
+    document.getElementById('curFlag').textContent=meta.flag;
+    document.getElementById('curLang').textContent=meta.name;
+    document.querySelectorAll('.lang-opt').forEach(function(opt){opt.classList.toggle('cur',opt.dataset.lang===lang);});
+    if(currentUser) renderUser(currentUser);
+  }
+
+  function renderUser(u){
+    var t=T[currentLang]||T['ko'];
+    var initial=(u.username||u.email||'?').charAt(0).toUpperCase();
+    document.getElementById('userAv').textContent=initial;
+    document.getElementById('userName').textContent=u.username||u.email.split('@')[0];
+    document.getElementById('userEmail').textContent=u.email;
+    document.getElementById('userRole').textContent=u.role||'user';
+    document.getElementById('welcomeMsg').textContent=t.welcome+' '+(u.username||u.email.split('@')[0]);
+    document.getElementById('editUsername').value=u.username||'';
+    if(u.plan_id){
+      document.getElementById('planName').textContent='Plan #'+u.plan_id;
+      document.getElementById('planExpires').textContent=u.plan_expires_at?new Date(u.plan_expires_at).toLocaleDateString():'-';
+    }else{
+      document.getElementById('planName').textContent=t.no_plan;
+      document.getElementById('planExpires').textContent='-';
+    }
+  }
+
+  applyLang(currentLang);
+
+  document.getElementById('langToggle').addEventListener('click',function(e){e.stopPropagation();document.getElementById('langMenu').classList.toggle('open');});
+  document.addEventListener('click',function(){document.getElementById('langMenu').classList.remove('open');});
+  document.querySelectorAll('.lang-opt').forEach(function(opt){
+    opt.addEventListener('click',function(e){
+      e.preventDefault();
+      currentLang=opt.dataset.lang;
+      localStorage.setItem('lang',currentLang);
+      document.getElementById('langMenu').classList.remove('open');
+      applyLang(currentLang);
+    });
+  });
+
+  var BASE=(location.protocol!=='file:')?location.origin+'/api':'http://localhost:3000/api';
+
+  // Load user
+  fetch(BASE+'/auth/me').then(function(r){return r.json();}).then(function(j){
+    if(j.success&&j.user){
+      currentUser=j.user;
+      try{localStorage.setItem('fk_user',JSON.stringify(j.user));}catch(e){}
+      renderUser(j.user);
+    }else{
+      window.location.href='login.html';
+    }
+  }).catch(function(){
+    // Try localStorage fallback
+    try{
+      var u=JSON.parse(localStorage.getItem('fk_user')||'null');
+      if(u){currentUser=u;renderUser(u);}
+      else{window.location.href='login.html';}
+    }catch(e){window.location.href='login.html';}
+  });
+
+  window.saveProfile=function(){
+    var t=T[currentLang]||T['ko'];
+    var uname=document.getElementById('editUsername').value.trim();
+    var tg=document.getElementById('editTg').value.trim();
+    var errEl=document.getElementById('profileErr');
+    var okEl=document.getElementById('profileOk');
+    var btn=document.getElementById('profileSaveBtn');
+    errEl.style.display='none';okEl.style.display='none';
+    btn.disabled=true;btn.textContent=t.saving;
+    fetch(BASE+'/auth/profile',{
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username:uname,telegram_username:tg||null})
+    }).then(function(r){return r.json();}).then(function(j){
+      if(j.success){
+        okEl.textContent=t.save_ok;okEl.style.display='block';
+        if(currentUser){currentUser.username=uname;try{localStorage.setItem('fk_user',JSON.stringify(currentUser));}catch(e){}}
+        document.getElementById('userName').textContent=uname||document.getElementById('userName').textContent;
+      }else{
+        errEl.textContent=j.error||'Error';errEl.style.display='block';
+      }
+      btn.disabled=false;btn.textContent=t.save;
+    }).catch(function(err){
+      errEl.textContent=err.message||'Network error';errEl.style.display='block';
+      btn.disabled=false;btn.textContent=t.save;
+    });
+  };
+
+  window.changePw=function(){
+    var t=T[currentLang]||T['ko'];
+    var cur=document.getElementById('curPw').value;
+    var nw=document.getElementById('newPw').value;
+    var conf=document.getElementById('confirmPw').value;
+    var errEl=document.getElementById('pwErr');
+    var okEl=document.getElementById('pwOk');
+    var btn=document.getElementById('pwSaveBtn');
+    errEl.style.display='none';okEl.style.display='none';
+    if(nw.length<6){errEl.textContent=t.err_pw_len;errEl.style.display='block';return;}
+    if(nw!==conf){errEl.textContent=t.err_pw_match;errEl.style.display='block';return;}
+    btn.disabled=true;btn.textContent=t.saving;
+    fetch(BASE+'/auth/password',{
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({current_password:cur,new_password:nw})
+    }).then(function(r){return r.json();}).then(function(j){
+      if(j.success){
+        okEl.textContent=t.pw_ok;okEl.style.display='block';
+        document.getElementById('curPw').value='';
+        document.getElementById('newPw').value='';
+        document.getElementById('confirmPw').value='';
+      }else{
+        errEl.textContent=j.error||'Error';errEl.style.display='block';
+      }
+      btn.disabled=false;btn.textContent=t.change_pw;
+    }).catch(function(err){
+      errEl.textContent=err.message||'Network error';errEl.style.display='block';
+      btn.disabled=false;btn.textContent=t.change_pw;
+    });
+  };
+
+  window.doLogout=function(){
+    fetch(BASE+'/auth/logout',{method:'POST'}).then(function(){
+      try{localStorage.removeItem('fk_user');}catch(e){}
+      window.location.href='index.html';
+    }).catch(function(){
+      try{localStorage.removeItem('fk_user');}catch(e){}
+      window.location.href='index.html';
+    });
+  };
+})();
+</script>
+</body>
+</html>

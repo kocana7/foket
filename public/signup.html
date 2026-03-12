@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>회원가입 | FoketSignal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root{--bg-primary:#0a0e1a;--bg-secondary:#0f1629;--bg-card:#131c31;--bg-card-hover:#1a2540;--border-color:#1e2d4a;--text-primary:#e8edf5;--text-secondary:#8fa3c0;--accent-blue:#00b4d8;--gradient-primary:linear-gradient(135deg,#00b4d8 0%,#0077a8 100%);--radius-md:12px;--radius-sm:8px;--shadow-card:0 8px 32px rgba(0,0,0,0.4)}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-height:100vh;display:flex;flex-direction:column}
+    a{color:var(--accent-blue);text-decoration:none}
+    .navbar{position:sticky;top:0;z-index:100;background:rgba(10,14,26,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border-color)}
+    .navbar-inner{max-width:1280px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:70px}
+    .navbar-brand{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:800;color:var(--text-primary)}
+    .navbar-brand .logo-icon{width:38px;height:38px;background:var(--gradient-primary);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .navbar-brand span{color:var(--accent-blue)}
+    .navbar-nav{display:flex;align-items:center;gap:4px}
+    .navbar-nav a{color:var(--text-secondary);font-size:14px;font-weight:500;padding:8px 14px;border-radius:var(--radius-sm)}
+    .navbar-nav a:hover{color:var(--text-primary);background:var(--bg-card)}
+    .navbar-actions{display:flex;align-items:center;gap:10px}
+    .lang-dropdown{position:relative}
+    .lang-btn{display:flex;align-items:center;gap:6px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:7px 12px;font-size:12px;color:var(--text-secondary);cursor:pointer;font-family:inherit}
+    .lang-btn:hover{border-color:var(--accent-blue);color:var(--accent-blue)}
+    .lang-menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:6px;min-width:155px;display:none;z-index:200;box-shadow:var(--shadow-card)}
+    .lang-menu.open{display:block}
+    .lang-opt{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);cursor:pointer;text-decoration:none}
+    .lang-opt:hover{background:var(--bg-card-hover);color:var(--text-primary)}
+    .lang-opt.cur{color:var(--accent-blue)}
+    main{flex:1;display:flex;align-items:center;justify-content:center;padding:60px 24px}
+    .auth-card{background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:40px;max-width:460px;width:100%;margin:0 auto}
+    .auth-title{font-size:24px;font-weight:800;margin-bottom:8px;text-align:center}
+    .auth-sub{color:var(--text-secondary);text-align:center;margin-bottom:32px;font-size:14px}
+    .fg{margin-bottom:18px}
+    .fl{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text-secondary)}
+    .fc{width:100%;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:11px 14px;font-size:14px;color:var(--text-primary);font-family:inherit}
+    .fc:focus{outline:none;border-color:var(--accent-blue)}
+    .btn-submit{width:100%;background:var(--gradient-primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:13px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px}
+    .btn-submit:hover{opacity:0.9}
+    .btn-submit:disabled{opacity:0.6;cursor:not-allowed}
+    .auth-err{background:rgba(220,53,69,.15);border:1px solid rgba(220,53,69,.4);border-radius:var(--radius-sm);padding:10px 14px;color:#ff6b6b;font-size:13px;margin-bottom:16px;display:none}
+    .auth-ok{background:rgba(0,180,100,.15);border:1px solid rgba(0,180,100,.4);border-radius:var(--radius-sm);padding:10px 14px;color:#2ecc71;font-size:13px;margin-bottom:16px;display:none}
+    .auth-footer{text-align:center;margin-top:20px;font-size:13px;color:var(--text-secondary)}
+    .auth-footer a{color:var(--accent-blue)}
+    footer{background:var(--bg-secondary);border-top:1px solid var(--border-color);padding:24px;text-align:center;color:var(--text-secondary);font-size:13px}
+    footer a{color:var(--accent-blue)}
+    @media(max-width:768px){.navbar-nav{display:none}.auth-card{padding:28px 20px}}
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand">
+      <div class="logo-icon"><img src="images/logo2.png" alt="FoketSignal" style="width:100%;height:100%;object-fit:contain;border-radius:8px;"></div>
+      Foket<span>Signal</span>
+    </a>
+    <div class="navbar-nav">
+      <a href="index.html" data-i18n="h">홈</a>
+      <a href="index.html#pricing" data-i18n="p">요금제</a>
+      <a href="faq.html" data-i18n="f">자주하는 질문(FAQ)</a>
+      <a href="index.html#contact" data-i18n="c">문의</a>
+    </div>
+    <div class="navbar-actions">
+      <div class="lang-dropdown">
+        <button class="lang-btn" id="langToggle"><span id="curFlag">🇰🇷</span><span id="curLang">한국어</span><span>▾</span></button>
+        <div class="lang-menu" id="langMenu">
+          <a class="lang-opt" data-lang="ko" href="#">🇰🇷 한국어</a>
+          <a class="lang-opt" data-lang="en" href="#">🇺🇸 English</a>
+          <a class="lang-opt" data-lang="de" href="#">🇩🇪 Deutsch</a>
+          <a class="lang-opt" data-lang="ja" href="#">🇯🇵 日本語</a>
+          <a class="lang-opt" data-lang="zh" href="#">🇨🇳 中文</a>
+          <a class="lang-opt" data-lang="fr" href="#">🇫🇷 Français</a>
+          <a class="lang-opt" data-lang="es" href="#">🇪🇸 Español</a>
+          <a class="lang-opt" data-lang="ru" href="#">🇷🇺 Русский</a>
+        </div>
+      </div>
+      <a href="https://t.me/foketsignal_Lobby" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;background:var(--gradient-primary);color:#fff;padding:9px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;text-decoration:none"><i class="fab fa-telegram-plane"></i> <span data-i18n="j">무료 텔레그램 참여</span></a>
+    </div>
+  </div>
+</nav>
+<main>
+  <div class="auth-card">
+    <h1 class="auth-title" data-i18n="form_title">회원가입</h1>
+    <p class="auth-sub" data-i18n="form_sub">FoketSignal에 오신 것을 환영합니다</p>
+    <div class="auth-err" id="authErr"></div>
+    <div class="auth-ok" id="authOk"></div>
+    <form id="signupForm" onsubmit="doSignup(event)">
+      <div class="fg">
+        <label class="fl" for="uname" data-i18n="username">이름</label>
+        <input class="fc" type="text" id="uname" name="username" autocomplete="name">
+      </div>
+      <div class="fg">
+        <label class="fl" for="email" data-i18n="email">이메일</label>
+        <input class="fc" type="email" id="email" name="email" required autocomplete="email">
+      </div>
+      <div class="fg">
+        <label class="fl" for="pw" data-i18n="pw">비밀번호</label>
+        <input class="fc" type="password" id="pw" name="password" required autocomplete="new-password">
+      </div>
+      <div class="fg">
+        <label class="fl" for="pw2" data-i18n="pw2">비밀번호 확인</label>
+        <input class="fc" type="password" id="pw2" name="confirm_password" required autocomplete="new-password">
+      </div>
+      <button class="btn-submit" type="submit" id="submitBtn" data-i18n="submit">가입하기</button>
+    </form>
+    <div class="auth-footer">
+      <span data-i18n="have_account">이미 계정이 있으신가요?</span> <a href="login.html" data-i18n="login_link">로그인</a>
+    </div>
+  </div>
+</main>
+<footer>
+  <a href="index.html">FoketSignal</a> &copy; 2026 · <a href="index.html#contact" data-i18n="c">문의</a>
+</footer>
+<script>
+(function(){
+  var T={
+    ko:{title:'회원가입',h:'홈',p:'요금제',f:'자주하는 질문(FAQ)',c:'문의',j:'무료 텔레그램 참여',
+      form_title:'회원가입',form_sub:'FoketSignal에 오신 것을 환영합니다',username:'이름',email:'이메일',pw:'비밀번호',pw2:'비밀번호 확인',
+      submit:'가입하기',submitting:'처리 중...',have_account:'이미 계정이 있으신가요?',login_link:'로그인',
+      err_pw_match:'비밀번호가 일치하지 않습니다.',err_pw_len:'비밀번호는 6자 이상이어야 합니다.',
+      success:'가입 완료! 로그인 페이지로 이동합니다.'},
+    en:{title:'Sign Up',h:'Home',p:'Pricing',f:'FAQ',c:'Contact',j:'Join Free Telegram',
+      form_title:'Create Account',form_sub:'Welcome to FoketSignal',username:'Name',email:'Email',pw:'Password',pw2:'Confirm Password',
+      submit:'Sign Up',submitting:'Processing...',have_account:'Already have an account?',login_link:'Log In',
+      err_pw_match:'Passwords do not match.',err_pw_len:'Password must be at least 6 characters.',
+      success:'Account created! Redirecting to login...'},
+    de:{title:'Registrieren',h:'Startseite',p:'Preise',f:'Häufige Fragen (FAQ)',c:'Kontakt',j:'Kostenlos beitreten',
+      form_title:'Konto erstellen',form_sub:'Willkommen bei FoketSignal',username:'Name',email:'E-Mail',pw:'Passwort',pw2:'Passwort bestätigen',
+      submit:'Registrieren',submitting:'Verarbeitung...',have_account:'Bereits ein Konto?',login_link:'Anmelden',
+      err_pw_match:'Passwörter stimmen nicht überein.',err_pw_len:'Passwort muss mindestens 6 Zeichen lang sein.',
+      success:'Konto erstellt! Weiterleitung zum Login...'},
+    ja:{title:'会員登録',h:'ホーム',p:'料金',f:'よくある質問(FAQ)',c:'お問い合わせ',j:'無料Telegram参加',
+      form_title:'アカウント作成',form_sub:'FoketSignalへようこそ',username:'名前',email:'メールアドレス',pw:'パスワード',pw2:'パスワード確認',
+      submit:'登録する',submitting:'処理中...',have_account:'すでにアカウントをお持ちですか?',login_link:'ログイン',
+      err_pw_match:'パスワードが一致しません。',err_pw_len:'パスワードは6文字以上必要です。',
+      success:'登録完了！ログインページに移動します。'},
+    zh:{title:'注册',h:'首页',p:'定价',f:'常见问题(FAQ)',c:'联系我们',j:'免费加入Telegram',
+      form_title:'创建账户',form_sub:'欢迎来到 FoketSignal',username:'姓名',email:'电子邮箱',pw:'密码',pw2:'确认密码',
+      submit:'注册',submitting:'处理中...',have_account:'已有账户？',login_link:'登录',
+      err_pw_match:'密码不匹配。',err_pw_len:'密码至少需要6个字符。',
+      success:'注册成功！正在跳转到登录页面...'},
+    fr:{title:'S\'inscrire',h:'Accueil',p:'Tarifs',f:'FAQ',c:'Contact',j:'Rejoindre Telegram gratuitement',
+      form_title:'Créer un compte',form_sub:'Bienvenue sur FoketSignal',username:'Nom',email:'E-mail',pw:'Mot de passe',pw2:'Confirmer le mot de passe',
+      submit:'S\'inscrire',submitting:'Traitement...',have_account:'Vous avez déjà un compte ?',login_link:'Se connecter',
+      err_pw_match:'Les mots de passe ne correspondent pas.',err_pw_len:'Le mot de passe doit comporter au moins 6 caractères.',
+      success:'Compte créé ! Redirection vers la connexion...'},
+    es:{title:'Registrarse',h:'Inicio',p:'Precios',f:'Preguntas frecuentes (FAQ)',c:'Contacto',j:'Unirse gratis a Telegram',
+      form_title:'Crear cuenta',form_sub:'Bienvenido a FoketSignal',username:'Nombre',email:'Correo electrónico',pw:'Contraseña',pw2:'Confirmar contraseña',
+      submit:'Registrarse',submitting:'Procesando...',have_account:'¿Ya tienes una cuenta?',login_link:'Iniciar sesión',
+      err_pw_match:'Las contraseñas no coinciden.',err_pw_len:'La contraseña debe tener al menos 6 caracteres.',
+      success:'¡Cuenta creada! Redirigiendo al inicio de sesión...'},
+    ru:{title:'Регистрация',h:'Главная',p:'Тарифы',f:'Часто задаваемые вопросы (FAQ)',c:'Контакт',j:'Присоединиться к Telegram бесплатно',
+      form_title:'Создать аккаунт',form_sub:'Добро пожаловать в FoketSignal',username:'Имя',email:'Эл. почта',pw:'Пароль',pw2:'Подтвердите пароль',
+      submit:'Зарегистрироваться',submitting:'Обработка...',have_account:'Уже есть аккаунт?',login_link:'Войти',
+      err_pw_match:'Пароли не совпадают.',err_pw_len:'Пароль должен содержать не менее 6 символов.',
+      success:'Аккаунт создан! Переход к входу...'}
+  };
+  var LANG_META={ko:{flag:'🇰🇷',name:'한국어'},en:{flag:'🇺🇸',name:'English'},de:{flag:'🇩🇪',name:'Deutsch'},ja:{flag:'🇯🇵',name:'日本語'},zh:{flag:'🇨🇳',name:'中文'},fr:{flag:'🇫🇷',name:'Français'},es:{flag:'🇪🇸',name:'Español'},ru:{flag:'🇷🇺',name:'Русский'}};
+  var currentLang=localStorage.getItem('lang')||'ko';
+
+  function applyLang(lang){
+    if(!T[lang])lang='ko';
+    var t=T[lang];
+    document.documentElement.lang=lang;
+    document.title=t.title+' | FoketSignal';
+    document.querySelectorAll('[data-i18n]').forEach(function(el){var k=el.getAttribute('data-i18n');if(t[k]!==undefined)el.textContent=t[k];});
+    var meta=LANG_META[lang];
+    document.getElementById('curFlag').textContent=meta.flag;
+    document.getElementById('curLang').textContent=meta.name;
+    document.querySelectorAll('.lang-opt').forEach(function(opt){opt.classList.toggle('cur',opt.dataset.lang===lang);});
+  }
+
+  applyLang(currentLang);
+
+  document.getElementById('langToggle').addEventListener('click',function(e){e.stopPropagation();document.getElementById('langMenu').classList.toggle('open');});
+  document.addEventListener('click',function(){document.getElementById('langMenu').classList.remove('open');});
+  document.querySelectorAll('.lang-opt').forEach(function(opt){
+    opt.addEventListener('click',function(e){
+      e.preventDefault();
+      currentLang=opt.dataset.lang;
+      localStorage.setItem('lang',currentLang);
+      document.getElementById('langMenu').classList.remove('open');
+      applyLang(currentLang);
+    });
+  });
+
+  var BASE=(location.protocol!=='file:')?location.origin+'/api':'http://localhost:3000/api';
+
+  window.doSignup=function(e){
+    e.preventDefault();
+    var t=T[currentLang]||T['ko'];
+    var email=document.getElementById('email').value.trim();
+    var pw=document.getElementById('pw').value;
+    var pw2=document.getElementById('pw2').value;
+    var uname=document.getElementById('uname').value.trim();
+    var errEl=document.getElementById('authErr');
+    var okEl=document.getElementById('authOk');
+    var btn=document.getElementById('submitBtn');
+    errEl.style.display='none';okEl.style.display='none';
+    if(pw.length<6){errEl.textContent=t.err_pw_len;errEl.style.display='block';return;}
+    if(pw!==pw2){errEl.textContent=t.err_pw_match;errEl.style.display='block';return;}
+    btn.disabled=true;btn.textContent=t.submitting;
+    fetch(BASE+'/auth/register',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:email,password:pw,username:uname})
+    }).then(function(r){return r.json();}).then(function(j){
+      if(j.success){
+        okEl.textContent=t.success;okEl.style.display='block';
+        setTimeout(function(){window.location.href='login.html';},1500);
+      }else{
+        errEl.textContent=j.error||'Error';errEl.style.display='block';
+        btn.disabled=false;btn.textContent=t.submit;
+      }
+    }).catch(function(err){
+      errEl.textContent=err.message||'Network error';errEl.style.display='block';
+      btn.disabled=false;btn.textContent=t.submit;
+    });
+  };
+})();
+</script>
+</body>
+</html>

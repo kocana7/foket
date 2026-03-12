@@ -1,6 +1,154 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const bcrypt = require('bcryptjs');
+
+function requireAuth(req, res, next) {
+  if (req.session && req.session.user) return next();
+  res.status(401).json({ success: false, error: 'Unauthorized' });
+}
+
+function requireAdmin(req, res, next) {
+  if (req.session && req.session.user && (req.session.user.role === 'admin' || req.session.user.role === 'superadmin')) return next();
+  res.status(403).json({ success: false, error: 'Forbidden' });
+}
+
+// POST /api/auth/register
+router.post('/auth/register', async (req, res) => {
+  try {
+    const { email, password, username } = req.body || {};
+    if (!email || !password) return res.status(400).json({ success: false, error: 'email and password required' });
+    if (password.length < 6) return res.status(400).json({ success: false, error: 'Password must be at least 6 characters' });
+    const [existing] = await db.query('SELECT id FROM users WHERE email = ?', [email.toLowerCase()]);
+    if (existing.length) return res.status(409).json({ success: false, error: 'Email already registered' });
+    const hash = await bcrypt.hash(password, 10);
+    const uname = username ? username.trim() : email.split('@')[0];
+    const [result] = await db.query('INSERT INTO users (email, password, username, role, is_active) VALUES (?, ?, ?, ?, 1)', [email.toLowerCase(), hash, uname, 'user']);
+    const userId = result.insertId;
+    req.session.user = { id: userId, email: email.toLowerCase(), username: uname, role: 'user' };
+    res.json({ success: true, user: req.session.user });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/auth/login
+router.post('/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body || {};
+    if (!email || !password) return res.status(400).json({ success: false, error: 'email and password required' });
+    const [rows] = await db.query('SELECT * FROM users WHERE email = ? AND is_active = 1 LIMIT 1', [email.toLowerCase()]);
+    if (!rows.length) return res.status(401).json({ success: false, error: 'Invalid email or password' });
+    const user = rows[0];
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(401).json({ success: false, error: 'Invalid email or password' });
+    await db.query('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id]);
+    req.session.user = { id: user.id, email: user.email, username: user.username, role: user.role, plan_id: user.plan_id, plan_expires_at: user.plan_expires_at };
+    res.json({ success: true, user: req.session.user });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/auth/logout
+router.post('/auth/logout', (req, res) => {
+  req.session.destroy(() => res.json({ success: true }));
+});
+
+// GET /api/auth/me
+router.get('/auth/me', (req, res) => {
+  if (req.session && req.session.user) return res.json({ success: true, user: req.session.user });
+  res.json({ success: false, user: null });
+});
+
+// PUT /api/auth/profile
+router.put('/auth/profile', requireAuth, async (req, res) => {
+  try {
+    const { username, telegram_username } = req.body || {};
+    const uid = req.session.user.id;
+    await db.query('UPDATE users SET username = ?, telegram_username = ? WHERE id = ?', [username || req.session.user.username, telegram_username || null, uid]);
+    req.session.user.username = username || req.session.user.username;
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// PUT /api/auth/password
+router.put('/auth/password', requireAuth, async (req, res) => {
+  try {
+    const { current_password, new_password } = req.body || {};
+    if (!current_password || !new_password) return res.status(400).json({ success: false, error: 'Both passwords required' });
+    if (new_password.length < 6) return res.status(400).json({ success: false, error: 'New password must be at least 6 characters' });
+    const [rows] = await db.query('SELECT password FROM users WHERE id = ?', [req.session.user.id]);
+    if (!rows.length) return res.status(404).json({ success: false, error: 'User not found' });
+    const match = await bcrypt.compare(current_password, rows[0].password);
+    if (!match) return res.status(401).json({ success: false, error: 'Current password is incorrect' });
+    const hash = await bcrypt.hash(new_password, 10);
+    await db.query('UPDATE users SET password = ? WHERE id = ?', [hash, req.session.user.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /api/admin/users
+router.get('/admin/users', requireAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT id, email, username, role, is_active, last_login, created_at, plan_id, plan_expires_at, telegram_username FROM users ORDER BY created_at DESC');
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/admin/users
+router.post('/admin/users', requireAdmin, async (req, res) => {
+  try {
+    const { email, password, username, role, telegram_username, is_active } = req.body || {};
+    if (!email || !password) return res.status(400).json({ success: false, error: 'email and password required' });
+    const [existing] = await db.query('SELECT id FROM users WHERE email = ?', [email.toLowerCase()]);
+    if (existing.length) return res.status(409).json({ success: false, error: 'Email already exists' });
+    const hash = await bcrypt.hash(password, 10);
+    const [result] = await db.query(
+      'INSERT INTO users (email, password, username, role, telegram_username, is_active) VALUES (?, ?, ?, ?, ?, ?)',
+      [email.toLowerCase(), hash, username || email.split('@')[0], role || 'user', telegram_username || null, is_active != null ? is_active : 1]
+    );
+    res.json({ success: true, id: result.insertId });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// PUT /api/admin/users/:id
+router.put('/admin/users/:id', requireAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { email, password, username, role, telegram_username, is_active } = req.body || {};
+    if (password && password.trim()) {
+      const hash = await bcrypt.hash(password, 10);
+      await db.query('UPDATE users SET email=?, username=?, role=?, telegram_username=?, is_active=?, password=? WHERE id=?',
+        [email, username, role || 'user', telegram_username || null, is_active != null ? is_active : 1, hash, id]);
+    } else {
+      await db.query('UPDATE users SET email=?, username=?, role=?, telegram_username=?, is_active=? WHERE id=?',
+        [email, username, role || 'user', telegram_username || null, is_active != null ? is_active : 1, id]);
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// DELETE /api/admin/users/:id
+router.delete('/admin/users/:id', requireAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    await db.query('DELETE FROM users WHERE id = ? AND role != ?', [id, 'superadmin']);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 // ----- MySQL AppStorage API (관리자·메인 페이지용) -----
 

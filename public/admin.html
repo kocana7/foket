@@ -2308,6 +2308,12 @@
       const adminName = cfg.admin_name || '관리자';
       if (email === adminEmail && (pw === adminPw || pw === 'Admin@123')) {
         lsSave('admin_sess', { email: adminEmail, name: adminName, ts: Date.now() });
+        // Also establish server session for admin API calls
+        fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({email: adminEmail, password: pw})
+        }).catch(function(){});
         showAdminApp(adminName);
       } else {
         const err = document.getElementById('loginError');
@@ -2318,6 +2324,7 @@
     }
     document.getElementById('loginPw').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
     function doLogout() {
+      fetch('/api/auth/logout', {method:'POST'}).catch(function(){});
       localStorage.removeItem('fk_admin_sess');
       document.getElementById('adminApp').style.display = 'none';
       document.getElementById('loginScreen').style.display = 'flex';
@@ -2701,72 +2708,85 @@
        USERS
     ═══════════════════════════════════════════════════════════════ */
     function renderUsers() {
-      const users = ls('users');
-      document.getElementById('users-count').textContent = users.length;
-      document.getElementById('users-body').innerHTML = [...users].reverse().map(u => `<tr>
-    <td><div style="display:flex;align-items:center;gap:8px;"><div class="sb-av">${(u.name || u.email).charAt(0).toUpperCase()}</div><div><div class="tp">${u.name || '—'}</div><div style="font-size:11px;color:var(--dim);">${u.email}</div></div></div></td>
-    <td><span class="bdg ${u.role === 'superadmin' ? 'bdg-red' : u.role === 'admin' ? 'bdg-yellow' : 'bdg-blue'}">${u.role === 'superadmin' ? '최고관리자' : u.role === 'admin' ? '관리자' : '회원'}</span></td>
-    <td><span class="bdg ${u.plan ? 'bdg-purple' : 'bdg-gray'}">${u.plan || '무료'}</span></td>
-    <td><span class="bdg ${u.status ? 'bdg-green' : 'bdg-red'}">${u.status ? '활성' : '차단'}</span></td>
-    <td style="font-size:11px;">${u.lastLogin ? fmtDate(u.lastLogin) : '없음'}</td>
-    <td style="font-size:11px;">${fmtDate(u.joined)}</td>
-    <td><div style="display:flex;gap:5px;">
-      <button class="btn btn-out btn-xs" onclick="editUser(${u.id})"><i class="fas fa-edit"></i></button>
-      ${u.role === 'user' ? `<button class="btn btn-xs ${u.status ? 'btn-dan' : 'btn-suc'}" onclick="toggleUser(${u.id})"><i class="fas fa-${u.status ? 'ban' : 'check'}"></i></button>` : ''}
-      ${u.role !== 'superadmin' ? `<button class="btn btn-dan btn-xs" onclick="deleteUser(${u.id})"><i class="fas fa-trash"></i></button>` : ''}
-    </div></td>
-  </tr>`).join('') || '<tr><td colspan="7" class="empty"><i class="fas fa-users"></i><p>회원이 없습니다</p></td></tr>';
+      const tbody = document.getElementById('users-body');
+      const countEl = document.getElementById('users-count');
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--muted)"><i class="fas fa-spinner fa-spin"></i> 불러오는 중...</td></tr>';
+      fetch('/api/admin/users').then(r => r.json()).then(j => {
+        if (!j.success) { tbody.innerHTML = '<tr><td colspan="7" class="empty">로드 실패: ' + (j.error||'') + '</td></tr>'; return; }
+        const users = j.data || [];
+        if (countEl) countEl.textContent = users.length;
+        // update dashboard user count
+        const sUsers = document.getElementById('s-users');
+        if (sUsers) sUsers.textContent = users.length;
+        if (!users.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty"><i class="fas fa-users"></i><p>회원이 없습니다</p></td></tr>'; return; }
+        tbody.innerHTML = users.map(u => `<tr>
+          <td><div style="font-weight:600">${u.username||''}</div><div style="font-size:12px;color:var(--muted)">${u.email}</div></td>
+          <td><span class="bdg ${u.role==='superadmin'?'bdg-red':(u.role==='admin'?'bdg-yellow':'bdg-blue')}">${u.role}</span></td>
+          <td>${u.plan_id||'-'}</td>
+          <td>${u.plan_expires_at?new Date(u.plan_expires_at).toLocaleDateString():'-'}</td>
+          <td><span class="bdg ${u.is_active?'bdg-green':'bdg-red'}">${u.is_active?'활성':'비활성'}</span></td>
+          <td>${u.last_login?new Date(u.last_login).toLocaleDateString():'-'}</td>
+          <td><div style="display:flex;gap:5px;">
+            <button class="btn btn-out btn-xs" onclick="editUserRow(${JSON.stringify(JSON.stringify(u))})"><i class="fas fa-edit"></i></button>
+            ${u.role!=='superadmin'?`<button class="btn btn-dan btn-xs" onclick="deleteUserById(${u.id})"><i class="fas fa-trash"></i></button>`:''}
+          </div></td>
+        </tr>`).join('');
+      }).catch(e => {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty">API 오류: ' + e.message + '</td></tr>';
+      });
     }
-    function editUser(id) {
-      const u = ls('users').find(x => x.id === id); if (!u) return;
-      document.getElementById('user-modal-title').textContent = '회원 수정';
-      document.getElementById('user-edit-id').value = id;
-      document.getElementById('user-email').value = u.email;
-      document.getElementById('user-name').value = u.name || '';
-      document.getElementById('user-role').value = u.role;
+    function editUserRow(jsonStr) {
+      const u = JSON.parse(jsonStr);
+      document.getElementById('user-edit-id').value = u.id;
+      document.getElementById('user-email').value = u.email || '';
+      document.getElementById('user-name').value = u.username || '';
+      document.getElementById('user-role').value = u.role || 'user';
+      document.getElementById('user-tg').value = u.telegram_username || '';
       document.getElementById('user-pw').value = '';
-      document.getElementById('user-tg').value = u.tg || '';
+      document.getElementById('user-modal-title').textContent = '회원 수정';
       openModal('userModal');
     }
+    function deleteUserById(id) {
+      showConfirm('회원 삭제', '이 회원이 삭제됩니다. 계속할까요?', () => {
+        fetch('/api/admin/users/' + id, {method:'DELETE'})
+          .then(r => r.json()).then(j => {
+            if (j.success) { renderUsers(); showAlert('삭제되었습니다'); }
+            else showAlert('삭제 실패: ' + (j.error||''), 'err');
+          }).catch(e => showAlert('오류: ' + e.message, 'err'));
+      });
+    }
+    // Keep legacy functions for backward compat
+    function editUser(id) { /* no-op, replaced by editUserRow */ }
+    function toggleUser(id) { /* no-op */ }
+    function deleteUser(id) { deleteUserById(id); }
     function saveUser() {
       const email = document.getElementById('user-email').value.trim();
-      const name = document.getElementById('user-name').value.trim();
+      const username = document.getElementById('user-name').value.trim();
+      const role = document.getElementById('user-role').value;
       const pw = document.getElementById('user-pw').value;
-      if (!email) { showAlert('이메일을 입력해주세요', 'err'); return; }
-      const users = ls('users');
-      const editId = parseInt(document.getElementById('user-edit-id').value) || 0;
-      const isEdit = editId > 0;
-      if (!isEdit && !pw) { showAlert('비밀번호를 입력해주세요', 'err'); return; }
-      const obj = {
-        id: isEdit ? editId : nextId(users), email, name,
-        role: document.getElementById('user-role').value,
-        tg: document.getElementById('user-tg').value,
-        plan: '', status: true,
-        lastLogin: null,
-        joined: isEdit ? (users.find(u => u.id === editId) || {}).joined || new Date().toISOString() : new Date().toISOString()
-      };
-      if (isEdit) { const i = users.findIndex(u => u.id === editId); obj.plan = users[i].plan; obj.status = users[i].status; obj.lastLogin = users[i].lastLogin; users[i] = obj; } else { users.push(obj); }
-      lsSave('users', users);
-      closeModal('userModal');
-      // Reset
-      document.getElementById('user-modal-title').textContent = '새 회원';
-      document.getElementById('user-edit-id').value = '';
-      renderUsers(); renderDashboard();
-      showAlert(isEdit ? '회원이 수정되었습니다!' : '회원이 생성되었습니다!');
-    }
-    function toggleUser(id) {
-      const users = ls('users');
-      const u = users.find(x => x.id === id); if (!u) return;
-      u.status = !u.status;
-      lsSave('users', users);
-      renderUsers();
-      showAlert(`회원이 ${u.status ? '활성화' : '차단'}되었습니다`);
-    }
-    function deleteUser(id) {
-      showConfirm('회원 삭제', '이 회원이 영구적으로 삭제됩니다.', () => {
-        lsSave('users', ls('users').filter(u => u.id !== id));
-        renderUsers(); renderDashboard(); showAlert('회원이 삭제되었습니다');
-      });
+      const tg = document.getElementById('user-tg').value.trim();
+      const editId = parseInt(document.getElementById('user-edit-id').value, 10) || 0;
+      if (!email) { showAlert('이메일을 입력해 주세요.', 'err'); return; }
+      if (!editId && !pw) { showAlert('비밀번호를 입력해 주세요.', 'err'); return; }
+      const body = { email, username, role, telegram_username: tg, is_active: 1 };
+      if (pw) body.password = pw;
+      const url = editId ? '/api/admin/users/' + editId : '/api/admin/users';
+      const method = editId ? 'PUT' : 'POST';
+      fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) })
+        .then(r => r.json()).then(j => {
+          if (j.success) {
+            closeModal('userModal');
+            document.getElementById('user-email').value = '';
+            document.getElementById('user-name').value = '';
+            document.getElementById('user-pw').value = '';
+            document.getElementById('user-edit-id').value = '';
+            document.getElementById('user-modal-title').textContent = '새 회원';
+            renderUsers();
+            showAlert(editId ? '회원이 수정되었습니다!' : '회원이 등록되었습니다!');
+          } else {
+            showAlert('오류: ' + (j.error || ''), 'err');
+          }
+        }).catch(e => showAlert('네트워크 오류: ' + e.message, 'err'));
     }
 
     /* ════════════════════════════════════════════════════════════
