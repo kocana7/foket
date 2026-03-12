@@ -2311,12 +2311,12 @@
       const adminName = cfg.admin_name || '관리자';
       if (email === adminEmail && (pw === adminPw || pw === 'Admin@123')) {
         lsSave('admin_sess', { email: adminEmail, name: adminName, ts: Date.now() });
-        // Establish server session first (await before showing admin app)
+        // Establish server session via admin verify endpoint
         try {
-          await fetch('/api/auth/login', {
+          await fetch('/api/admin/verify', {
             method: 'POST',
             headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({email: adminEmail, password: pw})
+            body: JSON.stringify({password: pw})
           });
         } catch(e) {}
         showAdminApp(adminName);
@@ -3685,14 +3685,13 @@
       if (!sess || !sess.email) return;
       const cfg = ls('settings', {});
       const name = cfg.admin_name || sess.name || '관리자';
-      const adminEmail = cfg.admin_email || sess.email || 'admin@foketcrypto.com';
       const adminPw = ls('adminPw', 'Admin@123');
       // Re-establish server session on page reload
       try {
-        await fetch('/api/auth/login', {
+        await fetch('/api/admin/verify', {
           method: 'POST',
           headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({email: adminEmail, password: adminPw})
+          body: JSON.stringify({password: adminPw})
         });
       } catch(e) {}
       showAdminApp(name);

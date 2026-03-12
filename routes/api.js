@@ -9,9 +9,21 @@ function requireAuth(req, res, next) {
 }
 
 function requireAdmin(req, res, next) {
+  if (req.session && req.session.adminVerified) return next();
   if (req.session && req.session.user && (req.session.user.role === 'admin' || req.session.user.role === 'superadmin')) return next();
   res.status(403).json({ success: false, error: 'Forbidden' });
 }
+
+// POST /api/admin/verify — admin panel password → server session
+router.post('/admin/verify', (req, res) => {
+  const { password } = req.body || {};
+  const expected = process.env.ADMIN_PANEL_PASSWORD || 'Admin@123';
+  if (password && password === expected) {
+    req.session.adminVerified = true;
+    return res.json({ success: true });
+  }
+  res.status(401).json({ success: false, error: 'Invalid admin password' });
+});
 
 // POST /api/auth/register
 router.post('/auth/register', async (req, res) => {
