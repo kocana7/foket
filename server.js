@@ -69,7 +69,7 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Global middleware: language detection
 app.use((req, res, next) => {
-  const supportedLangs = ['ko', 'en', 'de', 'ja', 'zh', 'fr', 'es'];
+  const supportedLangs = ['ko', 'en', 'de', 'ja', 'zh', 'fr', 'es', 'ru'];
 
   // Priority: query param > cookie > browser accept-language > default (ko)
   let lang = req.query.lang || req.cookies.lang;
