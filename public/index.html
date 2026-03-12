@@ -1398,10 +1398,15 @@
 
     /* ── PRICING ── */
     .pricing-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       gap: 20px;
       margin-bottom: 48px
+    }
+    .pricing-grid .plan-card {
+      flex: 0 1 300px;
+      max-width: 340px;
     }
 
     .plan-card {
@@ -1840,9 +1845,6 @@
 
     /* ── RESPONSIVE ── */
     @media(max-width:1200px) {
-      .pricing-grid {
-        grid-template-columns: repeat(2, 1fr)
-      }
 
       .coins-grid {
         grid-template-columns: repeat(4, 1fr)
@@ -1908,10 +1910,6 @@
       }
 
       .feat-grid {
-        grid-template-columns: 1fr
-      }
-
-      .pricing-grid {
         grid-template-columns: 1fr
       }
 
