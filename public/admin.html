@@ -1559,7 +1559,7 @@
                   <button class="btn btn-out" style="font-size:12px;padding:5px 12px;" onclick="tgSelectAll(true)">전체 선택</button>
                   <button class="btn btn-out" style="font-size:12px;padding:5px 12px;" onclick="tgSelectAll(false)">전체 해제</button>
                 </div>
-                <div id="tg-group-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;"></div>
+                <div id="tg-group-list" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;"></div>
               </div>
               <div class="fg" style="margin-top:16px;">
                 <label class="fl">메시지 내용 <span style="color:var(--muted);font-size:12px;">HTML 태그 지원: &lt;b&gt; &lt;i&gt; &lt;code&gt; &lt;pre&gt;</span></label>
@@ -2901,15 +2901,40 @@
     /* ════════════════════════════════════════════════════════════
        TELEGRAM
     ═══════════════════════════════════════════════════════════════ */
-    const TG_GROUPS = [
-      { id: '@foketsignal_Lobby',      label: '🔓 Lobby', desc: '무료' },
-      { id: '@foketsignal_Futures',    label: '📈 Futures', desc: '' },
-      { id: '@foketsignal_Binance',    label: '🟡 Binance', desc: '' },
-      { id: '@foketsignal_Cryptospot', label: '💎 CryptoSpot', desc: '' },
-      { id: '@foketsignal_Bronze',     label: '🥉 Bronze', desc: 'Class' },
-      { id: '@foketsignal_Silver',     label: '🥈 Silver', desc: 'Class' },
-      { id: '@foketsignal_Gold',       label: '🥇 Gold', desc: 'Class' },
-      { id: '@foketsignal_VIP',        label: '👑 VIP', desc: 'Class' },
+    const TG_PRESETS = [
+      {
+        label: '1그룹', color: '#4CAF50',
+        channels: [
+          { id: '@foketsignal_Lobby',      label: '🔓 Lobby' },
+          { id: '@foketsignal_Cryptospot', label: '💎 CryptoSpot' },
+          { id: '@foketsignal_Bronze',     label: '🥉 Bronze' },
+          { id: '@foketsignal_Silver',     label: '🥈 Silver' },
+          { id: '@foketsignal_Gold',       label: '🥇 Gold' },
+          { id: '@foketsignal_VIP',        label: '👑 VIP' },
+        ]
+      },
+      {
+        label: '2그룹', color: '#2196F3',
+        channels: [
+          { id: '@foketsignal_Lobby',   label: '🔓 Lobby' },
+          { id: '@foketsignal_Futures', label: '📈 Futures' },
+          { id: '@foketsignal_Bronze',  label: '🥉 Bronze' },
+          { id: '@foketsignal_Silver',  label: '🥈 Silver' },
+          { id: '@foketsignal_Gold',    label: '🥇 Gold' },
+          { id: '@foketsignal_VIP',     label: '👑 VIP' },
+        ]
+      },
+      {
+        label: '3그룹', color: '#F0B90B',
+        channels: [
+          { id: '@foketsignal_Lobby',   label: '🔓 Lobby' },
+          { id: '@foketsignal_Binance', label: '🟡 Binance' },
+          { id: '@foketsignal_Bronze',  label: '🥉 Bronze' },
+          { id: '@foketsignal_Silver',  label: '🥈 Silver' },
+          { id: '@foketsignal_Gold',    label: '🥇 Gold' },
+          { id: '@foketsignal_VIP',     label: '👑 VIP' },
+        ]
+      },
     ];
 
     function renderTelegram() {
@@ -2923,12 +2948,15 @@
 
       const list = document.getElementById('tg-group-list');
       if (list) {
-        list.innerHTML = TG_GROUPS.map(g => `
-          <label style="display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--brd);border-radius:8px;padding:10px 14px;cursor:pointer;user-select:none;transition:border-color .15s;">
-            <input type="checkbox" class="tg-grp-chk" data-id="${g.id}" style="width:16px;height:16px;accent-color:var(--pri);cursor:pointer;flex-shrink:0;">
-            <div style="flex:1;min-width:0;">
-              <div style="font-size:13px;font-weight:600;">${g.label}${g.desc ? ' <span style=\'color:var(--muted);font-weight:400;\'>' + g.desc + '</span>' : ''}</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:2px;">${g.id}</div>
+        list.innerHTML = TG_PRESETS.map((p, i) => `
+          <label style="display:flex;flex-direction:column;gap:0;background:var(--bg2);border:2px solid var(--brd);border-radius:10px;cursor:pointer;user-select:none;overflow:hidden;transition:border-color .15s;" onmouseover="this.style.borderColor='${p.color}'" onmouseout="if(!this.querySelector('input').checked)this.style.borderColor='var(--brd)'">
+            <div style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--brd);background:${p.color}18;">
+              <input type="checkbox" class="tg-grp-chk" data-preset="${i}" style="width:16px;height:16px;accent-color:${p.color};cursor:pointer;flex-shrink:0;" onchange="this.closest('label').style.borderColor=this.checked?'${p.color}':'var(--brd)'">
+              <span style="font-size:14px;font-weight:700;color:${p.color};">${p.label}</span>
+              <span style="font-size:11px;color:var(--muted);margin-left:auto;">${p.channels.length}개 채널</span>
+            </div>
+            <div style="padding:10px 14px;display:flex;flex-direction:column;gap:5px;">
+              ${p.channels.map(c => `<div style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;"><span>${c.label}</span><span style="opacity:.6;font-size:11px;">${c.id}</span></div>`).join('')}
             </div>
           </label>`).join('');
       }
@@ -2957,7 +2985,14 @@
     }
 
     function tgSelectAll(val) {
-      document.querySelectorAll('.tg-grp-chk').forEach(c => c.checked = val);
+      document.querySelectorAll('.tg-grp-chk').forEach(c => {
+        c.checked = val;
+        const label = c.closest('label');
+        if (label) {
+          const i = parseInt(c.dataset.preset);
+          label.style.borderColor = val ? TG_PRESETS[i].color : 'var(--brd)';
+        }
+      });
     }
 
     function tgWrap(before, after) {
@@ -3002,7 +3037,8 @@
     }
 
     async function sendTelegramMessage() {
-      const groups = [...document.querySelectorAll('.tg-grp-chk:checked')].map(c => c.dataset.id);
+      const checked = [...document.querySelectorAll('.tg-grp-chk:checked')];
+      const groups = [...new Set(checked.flatMap(c => TG_PRESETS[parseInt(c.dataset.preset)].channels.map(ch => ch.id)))];
       const message = (document.getElementById('tg-msg').value || '').trim();
       if (!groups.length) { showAlert('전송할 그룹을 하나 이상 선택해주세요.', 'err'); return; }
       if (!message) { showAlert('메시지를 입력해주세요.', 'err'); return; }
@@ -3024,12 +3060,12 @@
         if (j.results) {
           const rows = j.results.map(row =>
             `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--brd);">
-              <i class="fas fa-${row.ok ? 'check-circle' : 'times-circle'}" style="color:${row.ok ? '#4CAF50' : '#f44336'};width:16px;"></i>
+              <i class="fas fa-${row.ok ? 'check-circle' : 'times-circle'}" style="color:${row.ok ? '#4CAF50' : '#f44336'};width:16px;flex-shrink:0;"></i>
               <span style="font-size:13px;flex:1;">${row.group}</span>
-              <span style="font-size:12px;color:${row.ok ? '#4CAF50' : '#f44336'};">${row.ok ? '전송 완료' : (row.error || '실패')}</span>
+              <span style="font-size:12px;color:${row.ok ? '#4CAF50' : '#f44336'};">${row.ok ? '✓ 완료' : (row.error || '실패')}</span>
             </div>`).join('');
           resultEl.innerHTML = `<div style="background:var(--bg2);border:1px solid var(--brd);border-radius:8px;padding:14px;">
-            <div style="font-weight:600;font-size:14px;margin-bottom:10px;">${j.sent}/${j.total} 그룹 전송 완료</div>${rows}</div>`;
+            <div style="font-weight:600;font-size:14px;margin-bottom:10px;color:${j.sent===j.total?'#4CAF50':'#FF9800'};">${j.sent}/${j.total} 채널 전송 완료</div>${rows}</div>`;
         } else {
           resultEl.innerHTML = `<div style="color:#f44336;padding:10px;background:var(--bg2);border-radius:8px;font-size:13px;"><i class="fas fa-exclamation-triangle"></i> ${j.error || '전송 실패'}</div>`;
         }
