@@ -1364,7 +1364,7 @@
           <div class="ac">
             <div class="ac-hd">
               <div class="ac-title">자주하는 질문(FAQ) (<span id="faq-count">0</span>)</div>
-              <button class="tb-btn pri" onclick="openModal('faqModal')"><i class="fas fa-plus"></i> 새 FAQ</button>
+              <button class="tb-btn pri" onclick="openFaqModal()"><i class="fas fa-plus"></i> 새 FAQ</button>
             </div>
             <div style="overflow-x:auto;">
               <table class="tbl">
@@ -2059,7 +2059,17 @@
       </div>
       <div class="modal-bd">
         <input type="hidden" id="faq-edit-id">
-        <div class="fg"><label class="fl req">질문</label><input class="fc" id="faq-question"
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;">
+          <button class="legal-tab" id="faq-tab-ko" onclick="switchFaqLang('ko',this)">🇰🇷 한국어</button>
+          <button class="legal-tab" id="faq-tab-en" onclick="switchFaqLang('en',this)">🇺🇸 EN</button>
+          <button class="legal-tab" id="faq-tab-de" onclick="switchFaqLang('de',this)">🇩🇪 DE</button>
+          <button class="legal-tab" id="faq-tab-ja" onclick="switchFaqLang('ja',this)">🇯🇵 JA</button>
+          <button class="legal-tab" id="faq-tab-zh" onclick="switchFaqLang('zh',this)">🇨🇳 ZH</button>
+          <button class="legal-tab" id="faq-tab-fr" onclick="switchFaqLang('fr',this)">🇫🇷 FR</button>
+          <button class="legal-tab" id="faq-tab-es" onclick="switchFaqLang('es',this)">🇪🇸 ES</button>
+          <button class="legal-tab" id="faq-tab-ru" onclick="switchFaqLang('ru',this)">🇷🇺 RU</button>
+        </div>
+        <div class="fg"><label class="fl req">질문 <span id="faq-lang-badge">🇰🇷</span></label><input class="fc" id="faq-question"
             placeholder="자주 묻는 질문을 입력하세요"></div>
         <div class="fg"><label class="fl req">답변</label><textarea class="fc" id="faq-answer" rows="6"
             placeholder="답변 내용..."></textarea></div>
@@ -2352,7 +2362,7 @@
       const btns = {
         signals: `<button class="tb-btn pri" onclick="openModal('signalModal')"><i class="fas fa-plus"></i> 새 시그널</button>`,
         news: `<button class="tb-btn pri" onclick="openModal('newsModal')"><i class="fas fa-plus"></i> 새 기사</button>`,
-        faq: `<button class="tb-btn pri" onclick="openModal('faqModal')"><i class="fas fa-plus"></i> 새 FAQ</button>`,
+        faq: `<button class="tb-btn pri" onclick="openFaqModal()"><i class="fas fa-plus"></i> 새 FAQ</button>`,
         users: `<button class="tb-btn pri" onclick="openModal('userModal')"><i class="fas fa-plus"></i> 새 회원</button>`,
         plans: `<button class="tb-btn pri" onclick="openModal('planModal')"><i class="fas fa-plus"></i> 새 플랜</button>`,
       };
@@ -2642,7 +2652,7 @@
       const sorted = [...faq].sort((a, b) => (a.order != null ? a.order : 999) - (b.order != null ? b.order : 999));
       document.getElementById('faq-body').innerHTML = sorted.map(f => `<tr>
     <td>${f.order != null ? f.order : ''}</td>
-    <td><div class="tp" style="max-width:400px;overflow:hidden;text-overflow:ellipsis;">${(f.question || '').replace(/</g, '&lt;')}</div></td>
+    <td><div class="tp" style="max-width:400px;overflow:hidden;text-overflow:ellipsis;">${(typeof f.question === 'object' ? (f.question.ko || Object.values(f.question)[0] || '') : (f.question || '')).replace(/</g, '&lt;')}</div></td>
     <td><div style="display:flex;gap:5px;">
       <button class="btn btn-out btn-xs" onclick="editFaq(${f.id})"><i class="fas fa-edit"></i></button>
       <button class="btn btn-dan btn-xs" onclick="deleteFaq(${f.id})"><i class="fas fa-trash"></i></button>
@@ -2653,21 +2663,58 @@
       const f = ls('faq', []).find(x => x.id === id); if (!f) return;
       document.getElementById('faq-modal-title').textContent = 'FAQ 수정';
       document.getElementById('faq-edit-id').value = id;
-      document.getElementById('faq-question').value = f.question || '';
-      document.getElementById('faq-answer').value = f.answer || '';
+      const qObj = typeof f.question === 'object' ? f.question : { ko: f.question || '' };
+      const aObj = typeof f.answer === 'object' ? f.answer : { ko: f.answer || '' };
+      _faqLangData = {};
+      ['ko','en','de','ja','zh','fr','es','ru'].forEach(l => { _faqLangData[l] = { question: qObj[l] || '', answer: aObj[l] || '' }; });
+      _faqCurrentLang = 'ko';
+      document.getElementById('faq-question').value = _faqLangData.ko.question;
+      document.getElementById('faq-answer').value = _faqLangData.ko.answer;
       document.getElementById('faq-order').value = f.order != null ? f.order : 0;
+      document.querySelectorAll('[id^="faq-tab-"]').forEach(b => b.classList.remove('active'));
+      const koTab = document.getElementById('faq-tab-ko');
+      if (koTab) koTab.classList.add('active');
+      document.getElementById('faq-lang-badge').textContent = '🇰🇷';
+      openModal('faqModal');
+    }
+    let _faqLangData = {};
+    let _faqCurrentLang = 'ko';
+    const _FAQ_LANG_FLAGS = {ko:'🇰🇷',en:'🇺🇸',de:'🇩🇪',ja:'🇯🇵',zh:'🇨🇳',fr:'🇫🇷',es:'🇪🇸',ru:'🇷🇺'};
+    function switchFaqLang(lang, btn) {
+      _faqLangData[_faqCurrentLang] = { question: document.getElementById('faq-question').value, answer: document.getElementById('faq-answer').value };
+      _faqCurrentLang = lang;
+      document.getElementById('faq-question').value = (_faqLangData[lang] && _faqLangData[lang].question) || '';
+      document.getElementById('faq-answer').value = (_faqLangData[lang] && _faqLangData[lang].answer) || '';
+      document.querySelectorAll('[id^="faq-tab-"]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('faq-lang-badge').textContent = _FAQ_LANG_FLAGS[lang] || '';
+    }
+    function openFaqModal() {
+      _faqLangData = {};
+      ['ko','en','de','ja','zh','fr','es','ru'].forEach(l => { _faqLangData[l] = { question: '', answer: '' }; });
+      _faqCurrentLang = 'ko';
+      document.getElementById('faq-modal-title').textContent = '새 FAQ';
+      document.getElementById('faq-edit-id').value = '';
+      document.getElementById('faq-question').value = '';
+      document.getElementById('faq-answer').value = '';
+      document.getElementById('faq-order').value = '0';
+      document.querySelectorAll('[id^="faq-tab-"]').forEach(b => b.classList.remove('active'));
+      const koTab = document.getElementById('faq-tab-ko');
+      if (koTab) koTab.classList.add('active');
+      document.getElementById('faq-lang-badge').textContent = '🇰🇷';
       openModal('faqModal');
     }
     function saveFaq() {
-      const question = document.getElementById('faq-question').value.trim();
-      const answer = document.getElementById('faq-answer').value.trim();
-      if (!question || !answer) { showAlert('질문과 답변을 모두 입력해 주세요.', 'err'); return; }
+      _faqLangData[_faqCurrentLang] = { question: document.getElementById('faq-question').value.trim(), answer: document.getElementById('faq-answer').value.trim() };
+      const questionObj = {}, answerObj = {};
+      ['ko','en','de','ja','zh','fr','es','ru'].forEach(l => { if (_faqLangData[l]) { if (_faqLangData[l].question) questionObj[l] = _faqLangData[l].question; if (_faqLangData[l].answer) answerObj[l] = _faqLangData[l].answer; } });
+      if (!questionObj.ko || !answerObj.ko) { showAlert('한국어 질문과 답변을 입력해 주세요.', 'err'); return; }
       const faq = ls('faq', []);
       const editId = parseInt(document.getElementById('faq-edit-id').value, 10) || 0;
       const isEdit = editId > 0;
       const orderVal = document.getElementById('faq-order').value;
       const order = orderVal === '' || orderVal === null ? 999 : parseInt(orderVal, 10);
-      const obj = { id: isEdit ? editId : nextId(faq), question, answer, order };
+      const obj = { id: isEdit ? editId : nextId(faq), question: questionObj, answer: answerObj, order };
       if (isEdit) { const i = faq.findIndex(x => x.id === editId); faq[i] = obj; } else { faq.push(obj); }
       lsSave('faq', faq);
       document.getElementById('faq-modal-title').textContent = '새 FAQ';
