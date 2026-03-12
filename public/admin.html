@@ -1519,28 +1519,65 @@
 
         <!-- ───── TELEGRAM ───── -->
         <div class="page" id="page-telegram">
+          <!-- 링크 관리 -->
           <div class="ac">
-            <div class="ac-hd">
-              <div class="ac-title">텔레그램 링크 관리</div>
-            </div>
+            <div class="ac-hd"><div class="ac-title">텔레그램 링크 관리</div></div>
             <div class="ac-bd">
-              <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">메인 사이트의 무료/VIP 텔레그램 참여 버튼에 사용되는 링크입니다. 설정
-                저장 후 메인 페이지(index.html)에 반영하려면 해당 페이지에서 링크를 동일하게 수정해 주세요.</p>
               <div class="fgrid">
-                <div class="fg"><label class="fl">무료 텔레그램 (채널/그룹 링크)</label><input class="fc" id="tg-telegram_free"
-                    placeholder="https://t.me/foketsignal_Lobby"></div>
-                <div class="fg"><label class="fl">VIP 텔레그램 (채널/그룹 링크)</label><input class="fc" id="tg-telegram_vip"
-                    placeholder="https://t.me/foket_vip"></div>
+                <div class="fg"><label class="fl">무료 텔레그램 링크</label><input class="fc" id="tg-telegram_free" placeholder="https://t.me/foketsignal_Lobby"></div>
+                <div class="fg"><label class="fl">VIP 텔레그램 링크</label><input class="fc" id="tg-telegram_vip" placeholder="https://t.me/foket_vip"></div>
               </div>
-              <div class="fg"><label class="fl">표시용 사용자명 (예: @foketsignal_Lobby)</label><input class="fc" id="tg-display_handle"
-                  placeholder="@foketsignal_Lobby"></div>
+              <div class="fg"><label class="fl">표시용 사용자명</label><input class="fc" id="tg-display_handle" placeholder="@foketsignal_Lobby"></div>
             </div>
           </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="btn btn-pri" onclick="saveTelegramSettings()"><i class="fas fa-save"></i> 텔레그램 설정 저장</button>
-            <button class="btn btn-out" type="button"
-              onclick="var u=document.getElementById('tg-telegram_free').value.trim()||'https://t.me/foketsignal_Lobby';window.open(u,'_blank','noopener,noreferrer');"><i
-                class="fab fa-telegram-plane"></i> 무료 링크 미리보기</button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+            <button class="btn btn-pri" onclick="saveTelegramSettings()"><i class="fas fa-save"></i> 링크 설정 저장</button>
+            <button class="btn btn-out" type="button" onclick="var u=document.getElementById('tg-telegram_free').value.trim()||'https://t.me/foketsignal_Lobby';window.open(u,'_blank','noopener,noreferrer');"><i class="fab fa-telegram-plane"></i> 무료 링크 미리보기</button>
+          </div>
+
+          <!-- 봇 설정 -->
+          <div class="ac" style="margin-top:20px;">
+            <div class="ac-hd"><div class="ac-title"><i class="fas fa-robot"></i> 텔레그램 봇 설정</div></div>
+            <div class="ac-bd">
+              <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">@BotFather에서 생성한 봇 토큰을 입력하세요. 봇을 각 그룹의 관리자로 추가해야 메시지 전송이 가능합니다.</p>
+              <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+                <div class="fg" style="flex:1;min-width:260px;margin:0;"><label class="fl">봇 토큰 (Bot Token)</label><input class="fc" id="tg-bot-token" type="password" placeholder="1234567890:ABCdef..."></div>
+                <button class="btn btn-out" onclick="saveBotToken()"><i class="fas fa-key"></i> 저장</button>
+                <button class="btn btn-out" onclick="checkBotStatus()"><i class="fas fa-sync-alt"></i> 상태 확인</button>
+              </div>
+              <div id="tg-token-status" style="margin-top:10px;font-size:13px;"></div>
+            </div>
+          </div>
+
+          <!-- 메시지 전송 -->
+          <div class="ac" style="margin-top:20px;">
+            <div class="ac-hd"><div class="ac-title"><i class="fab fa-telegram-plane"></i> 그룹 메시지 전송</div></div>
+            <div class="ac-bd">
+              <div class="fg">
+                <label class="fl">전송 그룹 선택</label>
+                <div style="display:flex;gap:8px;margin-bottom:10px;">
+                  <button class="btn btn-out" style="font-size:12px;padding:5px 12px;" onclick="tgSelectAll(true)">전체 선택</button>
+                  <button class="btn btn-out" style="font-size:12px;padding:5px 12px;" onclick="tgSelectAll(false)">전체 해제</button>
+                </div>
+                <div id="tg-group-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;"></div>
+              </div>
+              <div class="fg" style="margin-top:16px;">
+                <label class="fl">메시지 내용 <span style="color:var(--muted);font-size:12px;">HTML 태그 지원: &lt;b&gt; &lt;i&gt; &lt;code&gt; &lt;pre&gt;</span></label>
+                <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+                  <button class="btn btn-out" style="font-size:12px;padding:4px 10px;" onclick="tgWrap('<b>','</b>')"><b>B</b></button>
+                  <button class="btn btn-out" style="font-size:12px;padding:4px 10px;" onclick="tgWrap('<i>','</i>')"><i>I</i></button>
+                  <button class="btn btn-out" style="font-size:12px;padding:4px 10px;font-family:monospace;" onclick="tgWrap('<code>','</code>')">Code</button>
+                  <button class="btn btn-out" style="font-size:12px;padding:4px 10px;font-family:monospace;" onclick="tgWrap('<pre>','</pre>')">Pre</button>
+                  <span id="tg-char-count" style="margin-left:auto;font-size:12px;color:var(--muted);align-self:center;">0 / 4096</span>
+                </div>
+                <textarea class="fc" id="tg-msg" rows="7" placeholder="전송할 메시지를 입력하세요...&#10;&#10;예시:&#10;&lt;b&gt;🚀 BTC/USDT LONG 시그널&lt;/b&gt;&#10;진입가: $65,000&#10;목표가1: $68,000&#10;손절가: $62,000" style="font-family:monospace;font-size:13px;line-height:1.6;"></textarea>
+              </div>
+              <div style="display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap;">
+                <button class="btn btn-pri" id="tg-send-btn" onclick="sendTelegramMessage()"><i class="fab fa-telegram-plane"></i> 메시지 전송</button>
+                <button class="btn btn-out" onclick="document.getElementById('tg-msg').value='';document.getElementById('tg-char-count').textContent='0 / 4096';"><i class="fas fa-eraser"></i> 초기화</button>
+              </div>
+              <div id="tg-result" style="margin-top:16px;display:none;"></div>
+            </div>
           </div>
         </div>
 
@@ -2864,6 +2901,17 @@
     /* ════════════════════════════════════════════════════════════
        TELEGRAM
     ═══════════════════════════════════════════════════════════════ */
+    const TG_GROUPS = [
+      { id: '@foketsignal_Lobby',      label: '🔓 Lobby', desc: '무료' },
+      { id: '@foketsignal_Futures',    label: '📈 Futures', desc: '' },
+      { id: '@foketsignal_Binance',    label: '🟡 Binance', desc: '' },
+      { id: '@foketsignal_Cryptospot', label: '💎 CryptoSpot', desc: '' },
+      { id: '@foketsignal_Bronze',     label: '🥉 Bronze', desc: 'Class' },
+      { id: '@foketsignal_Silver',     label: '🥈 Silver', desc: 'Class' },
+      { id: '@foketsignal_Gold',       label: '🥇 Gold', desc: 'Class' },
+      { id: '@foketsignal_VIP',        label: '👑 VIP', desc: 'Class' },
+    ];
+
     function renderTelegram() {
       const cfg = ls('settings', {});
       const freeEl = document.getElementById('tg-telegram_free');
@@ -2872,7 +2920,30 @@
       if (freeEl) freeEl.value = cfg.telegram_free || '';
       if (vipEl) vipEl.value = cfg.telegram_vip || '';
       if (handleEl) handleEl.value = cfg.telegram_handle || '@foketsignal_Lobby';
+
+      const list = document.getElementById('tg-group-list');
+      if (list) {
+        list.innerHTML = TG_GROUPS.map(g => `
+          <label style="display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--brd);border-radius:8px;padding:10px 14px;cursor:pointer;user-select:none;transition:border-color .15s;">
+            <input type="checkbox" class="tg-grp-chk" data-id="${g.id}" style="width:16px;height:16px;accent-color:var(--pri);cursor:pointer;flex-shrink:0;">
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:600;">${g.label}${g.desc ? ' <span style=\'color:var(--muted);font-weight:400;\'>' + g.desc + '</span>' : ''}</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">${g.id}</div>
+            </div>
+          </label>`).join('');
+      }
+
+      const msg = document.getElementById('tg-msg');
+      if (msg && !msg._tgInit) {
+        msg._tgInit = true;
+        msg.addEventListener('input', function() {
+          const cc = document.getElementById('tg-char-count');
+          if (cc) cc.textContent = msg.value.length + ' / 4096';
+        });
+      }
+      checkBotStatus();
     }
+
     function saveTelegramSettings() {
       const cfg = ls('settings', {});
       const freeEl = document.getElementById('tg-telegram_free');
@@ -2883,6 +2954,92 @@
       if (handleEl) cfg.telegram_handle = handleEl.value.trim() || '@foketsignal_Lobby';
       lsSave('settings', cfg);
       showAlert('텔레그램 설정이 저장되었습니다.');
+    }
+
+    function tgSelectAll(val) {
+      document.querySelectorAll('.tg-grp-chk').forEach(c => c.checked = val);
+    }
+
+    function tgWrap(before, after) {
+      const ta = document.getElementById('tg-msg');
+      if (!ta) return;
+      const s = ta.selectionStart, e = ta.selectionEnd;
+      ta.value = ta.value.slice(0, s) + before + ta.value.slice(s, e) + after + ta.value.slice(e);
+      ta.focus();
+      ta.setSelectionRange(s + before.length, e + before.length);
+      const cc = document.getElementById('tg-char-count');
+      if (cc) cc.textContent = ta.value.length + ' / 4096';
+    }
+
+    async function checkBotStatus() {
+      const el = document.getElementById('tg-token-status');
+      if (!el) return;
+      el.innerHTML = '<span style="color:var(--muted);"><i class="fas fa-spinner fa-spin"></i> 확인 중...</span>';
+      try {
+        const r = await fetch(location.origin + '/api/telegram/status');
+        const j = await r.json();
+        if (j.configured) {
+          el.innerHTML = '<span style="color:#4CAF50;"><i class="fas fa-check-circle"></i> 봇 연결됨' + (j.bot_name ? ': @' + j.bot_name : '') + '</span>';
+        } else {
+          el.innerHTML = '<span style="color:var(--muted);"><i class="fas fa-times-circle"></i> 봇 미설정 또는 토큰 오류</span>';
+        }
+      } catch(e) { el.innerHTML = ''; }
+    }
+
+    async function saveBotToken() {
+      const token = (document.getElementById('tg-bot-token').value || '').trim();
+      if (!token) { showAlert('봇 토큰을 입력해주세요.', 'err'); return; }
+      const r = await fetch(location.origin + '/api/storage', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'telegram_bot_token', value: token })
+      });
+      const j = await r.json();
+      if (j.success) {
+        document.getElementById('tg-bot-token').value = '';
+        showAlert('봇 토큰이 저장되었습니다.');
+        checkBotStatus();
+      } else { showAlert('저장 실패', 'err'); }
+    }
+
+    async function sendTelegramMessage() {
+      const groups = [...document.querySelectorAll('.tg-grp-chk:checked')].map(c => c.dataset.id);
+      const message = (document.getElementById('tg-msg').value || '').trim();
+      if (!groups.length) { showAlert('전송할 그룹을 하나 이상 선택해주세요.', 'err'); return; }
+      if (!message) { showAlert('메시지를 입력해주세요.', 'err'); return; }
+      if (message.length > 4096) { showAlert('메시지가 너무 깁니다 (최대 4096자).', 'err'); return; }
+
+      const btn = document.getElementById('tg-send-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 전송 중...';
+      const resultEl = document.getElementById('tg-result');
+      resultEl.style.display = 'none';
+
+      try {
+        const r = await fetch(location.origin + '/api/telegram/send', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ groups, message })
+        });
+        const j = await r.json();
+        resultEl.style.display = 'block';
+        if (j.results) {
+          const rows = j.results.map(row =>
+            `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--brd);">
+              <i class="fas fa-${row.ok ? 'check-circle' : 'times-circle'}" style="color:${row.ok ? '#4CAF50' : '#f44336'};width:16px;"></i>
+              <span style="font-size:13px;flex:1;">${row.group}</span>
+              <span style="font-size:12px;color:${row.ok ? '#4CAF50' : '#f44336'};">${row.ok ? '전송 완료' : (row.error || '실패')}</span>
+            </div>`).join('');
+          resultEl.innerHTML = `<div style="background:var(--bg2);border:1px solid var(--brd);border-radius:8px;padding:14px;">
+            <div style="font-weight:600;font-size:14px;margin-bottom:10px;">${j.sent}/${j.total} 그룹 전송 완료</div>${rows}</div>`;
+        } else {
+          resultEl.innerHTML = `<div style="color:#f44336;padding:10px;background:var(--bg2);border-radius:8px;font-size:13px;"><i class="fas fa-exclamation-triangle"></i> ${j.error || '전송 실패'}</div>`;
+        }
+      } catch(e) {
+        resultEl.style.display = 'block';
+        resultEl.innerHTML = `<div style="color:#f44336;padding:10px;background:var(--bg2);border-radius:8px;font-size:13px;"><i class="fas fa-exclamation-triangle"></i> 오류: ${e.message}</div>`;
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fab fa-telegram-plane"></i> 메시지 전송';
+      }
     }
 
     /* ════════════════════════════════════════════════════════════

@@ -100,4 +100,61 @@ router.get('/prices', async (req, res) => {
   res.json({ success: true, data: mockPrices });
 });
 
+// ----- Telegram Bot API -----
+
+async function getTelegramToken() {
+  let token = process.env.TELEGRAM_BOT_TOKEN || '';
+  if (!token) {
+    const [rows] = await db.query('SELECT value FROM app_storage WHERE `key` = ? LIMIT 1', ['telegram_bot_token']);
+    token = rows.length ? rows[0].value : '';
+  }
+  return token;
+}
+
+// GET /api/telegram/status
+router.get('/telegram/status', async (req, res) => {
+  try {
+    const token = await getTelegramToken();
+    if (!token) return res.json({ configured: false });
+    const r = await fetch(`https://api.telegram.org/bot${token}/getMe`);
+    const j = await r.json();
+    if (j.ok) res.json({ configured: true, bot_name: j.result.username });
+    else res.json({ configured: false, error: j.description });
+  } catch (e) {
+    res.json({ configured: false, error: e.message });
+  }
+});
+
+// POST /api/telegram/send  body: { groups: [...], message: string }
+router.post('/telegram/send', express.json(), async (req, res) => {
+  try {
+    const token = await getTelegramToken();
+    if (!token) return res.status(400).json({ success: false, error: '봇 토큰이 설정되지 않았습니다. 관리자 패널에서 봇 토큰을 입력해주세요.' });
+
+    const { groups, message } = req.body;
+    if (!Array.isArray(groups) || !groups.length) return res.status(400).json({ success: false, error: 'groups required' });
+    if (!message || !message.trim()) return res.status(400).json({ success: false, error: 'message required' });
+    if (message.length > 4096) return res.status(400).json({ success: false, error: '메시지가 너무 깁니다 (최대 4096자)' });
+
+    const results = [];
+    for (const chatId of groups) {
+      try {
+        const r = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'HTML' })
+        });
+        const j = await r.json();
+        results.push({ group: chatId, ok: j.ok, error: j.description });
+      } catch (e) {
+        results.push({ group: chatId, ok: false, error: e.message });
+      }
+    }
+    const sent = results.filter(r => r.ok).length;
+    res.json({ success: true, sent, total: results.length, results });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 module.exports = router;
