@@ -95,7 +95,7 @@ router.put('/auth/password', requireAuth, async (req, res) => {
 // GET /api/admin/users
 router.get('/admin/users', requireAdmin, async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT id, email, username, role, is_active, last_login, created_at, plan_id, plan_expires_at, telegram_username FROM users ORDER BY created_at DESC');
+    const [rows] = await db.query('SELECT id, email, username, role, is_active, email_verified, last_login, created_at, plan_id, plan_expires_at, telegram_username FROM users ORDER BY created_at DESC');
     res.json({ success: true, data: rows });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

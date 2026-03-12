@@ -1392,10 +1392,13 @@
               <table class="tbl">
                 <thead>
                   <tr>
-                    <th>회원</th>
+                    <th>이름</th>
+                    <th>이메일</th>
                     <th>역할</th>
+                    <th>텔레그램</th>
                     <th>플랜</th>
-                    <th>상태</th>
+                    <th>플랜 만료일</th>
+                    <th>활성</th>
                     <th>최근 로그인</th>
                     <th>가입일</th>
                     <th>작업</th>
@@ -2710,29 +2713,36 @@
     function renderUsers() {
       const tbody = document.getElementById('users-body');
       const countEl = document.getElementById('users-count');
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--muted)"><i class="fas fa-spinner fa-spin"></i> 불러오는 중...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--muted)"><i class="fas fa-spinner fa-spin"></i> 불러오는 중...</td></tr>';
       fetch('/api/admin/users').then(r => r.json()).then(j => {
-        if (!j.success) { tbody.innerHTML = '<tr><td colspan="7" class="empty">로드 실패: ' + (j.error||'') + '</td></tr>'; return; }
+        if (!j.success) { tbody.innerHTML = '<tr><td colspan="10" class="empty">로드 실패: ' + (j.error||'') + '</td></tr>'; return; }
         const users = j.data || [];
         if (countEl) countEl.textContent = users.length;
-        // update dashboard user count
         const sUsers = document.getElementById('s-users');
         if (sUsers) sUsers.textContent = users.length;
-        if (!users.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty"><i class="fas fa-users"></i><p>회원이 없습니다</p></td></tr>'; return; }
-        tbody.innerHTML = users.map(u => `<tr>
-          <td><div style="font-weight:600">${u.username||''}</div><div style="font-size:12px;color:var(--muted)">${u.email}</div></td>
-          <td><span class="bdg ${u.role==='superadmin'?'bdg-red':(u.role==='admin'?'bdg-yellow':'bdg-blue')}">${u.role}</span></td>
-          <td>${u.plan_id||'-'}</td>
-          <td>${u.plan_expires_at?new Date(u.plan_expires_at).toLocaleDateString():'-'}</td>
-          <td><span class="bdg ${u.is_active?'bdg-green':'bdg-red'}">${u.is_active?'활성':'비활성'}</span></td>
-          <td>${u.last_login?new Date(u.last_login).toLocaleDateString():'-'}</td>
-          <td><div style="display:flex;gap:5px;">
-            <button class="btn btn-out btn-xs" onclick="editUserRow(${JSON.stringify(JSON.stringify(u))})"><i class="fas fa-edit"></i></button>
-            ${u.role!=='superadmin'?`<button class="btn btn-dan btn-xs" onclick="deleteUserById(${u.id})"><i class="fas fa-trash"></i></button>`:''}
-          </div></td>
-        </tr>`).join('');
+        if (!users.length) { tbody.innerHTML = '<tr><td colspan="10" class="empty"><i class="fas fa-users"></i><p>회원이 없습니다</p></td></tr>'; return; }
+        const fmt = d => d ? new Date(d).toLocaleDateString('ko-KR') : '-';
+        tbody.innerHTML = users.map(u => {
+          const roleCls = u.role==='superadmin'?'bdg-red':(u.role==='admin'?'bdg-yellow':'bdg-blue');
+          const safeJson = encodeURIComponent(JSON.stringify(u));
+          return `<tr>
+            <td style="font-weight:600">${u.username||'-'}</td>
+            <td style="font-size:13px">${u.email}</td>
+            <td><span class="bdg ${roleCls}">${u.role}</span></td>
+            <td style="font-size:13px;color:var(--muted)">${u.telegram_username||'-'}</td>
+            <td>${u.plan_id||'-'}</td>
+            <td>${fmt(u.plan_expires_at)}</td>
+            <td><span class="bdg ${u.is_active?'bdg-green':'bdg-red'}">${u.is_active?'활성':'비활성'}</span></td>
+            <td style="font-size:13px">${fmt(u.last_login)}</td>
+            <td style="font-size:13px">${fmt(u.created_at)}</td>
+            <td><div style="display:flex;gap:5px;">
+              <button class="btn btn-out btn-xs" onclick="editUserRow(decodeURIComponent('${safeJson}'))"><i class="fas fa-edit"></i></button>
+              ${u.role!=='superadmin'?`<button class="btn btn-dan btn-xs" onclick="deleteUserById(${u.id})"><i class="fas fa-trash"></i></button>`:''}
+            </div></td>
+          </tr>`;
+        }).join('');
       }).catch(e => {
-        tbody.innerHTML = '<tr><td colspan="7" class="empty">API 오류: ' + e.message + '</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" class="empty">API 오류: ' + e.message + '</td></tr>';
       });
     }
     function editUserRow(jsonStr) {
