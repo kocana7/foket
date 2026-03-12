@@ -3070,9 +3070,15 @@
       });
 
       // 텔레그램 링크 동적 연결
-      (function applyTelegramLinks() {
+      (async function applyTelegramLinks() {
         let cfg = {};
-        try { const r = localStorage.getItem('fk_settings'); if (r) cfg = JSON.parse(r); } catch(e) {}
+        try {
+          const base = (location.protocol !== 'file:') ? location.origin + '/api' : 'http://localhost:3000/api';
+          const r = await fetch(base + '/storage/settings', { cache: 'no-store' });
+          const j = await r.json();
+          if (j.success && j.value) { cfg = JSON.parse(j.value); try { localStorage.setItem('fk_settings', j.value); } catch(e) {} }
+          else { const ls = localStorage.getItem('fk_settings'); if (ls) cfg = JSON.parse(ls); }
+        } catch(e) { try { const ls = localStorage.getItem('fk_settings'); if (ls) cfg = JSON.parse(ls); } catch(e2) {} }
         const freeUrl = cfg.telegram_free || 'https://t.me/foketsignal_Lobby';
         const vipUrl  = cfg.telegram_vip  || '#';
         const handle  = cfg.telegram_handle || '';
@@ -3083,7 +3089,7 @@
       })();
 
       // 구독 플랜 그리드 동적 렌더링
-      (function renderPricingGrid() {
+      (async function renderPricingGrid() {
         const grid = document.getElementById('pricingGrid');
         if (!grid) return;
         const FALLBACK = [
@@ -3093,7 +3099,13 @@
           { id:4, name:'VIP Class',    slug:'vip',    days:30, price:80, cur:'USD', popular:false, active:true, feats:['8개언어 지원','포켓시그널 카테고리 모두 선택 (예: CryptoSpot, Binance, Futures 모두 선택)','CryptoSpot은 24/7서비스, Futures는 월~금 서비스','진입/목표/손절/완료 시그널 제공','각 Class 단체방참여','투자금의 포트폴리오 별로 Futures의 1~3개월 국제 시세 (국제 증시, 국제유가, 금시세, 농축산물 예측 시세) 제공'] },
         ];
         let plans = FALLBACK;
-        try { const r = localStorage.getItem('fk_plans'); if (r) plans = JSON.parse(r); } catch(e) {}
+        try {
+          const base = (location.protocol !== 'file:') ? location.origin + '/api' : 'http://localhost:3000/api';
+          const r = await fetch(base + '/storage/plans', { cache: 'no-store' });
+          const j = await r.json();
+          if (j.success && j.value) { plans = JSON.parse(j.value); try { localStorage.setItem('fk_plans', j.value); } catch(e) {} }
+          else { const ls = localStorage.getItem('fk_plans'); if (ls) plans = JSON.parse(ls); }
+        } catch(e) { try { const ls = localStorage.getItem('fk_plans'); if (ls) plans = JSON.parse(ls); } catch(e2) {} }
         if (!Array.isArray(plans) || !plans.length) plans = FALLBACK;
         const ORDER = ['bronze','silver','gold','vip'];
         plans.sort((a,b) => { const ai=ORDER.indexOf(a.slug),bi=ORDER.indexOf(b.slug); return (ai<0?99:ai)-(bi<0?99:bi); });
@@ -3117,14 +3129,17 @@
       applyLang(currentLang);
 
       // 사용자 후기: 관리자 페이지 후기 데이터에서 로드
-      (function loadTestimonials() {
+      (async function loadTestimonials() {
         const grid = document.getElementById('testiGrid');
         if (!grid) return;
         let list = [];
         try {
-          const raw = localStorage.getItem('fk_testimonials');
-          if (raw) list = JSON.parse(raw);
-        } catch (e) { }
+          const base = (location.protocol !== 'file:') ? location.origin + '/api' : 'http://localhost:3000/api';
+          const r = await fetch(base + '/storage/testimonials', { cache: 'no-store' });
+          const j = await r.json();
+          if (j.success && j.value) { list = JSON.parse(j.value); try { localStorage.setItem('fk_testimonials', j.value); } catch(e) {} }
+          else { const ls = localStorage.getItem('fk_testimonials'); if (ls) list = JSON.parse(ls); }
+        } catch(e) { try { const ls = localStorage.getItem('fk_testimonials'); if (ls) list = JSON.parse(ls); } catch(e2) {} }
         if (!Array.isArray(list)) list = [];
         const esc = (s) => (s == null ? '' : String(s)).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         const stars = (n) => { const v = Math.min(5, Math.max(0, parseInt(n, 10) || 5)); return '★'.repeat(v) + '☆'.repeat(5 - v); };
