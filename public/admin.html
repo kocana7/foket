@@ -1551,30 +1551,15 @@
 
           <!-- 메시지 전송 -->
           <div class="ac" style="margin-top:20px;">
-            <div class="ac-hd"><div class="ac-title"><i class="fab fa-telegram-plane"></i> 그룹 메시지 전송</div></div>
+            <div class="ac-hd">
+              <div class="ac-title"><i class="fab fa-telegram-plane"></i> 그룹 메시지 전송</div>
+              <div style="display:flex;gap:6px;">
+                <button class="btn btn-out" style="font-size:11px;padding:3px 10px;" onclick="tgSelectAll(true)">전체 선택</button>
+                <button class="btn btn-out" style="font-size:11px;padding:3px 10px;" onclick="tgSelectAll(false)">전체 해제</button>
+              </div>
+            </div>
             <div class="ac-bd">
-              <!-- 메시지 작성 -->
-              <div class="fg">
-                <label class="fl">메시지 내용 <span style="color:var(--muted);font-size:12px;">HTML 태그 지원: &lt;b&gt; &lt;i&gt; &lt;code&gt; &lt;pre&gt;</span></label>
-                <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
-                  <button class="btn btn-out" style="font-size:12px;padding:4px 10px;" onclick="tgWrap('<b>','</b>')"><b>B</b></button>
-                  <button class="btn btn-out" style="font-size:12px;padding:4px 10px;" onclick="tgWrap('<i>','</i>')"><i>I</i></button>
-                  <button class="btn btn-out" style="font-size:12px;padding:4px 10px;font-family:monospace;" onclick="tgWrap('<code>','</code>')">Code</button>
-                  <button class="btn btn-out" style="font-size:12px;padding:4px 10px;font-family:monospace;" onclick="tgWrap('<pre>','</pre>')">Pre</button>
-                  <button class="btn btn-out" style="font-size:12px;padding:4px 10px;margin-left:auto;" onclick="document.getElementById('tg-msg').value='';document.getElementById('tg-char-count').textContent='0 / 4096';"><i class="fas fa-eraser"></i> 초기화</button>
-                  <span id="tg-char-count" style="font-size:12px;color:var(--muted);align-self:center;">0 / 4096</span>
-                </div>
-                <textarea class="fc" id="tg-msg" rows="6" placeholder="전송할 메시지를 입력하세요...&#10;&#10;예시:&#10;&lt;b&gt;🚀 BTC/USDT LONG 시그널&lt;/b&gt;&#10;진입가: $65,000&#10;목표가1: $68,000&#10;손절가: $62,000" style="font-family:monospace;font-size:13px;line-height:1.6;"></textarea>
-              </div>
-              <!-- 그룹 카드 (채널 체크박스 + 전송 버튼) -->
-              <div class="fg" style="margin-top:16px;">
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-                  <label class="fl" style="margin:0;">그룹 선택 &amp; 전송</label>
-                  <button class="btn btn-out" style="font-size:11px;padding:3px 10px;margin-left:auto;" onclick="tgSelectAll(true)">전체 선택</button>
-                  <button class="btn btn-out" style="font-size:11px;padding:3px 10px;" onclick="tgSelectAll(false)">전체 해제</button>
-                </div>
-                <div id="tg-group-list" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;"></div>
-              </div>
+              <div id="tg-group-list" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;"></div>
               <div id="tg-result" style="margin-top:16px;display:none;"></div>
             </div>
           </div>
@@ -2949,6 +2934,7 @@
       if (list) {
         list.innerHTML = TG_PRESETS.map((p, i) => `
           <div style="background:var(--bg2);border:2px solid var(--brd);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;">
+            <!-- 헤더 -->
             <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--brd);background:${p.color}18;">
               <span style="font-size:14px;font-weight:700;color:${p.color};">${p.label}</span>
               <div style="margin-left:auto;display:flex;gap:5px;">
@@ -2956,14 +2942,29 @@
                 <button onclick="tgPresetSelectAll(${i},false)" style="font-size:10px;padding:2px 7px;background:none;border:1px solid var(--brd);border-radius:4px;color:var(--muted);cursor:pointer;">해제</button>
               </div>
             </div>
-            <div style="padding:8px 14px;flex:1;">
+            <!-- 채널 체크박스 -->
+            <div style="padding:8px 14px;">
               ${p.channels.map((c, j) => `
-                <label style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;${j < p.channels.length-1 ? 'border-bottom:1px solid var(--brd);' : ''}">
+                <label style="display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;${j < p.channels.length-1 ? 'border-bottom:1px solid var(--brd);' : ''}">
                   <input type="checkbox" class="tg-ch-chk" data-preset="${i}" data-id="${c.id}" checked style="width:14px;height:14px;accent-color:${p.color};cursor:pointer;flex-shrink:0;">
                   <span style="font-size:13px;flex:1;">${c.label}</span>
                   <span style="font-size:10px;color:var(--muted);">${c.id.replace('@foketsignal_','')}</span>
                 </label>`).join('')}
             </div>
+            <!-- 메시지 입력 -->
+            <div style="padding:8px 14px;border-top:1px solid var(--brd);">
+              <div style="display:flex;gap:4px;margin-bottom:5px;flex-wrap:wrap;">
+                <button style="font-size:11px;padding:2px 7px;background:none;border:1px solid var(--brd);border-radius:4px;cursor:pointer;font-weight:700;" onclick="tgWrapN(${i},'<b>','</b>')">B</button>
+                <button style="font-size:11px;padding:2px 7px;background:none;border:1px solid var(--brd);border-radius:4px;cursor:pointer;font-style:italic;" onclick="tgWrapN(${i},'<i>','</i>')">I</button>
+                <button style="font-size:11px;padding:2px 7px;background:none;border:1px solid var(--brd);border-radius:4px;cursor:pointer;font-family:monospace;" onclick="tgWrapN(${i},'<code>','</code>')">Code</button>
+                <button style="font-size:11px;padding:2px 7px;background:none;border:1px solid var(--brd);border-radius:4px;cursor:pointer;margin-left:auto;" onclick="document.getElementById('tg-msg-${i}').value='';document.getElementById('tg-cc-${i}').textContent='0/4096';">✕</button>
+                <span id="tg-cc-${i}" style="font-size:10px;color:var(--muted);align-self:center;">0/4096</span>
+              </div>
+              <textarea id="tg-msg-${i}" rows="5" placeholder="전송할 메시지를 입력하세요...&#10;&#10;예시:&#10;&lt;b&gt;🚀 BTC/USDT LONG&lt;/b&gt;&#10;진입가: $65,000&#10;목표가: $68,000&#10;손절가: $62,000"
+                style="width:100%;background:var(--bg-input,#0a0e1a);border:1px solid var(--brd);border-radius:6px;color:var(--text);padding:8px 10px;font-family:monospace;font-size:12px;line-height:1.6;resize:vertical;outline:none;"
+                oninput="document.getElementById('tg-cc-${i}').textContent=this.value.length+'/4096'"></textarea>
+            </div>
+            <!-- 전송 버튼 -->
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px 14px;border-top:1px solid var(--brd);">
               <button class="btn btn-pri" style="font-size:12px;padding:7px 4px;" onclick="sendToPreset(${i},'진입')"><i class="fas fa-sign-in-alt"></i> 진입시그널</button>
               <button class="btn btn-dan" style="font-size:12px;padding:7px 4px;" onclick="sendToPreset(${i},'청산')"><i class="fas fa-sign-out-alt"></i> 청산시그널</button>
@@ -3001,15 +3002,16 @@
       document.querySelectorAll(`.tg-ch-chk[data-preset="${presetIdx}"]`).forEach(c => c.checked = val);
     }
 
-    function tgWrap(before, after) {
-      const ta = document.getElementById('tg-msg');
+    function tgWrap(before, after) { tgWrapN(0, before, after); }
+    function tgWrapN(idx, before, after) {
+      const ta = document.getElementById('tg-msg-' + idx);
       if (!ta) return;
       const s = ta.selectionStart, e = ta.selectionEnd;
       ta.value = ta.value.slice(0, s) + before + ta.value.slice(s, e) + after + ta.value.slice(e);
       ta.focus();
       ta.setSelectionRange(s + before.length, e + before.length);
-      const cc = document.getElementById('tg-char-count');
-      if (cc) cc.textContent = ta.value.length + ' / 4096';
+      const cc = document.getElementById('tg-cc-' + idx);
+      if (cc) cc.textContent = ta.value.length + '/4096';
     }
 
     async function checkBotStatus() {
@@ -3045,17 +3047,19 @@
     async function sendToPreset(presetIdx, type) {
       const groups = [...document.querySelectorAll(`.tg-ch-chk[data-preset="${presetIdx}"]:checked`)].map(c => c.dataset.id);
       if (!groups.length) { showAlert('선택된 채널이 없습니다.', 'err'); return; }
-      await _tgSend(groups, type);
+      const message = (document.getElementById('tg-msg-' + presetIdx).value || '').trim();
+      await _tgSend(groups, type, message);
     }
 
     async function sendTelegramMessage() {
       const groups = [...new Set([...document.querySelectorAll('.tg-ch-chk:checked')].map(c => c.dataset.id))];
       if (!groups.length) { showAlert('전송할 채널을 선택해주세요.', 'err'); return; }
-      await _tgSend(groups, '전체');
+      // 전체 전송 시 첫 번째 그룹 메시지 사용
+      const message = (document.getElementById('tg-msg-0') ? document.getElementById('tg-msg-0').value : '').trim();
+      await _tgSend(groups, '전체', message);
     }
 
-    async function _tgSend(groups, label) {
-      const message = (document.getElementById('tg-msg').value || '').trim();
+    async function _tgSend(groups, label, message) {
       if (!message) { showAlert('메시지를 입력해주세요.', 'err'); return; }
       if (message.length > 4096) { showAlert('메시지가 너무 깁니다 (최대 4096자).', 'err'); return; }
 
