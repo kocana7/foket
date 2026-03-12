@@ -2622,13 +2622,47 @@
       document.title = (t[''] || '') + 'AI Deep Learning| FoketSignal';
 
       // Re-render pricing grid with translated feature texts
-      renderPlans(lang);
+      if (typeof renderPlans === 'function') renderPlans(lang);
 
       // Re-render stats panels so Korean shows nameKo first, others show sym first
       if (typeof loadCryptoStats === 'function') loadCryptoStats();
       if (typeof loadBinanceStats === 'function') loadBinanceStats();
       if (typeof loadFuturesStats === 'function') loadFuturesStats();
       if (typeof loadBest10 === 'function') loadBest10();
+    }
+
+    /* ── PRICING PLANS – global scope so applyLang can call renderPlans ── */
+    const PLAN_FALLBACK = [
+      { id:1, name:'Bronze Class', slug:'bronze', days:30, price:30, cur:'USD', popular:false, active:true, feats:['pricing.feat_8lang','pricing.feat_cat1','pricing.feat_247','pricing.feat_signals','pricing.feat_group'] },
+      { id:2, name:'Silver Class', slug:'silver', days:30, price:45, cur:'USD', popular:true,  active:true, feats:['pricing.feat_8lang','pricing.feat_cat2','pricing.feat_247','pricing.feat_signals','pricing.feat_group'] },
+      { id:3, name:'Gold Class',   slug:'gold',   days:30, price:60, cur:'USD', popular:false, active:true, feats:['pricing.feat_8lang','pricing.feat_cat_all','pricing.feat_247','pricing.feat_signals','pricing.feat_group'] },
+      { id:4, name:'VIP Class',    slug:'vip',    days:30, price:80, cur:'USD', popular:false, active:true, feats:['pricing.feat_8lang','pricing.feat_cat_all','pricing.feat_247','pricing.feat_signals','pricing.feat_group','pricing.feat_futures'] },
+    ];
+    let _cachedPlans = null;
+
+    function renderPlans(lang) {
+      const grid = document.getElementById('pricingGrid');
+      if (!grid || !_cachedPlans) return;
+      const tDict = TRANSLATIONS[lang] || TRANSLATIONS['ko'];
+      const ORDER = ['bronze','silver','gold','vip'];
+      const sorted = [..._cachedPlans].sort((a,b) => { const ai=ORDER.indexOf(a.slug),bi=ORDER.indexOf(b.slug); return (ai<0?99:ai)-(bi<0?99:bi); });
+      const active = sorted.filter(p => p.active !== false);
+      grid.innerHTML = active.map(p => {
+        const sym = p.cur === 'USD' ? '$' : (p.cur || '$');
+        const feats = (p.feats || []).map(f => {
+          const display = (f && f.startsWith('pricing.')) ? (tDict[f] || f) : f;
+          return `<div class="pfeat"><span class="chk">✓</span><span>${display}</span></div>`;
+        }).join('');
+        return `<div class="plan-card${p.popular ? ' popular' : ''}">
+          ${p.popular ? `<div class="pop-badge">${tDict['pricing.most_popular'] || '인기'}</div>` : ''}
+          <div class="pname">${p.name}</div>
+          <div class="pdur">${p.days}${tDict['pricing.dur_1month'] ? '' : '일'}</div>
+          <div class="pprice-wrap"><span class="pcur">${sym}</span><span class="pamt">${p.price}</span></div>
+          <div class="pper">${tDict['pricing.per_month'] || '/월'}</div>
+          <div class="pfeats">${feats}</div>
+          <a href="payment.html?plan=${p.slug}" class="plan-btn ${p.popular ? 'pri' : 'out'}">${tDict['pricing.get_started'] || '시작하기'}</a>
+        </div>`;
+      }).join('');
     }
 
     /* ═══════════════════════════════════════════════
@@ -3110,39 +3144,6 @@
       })();
 
       // 구독 플랜 그리드 동적 렌더링
-      const PLAN_FALLBACK = [
-        { id:1, name:'Bronze Class', slug:'bronze', days:30, price:30, cur:'USD', popular:false, active:true, feats:['pricing.feat_8lang','pricing.feat_cat1','pricing.feat_247','pricing.feat_signals','pricing.feat_group'] },
-        { id:2, name:'Silver Class', slug:'silver', days:30, price:45, cur:'USD', popular:true,  active:true, feats:['pricing.feat_8lang','pricing.feat_cat2','pricing.feat_247','pricing.feat_signals','pricing.feat_group'] },
-        { id:3, name:'Gold Class',   slug:'gold',   days:30, price:60, cur:'USD', popular:false, active:true, feats:['pricing.feat_8lang','pricing.feat_cat_all','pricing.feat_247','pricing.feat_signals','pricing.feat_group'] },
-        { id:4, name:'VIP Class',    slug:'vip',    days:30, price:80, cur:'USD', popular:false, active:true, feats:['pricing.feat_8lang','pricing.feat_cat_all','pricing.feat_247','pricing.feat_signals','pricing.feat_group','pricing.feat_futures'] },
-      ];
-      let _cachedPlans = null;
-
-      function renderPlans(lang) {
-        const grid = document.getElementById('pricingGrid');
-        if (!grid || !_cachedPlans) return;
-        const tDict = TRANSLATIONS[lang] || TRANSLATIONS['ko'];
-        const ORDER = ['bronze','silver','gold','vip'];
-        const sorted = [..._cachedPlans].sort((a,b) => { const ai=ORDER.indexOf(a.slug),bi=ORDER.indexOf(b.slug); return (ai<0?99:ai)-(bi<0?99:bi); });
-        const active = sorted.filter(p => p.active !== false);
-        grid.innerHTML = active.map(p => {
-          const sym = p.cur === 'USD' ? '$' : (p.cur || '$');
-          const feats = (p.feats || []).map(f => {
-            const display = (f && f.startsWith('pricing.')) ? (tDict[f] || f) : f;
-            return `<div class="pfeat"><span class="chk">✓</span><span>${display}</span></div>`;
-          }).join('');
-          return `<div class="plan-card${p.popular ? ' popular' : ''}">
-            ${p.popular ? `<div class="pop-badge">${tDict['pricing.most_popular'] || '인기'}</div>` : ''}
-            <div class="pname">${p.name}</div>
-            <div class="pdur">${p.days}${tDict['pricing.dur_1month'] ? '' : '일'}</div>
-            <div class="pprice-wrap"><span class="pcur">${sym}</span><span class="pamt">${p.price}</span></div>
-            <div class="pper">${tDict['pricing.per_month'] || '/월'}</div>
-            <div class="pfeats">${feats}</div>
-            <a href="payment.html?plan=${p.slug}" class="plan-btn ${p.popular ? 'pri' : 'out'}">${tDict['pricing.get_started'] || '시작하기'}</a>
-          </div>`;
-        }).join('');
-      }
-
       (async function loadPricingGrid() {
         let plans = PLAN_FALLBACK;
         try {
