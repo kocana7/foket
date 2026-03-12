@@ -2621,6 +2621,9 @@
       // Update page title
       document.title = (t[''] || '') + 'AI Deep Learning| FoketSignal';
 
+      // Re-render pricing grid with translated feature texts
+      renderPlans(lang);
+
       // Re-render stats panels so Korean shows nameKo first, others show sym first
       if (typeof loadCryptoStats === 'function') loadCryptoStats();
       if (typeof loadBinanceStats === 'function') loadBinanceStats();
@@ -3107,16 +3110,41 @@
       })();
 
       // 구독 플랜 그리드 동적 렌더링
-      (async function renderPricingGrid() {
+      const PLAN_FALLBACK = [
+        { id:1, name:'Bronze Class', slug:'bronze', days:30, price:30, cur:'USD', popular:false, active:true, feats:['pricing.feat_8lang','pricing.feat_cat1','pricing.feat_247','pricing.feat_signals','pricing.feat_group'] },
+        { id:2, name:'Silver Class', slug:'silver', days:30, price:45, cur:'USD', popular:true,  active:true, feats:['pricing.feat_8lang','pricing.feat_cat2','pricing.feat_247','pricing.feat_signals','pricing.feat_group'] },
+        { id:3, name:'Gold Class',   slug:'gold',   days:30, price:60, cur:'USD', popular:false, active:true, feats:['pricing.feat_8lang','pricing.feat_cat_all','pricing.feat_247','pricing.feat_signals','pricing.feat_group'] },
+        { id:4, name:'VIP Class',    slug:'vip',    days:30, price:80, cur:'USD', popular:false, active:true, feats:['pricing.feat_8lang','pricing.feat_cat_all','pricing.feat_247','pricing.feat_signals','pricing.feat_group','pricing.feat_futures'] },
+      ];
+      let _cachedPlans = null;
+
+      function renderPlans(lang) {
         const grid = document.getElementById('pricingGrid');
-        if (!grid) return;
-        const FALLBACK = [
-          { id:1, name:'Bronze Class', slug:'bronze', days:30, price:30, cur:'USD', popular:false, active:true, feats:['8개언어 지원','포켓시그널 카테고리 중 1 선택 (예: CryptoSpot, Binance, Futures 중 1 선택)','CryptoSpot은 24/7서비스, Futures는 월~금 서비스','진입/목표/손절/완료 시그널 제공','각 Class 단체방참여'] },
-          { id:2, name:'Silver Class', slug:'silver', days:30, price:45, cur:'USD', popular:true,  active:true, feats:['8개언어 지원','포켓시그널 카테고리 중 2 선택 (예: CryptoSpot, Binance, Futures 중 2 선택)','CryptoSpot은 24/7서비스, Futures는 월~금 서비스','진입/목표/손절/완료 시그널 제공','각 Class 단체방참여'] },
-          { id:3, name:'Gold Class',   slug:'gold',   days:30, price:60, cur:'USD', popular:false, active:true, feats:['8개언어 지원','포켓시그널 카테고리 모두 선택 (예: CryptoSpot, Binance, Futures 모두 선택)','CryptoSpot은 24/7서비스, Futures는 월~금 서비스','진입/목표/손절/완료 시그널 제공','각 Class 단체방참여'] },
-          { id:4, name:'VIP Class',    slug:'vip',    days:30, price:80, cur:'USD', popular:false, active:true, feats:['8개언어 지원','포켓시그널 카테고리 모두 선택 (예: CryptoSpot, Binance, Futures 모두 선택)','CryptoSpot은 24/7서비스, Futures는 월~금 서비스','진입/목표/손절/완료 시그널 제공','각 Class 단체방참여','투자금의 포트폴리오 별로 Futures의 1~3개월 국제 시세 (국제 증시, 국제유가, 금시세, 농축산물 예측 시세) 제공'] },
-        ];
-        let plans = FALLBACK;
+        if (!grid || !_cachedPlans) return;
+        const tDict = TRANSLATIONS[lang] || TRANSLATIONS['ko'];
+        const ORDER = ['bronze','silver','gold','vip'];
+        const sorted = [..._cachedPlans].sort((a,b) => { const ai=ORDER.indexOf(a.slug),bi=ORDER.indexOf(b.slug); return (ai<0?99:ai)-(bi<0?99:bi); });
+        const active = sorted.filter(p => p.active !== false);
+        grid.innerHTML = active.map(p => {
+          const sym = p.cur === 'USD' ? '$' : (p.cur || '$');
+          const feats = (p.feats || []).map(f => {
+            const display = (f && f.startsWith('pricing.')) ? (tDict[f] || f) : f;
+            return `<div class="pfeat"><span class="chk">✓</span><span>${display}</span></div>`;
+          }).join('');
+          return `<div class="plan-card${p.popular ? ' popular' : ''}">
+            ${p.popular ? `<div class="pop-badge">${tDict['pricing.most_popular'] || '인기'}</div>` : ''}
+            <div class="pname">${p.name}</div>
+            <div class="pdur">${p.days}${tDict['pricing.dur_1month'] ? '' : '일'}</div>
+            <div class="pprice-wrap"><span class="pcur">${sym}</span><span class="pamt">${p.price}</span></div>
+            <div class="pper">${tDict['pricing.per_month'] || '/월'}</div>
+            <div class="pfeats">${feats}</div>
+            <a href="payment.html?plan=${p.slug}" class="plan-btn ${p.popular ? 'pri' : 'out'}">${tDict['pricing.get_started'] || '시작하기'}</a>
+          </div>`;
+        }).join('');
+      }
+
+      (async function loadPricingGrid() {
+        let plans = PLAN_FALLBACK;
         try {
           const base = (location.protocol !== 'file:') ? location.origin + '/api' : 'http://localhost:3000/api';
           const r = await fetch(base + '/storage/plans', { cache: 'no-store' });
@@ -3124,23 +3152,9 @@
           if (j.success && j.value) { plans = JSON.parse(j.value); try { localStorage.setItem('fk_plans', j.value); } catch(e) {} }
           else { const ls = localStorage.getItem('fk_plans'); if (ls) plans = JSON.parse(ls); }
         } catch(e) { try { const ls = localStorage.getItem('fk_plans'); if (ls) plans = JSON.parse(ls); } catch(e2) {} }
-        if (!Array.isArray(plans) || !plans.length) plans = FALLBACK;
-        const ORDER = ['bronze','silver','gold','vip'];
-        plans.sort((a,b) => { const ai=ORDER.indexOf(a.slug),bi=ORDER.indexOf(b.slug); return (ai<0?99:ai)-(bi<0?99:bi); });
-        const active = plans.filter(p => p.active !== false);
-        grid.innerHTML = active.map(p => {
-          const sym = p.cur === 'USD' ? '$' : (p.cur || '$');
-          const feats = (p.feats || []).map(f => `<div class="pfeat"><span class="chk">✓</span><span>${f}</span></div>`).join('');
-          return `<div class="plan-card${p.popular ? ' popular' : ''}">
-            ${p.popular ? '<div class="pop-badge" data-i18n="pricing.most_popular">인기</div>' : ''}
-            <div class="pname">${p.name}</div>
-            <div class="pdur">${p.days}일</div>
-            <div class="pprice-wrap"><span class="pcur">${sym}</span><span class="pamt">${p.price}</span></div>
-            <div class="pper" data-i18n="pricing.per_month">/월</div>
-            <div class="pfeats">${feats}</div>
-            <a href="payment.html?plan=${p.slug}" class="plan-btn ${p.popular ? 'pri' : 'out'}" data-i18n="pricing.get_started">시작하기</a>
-          </div>`;
-        }).join('');
+        if (!Array.isArray(plans) || !plans.length) plans = PLAN_FALLBACK;
+        _cachedPlans = plans;
+        renderPlans(currentLang);
       })();
 
       // Apply saved language
