@@ -104,19 +104,22 @@
 <script>
 (function(){
   var T = {
-    ko: { title:'자주하는 질문', subtitle:'서비스 이용에 대해 자주 묻는 질문과 답변입니다.', h:'홈', p:'요금제', f:'자주하는 질문(FAQ)', c:'문의', j:'무료 텔레그램 참여', loading:'불러오는 중...', empty:'등록된 FAQ가 없습니다.' },
-    en: { title:'FAQ', subtitle:'Frequently asked questions about our service.', h:'Home', p:'Pricing', f:'FAQ', c:'Contact', j:'Join Free Telegram', loading:'Loading...', empty:'No FAQ entries found.' },
-    de: { title:'Häufige Fragen', subtitle:'Häufig gestellte Fragen zu unserem Service.', h:'Startseite', p:'Preise', f:'Häufige Fragen (FAQ)', c:'Kontakt', j:'Kostenlos beitreten', loading:'Wird geladen...', empty:'Keine FAQ-Einträge gefunden.' },
-    ja: { title:'よくある質問', subtitle:'サービスについてよくある質問と回答です。', h:'ホーム', p:'料金', f:'よくある質問(FAQ)', c:'お問い合わせ', j:'無料Telegram参加', loading:'読み込み中...', empty:'FAQが登録されていません。' },
-    zh: { title:'常见问题', subtitle:'关于我们服务的常见问题解答。', h:'首页', p:'定价', f:'常见问题(FAQ)', c:'联系我们', j:'免费加入Telegram', loading:'加载中...', empty:'暂无常见问题。' },
-    fr: { title:'Questions fréquentes', subtitle:'Questions fréquemment posées sur notre service.', h:'Accueil', p:'Tarifs', f:'FAQ', c:'Contact', j:'Rejoindre Telegram gratuitement', loading:'Chargement...', empty:'Aucune question enregistrée.' },
-    es: { title:'Preguntas frecuentes', subtitle:'Preguntas frecuentes sobre nuestro servicio.', h:'Inicio', p:'Precios', f:'Preguntas frecuentes (FAQ)', c:'Contacto', j:'Unirse gratis a Telegram', loading:'Cargando...', empty:'No hay preguntas registradas.' },
-    ru: { title:'Часто задаваемые вопросы', subtitle:'Часто задаваемые вопросы о нашем сервисе.', h:'Главная', p:'Тарифы', f:'Часто задаваемые вопросы (FAQ)', c:'Контакт', j:'Присоединиться к Telegram бесплатно', loading:'Загрузка...', empty:'Вопросы не зарегистрированы.' }
+    ko: { title:'자주하는 질문', subtitle:'서비스 이용에 대해 자주 묻는 질문과 답변입니다.', h:'홈', p:'요금제', f:'자주하는 질문(FAQ)', c:'문의', j:'무료 텔레그램 참여', loading:'불러오는 중...', translating:'번역 중...', empty:'등록된 FAQ가 없습니다.' },
+    en: { title:'FAQ', subtitle:'Frequently asked questions about our service.', h:'Home', p:'Pricing', f:'FAQ', c:'Contact', j:'Join Free Telegram', loading:'Loading...', translating:'Translating...', empty:'No FAQ entries found.' },
+    de: { title:'Häufige Fragen', subtitle:'Häufig gestellte Fragen zu unserem Service.', h:'Startseite', p:'Preise', f:'Häufige Fragen (FAQ)', c:'Kontakt', j:'Kostenlos beitreten', loading:'Wird geladen...', translating:'Übersetzen...', empty:'Keine FAQ-Einträge gefunden.' },
+    ja: { title:'よくある質問', subtitle:'サービスについてよくある質問と回答です。', h:'ホーム', p:'料金', f:'よくある質問(FAQ)', c:'お問い合わせ', j:'無料Telegram参加', loading:'読み込み中...', translating:'翻訳中...', empty:'FAQが登録されていません。' },
+    zh: { title:'常见问题', subtitle:'关于我们服务的常见问题解答。', h:'首页', p:'定价', f:'常见问题(FAQ)', c:'联系我们', j:'免费加入Telegram', loading:'加载中...', translating:'翻译中...', empty:'暂无常见问题。' },
+    fr: { title:'Questions fréquentes', subtitle:'Questions fréquemment posées sur notre service.', h:'Accueil', p:'Tarifs', f:'FAQ', c:'Contact', j:'Rejoindre Telegram gratuitement', loading:'Chargement...', translating:'Traduction...', empty:'Aucune question enregistrée.' },
+    es: { title:'Preguntas frecuentes', subtitle:'Preguntas frecuentes sobre nuestro servicio.', h:'Inicio', p:'Precios', f:'Preguntas frecuentes (FAQ)', c:'Contacto', j:'Unirse gratis a Telegram', loading:'Cargando...', translating:'Traduciendo...', empty:'No hay preguntas registradas.' },
+    ru: { title:'Часто задаваемые вопросы', subtitle:'Часто задаваемые вопросы о нашем сервисе.', h:'Главная', p:'Тарифы', f:'Часто задаваемые вопросы (FAQ)', c:'Контакт', j:'Присоединиться к Telegram бесплатно', loading:'Загрузка...', translating:'Перевод...', empty:'Вопросы не зарегистрированы.' }
   };
   var LANG_META = {ko:{flag:'🇰🇷',name:'한국어'},en:{flag:'🇺🇸',name:'English'},de:{flag:'🇩🇪',name:'Deutsch'},ja:{flag:'🇯🇵',name:'日本語'},zh:{flag:'🇨🇳',name:'中文'},fr:{flag:'🇫🇷',name:'Français'},es:{flag:'🇪🇸',name:'Español'},ru:{flag:'🇷🇺',name:'Русский'}};
+  // MyMemory API language codes
+  var MM_LANG = {ko:'ko',en:'en-GB',de:'de-DE',ja:'ja-JP',zh:'zh-CN',fr:'fr-FR',es:'es-ES',ru:'ru-RU'};
 
   var currentLang = localStorage.getItem('lang') || 'ko';
   var allItems = [];
+  var _transCache = {};
 
   function getApiBase(){
     if (location.protocol !== 'file:') return location.origin + '/api';
@@ -130,10 +133,35 @@
     return d.innerHTML;
   }
 
+  // Get Korean (source) text from a field (handles both string and {ko,en,...} object)
+  function getKorean(field) {
+    if (!field) return '';
+    if (typeof field === 'object') return field.ko || Object.values(field).find(function(v){ return v; }) || '';
+    return String(field);
+  }
+
+  // Get text for a specific language (with Korean fallback)
   function getLocalized(field, lang) {
     if (!field) return '';
-    if (typeof field === 'object') return field[lang] || field['ko'] || Object.values(field).find(v => v) || '';
-    return field; // backward compat: plain string
+    if (typeof field === 'object') return field[lang] || field.ko || Object.values(field).find(function(v){ return v; }) || '';
+    return String(field);
+  }
+
+  // Auto-translate Korean text to target language via MyMemory API
+  function translateText(text, toLang) {
+    if (!text || !text.trim() || toLang === 'ko') return Promise.resolve(text);
+    var cacheKey = toLang + '\x00' + text;
+    if (_transCache[cacheKey] !== undefined) return Promise.resolve(_transCache[cacheKey]);
+    var mlTo = MM_LANG[toLang] || toLang;
+    return fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text.substring(0, 500)) + '&langpair=ko|' + mlTo)
+      .then(function(resp){ return resp.json(); })
+      .then(function(data){
+        var result = (data.responseStatus === 200 && data.responseData && data.responseData.translatedText)
+          ? data.responseData.translatedText : text;
+        _transCache[cacheKey] = result;
+        return result;
+      })
+      .catch(function(){ return text; });
   }
 
   function applyLang(lang) {
@@ -153,33 +181,10 @@
     document.querySelectorAll('.lang-opt').forEach(function(opt) {
       opt.classList.toggle('cur', opt.dataset.lang === lang);
     });
-    renderFaq(allItems);
+    renderFaq(allItems, lang);
   }
 
-  function renderFaq(items) {
-    var faqList = document.getElementById('faq-list');
-    var faqLoading = document.getElementById('faq-loading');
-    var faqEmpty = document.getElementById('faq-empty');
-    faqLoading.style.display = 'none';
-    if (!items || items.length === 0) {
-      faqEmpty.style.display = 'block';
-      faqList.style.display = 'none';
-      return;
-    }
-    faqEmpty.style.display = 'none';
-    faqList.style.display = 'flex';
-    var sorted = items.slice().sort(function(a,b){ return (a.order != null ? a.order : 999) - (b.order != null ? b.order : 999); });
-    faqList.innerHTML = sorted.map(function(item) {
-      var q = escapeHtml(getLocalized(item.question, currentLang));
-      var a = escapeHtml(getLocalized(item.answer, currentLang));
-      return '<div class="faq-item">' +
-        '<div class="faq-q" role="button" tabindex="0" aria-expanded="false">' +
-          '<span>' + q + '</span><i class="fas fa-chevron-down"></i>' +
-        '</div>' +
-        '<div class="faq-a"><div class="faq-a-inner">' + a + '</div></div>' +
-      '</div>';
-    }).join('');
-
+  function attachAccordion(faqList) {
     faqList.querySelectorAll('.faq-q').forEach(function(qEl) {
       qEl.addEventListener('click', function() {
         var item = this.closest('.faq-item');
@@ -188,6 +193,89 @@
         if (!open) item.classList.add('open');
         this.setAttribute('aria-expanded', String(!open));
       });
+    });
+  }
+
+  function buildHtml(pairs) {
+    return pairs.map(function(r) {
+      return '<div class="faq-item">' +
+        '<div class="faq-q" role="button" tabindex="0" aria-expanded="false">' +
+          '<span>' + escapeHtml(r.q) + '</span><i class="fas fa-chevron-down"></i>' +
+        '</div>' +
+        '<div class="faq-a"><div class="faq-a-inner">' + escapeHtml(r.a) + '</div></div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderFaq(items, lang) {
+    var faqList = document.getElementById('faq-list');
+    var faqLoading = document.getElementById('faq-loading');
+    var faqEmpty = document.getElementById('faq-empty');
+    var t = T[lang] || T.ko;
+
+    faqLoading.style.display = 'none';
+    if (!items || items.length === 0) {
+      faqEmpty.style.display = 'block';
+      faqList.style.display = 'none';
+      return;
+    }
+    faqEmpty.style.display = 'none';
+
+    var sorted = items.slice().sort(function(a,b){
+      return (a.order != null ? a.order : 999) - (b.order != null ? b.order : 999);
+    });
+
+    // Korean: render immediately
+    if (lang === 'ko') {
+      faqList.style.display = 'flex';
+      faqList.innerHTML = buildHtml(sorted.map(function(item) {
+        return { q: getKorean(item.question), a: getKorean(item.answer) };
+      }));
+      attachAccordion(faqList);
+      return;
+    }
+
+    // Non-Korean: check if all items already have stored translations
+    var allStored = sorted.every(function(item) {
+      return typeof item.question === 'object' && item.question[lang] &&
+             typeof item.answer === 'object' && item.answer[lang];
+    });
+
+    if (allStored) {
+      faqList.style.display = 'flex';
+      faqList.innerHTML = buildHtml(sorted.map(function(item) {
+        return { q: getLocalized(item.question, lang), a: getLocalized(item.answer, lang) };
+      }));
+      attachAccordion(faqList);
+      return;
+    }
+
+    // Show "translating" indicator while API calls run
+    faqList.style.display = 'none';
+    faqLoading.style.display = 'block';
+    faqLoading.innerHTML = '<i class="fas fa-language"></i> ' + escapeHtml(t.translating || '번역 중...');
+
+    Promise.all(sorted.map(function(item) {
+      var qPromise = (typeof item.question === 'object' && item.question[lang])
+        ? Promise.resolve(item.question[lang])
+        : translateText(getKorean(item.question), lang);
+      var aPromise = (typeof item.answer === 'object' && item.answer[lang])
+        ? Promise.resolve(item.answer[lang])
+        : translateText(getKorean(item.answer), lang);
+      return Promise.all([qPromise, aPromise]).then(function(r) { return { q: r[0], a: r[1] }; });
+    })).then(function(pairs) {
+      faqLoading.style.display = 'none';
+      faqList.style.display = 'flex';
+      faqList.innerHTML = buildHtml(pairs);
+      attachAccordion(faqList);
+    }).catch(function() {
+      // Fallback to Korean on error
+      faqLoading.style.display = 'none';
+      faqList.style.display = 'flex';
+      faqList.innerHTML = buildHtml(sorted.map(function(item) {
+        return { q: getKorean(item.question), a: getKorean(item.answer) };
+      }));
+      attachAccordion(faqList);
     });
   }
 
@@ -203,26 +291,29 @@
           try { var ls = localStorage.getItem('fk_faq'); if (ls) data = JSON.parse(ls); } catch(e) {}
         }
         allItems = Array.isArray(data) ? data : [];
-        renderFaq(allItems);
+        renderFaq(allItems, currentLang);
       })
       .catch(function() {
         try { var ls = localStorage.getItem('fk_faq'); if (ls) allItems = JSON.parse(ls); } catch(e) {}
-        renderFaq(allItems);
+        renderFaq(allItems, currentLang);
       });
   }
 
   loadFaq();
   applyLang(currentLang);
 
-  document.getElementById('langToggle').addEventListener('click', function(e) { e.stopPropagation(); document.getElementById('langMenu').classList.toggle('open'); });
-  document.addEventListener('click', function() { document.getElementById('langMenu').classList.remove('open'); });
+  document.getElementById('langToggle').addEventListener('click', function(e) {
+    e.stopPropagation();
+    document.getElementById('langMenu').classList.toggle('open');
+  });
+  document.addEventListener('click', function() {
+    document.getElementById('langMenu').classList.remove('open');
+  });
   document.querySelectorAll('.lang-opt').forEach(function(opt) {
     opt.addEventListener('click', function(e) {
       e.preventDefault();
-      currentLang = opt.dataset.lang;
-      localStorage.setItem('lang', currentLang);
       document.getElementById('langMenu').classList.remove('open');
-      applyLang(currentLang);
+      applyLang(opt.dataset.lang);
     });
   });
 })();
