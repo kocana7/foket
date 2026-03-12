@@ -28,14 +28,15 @@ router.post('/admin/verify', (req, res) => {
 // POST /api/auth/register
 router.post('/auth/register', async (req, res) => {
   try {
-    const { email, password, username } = req.body || {};
+    const { email, password, username, telegram_username } = req.body || {};
     if (!email || !password) return res.status(400).json({ success: false, error: 'email and password required' });
     if (password.length < 6) return res.status(400).json({ success: false, error: 'Password must be at least 6 characters' });
     const [existing] = await db.query('SELECT id FROM users WHERE email = ?', [email.toLowerCase()]);
     if (existing.length) return res.status(409).json({ success: false, error: 'Email already registered' });
     const hash = await bcrypt.hash(password, 10);
     const uname = username ? username.trim() : email.split('@')[0];
-    const [result] = await db.query('INSERT INTO users (email, password, username, role, is_active) VALUES (?, ?, ?, ?, 1)', [email.toLowerCase(), hash, uname, 'user']);
+    const tg = telegram_username ? telegram_username.trim() : null;
+    const [result] = await db.query('INSERT INTO users (email, password, username, telegram_username, role, is_active) VALUES (?, ?, ?, ?, ?, 1)', [email.toLowerCase(), hash, uname, tg, 'user']);
     const userId = result.insertId;
     req.session.user = { id: userId, email: email.toLowerCase(), username: uname, role: 'user' };
     res.json({ success: true, user: req.session.user });

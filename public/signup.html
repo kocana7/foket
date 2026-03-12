@@ -102,6 +102,10 @@
         <label class="fl" for="pw2" data-i18n="pw2">비밀번호 확인</label>
         <input class="fc" type="password" id="pw2" name="confirm_password" required autocomplete="new-password">
       </div>
+      <div class="fg">
+        <label class="fl" for="tg" data-i18n="telegram">텔레그램 아이디 <span style="font-weight:400;color:var(--text-muted,#566a85)" data-i18n="optional">(선택)</span></label>
+        <input class="fc" type="text" id="tg" name="telegram_username" placeholder="@username" autocomplete="off">
+      </div>
       <button class="btn-submit" type="submit" id="submitBtn" data-i18n="submit">가입하기</button>
     </form>
     <div class="auth-footer">
@@ -116,42 +120,42 @@
 (function(){
   var T={
     ko:{title:'회원가입',h:'홈',p:'요금제',f:'자주하는 질문(FAQ)',c:'문의',j:'무료 텔레그램 참여',
-      form_title:'회원가입',form_sub:'FoketSignal에 오신 것을 환영합니다',username:'이름',email:'이메일',pw:'비밀번호',pw2:'비밀번호 확인',
+      form_title:'회원가입',form_sub:'FoketSignal에 오신 것을 환영합니다',username:'이름',email:'이메일',pw:'비밀번호',pw2:'비밀번호 확인',telegram:'텔레그램 아이디',optional:'(선택)',
       submit:'가입하기',submitting:'처리 중...',have_account:'이미 계정이 있으신가요?',login_link:'로그인',
       err_pw_match:'비밀번호가 일치하지 않습니다.',err_pw_len:'비밀번호는 6자 이상이어야 합니다.',
       success:'가입 완료! 로그인 페이지로 이동합니다.'},
     en:{title:'Sign Up',h:'Home',p:'Pricing',f:'FAQ',c:'Contact',j:'Join Free Telegram',
-      form_title:'Create Account',form_sub:'Welcome to FoketSignal',username:'Name',email:'Email',pw:'Password',pw2:'Confirm Password',
+      form_title:'Create Account',form_sub:'Welcome to FoketSignal',username:'Name',email:'Email',pw:'Password',pw2:'Confirm Password',telegram:'Telegram ID',optional:'(optional)',
       submit:'Sign Up',submitting:'Processing...',have_account:'Already have an account?',login_link:'Log In',
       err_pw_match:'Passwords do not match.',err_pw_len:'Password must be at least 6 characters.',
       success:'Account created! Redirecting to login...'},
     de:{title:'Registrieren',h:'Startseite',p:'Preise',f:'Häufige Fragen (FAQ)',c:'Kontakt',j:'Kostenlos beitreten',
-      form_title:'Konto erstellen',form_sub:'Willkommen bei FoketSignal',username:'Name',email:'E-Mail',pw:'Passwort',pw2:'Passwort bestätigen',
+      form_title:'Konto erstellen',form_sub:'Willkommen bei FoketSignal',username:'Name',email:'E-Mail',pw:'Passwort',pw2:'Passwort bestätigen',telegram:'Telegram-ID',optional:'(optional)',
       submit:'Registrieren',submitting:'Verarbeitung...',have_account:'Bereits ein Konto?',login_link:'Anmelden',
       err_pw_match:'Passwörter stimmen nicht überein.',err_pw_len:'Passwort muss mindestens 6 Zeichen lang sein.',
       success:'Konto erstellt! Weiterleitung zum Login...'},
     ja:{title:'会員登録',h:'ホーム',p:'料金',f:'よくある質問(FAQ)',c:'お問い合わせ',j:'無料Telegram参加',
-      form_title:'アカウント作成',form_sub:'FoketSignalへようこそ',username:'名前',email:'メールアドレス',pw:'パスワード',pw2:'パスワード確認',
+      form_title:'アカウント作成',form_sub:'FoketSignalへようこそ',username:'名前',email:'メールアドレス',pw:'パスワード',pw2:'パスワード確認',telegram:'Telegram ID',optional:'(任意)',
       submit:'登録する',submitting:'処理中...',have_account:'すでにアカウントをお持ちですか?',login_link:'ログイン',
       err_pw_match:'パスワードが一致しません。',err_pw_len:'パスワードは6文字以上必要です。',
       success:'登録完了！ログインページに移動します。'},
     zh:{title:'注册',h:'首页',p:'定价',f:'常见问题(FAQ)',c:'联系我们',j:'免费加入Telegram',
-      form_title:'创建账户',form_sub:'欢迎来到 FoketSignal',username:'姓名',email:'电子邮箱',pw:'密码',pw2:'确认密码',
+      form_title:'创建账户',form_sub:'欢迎来到 FoketSignal',username:'姓名',email:'电子邮箱',pw:'密码',pw2:'确认密码',telegram:'Telegram ID',optional:'(可选)',
       submit:'注册',submitting:'处理中...',have_account:'已有账户？',login_link:'登录',
       err_pw_match:'密码不匹配。',err_pw_len:'密码至少需要6个字符。',
       success:'注册成功！正在跳转到登录页面...'},
     fr:{title:'S\'inscrire',h:'Accueil',p:'Tarifs',f:'FAQ',c:'Contact',j:'Rejoindre Telegram gratuitement',
-      form_title:'Créer un compte',form_sub:'Bienvenue sur FoketSignal',username:'Nom',email:'E-mail',pw:'Mot de passe',pw2:'Confirmer le mot de passe',
+      form_title:'Créer un compte',form_sub:'Bienvenue sur FoketSignal',username:'Nom',email:'E-mail',pw:'Mot de passe',pw2:'Confirmer le mot de passe',telegram:'ID Telegram',optional:'(facultatif)',
       submit:'S\'inscrire',submitting:'Traitement...',have_account:'Vous avez déjà un compte ?',login_link:'Se connecter',
       err_pw_match:'Les mots de passe ne correspondent pas.',err_pw_len:'Le mot de passe doit comporter au moins 6 caractères.',
       success:'Compte créé ! Redirection vers la connexion...'},
     es:{title:'Registrarse',h:'Inicio',p:'Precios',f:'Preguntas frecuentes (FAQ)',c:'Contacto',j:'Unirse gratis a Telegram',
-      form_title:'Crear cuenta',form_sub:'Bienvenido a FoketSignal',username:'Nombre',email:'Correo electrónico',pw:'Contraseña',pw2:'Confirmar contraseña',
+      form_title:'Crear cuenta',form_sub:'Bienvenido a FoketSignal',username:'Nombre',email:'Correo electrónico',pw:'Contraseña',pw2:'Confirmar contraseña',telegram:'ID de Telegram',optional:'(opcional)',
       submit:'Registrarse',submitting:'Procesando...',have_account:'¿Ya tienes una cuenta?',login_link:'Iniciar sesión',
       err_pw_match:'Las contraseñas no coinciden.',err_pw_len:'La contraseña debe tener al menos 6 caracteres.',
       success:'¡Cuenta creada! Redirigiendo al inicio de sesión...'},
     ru:{title:'Регистрация',h:'Главная',p:'Тарифы',f:'Часто задаваемые вопросы (FAQ)',c:'Контакт',j:'Присоединиться к Telegram бесплатно',
-      form_title:'Создать аккаунт',form_sub:'Добро пожаловать в FoketSignal',username:'Имя',email:'Эл. почта',pw:'Пароль',pw2:'Подтвердите пароль',
+      form_title:'Создать аккаунт',form_sub:'Добро пожаловать в FoketSignal',username:'Имя',email:'Эл. почта',pw:'Пароль',pw2:'Подтвердите пароль',telegram:'ID Telegram',optional:'(необязательно)',
       submit:'Зарегистрироваться',submitting:'Обработка...',have_account:'Уже есть аккаунт?',login_link:'Войти',
       err_pw_match:'Пароли не совпадают.',err_pw_len:'Пароль должен содержать не менее 6 символов.',
       success:'Аккаунт создан! Переход к входу...'}
@@ -194,6 +198,7 @@
     var pw=document.getElementById('pw').value;
     var pw2=document.getElementById('pw2').value;
     var uname=document.getElementById('uname').value.trim();
+    var tg=document.getElementById('tg').value.trim();
     var errEl=document.getElementById('authErr');
     var okEl=document.getElementById('authOk');
     var btn=document.getElementById('submitBtn');
@@ -204,7 +209,7 @@
     fetch(BASE+'/auth/register',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({email:email,password:pw,username:uname})
+      body:JSON.stringify({email:email,password:pw,username:uname,telegram_username:tg||null})
     }).then(function(r){return r.json();}).then(function(j){
       if(j.success){
         okEl.textContent=t.success;okEl.style.display='block';
