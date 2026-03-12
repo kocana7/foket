@@ -89,7 +89,7 @@
     es:{title:'Términos de servicio',h:'Inicio',p:'Precios',f:'Preguntas frecuentes (FAQ)',c:'Contacto',j:'Unirse gratis a Telegram',pt:'Términos de servicio',e:'No hay términos de servicio registrados.'}
   };
   var LANG_META={ko:{flag:'🇰🇷',name:'한국어'},en:{flag:'🇺🇸',name:'English'},de:{flag:'🇩🇪',name:'Deutsch'},ja:{flag:'🇯🇵',name:'日本語'},zh:{flag:'🇨🇳',name:'中文'},fr:{flag:'🇫🇷',name:'Français'},es:{flag:'🇪🇸',name:'Español'}};
-  var rawData=''; try{rawData=localStorage.getItem('fk_terms')||'';}catch(e){}
+  var rawData='';
 
   function getLocalized(lang){
     if(!rawData)return'';
@@ -106,7 +106,6 @@
     document.getElementById('curFlag').textContent=meta.flag;
     document.getElementById('curLang').textContent=meta.name;
     document.querySelectorAll('.lang-opt').forEach(function(opt){opt.classList.toggle('cur',opt.dataset.lang===lang);});
-    // 콘텐츠 갱신
     var content=document.getElementById('terms-content');
     var empty=document.getElementById('terms-empty');
     var text=getLocalized(lang);
@@ -115,7 +114,19 @@
   }
 
   var currentLang=localStorage.getItem('lang')||'ko';
+  try{rawData=localStorage.getItem('fk_terms')||'';}catch(e){}
   applyLang(currentLang);
+
+  // API에서 최신 데이터 로드 후 재렌더링
+  var BASE=(location.protocol!=='file:')?location.origin+'/api':'http://localhost:3000/api';
+  fetch(BASE+'/storage/terms',{cache:'no-store'})
+    .then(function(r){return r.json();})
+    .then(function(j){
+      if(j&&j.success&&j.value!=null){try{localStorage.setItem('fk_terms',j.value);}catch(e){}rawData=j.value;}
+      else{rawData=localStorage.getItem('fk_terms')||'';}
+      applyLang(currentLang);
+    })
+    .catch(function(){rawData=localStorage.getItem('fk_terms')||'';applyLang(currentLang);});
 
   document.getElementById('langToggle').addEventListener('click',function(e){e.stopPropagation();document.getElementById('langMenu').classList.toggle('open');});
   document.addEventListener('click',function(){document.getElementById('langMenu').classList.remove('open');});

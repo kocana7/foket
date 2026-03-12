@@ -89,7 +89,7 @@
     es:{title:'Política de privacidad',h:'Inicio',p:'Precios',f:'Preguntas frecuentes (FAQ)',c:'Contacto',j:'Unirse gratis a Telegram',pt:'Política de privacidad',e:'No hay política de privacidad registrada.'}
   };
   var LANG_META={ko:{flag:'🇰🇷',name:'한국어'},en:{flag:'🇺🇸',name:'English'},de:{flag:'🇩🇪',name:'Deutsch'},ja:{flag:'🇯🇵',name:'日本語'},zh:{flag:'🇨🇳',name:'中文'},fr:{flag:'🇫🇷',name:'Français'},es:{flag:'🇪🇸',name:'Español'}};
-  var rawData=''; try{rawData=localStorage.getItem('fk_privacy')||'';}catch(e){}
+  var rawData='';
 
   function getLocalized(lang){
     if(!rawData)return'';
@@ -114,7 +114,19 @@
   }
 
   var currentLang=localStorage.getItem('lang')||'ko';
+  try{rawData=localStorage.getItem('fk_privacy')||'';}catch(e){}
   applyLang(currentLang);
+
+  // API에서 최신 데이터 로드 후 재렌더링
+  var BASE=(location.protocol!=='file:')?location.origin+'/api':'http://localhost:3000/api';
+  fetch(BASE+'/storage/privacy',{cache:'no-store'})
+    .then(function(r){return r.json();})
+    .then(function(j){
+      if(j&&j.success&&j.value!=null){try{localStorage.setItem('fk_privacy',j.value);}catch(e){}rawData=j.value;}
+      else{rawData=localStorage.getItem('fk_privacy')||'';}
+      applyLang(currentLang);
+    })
+    .catch(function(){rawData=localStorage.getItem('fk_privacy')||'';applyLang(currentLang);});
 
   document.getElementById('langToggle').addEventListener('click',function(e){e.stopPropagation();document.getElementById('langMenu').classList.toggle('open');});
   document.addEventListener('click',function(){document.getElementById('langMenu').classList.remove('open');});
