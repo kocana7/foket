@@ -116,19 +116,20 @@
       vip:    { name: 'VIP Class',    price: 80, days: 30 }
     };
     let PLANS = PLANS_DEFAULT;
-    try {
-      const raw = localStorage.getItem('fk_plans');
-      if (raw) {
+    function parsePlans(raw) {
+      try {
         const arr = JSON.parse(raw);
         const map = {};
         arr.forEach(function(p) { if (p.slug) map[p.slug] = { name: p.name, price: p.price, days: p.days }; });
-        if (Object.keys(map).length) PLANS = map;
-      }
-    } catch(e) {}
+        if (Object.keys(map).length) return map;
+      } catch(e) {}
+      return null;
+    }
+    // localStorage 즉시 적용
+    try { const r = localStorage.getItem('fk_plans'); if (r) { const m = parsePlans(r); if (m) PLANS = m; } } catch(e) {}
 
     const params = new URLSearchParams(location.search);
     const planId = (params.get('plan') || '').toLowerCase();
-    const plan = PLANS[planId];
 
     const payPlanName = document.getElementById('payPlanName');
     const payPlanMeta = document.getElementById('payPlanMeta');
@@ -136,19 +137,39 @@
     const payError = document.getElementById('payError');
     const payForm = document.getElementById('payForm');
 
-    if (plan) {
-      payPlanName.textContent = plan.name;
-      payAmount.textContent = '$' + plan.price;
-      payPlanMeta.textContent = '이용 기간: ' + (plan.days || 30) + '일';
-      document.title = plan.name + ' 결제 - FoketCrypto Signals';
-    } else {
-      payPlanName.textContent = '플랜을 선택해 주세요';
-      payAmount.textContent = '$—';
-      payError.textContent = '유효한 플랜이 없습니다. 요금제에서 플랜을 선택한 뒤 다시 시도해 주세요.';
-      payError.classList.add('show');
+    function applyPlan(plans) {
+      const plan = plans[planId];
+      if (plan) {
+        payPlanName.textContent = plan.name;
+        payAmount.textContent = '$' + plan.price;
+        payPlanMeta.textContent = '이용 기간: ' + (plan.days || 30) + '일';
+        document.title = plan.name + ' 결제 - FoketCrypto Signals';
+        payError.classList.remove('show');
+      } else {
+        payPlanName.textContent = '플랜을 선택해 주세요';
+        payAmount.textContent = '$—';
+        payError.textContent = '유효한 플랜이 없습니다. 요금제에서 플랜을 선택한 뒤 다시 시도해 주세요.';
+        payError.classList.add('show');
+      }
     }
+    applyPlan(PLANS);
+
+    // API에서 최신 플랜 로드 후 갱신
+    (async function() {
+      try {
+        const base = (location.protocol !== 'file:') ? location.origin + '/api' : 'http://localhost:3000/api';
+        const r = await fetch(base + '/storage/plans', { cache: 'no-store' });
+        const j = await r.json();
+        if (j && j.success && j.value) {
+          try { localStorage.setItem('fk_plans', j.value); } catch(e) {}
+          const m = parsePlans(j.value);
+          if (m) { PLANS = m; applyPlan(PLANS); }
+        }
+      } catch(e) {}
+    })();
 
     payForm.addEventListener('submit', function(e) {
+      const plan = PLANS[planId];
       e.preventDefault();
       if (!plan) return;
       const email = document.getElementById('email').value.trim();
