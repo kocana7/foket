@@ -3005,23 +3005,35 @@
                   <span style="font-size:10px;color:var(--muted);">${c.id.replace('@foketsignal_','')}</span>
                 </label>`).join('')}
             </div>
-            <!-- 메시지 입력 -->
-            <div style="padding:8px 14px;border-top:1px solid var(--brd);">
+            <!-- 진입시그널 섹션 -->
+            <div style="padding:10px 14px;border-top:2px solid #00b4d8;background:rgba(0,180,216,.04);">
+              <div style="font-size:12px;font-weight:700;color:#00b4d8;margin-bottom:7px;"><i class="fas fa-sign-in-alt"></i> 진입시그널</div>
               <div style="display:flex;gap:4px;margin-bottom:5px;flex-wrap:wrap;">
-                <button style="font-size:11px;padding:2px 7px;background:none;border:1px solid var(--brd);border-radius:4px;cursor:pointer;font-weight:700;" onclick="tgWrapN(${i},'<b>','</b>')">B</button>
-                <button style="font-size:11px;padding:2px 7px;background:none;border:1px solid var(--brd);border-radius:4px;cursor:pointer;font-style:italic;" onclick="tgWrapN(${i},'<i>','</i>')">I</button>
-                <button style="font-size:11px;padding:2px 7px;background:none;border:1px solid var(--brd);border-radius:4px;cursor:pointer;font-family:monospace;" onclick="tgWrapN(${i},'<code>','</code>')">Code</button>
-                <button style="font-size:11px;padding:2px 7px;background:none;border:1px solid var(--brd);border-radius:4px;cursor:pointer;margin-left:auto;" onclick="document.getElementById('tg-msg-${i}').value='';document.getElementById('tg-cc-${i}').textContent='0/4096';">✕</button>
-                <span id="tg-cc-${i}" style="font-size:10px;color:var(--muted);align-self:center;">0/4096</span>
+                <button style="font-size:11px;padding:2px 7px;background:none;border:1px solid var(--brd);border-radius:4px;cursor:pointer;font-weight:700;" onclick="tgWrapN(${i},'entry','<b>','</b>')">B</button>
+                <button style="font-size:11px;padding:2px 7px;background:none;border:1px solid var(--brd);border-radius:4px;cursor:pointer;font-style:italic;" onclick="tgWrapN(${i},'entry','<i>','</i>')">I</button>
+                <button style="font-size:11px;padding:2px 7px;background:none;border:1px solid var(--brd);border-radius:4px;cursor:pointer;font-family:monospace;" onclick="tgWrapN(${i},'entry','<code>','</code>')">Code</button>
+                <button style="font-size:11px;padding:2px 7px;background:none;border:1px solid var(--brd);border-radius:4px;cursor:pointer;margin-left:auto;" onclick="document.getElementById('tg-msg-entry-${i}').value='';document.getElementById('tg-cc-entry-${i}').textContent='0/4096';">✕</button>
+                <span id="tg-cc-entry-${i}" style="font-size:10px;color:var(--muted);align-self:center;">0/4096</span>
               </div>
-              <textarea id="tg-msg-${i}" rows="5" placeholder="전송할 메시지를 입력하세요...&#10;&#10;예시:&#10;&lt;b&gt;🚀 BTC/USDT LONG&lt;/b&gt;&#10;진입가: $65,000&#10;목표가: $68,000&#10;손절가: $62,000"
+              <textarea id="tg-msg-entry-${i}" rows="4" placeholder="진입 시그널 메시지...&#10;예: &lt;b&gt;🚀 BTC/USDT LONG&lt;/b&gt;&#10;진입가: $65,000&#10;목표가: $68,000&#10;손절가: $62,000"
                 style="width:100%;background:var(--bg-input,#0a0e1a);border:1px solid var(--brd);border-radius:6px;color:var(--text);padding:8px 10px;font-family:monospace;font-size:12px;line-height:1.6;resize:vertical;outline:none;"
-                oninput="document.getElementById('tg-cc-${i}').textContent=this.value.length+'/4096'"></textarea>
+                oninput="document.getElementById('tg-cc-entry-${i}').textContent=this.value.length+'/4096'"></textarea>
+              <button class="btn btn-pri" style="width:100%;margin-top:7px;font-size:13px;" onclick="sendToPreset(${i},'진입','entry')"><i class="fas fa-sign-in-alt"></i> 진입시그널 전송</button>
             </div>
-            <!-- 전송 버튼 -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px 14px;border-top:1px solid var(--brd);">
-              <button class="btn btn-pri" style="font-size:12px;padding:7px 4px;" onclick="sendToPreset(${i},'진입')"><i class="fas fa-sign-in-alt"></i> 진입시그널</button>
-              <button class="btn btn-dan" style="font-size:12px;padding:7px 4px;" onclick="sendToPreset(${i},'청산')"><i class="fas fa-sign-out-alt"></i> 청산시그널</button>
+            <!-- 청산시그널 섹션 -->
+            <div style="padding:10px 14px;border-top:2px solid #ff6b6b;background:rgba(255,107,107,.04);">
+              <div style="font-size:12px;font-weight:700;color:#ff6b6b;margin-bottom:7px;"><i class="fas fa-sign-out-alt"></i> 청산시그널</div>
+              <div style="display:flex;gap:4px;margin-bottom:5px;flex-wrap:wrap;">
+                <button style="font-size:11px;padding:2px 7px;background:none;border:1px solid var(--brd);border-radius:4px;cursor:pointer;font-weight:700;" onclick="tgWrapN(${i},'exit','<b>','</b>')">B</button>
+                <button style="font-size:11px;padding:2px 7px;background:none;border:1px solid var(--brd);border-radius:4px;cursor:pointer;font-style:italic;" onclick="tgWrapN(${i},'exit','<i>','</i>')">I</button>
+                <button style="font-size:11px;padding:2px 7px;background:none;border:1px solid var(--brd);border-radius:4px;cursor:pointer;font-family:monospace;" onclick="tgWrapN(${i},'exit','<code>','</code>')">Code</button>
+                <button style="font-size:11px;padding:2px 7px;background:none;border:1px solid var(--brd);border-radius:4px;cursor:pointer;margin-left:auto;" onclick="document.getElementById('tg-msg-exit-${i}').value='';document.getElementById('tg-cc-exit-${i}').textContent='0/4096';">✕</button>
+                <span id="tg-cc-exit-${i}" style="font-size:10px;color:var(--muted);align-self:center;">0/4096</span>
+              </div>
+              <textarea id="tg-msg-exit-${i}" rows="4" placeholder="청산 시그널 메시지...&#10;예: &lt;b&gt;✅ BTC/USDT 청산&lt;/b&gt;&#10;청산가: $68,000&#10;수익률: +4.6%"
+                style="width:100%;background:var(--bg-input,#0a0e1a);border:1px solid var(--brd);border-radius:6px;color:var(--text);padding:8px 10px;font-family:monospace;font-size:12px;line-height:1.6;resize:vertical;outline:none;"
+                oninput="document.getElementById('tg-cc-exit-${i}').textContent=this.value.length+'/4096'"></textarea>
+              <button class="btn btn-dan" style="width:100%;margin-top:7px;font-size:13px;" onclick="sendToPreset(${i},'청산','exit')"><i class="fas fa-sign-out-alt"></i> 청산시그널 전송</button>
             </div>
           </div>`).join('');
       }
@@ -3056,15 +3068,15 @@
       document.querySelectorAll(`.tg-ch-chk[data-preset="${presetIdx}"]`).forEach(c => c.checked = val);
     }
 
-    function tgWrap(before, after) { tgWrapN(0, before, after); }
-    function tgWrapN(idx, before, after) {
-      const ta = document.getElementById('tg-msg-' + idx);
+    function tgWrap(before, after) { tgWrapN(0, 'entry', before, after); }
+    function tgWrapN(idx, msgKey, before, after) {
+      const ta = document.getElementById('tg-msg-' + msgKey + '-' + idx);
       if (!ta) return;
       const s = ta.selectionStart, e = ta.selectionEnd;
       ta.value = ta.value.slice(0, s) + before + ta.value.slice(s, e) + after + ta.value.slice(e);
       ta.focus();
       ta.setSelectionRange(s + before.length, e + before.length);
-      const cc = document.getElementById('tg-cc-' + idx);
+      const cc = document.getElementById('tg-cc-' + msgKey + '-' + idx);
       if (cc) cc.textContent = ta.value.length + '/4096';
     }
 
@@ -3098,10 +3110,11 @@
       } else { showAlert('저장 실패', 'err'); }
     }
 
-    async function sendToPreset(presetIdx, type) {
+    async function sendToPreset(presetIdx, type, msgKey) {
       const groups = [...document.querySelectorAll(`.tg-ch-chk[data-preset="${presetIdx}"]:checked`)].map(c => c.dataset.id);
       if (!groups.length) { showAlert('선택된 채널이 없습니다.', 'err'); return; }
-      const message = (document.getElementById('tg-msg-' + presetIdx).value || '').trim();
+      const msgId = 'tg-msg-' + msgKey + '-' + presetIdx;
+      const message = (document.getElementById(msgId).value || '').trim();
       await _tgSend(groups, type, message);
     }
 
