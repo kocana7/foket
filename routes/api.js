@@ -152,6 +152,20 @@ router.put('/admin/users/:id', requireAdmin, async (req, res) => {
   }
 });
 
+// PUT /api/admin/users/:id/plan
+router.put('/admin/users/:id/plan', requireAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const pid = req.body && req.body.plan_id ? parseInt(req.body.plan_id, 10) : null;
+    if (pid) {
+      await db.query('UPDATE users SET plan_id = ?, plan_expires_at = DATE_ADD(NOW(), INTERVAL 30 DAY) WHERE id = ?', [pid, id]);
+    } else {
+      await db.query('UPDATE users SET plan_id = NULL, plan_expires_at = NULL WHERE id = ?', [id]);
+    }
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ success: false, error: err.message }); }
+});
+
 // DELETE /api/admin/users/:id
 router.delete('/admin/users/:id', requireAdmin, async (req, res) => {
   try {
