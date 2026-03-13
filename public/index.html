@@ -2661,14 +2661,18 @@
       const active = sorted.filter(p => p.active !== false && p.slug !== 'vip');
       grid.innerHTML = active.map(p => {
         const sym = p.cur === 'USD' ? '$' : (p.cur || '$');
+        const nameKey = 'pricing.plan_' + p.slug;
+        const planName = tDict[nameKey] || p.name;
+        const durKey = p.days <= 30 ? 'pricing.dur_1month' : p.days <= 90 ? 'pricing.per_3months' : p.days <= 180 ? 'pricing.per_6months' : 'pricing.per_year';
+        const durText = tDict[durKey] ? tDict[durKey].replace(/^\//, '') : (p.days + '일');
         const feats = (p.feats || []).map(f => {
           const display = (f && f.startsWith('pricing.')) ? (tDict[f] || f) : f;
           return `<div class="pfeat"><span class="chk">✓</span><span>${display}</span></div>`;
         }).join('');
         return `<div class="plan-card${p.popular ? ' popular' : ''}">
           ${p.popular ? `<div class="pop-badge">${tDict['pricing.most_popular'] || '인기'}</div>` : ''}
-          <div class="pname">${p.name}</div>
-          <div class="pdur">${p.days}${tDict['pricing.dur_1month'] ? '' : '일'}</div>
+          <div class="pname">${planName}</div>
+          <div class="pdur">${durText}</div>
           <div class="pprice-wrap"><span class="pcur">${sym}</span><span class="pamt">${p.price}</span></div>
           <div class="pper">${tDict['pricing.per_month'] || '/월'}</div>
           <div class="pfeats">${feats}</div>
