@@ -1398,9 +1398,11 @@
                     <th>텔레그램</th>
                     <th>클래스</th>
                     <th>등급변경일</th>
+                    <th>종료날짜</th>
                     <th>잔여일수</th>
                     <th>활성</th>
                     <th>최근 로그인</th>
+                    <th>접속 IP</th>
                     <th>가입일</th>
                     <th>작업</th>
                   </tr>
@@ -2723,7 +2725,7 @@
         if (countEl) countEl.textContent = users.length;
         const sUsers = document.getElementById('s-users');
         if (sUsers) sUsers.textContent = users.length;
-        if (!users.length) { tbody.innerHTML = '<tr><td colspan="11" class="empty"><i class="fas fa-users"></i><p>회원이 없습니다</p></td></tr>'; return; }
+        if (!users.length) { tbody.innerHTML = '<tr><td colspan="13" class="empty"><i class="fas fa-users"></i><p>회원이 없습니다</p></td></tr>'; return; }
         const fmt = d => d ? new Date(d).toLocaleDateString('ko-KR') : '-';
         const PLAN_LABEL = {1:'Bronze',2:'Silver',3:'Gold'};
         const PLAN_COLOR = {1:'#cd7f32',2:'#9ca3af',3:'#f59e0b'};
@@ -2731,17 +2733,21 @@
         tbody.innerHTML = users.map(u => {
           const roleCls = u.role==='superadmin'?'bdg-red':(u.role==='admin'?'bdg-yellow':'bdg-blue');
           const safeJson = encodeURIComponent(JSON.stringify(u));
-          // 클래스 드롭다운
-          const planSel = `<select onchange="changePlan(${u.id},this.value)" style="background:var(--bg2);border:1px solid var(--brd);border-radius:6px;padding:4px 8px;font-size:12px;color:var(--text);cursor:pointer;min-width:80px;">
-            <option value="0" ${!u.plan_id?'selected':''}>없음</option>
-            <option value="1" ${u.plan_id==1?'selected':''}>🥉 Bronze</option>
-            <option value="2" ${u.plan_id==2?'selected':''}>🥈 Silver</option>
-            <option value="3" ${u.plan_id==3?'selected':''}>🥇 Gold</option>
-          </select>`;
-          // 등급변경일 (plan_expires_at - 30일)
+          // 클래스 드롭다운 (저장 버튼으로 확정)
+          const planSel = `<div style="display:flex;gap:4px;align-items:center;">
+            <select id="plan-sel-${u.id}" style="background:var(--bg2);border:1px solid var(--brd);border-radius:6px;padding:4px 8px;font-size:12px;color:var(--text);cursor:pointer;min-width:80px;">
+              <option value="0" ${!u.plan_id?'selected':''}>없음</option>
+              <option value="1" ${u.plan_id==1?'selected':''}>🥉 Bronze</option>
+              <option value="2" ${u.plan_id==2?'selected':''}>🥈 Silver</option>
+              <option value="3" ${u.plan_id==3?'selected':''}>🥇 Gold</option>
+            </select>
+            <button onclick="changePlan(${u.id})" style="background:var(--accent);border:none;border-radius:6px;padding:4px 8px;font-size:11px;color:#fff;cursor:pointer;" title="저장"><i class="fas fa-save"></i></button>
+          </div>`;
+          // 등급변경일 (plan_expires_at - 30일), 종료날짜
           const expDate = u.plan_expires_at ? new Date(u.plan_expires_at) : null;
           const changeDate = expDate ? new Date(expDate.getTime() - 30*24*60*60*1000) : null;
           const changeDateStr = changeDate ? changeDate.toLocaleDateString('ko-KR') : '-';
+          const expDateStr = expDate && u.plan_id ? expDate.toLocaleDateString('ko-KR') : '-';
           // 잔여일수
           let remainStr = '-';
           if (expDate && u.plan_id) {
@@ -2749,6 +2755,11 @@
             if (days > 0) remainStr = `<span style="color:#4CAF50;font-weight:600">${days}일</span>`;
             else remainStr = `<span style="color:#f44336;font-weight:600">만료</span>`;
           }
+          // 접속 IP + 차단 버튼
+          const ipStr = u.last_login_ip || '-';
+          const ipCell = ipStr !== '-'
+            ? `<div style="display:flex;gap:4px;align-items:center;"><span style="font-size:12px;font-family:monospace">${ipStr}</span><button onclick="blockIp('${ipStr}')" style="background:#f44336;border:none;border-radius:5px;padding:3px 7px;font-size:11px;color:#fff;cursor:pointer;" title="IP 차단"><i class="fas fa-ban"></i></button></div>`
+            : '<span style="color:var(--muted);font-size:13px">-</span>';
           return `<tr>
             <td style="font-weight:600">${u.username||'-'}</td>
             <td style="font-size:13px">${u.email}</td>
@@ -2756,9 +2767,11 @@
             <td style="font-size:13px;color:var(--muted)">${u.telegram_username||'-'}</td>
             <td>${planSel}</td>
             <td style="font-size:13px">${changeDateStr}</td>
+            <td style="font-size:13px">${expDateStr}</td>
             <td style="font-size:13px;text-align:center">${remainStr}</td>
             <td><span class="bdg ${u.is_active?'bdg-green':'bdg-red'}">${u.is_active?'활성':'비활성'}</span></td>
             <td style="font-size:13px">${fmt(u.last_login)}</td>
+            <td>${ipCell}</td>
             <td style="font-size:13px">${fmt(u.created_at)}</td>
             <td><div style="display:flex;gap:5px;">
               <button class="btn btn-out btn-xs" onclick="editUserRow(decodeURIComponent('${safeJson}'))"><i class="fas fa-edit"></i></button>
@@ -2767,7 +2780,7 @@
           </tr>`;
         }).join('');
       }).catch(e => {
-        tbody.innerHTML = '<tr><td colspan="10" class="empty">API 오류: ' + e.message + '</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="13" class="empty">API 오류: ' + e.message + '</td></tr>';
       });
     }
     function editUserRow(jsonStr) {
@@ -2790,8 +2803,10 @@
           }).catch(e => showAlert('오류: ' + e.message, 'err'));
       });
     }
-    async function changePlan(userId, planId) {
-      const pid = parseInt(planId, 10) || null;
+    async function changePlan(userId) {
+      const sel = document.getElementById('plan-sel-' + userId);
+      if (!sel) return;
+      const pid = parseInt(sel.value, 10) || null;
       try {
         const resp = await fetch('/api/admin/users/' + userId + '/plan', {
           method: 'PUT', headers: {'Content-Type':'application/json'},
@@ -2801,6 +2816,19 @@
         if (j.success) { showAlert(pid ? '클래스가 변경되었습니다.' : '클래스가 해제되었습니다.'); renderUsers(); }
         else showAlert('변경 실패: ' + (j.error||''), 'err');
       } catch(e) { showAlert('오류: ' + e.message, 'err'); }
+    }
+    async function blockIp(ip) {
+      showConfirm('IP 차단', ip + ' 을(를) 차단하시겠습니까?', async () => {
+        try {
+          const resp = await fetch('/api/admin/block-ip', {
+            method: 'POST', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ ip })
+          });
+          const j = await resp.json();
+          if (j.success) showAlert('IP가 차단되었습니다: ' + ip);
+          else showAlert('차단 실패: ' + (j.error||''), 'err');
+        } catch(e) { showAlert('오류: ' + e.message, 'err'); }
+      });
     }
     // Keep legacy functions for backward compat
     function editUser(id) { /* no-op, replaced by editUserRow */ }

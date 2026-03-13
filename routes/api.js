@@ -55,7 +55,8 @@ router.post('/auth/login', async (req, res) => {
     const user = rows[0];
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(401).json({ success: false, error: 'Invalid email or password' });
-    await db.query('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id]);
+    const loginIp = req.ip || '';
+    await db.query('UPDATE users SET last_login = NOW(), last_login_ip = ? WHERE id = ?', [loginIp, user.id]);
     req.session.user = { id: user.id, email: user.email, username: user.username, role: user.role, plan_id: user.plan_id, plan_expires_at: user.plan_expires_at };
     res.json({ success: true, user: req.session.user });
   } catch (err) {
@@ -108,7 +109,7 @@ router.put('/auth/password', requireAuth, async (req, res) => {
 // GET /api/admin/users
 router.get('/admin/users', requireAdmin, async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT id, email, username, role, is_active, email_verified, last_login, created_at, plan_id, plan_expires_at, telegram_username FROM users ORDER BY created_at DESC');
+    const [rows] = await db.query('SELECT id, email, username, role, is_active, email_verified, last_login, last_login_ip, created_at, plan_id, plan_expires_at, telegram_username FROM users ORDER BY created_at DESC');
     res.json({ success: true, data: rows });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -162,6 +163,34 @@ router.put('/admin/users/:id/plan', requireAdmin, async (req, res) => {
     } else {
       await db.query('UPDATE users SET plan_id = NULL, plan_expires_at = NULL WHERE id = ?', [id]);
     }
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ success: false, error: err.message }); }
+});
+
+// GET /api/admin/blocked-ips
+router.get('/admin/blocked-ips', requireAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT ip, blocked_at, reason FROM blocked_ips ORDER BY blocked_at DESC');
+    res.json({ success: true, data: rows });
+  } catch (err) { res.status(500).json({ success: false, error: err.message }); }
+});
+
+// POST /api/admin/block-ip  body: { ip, reason }
+router.post('/admin/block-ip', requireAdmin, async (req, res) => {
+  try {
+    const ip = (req.body && req.body.ip) ? String(req.body.ip).trim() : null;
+    if (!ip) return res.status(400).json({ success: false, error: 'ip required' });
+    const reason = (req.body && req.body.reason) ? String(req.body.reason).trim() : null;
+    await db.query('INSERT INTO blocked_ips (ip, reason) VALUES (?, ?) ON DUPLICATE KEY UPDATE blocked_at = NOW(), reason = VALUES(reason)', [ip, reason]);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ success: false, error: err.message }); }
+});
+
+// DELETE /api/admin/block-ip/:ip
+router.delete('/admin/block-ip/:ip', requireAdmin, async (req, res) => {
+  try {
+    const ip = decodeURIComponent(req.params.ip);
+    await db.query('DELETE FROM blocked_ips WHERE ip = ?', [ip]);
     res.json({ success: true });
   } catch (err) { res.status(500).json({ success: false, error: err.message }); }
 });

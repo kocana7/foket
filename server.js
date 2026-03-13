@@ -10,6 +10,19 @@ const cors = require('cors');
 
 const db = require('./config/database');
 const mainRouter = require('./routes/main');
+
+// IP blocking middleware — loaded lazily after db is ready
+async function ipBlockMiddleware(req, res, next) {
+  // Never block admin API routes (to prevent admin self-lockout)
+  if (req.path.startsWith('/api/admin') || req.path.startsWith('/admin')) return next();
+  try {
+    const ip = req.ip || '';
+    if (!ip) return next();
+    const [rows] = await db.query('SELECT 1 FROM blocked_ips WHERE ip = ? LIMIT 1', [ip]);
+    if (rows.length) return res.status(403).send('Access denied.');
+    next();
+  } catch (e) { next(); }
+}
 const adminRouter = require('./routes/admin');
 const apiRouter = require('./routes/api');
 
@@ -107,6 +120,9 @@ app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
   next();
 });
+
+// IP blocking
+app.use(ipBlockMiddleware);
 
 // Routes
 app.use('/', mainRouter);
