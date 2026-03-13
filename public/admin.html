@@ -2220,7 +2220,7 @@
     async function loadStorageFromApi() {
       const base = getApiBase();
       if (!base) return;
-      const keys = ['markets', 'markets_published', 'settings', 'seeded', 'signals', 'news', 'faq', 'users', 'plans', 'testimonials', 'messages'];
+      const keys = ['markets', 'markets_published', 'settings', 'seeded', 'signals', 'news', 'faq', 'users', 'plans', 'testimonials', 'messages', 'terms', 'privacy', 'risk', 'refund', 'affiliate', 'earnings'];
       for (const k of keys) {
         try {
           const r = await fetch(base + '/storage/' + k);
@@ -3284,12 +3284,10 @@
       });
     }
     function legalLoad(key) {
-      const raw = ls(key, '');
-      let data = {};
-      try { data = JSON.parse(raw); } catch(e) { if (raw) data = { ko: raw }; }
+      const data = ls(key, {});
       LEGAL_LANGS.forEach(function(l) {
         const el = document.getElementById(key + '-text-' + l);
-        if (el) el.value = data[l] || '';
+        if (el) el.value = (data && typeof data === 'object' ? data[l] : '') || '';
       });
     }
     function legalSave(key, label) {
