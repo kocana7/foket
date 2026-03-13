@@ -2,18 +2,16 @@ require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-const flash = require('connect-flash');
 const path = require('path');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
 
 const db = require('./config/database');
-const mainRouter = require('./routes/main');
+const apiRouter = require('./routes/api');
 
-// IP blocking middleware — loaded lazily after db is ready
+// IP blocking middleware
 async function ipBlockMiddleware(req, res, next) {
-  // Never block admin API routes (to prevent admin self-lockout)
   if (req.path.startsWith('/api/admin') || req.path.startsWith('/admin')) return next();
   try {
     const ip = req.ip || '';
@@ -23,8 +21,6 @@ async function ipBlockMiddleware(req, res, next) {
     next();
   } catch (e) { next(); }
 }
-const adminRouter = require('./routes/admin');
-const apiRouter = require('./routes/api');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -55,96 +51,34 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Static files
-app.use(express.static(path.join(__dirname, 'public')));
-
-// 루트(/) 요청 시 public/index.html 제공 (MySQL 없이 메인 페이지 표시, 404 방지)
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Session
+// Session (API 인증용)
 app.use(session({
   secret: process.env.SESSION_SECRET || 'foketcrypto-secret-key-2024',
   resave: false,
   saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    maxAge: 24 * 60 * 60 * 1000
   }
 }));
-
-app.use(flash());
-
-// View engine
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-
-// Global middleware: language detection
-app.use((req, res, next) => {
-  const supportedLangs = ['ko', 'en', 'de', 'ja', 'zh', 'fr', 'es', 'ru'];
-
-  // Priority: query param > cookie > browser accept-language > default (ko)
-  let lang = req.query.lang || req.cookies.lang;
-
-  if (!lang || !supportedLangs.includes(lang)) {
-    const acceptLang = req.headers['accept-language'] || '';
-    const browserLang = acceptLang.split(',')[0].split('-')[0].toLowerCase();
-    lang = supportedLangs.includes(browserLang) ? browserLang : 'ko';
-  }
-
-  if (req.query.lang && supportedLangs.includes(req.query.lang)) {
-    res.cookie('lang', req.query.lang, { maxAge: 365 * 24 * 60 * 60 * 1000 });
-    lang = req.query.lang;
-  }
-
-  req.lang = lang;
-  res.locals.lang = lang;
-  res.locals.supportedLangs = supportedLangs;
-
-  // Load translations
-  try {
-    res.locals.t = require(`./locales/${lang}.json`);
-  } catch (e) {
-    res.locals.t = require('./locales/ko.json');
-  }
-
-  next();
-});
-
-// Flash messages global
-app.use((req, res, next) => {
-  res.locals.success_msg = req.flash('success_msg');
-  res.locals.error_msg = req.flash('error_msg');
-  res.locals.error = req.flash('error');
-  res.locals.user = req.session.user || null;
-  next();
-});
 
 // IP blocking
 app.use(ipBlockMiddleware);
 
-// Routes
-app.use('/', mainRouter);
+// API routes
+app.use('/api', apiRouter);
+
+// Admin panel
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
-app.use('/api', apiRouter);
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).render('404', { title: '404 - Page Not Found' });
-});
-
-// Error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).render('500', { title: '500 - Server Error', error: err.message });
-});
+// Static files (index.html, login.html, signup.html 등)
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`\n  CryptoSignals server running on http://localhost:${PORT}`);
+  console.log(`\n  Server running on http://localhost:${PORT}`);
   console.log(`  Admin panel: http://localhost:${PORT}/admin`);
   console.log(`  Environment: ${process.env.NODE_ENV || 'development'}\n`);
 });
