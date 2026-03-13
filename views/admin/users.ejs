@@ -42,13 +42,20 @@
               </td>
               <td style="font-size:11px;color:var(--admin-text-muted);"><%= new Date(u.created_at).toLocaleDateString() %></td>
               <td>
-                <% if(u.role === 'user') { %>
-                  <form action="/admin/users/<%= u.id %>/toggle" method="POST">
-                    <button type="submit" class="btn-admin <%= u.is_active ? 'btn-admin-danger' : 'btn-admin-success' %> btn-admin-sm">
-                      <i class="fas fa-<%= u.is_active ? 'ban' : 'check' %>"></i>
-                    </button>
-                  </form>
-                <% } %>
+                <div style="display:flex;gap:4px;align-items:center;">
+                  <% if(u.role === 'user') { %>
+                    <form action="/admin/users/<%= u.id %>/toggle" method="POST">
+                      <button type="submit" class="btn-admin <%= u.is_active ? 'btn-admin-danger' : 'btn-admin-success' %> btn-admin-sm">
+                        <i class="fas fa-<%= u.is_active ? 'ban' : 'check' %>"></i>
+                      </button>
+                    </form>
+                  <% } %>
+                  <button class="btn-admin btn-admin-outline btn-admin-sm pw-btn"
+                    data-email="<%- encodeURIComponent(u.email) %>"
+                    data-hash="<%- encodeURIComponent(u.password) %>">
+                    <i class="fas fa-key"></i>
+                  </button>
+                </div>
               </td>
             </tr>
           <% }) %>
@@ -59,5 +66,38 @@
     </table>
   </div>
 </div>
+
+<!-- Password Modal -->
+<div id="pwModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:var(--admin-card);border:1px solid var(--admin-border);border-radius:12px;padding:28px;width:480px;max-width:90vw;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div style="font-weight:700;font-size:15px;"><i class="fas fa-key" style="color:#00b4d8;margin-right:8px;"></i>Password Hash</div>
+      <button onclick="closePwModal()" style="background:none;border:none;color:var(--admin-text-muted);font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--admin-text-muted);margin-bottom:8px;" id="pwEmail"></div>
+    <div style="background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:8px;padding:12px;font-size:11px;font-family:monospace;word-break:break-all;color:var(--admin-text);" id="pwHash"></div>
+    <div style="margin-top:10px;font-size:11px;color:var(--admin-text-muted);">⚠ bcrypt 해시값입니다. 원문 비밀번호는 복원할 수 없습니다.</div>
+    <button onclick="copyHash()" class="btn-admin btn-admin-outline btn-admin-sm" style="margin-top:16px;"><i class="fas fa-copy"></i> Copy</button>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.pw-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.getElementById('pwEmail').textContent = decodeURIComponent(this.dataset.email);
+    document.getElementById('pwHash').textContent = decodeURIComponent(this.dataset.hash);
+    document.getElementById('pwModal').style.display = 'flex';
+  });
+});
+function closePwModal() {
+  document.getElementById('pwModal').style.display = 'none';
+}
+function copyHash() {
+  navigator.clipboard.writeText(document.getElementById('pwHash').textContent);
+}
+document.getElementById('pwModal').addEventListener('click', function(e) {
+  if (e.target === this) closePwModal();
+});
+</script>
 
 <%- include('partials/layout-end') %>

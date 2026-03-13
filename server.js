@@ -126,9 +126,6 @@ app.use(ipBlockMiddleware);
 
 // Routes
 app.use('/', mainRouter);
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
 app.use('/admin', adminRouter);
 app.use('/api', apiRouter);
 

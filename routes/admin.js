@@ -398,6 +398,54 @@ router.post('/testimonials/:id/delete', async (req, res) => {
   res.redirect('/admin/testimonials');
 });
 
+// PROFILE (Admin credentials)
+router.get('/profile', (req, res) => {
+  res.render('admin/profile', { title: '계정 설정' });
+});
+
+router.post('/profile', async (req, res) => {
+  const { email, current_password, new_password, confirm_password } = req.body;
+  try {
+    const [[user]] = await db.query('SELECT * FROM users WHERE id = ?', [req.session.admin.id]);
+
+    // Email update
+    const newEmail = email.trim();
+
+    // Password change requested?
+    if (current_password || new_password || confirm_password) {
+      if (!current_password) {
+        req.flash('error_msg', '현재 비밀번호를 입력하세요.');
+        return res.redirect('/admin/profile');
+      }
+      const match = await bcrypt.compare(current_password, user.password);
+      if (!match) {
+        req.flash('error_msg', '현재 비밀번호가 틀렸습니다.');
+        return res.redirect('/admin/profile');
+      }
+      if (new_password !== confirm_password) {
+        req.flash('error_msg', '새 비밀번호가 일치하지 않습니다.');
+        return res.redirect('/admin/profile');
+      }
+      if (new_password.length < 6) {
+        req.flash('error_msg', '비밀번호는 6자 이상이어야 합니다.');
+        return res.redirect('/admin/profile');
+      }
+      const hash = await bcrypt.hash(new_password, 10);
+      await db.query('UPDATE users SET email=?, password=? WHERE id=?', [newEmail, hash, user.id]);
+    } else {
+      await db.query('UPDATE users SET email=? WHERE id=?', [newEmail, user.id]);
+    }
+
+    req.session.admin.email = newEmail;
+    req.flash('success_msg', '저장되었습니다.');
+    res.redirect('/admin/profile');
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', '저장 중 오류가 발생했습니다.');
+    res.redirect('/admin/profile');
+  }
+});
+
 // STATS
 router.post('/stats', async (req, res) => {
   try {

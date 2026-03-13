@@ -60,20 +60,20 @@ button, input, select, textarea { font-family: inherit; }
   gap: 10px;
 }
 .sidebar-logo {
-  width: 36px;
-  height: 36px;
-  background: linear-gradient(135deg, #58a6ff, #1f6feb);
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, #00b4d8 0%, #0077a8 100%);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 14px;
+  font-size: 18px;
   color: white;
   flex-shrink: 0;
 }
 .sidebar-title { font-size: 16px; font-weight: 700; }
-.sidebar-title span { color: var(--admin-blue); }
+.sidebar-title span { color: #00b4d8; }
 .sidebar-subtitle { font-size: 10px; color: var(--admin-text-muted); }
 .sidebar-nav { flex: 1; padding: 8px; }
 .sidebar-section-label {
