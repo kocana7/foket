@@ -3092,10 +3092,11 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      loadCryptoStats();
-      loadBinanceStats();
-      loadFuturesStats();
-      loadBest10();
+      loadBest10().then(() => {
+        loadCryptoStats();
+        loadBinanceStats();
+        loadFuturesStats();
+      });
 
       // Random shuffle of 3 CSP cards periodically
       const heroCspWrap = document.getElementById('heroCspWrap');
