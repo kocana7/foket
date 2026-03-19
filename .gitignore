@@ -1,0 +1,8 @@
+node_modules/
+api/node_modules/
+api/server.log
+api/.env
+*.log
+.DS_Store
+Thumbs.db
+.claude/

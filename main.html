@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kalshi – Trade on Anything</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue: #334BFA;
+      --blue-dark: #2438e0;
+      --blue-light: #EEF0FF;
+      --green: #00C896;
+      --green-bg: #E6FBF5;
+      --red: #F04438;
+      --red-bg: #FEE9E7;
+      --gray-50: #F9FAFB;
+      --gray-100: #F2F4F7;
+      --gray-200: #E4E7EC;
+      --gray-300: #D0D5DD;
+      --gray-400: #98A2B3;
+      --gray-500: #667085;
+      --gray-600: #475467;
+      --gray-700: #344054;
+      --gray-800: #1D2939;
+      --gray-900: #101828;
+      --white: #FFFFFF;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--white); color: var(--gray-900); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+
+    /* ─── NAVBAR ─── */
+    .navbar {
+      position: sticky; top: 0; z-index: 1000;
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-200);
+      height: 64px;
+      display: flex; align-items: center;
+    }
+    .nav-inner {
+      max-width: 1280px; margin: 0 auto; width: 100%;
+      padding: 0 24px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 8px;
+      text-decoration: none; color: var(--gray-900);
+      font-weight: 800; font-size: 22px; letter-spacing: -0.5px;
+      margin-right: 16px; flex-shrink: 0;
+    }
+    .nav-logo svg { width: 32px; height: 32px; }
+    .nav-links {
+      display: flex; align-items: center; gap: 2px;
+      flex: 1;
+    }
+    .nav-link {
+      padding: 8px 14px; border-radius: 8px;
+      font-size: 14px; font-weight: 700; color: var(--gray-700);
+      text-decoration: none; white-space: nowrap;
+      transition: background 0.15s, color 0.15s;
+      display: flex; align-items: center; gap: 5px;
+      letter-spacing: -0.1px;
+    }
+    .nav-link:hover { background: var(--gray-900); color: var(--white); }
+    .nav-link.active { color: var(--white); background: var(--blue); }
+    .nav-link svg { width: 14px; height: 14px; }
+    .nav-spacer { flex: 1; }
+    .nav-actions { display: flex; align-items: center; gap: 10px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; border: none; text-decoration: none; white-space: nowrap; }
+    .btn-sm { padding: 8px 16px; font-size: 13px; }
+    .btn-md { padding: 10px 20px; }
+    .btn-lg { padding: 14px 28px; font-size: 16px; border-radius: 12px; }
+    .btn-ghost { background: transparent; color: var(--gray-700); border: 1px solid var(--gray-300); }
+    .btn-ghost:hover { background: var(--gray-100); }
+    .btn-primary { background: var(--blue); color: var(--white); }
+    .btn-primary:hover { background: var(--blue-dark); }
+    .btn-dark { background: var(--gray-900); color: var(--white); }
+    .btn-dark:hover { background: var(--gray-800); }
+
+    /* ─── CATEGORY BAR ─── */
+
+    /* ─── HERO ─── */
+    .hero {
+      background: var(--white);
+      padding: 72px 24px 64px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--blue-light); color: var(--blue);
+      padding: 6px 14px; border-radius: 100px;
+      font-size: 12px; font-weight: 600; letter-spacing: 0.3px;
+      margin-bottom: 24px; text-transform: uppercase;
+    }
+    .hero-badge span { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); display: inline-block; }
+    .hero h1 {
+      font-size: clamp(40px, 7vw, 72px);
+      font-weight: 900; letter-spacing: -2px;
+      color: var(--gray-900); line-height: 1.05;
+      max-width: 760px; margin: 0 auto 20px;
+    }
+    .hero h1 span { color: var(--blue); }
+    .hero-sub {
+      font-size: 18px; color: var(--gray-500);
+      max-width: 520px; margin: 0 auto 36px;
+      font-weight: 400; line-height: 1.6;
+    }
+    .hero-cta { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .hero-trust {
+      margin-top: 48px;
+      display: flex; align-items: center; justify-content: center;
+      gap: 32px; flex-wrap: wrap;
+    }
+    .trust-item { display: flex; align-items: center; gap: 8px; color: var(--gray-500); font-size: 13px; font-weight: 500; }
+    .trust-item svg { width: 16px; height: 16px; color: var(--green); flex-shrink: 0; }
+
+    /* ─── MARKETS SECTION ─── */
+    .section { padding: 48px 24px; }
+    .section-inner { max-width: 1280px; margin: 0 auto; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .section-title { font-size: 20px; font-weight: 700; color: var(--gray-900); }
+    .section-link { font-size: 14px; font-weight: 600; color: var(--blue); text-decoration: none; }
+    .section-link:hover { text-decoration: underline; }
+
+    /* ─── MARKET GRID ─── */
+    .market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+
+    .market-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 16px;
+      padding: 20px;
+      cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.15s;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .market-card:hover { box-shadow: 0 4px 24px rgba(0,0,0,0.08); transform: translateY(-1px); }
+
+    .market-card-top { display: flex; align-items: flex-start; gap: 12px; }
+    .market-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: var(--gray-100); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+    .market-meta { flex: 1; }
+    .market-category { font-size: 11px; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .market-question { font-size: 15px; font-weight: 600; color: var(--gray-900); line-height: 1.4; }
+
+    .market-prob-bar { background: var(--gray-100); border-radius: 100px; height: 4px; overflow: hidden; }
+    .market-prob-fill { height: 100%; border-radius: 100px; background: var(--green); }
+
+    .market-card-bottom {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .market-chance {
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .market-chance-val { font-size: 22px; font-weight: 800; color: var(--gray-900); }
+    .market-chance-label { font-size: 11px; font-weight: 500; color: var(--gray-400); }
+    .market-vol { font-size: 12px; color: var(--gray-400); font-weight: 500; }
+    .market-btns { display: flex; gap: 6px; }
+    .btn-yes {
+      padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700;
+      background: var(--green-bg); color: var(--green);
+      border: none; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-yes:hover { background: var(--green); color: var(--white); }
+    .btn-no {
+      padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700;
+      background: var(--red-bg); color: var(--red);
+      border: none; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-no:hover { background: var(--red); color: var(--white); }
+
+    /* ─── FEATURED STRIP ─── */
+    .strip-card {
+      background: var(--gray-900);
+      border-radius: 20px;
+      padding: 32px;
+      color: var(--white);
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 24px; flex-wrap: wrap;
+      margin-bottom: 48px;
+    }
+    .strip-left h2 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+    .strip-left p { color: var(--gray-400); font-size: 15px; }
+    .strip-stats { display: flex; gap: 32px; }
+    .strip-stat h3 { font-size: 28px; font-weight: 800; }
+    .strip-stat p { font-size: 13px; color: var(--gray-400); }
+
+    /* ─── CATEGORY CARDS ─── */
+    .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+    .cat-card {
+      background: var(--white); border: 1px solid var(--gray-200); border-radius: 16px;
+      padding: 20px; text-align: center; cursor: pointer;
+      transition: all 0.2s; text-decoration: none; color: var(--gray-900);
+    }
+    .cat-card:hover { border-color: var(--blue); box-shadow: 0 0 0 4px var(--blue-light); }
+    .cat-card .cat-emoji { font-size: 32px; margin-bottom: 10px; display: block; }
+    .cat-card .cat-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .cat-card .cat-count { font-size: 12px; color: var(--gray-400); }
+
+    /* ─── HOW IT WORKS ─── */
+    .hiw-section { background: var(--gray-50); padding: 72px 24px; }
+    .hiw-inner { max-width: 1280px; margin: 0 auto; }
+    .hiw-title { font-size: 36px; font-weight: 800; text-align: center; letter-spacing: -1px; margin-bottom: 12px; }
+    .hiw-sub { text-align: center; color: var(--gray-500); font-size: 16px; margin-bottom: 52px; }
+    .hiw-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 32px; }
+    .hiw-card { background: var(--white); border-radius: 20px; padding: 32px; border: 1px solid var(--gray-200); }
+    .hiw-num { width: 40px; height: 40px; border-radius: 12px; background: var(--blue); color: var(--white); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; margin-bottom: 16px; }
+    .hiw-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+    .hiw-card p { font-size: 14px; color: var(--gray-500); line-height: 1.6; }
+
+    /* ─── STATS BANNER ─── */
+    .stats-section { padding: 64px 24px; }
+    .stats-inner { max-width: 1280px; margin: 0 auto; text-align: center; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px; margin-top: 48px; }
+    .stat-item h3 { font-size: 44px; font-weight: 900; color: var(--blue); letter-spacing: -1px; }
+    .stat-item p { font-size: 15px; color: var(--gray-500); margin-top: 4px; }
+
+    /* ─── LIVE TICKER ─── */
+    .ticker-wrap { overflow: hidden; background: var(--blue); padding: 10px 0; }
+    .ticker { display: flex; animation: ticker 30s linear infinite; width: max-content; }
+    .ticker-item { display: flex; align-items: center; gap: 8px; padding: 0 24px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9); white-space: nowrap; }
+    .ticker-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); }
+    @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* ─── TESTIMONIALS ─── */
+    .test-section { background: var(--gray-50); padding: 72px 24px; }
+    .test-inner { max-width: 1280px; margin: 0 auto; }
+    .test-title { font-size: 32px; font-weight: 800; text-align: center; letter-spacing: -0.5px; margin-bottom: 40px; }
+    .test-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .test-card { background: var(--white); border-radius: 16px; padding: 24px; border: 1px solid var(--gray-200); }
+    .test-stars { color: #FFBE00; font-size: 14px; margin-bottom: 12px; }
+    .test-text { font-size: 14px; color: var(--gray-700); line-height: 1.6; margin-bottom: 16px; }
+    .test-author { display: flex; align-items: center; gap: 10px; }
+    .test-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--blue); color: var(--white); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+    .test-name { font-size: 13px; font-weight: 600; color: var(--gray-900); }
+    .test-handle { font-size: 12px; color: var(--gray-400); }
+
+    /* ─── CTA SECTION ─── */
+    .cta-section { padding: 80px 24px; }
+    .cta-inner { max-width: 640px; margin: 0 auto; text-align: center; }
+    .cta-section h2 { font-size: 40px; font-weight: 900; letter-spacing: -1px; margin-bottom: 16px; }
+    .cta-section p { font-size: 16px; color: var(--gray-500); margin-bottom: 36px; }
+    .cta-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+
+    /* ─── FOOTER ─── */
+    .footer { background: var(--gray-900); color: var(--white); padding: 64px 24px 32px; }
+    .footer-inner { max-width: 1280px; margin: 0 auto; }
+    .footer-grid { display: grid; grid-template-columns: 2fr repeat(4, 1fr); gap: 48px; margin-bottom: 48px; }
+    .footer-brand p { font-size: 13px; color: var(--gray-400); margin-top: 12px; line-height: 1.7; max-width: 280px; }
+    .footer-logo { font-size: 22px; font-weight: 800; color: var(--white); }
+    .footer-col h4 { font-size: 12px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 16px; }
+    .footer-col a { display: block; font-size: 14px; color: var(--gray-300); text-decoration: none; margin-bottom: 10px; transition: color 0.15s; }
+    .footer-col a:hover { color: var(--white); }
+    .footer-bottom { border-top: 1px solid var(--gray-700); padding-top: 28px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    .footer-bottom p { font-size: 13px; color: var(--gray-500); }
+    .footer-badges { display: flex; gap: 10px; }
+    .badge { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--gray-700); font-size: 11px; font-weight: 600; color: var(--gray-400); }
+
+    /* ─── MODAL ─── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(16,24,40,0.6);
+      z-index: 2000; display: none; align-items: center; justify-content: center;
+      padding: 24px;
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--white); border-radius: 24px;
+      width: 100%; max-width: 440px;
+      padding: 40px; position: relative;
+      animation: modalIn 0.25s ease;
+    }
+    @keyframes modalIn { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .modal-close { position: absolute; top: 20px; right: 20px; background: var(--gray-100); border: none; border-radius: 8px; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--gray-500); }
+    .modal-close:hover { background: var(--gray-200); }
+    .modal h2 { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+    .modal p { font-size: 14px; color: var(--gray-500); margin-bottom: 28px; }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 6px; }
+    .form-input {
+      width: 100%; padding: 11px 14px;
+      border: 1px solid var(--gray-300); border-radius: 10px;
+      font-size: 14px; font-family: var(--font); color: var(--gray-900);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+    }
+    .form-input:focus { border-color: var(--blue); box-shadow: 0 0 0 4px var(--blue-light); }
+    .form-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: var(--gray-400); font-size: 13px; }
+    .form-divider::before, .form-divider::after { content: ''; flex: 1; height: 1px; background: var(--gray-200); }
+    .social-btn { width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--gray-300); background: var(--white); font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; transition: background 0.15s; }
+    .social-btn:hover { background: var(--gray-50); }
+    .modal-switch { font-size: 13px; color: var(--gray-500); text-align: center; margin-top: 20px; }
+    .modal-switch a { color: var(--blue); font-weight: 600; cursor: pointer; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .footer-brand { grid-column: 1 / -1; }
+      .strip-card { flex-direction: column; }
+      .strip-stats { gap: 16px; }
+    }
+
+    /* ─── TRADE MODAL ─── */
+    .trade-modal { max-width: 380px; }
+    .trade-question { font-size: 15px; font-weight: 600; margin-bottom: 20px; color: var(--gray-800); }
+    .trade-toggle { display: flex; border-radius: 12px; overflow: hidden; border: 1px solid var(--gray-200); margin-bottom: 20px; }
+    .trade-yes, .trade-no {
+      flex: 1; padding: 12px; text-align: center; cursor: pointer;
+      font-size: 14px; font-weight: 700; transition: all 0.15s; border: none;
+    }
+    .trade-yes { background: var(--green-bg); color: var(--green); }
+    .trade-yes.active, .trade-yes:hover { background: var(--green); color: var(--white); }
+    .trade-no { background: var(--red-bg); color: var(--red); }
+    .trade-no.active, .trade-no:hover { background: var(--red); color: var(--white); }
+    .trade-label { font-size: 12px; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .trade-input-wrap { position: relative; }
+    .trade-input-wrap .dollar { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--gray-500); font-weight: 600; }
+    .trade-input { width: 100%; padding: 12px 14px 12px 28px; border: 1px solid var(--gray-300); border-radius: 10px; font-size: 18px; font-weight: 700; font-family: var(--font); outline: none; }
+    .trade-input:focus { border-color: var(--blue); box-shadow: 0 0 0 4px var(--blue-light); }
+    .trade-amounts { display: flex; gap: 6px; margin: 10px 0 20px; }
+    .trade-amt { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--gray-200); font-size: 12px; font-weight: 600; cursor: pointer; background: var(--white); transition: all 0.15s; }
+    .trade-amt:hover { border-color: var(--blue); color: var(--blue); }
+    .trade-summary { background: var(--gray-50); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    .trade-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+    .trade-row:last-child { margin-bottom: 0; font-weight: 700; color: var(--gray-900); }
+    .trade-row span:first-child { color: var(--gray-500); }
+
+    /* ─── LANGUAGE SELECTOR ─── */
+    .lang-selector { position: relative; }
+    .lang-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 12px; border-radius: 8px;
+      border: 1px solid var(--gray-300);
+      background: var(--white); cursor: pointer;
+      font-size: 13px; font-weight: 600; color: var(--gray-700);
+      transition: all 0.15s; white-space: nowrap; font-family: var(--font);
+    }
+    .lang-btn:hover { background: var(--gray-100); }
+    .lang-dropdown {
+      position: absolute; top: calc(100% + 6px); right: 0;
+      background: var(--white); border: 1px solid var(--gray-200);
+      border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      min-width: 155px; z-index: 1100;
+      display: none; overflow: hidden;
+    }
+    .lang-dropdown.open { display: block; animation: dropIn 0.15s ease; }
+    @keyframes dropIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+    .lang-option {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 14px; cursor: pointer;
+      font-size: 13px; font-weight: 500; color: var(--gray-700);
+      transition: background 0.1s;
+      border: none; background: none; width: 100%; text-align: left; font-family: var(--font);
+    }
+    .lang-option:hover { background: var(--gray-50); }
+    .lang-option.active { background: var(--blue-light); color: var(--blue); font-weight: 600; }
+    .lang-flag { font-size: 16px; line-height: 1; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: var(--gray-900); color: var(--white);
+      padding: 14px 24px; border-radius: 12px;
+      font-size: 14px; font-weight: 600;
+      z-index: 3000; display: none;
+      animation: toastIn 0.3s ease;
+    }
+    .toast.show { display: block; }
+    @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <a class="nav-logo" href="#">
+      <img src="logo.png" alt="FOKET.COM" style="height:36px;width:auto;display:block;" />
+    </a>
+    <div class="nav-links">
+      <a class="nav-link active" href="#"><span data-i18n="nav.home">홈</span></a>
+      <a class="nav-link" href="#hot"><span data-i18n="nav.hot">Hot 이슈</span></a>
+      <a class="nav-link" href="#politics"><span data-i18n="nav.politics">정치</span></a>
+      <a class="nav-link" href="#sports"><span data-i18n="nav.sports">스포츠</span></a>
+      <a class="nav-link" href="#culture"><span data-i18n="nav.culture">문화</span></a>
+      <a class="nav-link" href="#trading"><span data-i18n="nav.trading">트레이딩</span></a>
+      <a class="nav-link" href="#weather"><span data-i18n="nav.weather">날씨</span></a>
+      <a class="nav-link" href="#economy"><span data-i18n="nav.economy">경제</span></a>
+      <a class="nav-link" href="#statement"><span data-i18n="nav.statement">발언</span></a>
+      <a class="nav-link" href="#neighbor"><span data-i18n="nav.neighbor">나의 이웃</span></a>
+      <a class="nav-link" href="#science"><span data-i18n="nav.science">과학 &amp; 기술</span></a>
+    </div>
+    <div class="nav-spacer"></div>
+    <div class="nav-actions">
+      <div class="lang-selector" id="langSelector">
+        <button class="lang-btn" id="langBtn" onclick="toggleLangMenu()">
+          <span id="langFlag">🇰🇷</span>
+          <span id="langName">한국어</span>
+          <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="lang-dropdown" id="langDropdown">
+          <button class="lang-option" data-lang="ko" onclick="setLang('ko')"><span class="lang-flag">🇰🇷</span>한국어</button>
+          <button class="lang-option" data-lang="en" onclick="setLang('en')"><span class="lang-flag">🇺🇸</span>English</button>
+          <button class="lang-option" data-lang="ja" onclick="setLang('ja')"><span class="lang-flag">🇯🇵</span>日本語</button>
+          <button class="lang-option" data-lang="zh" onclick="setLang('zh')"><span class="lang-flag">🇨🇳</span>中文</button>
+          <button class="lang-option" data-lang="fr" onclick="setLang('fr')"><span class="lang-flag">🇫🇷</span>Français</button>
+          <button class="lang-option" data-lang="de" onclick="setLang('de')"><span class="lang-flag">🇩🇪</span>Deutsch</button>
+          <button class="lang-option" data-lang="es" onclick="setLang('es')"><span class="lang-flag">🇪🇸</span>Español</button>
+          <button class="lang-option" data-lang="ru" onclick="setLang('ru')"><span class="lang-flag">🇷🇺</span>Русский</button>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" data-i18n="nav.mypage" onclick="showToast('마이페이지 준비 중!')">마이페이지</button>
+      <button class="btn btn-ghost btn-sm" data-i18n="nav.login" onclick="openModal('login')">로그인</button>
+      <button class="btn btn-primary btn-sm" data-i18n="nav.signup" onclick="window.location.href='signup.html'">회원가입</button>
+    </div>
+  </div>
+</nav>
+
+
+<!-- LIVE TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker" id="ticker">
+    <div class="ticker-item"><span class="ticker-dot"></span> S&P 500 above 5,200 today? <strong>67%</strong></div>
+    <div class="ticker-item"><span class="ticker-dot"></span> Bitcoin above $80K this week? <strong>52%</strong></div>
+    <div class="ticker-item"><span class="ticker-dot"></span> Fed cuts rates in March? <strong>28%</strong></div>
+    <div class="ticker-item"><span class="ticker-dot"></span> NFL Playoffs: Chiefs to win? <strong>71%</strong></div>
+    <div class="ticker-item"><span class="ticker-dot"></span> Nasdaq 100 up today? <strong>58%</strong></div>
+    <div class="ticker-item"><span class="ticker-dot"></span> CPI below 3% next report? <strong>41%</strong></div>
+    <div class="ticker-item"><span class="ticker-dot"></span> Tesla above $300 this week? <strong>34%</strong></div>
+    <div class="ticker-item"><span class="ticker-dot"></span> Gold above $2,100 today? <strong>79%</strong></div>
+    <div class="ticker-item"><span class="ticker-dot"></span> S&P 500 above 5,200 today? <strong>67%</strong></div>
+    <div class="ticker-item"><span class="ticker-dot"></span> Bitcoin above $80K this week? <strong>52%</strong></div>
+    <div class="ticker-item"><span class="ticker-dot"></span> Fed cuts rates in March? <strong>28%</strong></div>
+    <div class="ticker-item"><span class="ticker-dot"></span> NFL Playoffs: Chiefs to win? <strong>71%</strong></div>
+    <div class="ticker-item"><span class="ticker-dot"></span> Nasdaq 100 up today? <strong>58%</strong></div>
+    <div class="ticker-item"><span class="ticker-dot"></span> CPI below 3% next report? <strong>41%</strong></div>
+    <div class="ticker-item"><span class="ticker-dot"></span> Tesla above $300 this week? <strong>34%</strong></div>
+    <div class="ticker-item"><span class="ticker-dot"></span> Gold above $2,100 today? <strong>79%</strong></div>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge"><span></span> <span data-i18n="hero.badge">CFTC 공인 거래소</span></div>
+  <h1 id="heroH1">모든 것에<br/><span>거래하세요</span></h1>
+  <p class="hero-sub" data-i18n="hero.sub">스포츠, 금융, 정치 등 실제 사건의 결과에 대한 계약을 사고팔 수 있습니다.</p>
+    <div class="hero-cta">
+    <button class="btn btn-primary btn-lg" data-i18n="hero.start" onclick="window.location.href='signup.html'">거래 시작 →</button>
+    <button class="btn btn-ghost btn-lg" data-i18n="hero.explore" onclick="document.getElementById('markets').scrollIntoView({behavior:'smooth'})">마켓 탐색</button>
+  </div>
+  <div class="hero-trust">
+    <div class="trust-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span data-i18n="hero.trust1">CFTC 규제</span>
+    </div>
+    <div class="trust-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span data-i18n="hero.trust2">무료 가입</span>
+    </div>
+    <div class="trust-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span data-i18n="hero.trust3">즉시 입금</span>
+    </div>
+    <div class="trust-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span data-i18n="hero.trust4">$4.39B+ 거래</span>
+    </div>
+  </div>
+</section>
+
+<!-- STRIP CARD -->
+<section class="section" style="padding-top:0">
+  <div class="section-inner">
+    <div class="strip-card">
+      <div class="strip-left">
+        <h2 data-i18n="strip.h2">🏆 10월 기록: 거래량 $4.39B</h2>
+        <p data-i18n="strip.p">Foket 역사상 가장 큰 단월 거래량입니다. 수백만 거래자들과 함께하세요.</p>
+      </div>
+      <div class="strip-stats">
+        <div class="strip-stat"><h3>2M+</h3><p data-i18n="strip.stat1">활성 거래자</p></div>
+        <div class="strip-stat"><h3>1,000+</h3><p data-i18n="strip.stat2">공개 마켓</p></div>
+        <div class="strip-stat"><h3>$4.39B</h3><p data-i18n="strip.stat3">10월 거래량</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRENDING MARKETS -->
+<section class="section" id="markets">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="section-title" data-i18n="section.trending">🔥 인기 마켓</div>
+      <a class="section-link" data-i18n="section.viewall" href="#">전체보기 →</a>
+    </div>
+    <div class="market-grid" id="marketGrid">
+
+      <div class="market-card" data-cat="sports" onclick="openTrade('Will the Kansas City Chiefs win the Super Bowl?', 71)">
+        <div class="market-card-top">
+          <div class="market-icon">🏈</div>
+          <div class="market-meta">
+            <div class="market-category">NFL · Sports</div>
+            <div class="market-question">Will the Kansas City Chiefs win the Super Bowl?</div>
+          </div>
+        </div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:71%"></div></div>
+        <div class="market-card-bottom">
+          <div class="market-chance"><div class="market-chance-val">71¢</div><div class="market-chance-label">Yes chance</div></div>
+          <div>
+            <div class="market-vol">$2.1M Vol</div>
+            <div class="market-btns"><button class="btn-yes">Yes 71¢</button><button class="btn-no">No 29¢</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="market-card" data-cat="finance" onclick="openTrade('Will the S&P 500 close above 5,200 today?', 67)">
+        <div class="market-card-top">
+          <div class="market-icon">📈</div>
+          <div class="market-meta">
+            <div class="market-category">S&P 500 · Financials</div>
+            <div class="market-question">Will the S&P 500 close above 5,200 today?</div>
+          </div>
+        </div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:67%"></div></div>
+        <div class="market-card-bottom">
+          <div class="market-chance"><div class="market-chance-val">67¢</div><div class="market-chance-label">Yes chance</div></div>
+          <div>
+            <div class="market-vol">$4.7M Vol</div>
+            <div class="market-btns"><button class="btn-yes">Yes 67¢</button><button class="btn-no">No 33¢</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="market-card" data-cat="crypto" onclick="openTrade('Will Bitcoin exceed $80,000 this week?', 52)">
+        <div class="market-card-top">
+          <div class="market-icon">₿</div>
+          <div class="market-meta">
+            <div class="market-category">Bitcoin · Crypto</div>
+            <div class="market-question">Will Bitcoin exceed $80,000 this week?</div>
+          </div>
+        </div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:52%"></div></div>
+        <div class="market-card-bottom">
+          <div class="market-chance"><div class="market-chance-val">52¢</div><div class="market-chance-label">Yes chance</div></div>
+          <div>
+            <div class="market-vol">$6.3M Vol</div>
+            <div class="market-btns"><button class="btn-yes">Yes 52¢</button><button class="btn-no">No 48¢</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="market-card" data-cat="econ" onclick="openTrade('Will the Fed cut rates in March 2026?', 28)">
+        <div class="market-card-top">
+          <div class="market-icon">🏦</div>
+          <div class="market-meta">
+            <div class="market-category">Fed Rates · Economics</div>
+            <div class="market-question">Will the Fed cut rates in March 2026?</div>
+          </div>
+        </div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:28%; background:var(--red)"></div></div>
+        <div class="market-card-bottom">
+          <div class="market-chance"><div class="market-chance-val">28¢</div><div class="market-chance-label">Yes chance</div></div>
+          <div>
+            <div class="market-vol">$3.2M Vol</div>
+            <div class="market-btns"><button class="btn-yes">Yes 28¢</button><button class="btn-no">No 72¢</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="market-card" data-cat="politics" onclick="openTrade('Will Trump\\'s approval rating exceed 50% in March?', 44)">
+        <div class="market-card-top">
+          <div class="market-icon">🗳️</div>
+          <div class="market-meta">
+            <div class="market-category">Approval · Politics</div>
+            <div class="market-question">Will Trump's approval rating exceed 50% in March?</div>
+          </div>
+        </div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:44%"></div></div>
+        <div class="market-card-bottom">
+          <div class="market-chance"><div class="market-chance-val">44¢</div><div class="market-chance-label">Yes chance</div></div>
+          <div>
+            <div class="market-vol">$1.8M Vol</div>
+            <div class="market-btns"><button class="btn-yes">Yes 44¢</button><button class="btn-no">No 56¢</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="market-card" data-cat="climate" onclick="openTrade('Will average US temp exceed 60°F in March?', 79)">
+        <div class="market-card-top">
+          <div class="market-icon">🌡️</div>
+          <div class="market-meta">
+            <div class="market-category">Temperature · Climate</div>
+            <div class="market-question">Will average US temp exceed 60°F in March?</div>
+          </div>
+        </div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:79%"></div></div>
+        <div class="market-card-bottom">
+          <div class="market-chance"><div class="market-chance-val">79¢</div><div class="market-chance-label">Yes chance</div></div>
+          <div>
+            <div class="market-vol">$890K Vol</div>
+            <div class="market-btns"><button class="btn-yes">Yes 79¢</button><button class="btn-no">No 21¢</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="market-card" data-cat="finance" onclick="openTrade('Will Nasdaq 100 close up today?', 58)">
+        <div class="market-card-top">
+          <div class="market-icon">💹</div>
+          <div class="market-meta">
+            <div class="market-category">Nasdaq 100 · Financials</div>
+            <div class="market-question">Will Nasdaq 100 close up today?</div>
+          </div>
+        </div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:58%"></div></div>
+        <div class="market-card-bottom">
+          <div class="market-chance"><div class="market-chance-val">58¢</div><div class="market-chance-label">Yes chance</div></div>
+          <div>
+            <div class="market-vol">$3.4M Vol</div>
+            <div class="market-btns"><button class="btn-yes">Yes 58¢</button><button class="btn-no">No 42¢</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="market-card" data-cat="culture" onclick="openTrade('Will Taylor Swift win Album of the Year at Grammys?', 62)">
+        <div class="market-card-top">
+          <div class="market-icon">🎵</div>
+          <div class="market-meta">
+            <div class="market-category">Grammys · Culture</div>
+            <div class="market-question">Will Taylor Swift win Album of the Year at Grammys?</div>
+          </div>
+        </div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:62%"></div></div>
+        <div class="market-card-bottom">
+          <div class="market-chance"><div class="market-chance-val">62¢</div><div class="market-chance-label">Yes chance</div></div>
+          <div>
+            <div class="market-vol">$1.2M Vol</div>
+            <div class="market-btns"><button class="btn-yes">Yes 62¢</button><button class="btn-no">No 38¢</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="market-card" data-cat="tech" onclick="openTrade('Will Apple release a new iPhone model in Q1 2026?', 18)">
+        <div class="market-card-top">
+          <div class="market-icon">📱</div>
+          <div class="market-meta">
+            <div class="market-category">Apple · Tech</div>
+            <div class="market-question">Will Apple release a new iPhone model in Q1 2026?</div>
+          </div>
+        </div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:18%; background:var(--red)"></div></div>
+        <div class="market-card-bottom">
+          <div class="market-chance"><div class="market-chance-val">18¢</div><div class="market-chance-label">Yes chance</div></div>
+          <div>
+            <div class="market-vol">$670K Vol</div>
+            <div class="market-btns"><button class="btn-yes">Yes 18¢</button><button class="btn-no">No 82¢</button></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- SPORTS -->
+<section class="section" id="sports" style="background:var(--gray-50)">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="section-title" data-i18n="section.sports">🏆 스포츠 마켓</div>
+      <a class="section-link" data-i18n="section.viewall" href="#">전체보기 →</a>
+    </div>
+    <div class="market-grid">
+      <div class="market-card" data-cat="sports" onclick="openTrade('Will the Lakers make the NBA playoffs?', 55)">
+        <div class="market-card-top"><div class="market-icon">🏀</div><div class="market-meta"><div class="market-category">NBA · Basketball</div><div class="market-question">Will the Lakers make the NBA playoffs?</div></div></div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:55%"></div></div>
+        <div class="market-card-bottom"><div class="market-chance"><div class="market-chance-val">55¢</div><div class="market-chance-label">Yes chance</div></div><div><div class="market-vol">$980K Vol</div><div class="market-btns"><button class="btn-yes">Yes 55¢</button><button class="btn-no">No 45¢</button></div></div></div>
+      </div>
+      <div class="market-card" data-cat="sports" onclick="openTrade('Will Manchester City win the Premier League?', 38)">
+        <div class="market-card-top"><div class="market-icon">⚽</div><div class="market-meta"><div class="market-category">Soccer · Premier League</div><div class="market-question">Will Manchester City win the Premier League?</div></div></div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:38%"></div></div>
+        <div class="market-card-bottom"><div class="market-chance"><div class="market-chance-val">38¢</div><div class="market-chance-label">Yes chance</div></div><div><div class="market-vol">$1.5M Vol</div><div class="market-btns"><button class="btn-yes">Yes 38¢</button><button class="btn-no">No 62¢</button></div></div></div>
+      </div>
+      <div class="market-card" data-cat="sports" onclick="openTrade('Will the New York Yankees win the World Series?', 22)">
+        <div class="market-card-top"><div class="market-icon">⚾</div><div class="market-meta"><div class="market-category">MLB · Baseball</div><div class="market-question">Will the New York Yankees win the World Series?</div></div></div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:22%; background:var(--red)"></div></div>
+        <div class="market-card-bottom"><div class="market-chance"><div class="market-chance-val">22¢</div><div class="market-chance-label">Yes chance</div></div><div><div class="market-vol">$760K Vol</div><div class="market-btns"><button class="btn-yes">Yes 22¢</button><button class="btn-no">No 78¢</button></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINANCIALS -->
+<section class="section" id="financials">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="section-title" data-i18n="section.financial">📈 금융 마켓</div>
+      <a class="section-link" data-i18n="section.viewall" href="#">전체보기 →</a>
+    </div>
+    <div class="market-grid">
+      <div class="market-card" onclick="openTrade('Will WTI Crude Oil close above $80 today?', 61)">
+        <div class="market-card-top"><div class="market-icon">🛢️</div><div class="market-meta"><div class="market-category">WTI Oil · Commodities</div><div class="market-question">Will WTI Crude Oil close above $80 today?</div></div></div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:61%"></div></div>
+        <div class="market-card-bottom"><div class="market-chance"><div class="market-chance-val">61¢</div><div class="market-chance-label">Yes chance</div></div><div><div class="market-vol">$2.2M Vol</div><div class="market-btns"><button class="btn-yes">Yes 61¢</button><button class="btn-no">No 39¢</button></div></div></div>
+      </div>
+      <div class="market-card" onclick="openTrade('Will Gold close above $2,100 per ounce today?', 79)">
+        <div class="market-card-top"><div class="market-icon">🥇</div><div class="market-meta"><div class="market-category">Gold · Commodities</div><div class="market-question">Will Gold close above $2,100 per ounce today?</div></div></div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:79%"></div></div>
+        <div class="market-card-bottom"><div class="market-chance"><div class="market-chance-val">79¢</div><div class="market-chance-label">Yes chance</div></div><div><div class="market-vol">$1.8M Vol</div><div class="market-btns"><button class="btn-yes">Yes 79¢</button><button class="btn-no">No 21¢</button></div></div></div>
+      </div>
+      <div class="market-card" onclick="openTrade('Will inflation (CPI) come in below 3% at the next report?', 41)">
+        <div class="market-card-top"><div class="market-icon">💰</div><div class="market-meta"><div class="market-category">CPI · Economics</div><div class="market-question">Will inflation (CPI) come in below 3% at next report?</div></div></div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:41%"></div></div>
+        <div class="market-card-bottom"><div class="market-chance"><div class="market-chance-val">41¢</div><div class="market-chance-label">Yes chance</div></div><div><div class="market-vol">$1.1M Vol</div><div class="market-btns"><button class="btn-yes">Yes 41¢</button><button class="btn-no">No 59¢</button></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="section" style="background:var(--gray-50)">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="section-title" data-i18n="section.browse">카테고리별 탐색</div>
+    </div>
+    <div class="cat-grid">
+      <a class="cat-card" href="#sports"><span class="cat-emoji">🏆</span><div class="cat-name">Sports</div><div class="cat-count">240+ markets</div></a>
+      <a class="cat-card" href="#financials"><span class="cat-emoji">📈</span><div class="cat-name">Financials</div><div class="cat-count">180+ markets</div></a>
+      <a class="cat-card" href="#politics"><span class="cat-emoji">🗳️</span><div class="cat-name">Politics</div><div class="cat-count">95+ markets</div></a>
+      <a class="cat-card" href="#crypto"><span class="cat-emoji">₿</span><div class="cat-name">Crypto</div><div class="cat-count">120+ markets</div></a>
+      <a class="cat-card" href="#"><span class="cat-emoji">🌡️</span><div class="cat-name">Climate</div><div class="cat-count">60+ markets</div></a>
+      <a class="cat-card" href="#"><span class="cat-emoji">🎭</span><div class="cat-name">Culture</div><div class="cat-count">75+ markets</div></a>
+      <a class="cat-card" href="#"><span class="cat-emoji">💹</span><div class="cat-name">Economics</div><div class="cat-count">110+ markets</div></a>
+      <a class="cat-card" href="#"><span class="cat-emoji">💻</span><div class="cat-name">Tech</div><div class="cat-count">50+ markets</div></a>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="hiw-section" id="how-it-works">
+  <div class="hiw-inner">
+    <h2 class="hiw-title" data-i18n="hiw.title">Foket이 작동하는 방식</h2>
+    <p class="hiw-sub" data-i18n="hiw.sub">세계 최초의 연방 규제 예측 마켓</p>
+    <div class="hiw-grid">
+      <div class="hiw-card">
+        <div class="hiw-num">1</div>
+        <h3 data-i18n="hiw.s1.title">마켓 선택</h3>
+        <p data-i18n="hiw.s1.text">스포츠, 금융, 정치 등 수천 개의 마켓을 탐색하세요. 모든 마켓은 예 또는 아니오로 결정됩니다.</p>
+      </div>
+      <div class="hiw-card">
+        <div class="hiw-num">2</div>
+        <h3 data-i18n="hiw.s2.title">포지션 취하기</h3>
+        <p data-i18n="hiw.s2.text">일어날 것 같으면 "예", 아니면 "아니오"를 구매하세요. 가격은 확률을 반영해 1¢~99¢ 범위입니다.</p>
+      </div>
+      <div class="hiw-card">
+        <div class="hiw-num">3</div>
+        <h3 data-i18n="hiw.s3.title">언제든지 거래</h3>
+        <p data-i18n="hiw.s3.text">마켓은 24/7 운영됩니다. 결정 전 언제든지 계약을 사고팔아 수익을 확정하거나 손실을 줄일 수 있습니다.</p>
+      </div>
+      <div class="hiw-card">
+        <div class="hiw-num">4</div>
+        <h3 data-i18n="hiw.s4.title">수익 받기</h3>
+        <p data-i18n="hiw.s4.text">당첨 계약은 각 $1을 지급합니다. 은행, 직불카드 또는 디지털 지갑으로 즉시 출금 가능합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-section">
+  <div class="stats-inner">
+    <h2 style="font-size:32px;font-weight:800;letter-spacing:-0.5px" data-i18n="stats.title">숫자가 말해줍니다</h2>
+    <p style="color:var(--gray-500);margin-top:8px" data-i18n="stats.sub">Foket은 미국 최고의 규제 예측 마켓입니다</p>
+    <div class="stats-grid">
+      <div class="stat-item"><h3>$4.39B</h3><p data-i18n="stats.s1">기록 월간 거래량 (2025년 10월)</p></div>
+      <div class="stat-item"><h3>2M+</h3><p data-i18n="stats.s2">활성 등록 거래자</p></div>
+      <div class="stat-item"><h3>1,000+</h3><p data-i18n="stats.s3">언제든지 공개 마켓</p></div>
+      <div class="stat-item"><h3>#1</h3><p data-i18n="stats.s4">CFTC 규제 예측 마켓</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="test-section">
+  <div class="test-inner">
+    <h2 class="test-title" data-i18n="test.title">거래자들의 이야기</h2>
+    <div class="test-grid">
+      <div class="test-card">
+        <div class="test-stars">★★★★★</div>
+        <p class="test-text">"Kalshi is the only platform where I can actually trade on real-world events. The CFTC regulation gives me peace of mind. Made $3,400 last quarter."</p>
+        <div class="test-author"><div class="test-avatar">MJ</div><div><div class="test-name">Michael J.</div><div class="test-handle">@tradermike</div></div></div>
+      </div>
+      <div class="test-card">
+        <div class="test-stars">★★★★★</div>
+        <p class="test-text">"Finally a legit prediction market. The interface is clean, withdrawals are instant, and the market variety is incredible. Game changer for traders."</p>
+        <div class="test-author"><div class="test-avatar">SR</div><div><div class="test-name">Sarah R.</div><div class="test-handle">@sarahrades</div></div></div>
+      </div>
+      <div class="test-card">
+        <div class="test-stars">★★★★★</div>
+        <p class="test-text">"I use Kalshi to hedge my portfolio. When I'm long on stocks I buy 'No' on S&P going up. It's brilliant risk management. Highly recommend."</p>
+        <div class="test-author"><div class="test-avatar">TK</div><div><div class="test-name">Tom K.</div><div class="test-handle">@tomktrader</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-inner">
+    <h2 data-i18n="cta.h2">거래를 시작할 준비가 됐나요?</h2>
+    <p data-i18n="cta.p">유일한 CFTC 규제 예측 마켓에서 수백만 거래자들과 함께하세요. 무료 가입, 즉시 입금 지원.</p>
+    <div class="cta-actions">
+      <button class="btn btn-primary btn-lg" data-i18n="cta.create" onclick="window.location.href='signup.html'">무료 계정 만들기 →</button>
+      <button class="btn btn-ghost btn-lg" data-i18n="nav.login" onclick="openModal('login')">로그인</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">⬡ FOKET</div>
+        <p data-i18n="footer.brand">Foket은 미국 최초의 연방 규제 예측 마켓입니다. CFTC 공인 거래소. 중요한 모든 것에 거래하세요.</p>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.col1.title">마켓</h4>
+        <a href="#" data-i18n="footer.col1.l1">스포츠</a>
+        <a href="#" data-i18n="footer.col1.l2">금융</a>
+        <a href="#" data-i18n="footer.col1.l3">정치</a>
+        <a href="#" data-i18n="footer.col1.l4">크립토</a>
+        <a href="#" data-i18n="footer.col1.l5">날씨</a>
+        <a href="#" data-i18n="footer.col1.l6">문화</a>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.col2.title">회사</h4>
+        <a href="#" data-i18n="footer.col2.l1">회사 소개</a>
+        <a href="#" data-i18n="footer.col2.l2">블로그</a>
+        <a href="#" data-i18n="footer.col2.l3">채용</a>
+        <a href="#" data-i18n="footer.col2.l4">언론</a>
+        <a href="#" data-i18n="footer.col2.l5">파트너</a>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.col3.title">지원</h4>
+        <a href="#" data-i18n="footer.col3.l1">도움말</a>
+        <a href="#" data-i18n="footer.col3.l2">사용 방법</a>
+        <a href="#" data-i18n="footer.col3.l3">수수료</a>
+        <a href="#" data-i18n="footer.col3.l4">문의하기</a>
+        <a href="#" data-i18n="footer.col3.l5">상태</a>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.col4.title">법적 고지</h4>
+        <a href="#" data-i18n="footer.col4.l1">이용약관</a>
+        <a href="#" data-i18n="footer.col4.l2">개인정보처리방침</a>
+        <a href="#" data-i18n="footer.col4.l3">위험 공시</a>
+        <a href="#" data-i18n="footer.col4.l4">규제 정보</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p data-i18n="footer.copy">© 2026 Foket Inc. 모든 권리 보유. CFTC 공인 거래소.</p>
+      <div class="footer-badges">
+        <div class="badge">CFTC Regulated</div>
+        <div class="badge">SOC 2 Certified</div>
+        <div class="badge">256-bit SSL</div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="authModal" onclick="closeModalOutside(event)">
+  <div class="modal" id="loginForm">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2 data-i18n="modal.login.h2">다시 오신 것을 환영합니다</h2>
+    <p data-i18n="modal.login.p">Foket 계정에 로그인하세요</p>
+    <div class="social-btn" onclick="handleGoogleLogin()">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+      <span data-i18n="modal.google">Google로 계속</span>
+    </div>
+    <div class="social-btn" onclick="showToast('Apple 로그인 준비 중!')">
+      <svg width="18" height="18" viewBox="0 0 814 1000"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-37.3-155.5-127.1c-43.5-82.4-78.8-214.4-78.8-340.8 0-170.3 111.4-260.2 220.5-260.2 58.5 0 107.5 38.3 144.2 38.3 35.3 0 90.2-40.4 156.7-40.4 25.2 0 108.2 2.6 168.4 81.9zm-225.6-73.4c29.6-34.5 50.1-82.4 50.1-130.3 0-6.5-.6-13-1.9-18.2-47.5 1.9-104 31.8-138 70.6-26.5 29.7-51 77.6-51 126.1 0 7.1 1.3 14.2 1.9 16.5 3.2.6 8.4 1.3 13.6 1.3 43.1 0 97.7-28.6 125.3-65.9z" fill="currentColor"/></svg>
+      <span data-i18n="modal.apple">Apple로 계속</span>
+    </div>
+    <div class="form-divider" data-i18n="modal.or">또는</div>
+    <div class="form-group">
+      <label class="form-label" data-i18n="modal.email">이메일</label>
+      <input class="form-input" id="loginEmail" name="loginEmail" type="email" data-i18n="modal.emailPh" placeholder="이메일을 입력하세요" autocomplete="email" required />
+    </div>
+    <div class="form-group">
+      <label class="form-label" data-i18n="modal.pw">비밀번호</label>
+      <input class="form-input" id="loginPassword" name="loginPassword" type="password" data-i18n="modal.pwPh" placeholder="비밀번호를 입력하세요" autocomplete="current-password" required />
+    </div>
+    <div id="loginError" style="display:none;color:#F04438;font-size:13px;margin-bottom:8px;padding:8px 12px;background:#FEE9E7;border-radius:8px"></div>
+    <button class="btn btn-primary btn-md" id="loginSubmitBtn" style="width:100%;margin-top:8px" onclick="handleEmailLogin()">
+      <span data-i18n="nav.login">로그인</span>
+    </button>
+    <div class="modal-switch"><span data-i18n="modal.login.switch">계정이 없으신가요?</span> <a data-i18n="nav.signup" onclick="switchModal('signup')" style="cursor:pointer">회원가입</a></div>
+  </div>
+
+  <div class="modal" id="signupForm" style="display:none">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2 data-i18n="modal.signup.h2">계정 만들기</h2>
+    <p data-i18n="modal.signup.p">Foket에서 수백만 거래자들과 함께하세요</p>
+    <!-- Google 회원가입 버튼 -->
+    <div class="social-btn" id="signupGoogleBtn" onclick="handleGoogleSignup()">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+      <span data-i18n="modal.google">Google로 계속</span>
+    </div>
+    <div class="form-divider" data-i18n="modal.or">또는</div>
+    <!-- 이메일 회원가입 폼 -->
+    <div class="form-group">
+      <label class="form-label" data-i18n="modal.name">전체 이름</label>
+      <input class="form-input" id="signupName" type="text" placeholder="홍길동" autocomplete="name" />
+    </div>
+    <div class="form-group">
+      <label class="form-label" data-i18n="modal.email">이메일</label>
+      <input class="form-input" id="signupEmail" type="email" placeholder="hong@example.com" autocomplete="email" />
+    </div>
+    <div class="form-group">
+      <label class="form-label" data-i18n="modal.pw">비밀번호</label>
+      <input class="form-input" id="signupPassword" type="password" placeholder="8자 이상 입력하세요" autocomplete="new-password" />
+    </div>
+    <div id="signupError" style="display:none;color:#F04438;font-size:13px;margin-bottom:8px;padding:8px 12px;background:#FEE9E7;border-radius:8px"></div>
+    <button class="btn btn-primary btn-md" id="signupSubmitBtn" style="width:100%;margin-top:8px" onclick="handleEmailSignup()">
+      <span data-i18n="modal.signup.btn">계정 만들기</span>
+    </button>
+    <div class="modal-switch"><span data-i18n="modal.signup.switch">이미 계정이 있으신가요?</span> <a data-i18n="nav.login" onclick="switchModal('login')" style="cursor:pointer">로그인</a></div>
+  </div>
+</div>
+
+<!-- TRADE MODAL -->
+<div class="modal-overlay" id="tradeModal" onclick="closeTradeOutside(event)">
+  <div class="modal trade-modal">
+    <button class="modal-close" onclick="closeTrade()">✕</button>
+    <h2 style="font-size:18px;margin-bottom:16px" data-i18n="trade.title">거래 실행</h2>
+    <div class="trade-question" id="tradeQuestion"></div>
+    <div class="trade-toggle">
+      <button class="trade-yes active" id="tradeYesBtn" onclick="selectSide('yes')"><span data-i18n="trade.yes">✓ 예</span></button>
+      <button class="trade-no" id="tradeNoBtn" onclick="selectSide('no')"><span data-i18n="trade.no">✗ 아니오</span></button>
+    </div>
+    <div class="trade-label" data-i18n="trade.amount">금액</div>
+    <div class="trade-input-wrap">
+      <span class="dollar">$</span>
+      <input class="trade-input" id="tradeAmount" type="number" value="10" min="1" oninput="updateTrade()" />
+    </div>
+    <div class="trade-amounts">
+      <button class="trade-amt" onclick="setAmount(5)">$5</button>
+      <button class="trade-amt" onclick="setAmount(10)">$10</button>
+      <button class="trade-amt" onclick="setAmount(25)">$25</button>
+      <button class="trade-amt" onclick="setAmount(50)">$50</button>
+      <button class="trade-amt" onclick="setAmount(100)">$100</button>
+    </div>
+    <div class="trade-summary">
+      <div class="trade-row"><span data-i18n="trade.price">계약당 가격</span><span id="tradePrice">67¢</span></div>
+      <div class="trade-row"><span data-i18n="trade.contracts">계약 수</span><span id="tradeContracts">14</span></div>
+      <div class="trade-row"><span data-i18n="trade.profit">최대 수익</span><span id="tradeProfit" style="color:var(--green)">$4.02</span></div>
+      <div class="trade-row"><span data-i18n="trade.cost">총 비용</span><span id="tradeCost">$10.00</span></div>
+    </div>
+    <button class="btn btn-primary btn-md" style="width:100%" data-i18n="trade.confirm" onclick="confirmTrade()">거래 확인 →</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="firebase-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<script>
+  /* ── i18n ── */
+  const T = {
+    ko: {
+      'nav.home':'홈','nav.hot':'Hot 이슈','nav.politics':'정치','nav.sports':'스포츠',
+      'nav.culture':'문화','nav.trading':'트레이딩','nav.weather':'날씨',
+      'nav.economy':'경제','nav.statement':'발언','nav.neighbor':'나의 이웃','nav.science':'과학 & 기술',
+      'nav.mypage':'마이페이지','nav.login':'로그인','nav.signup':'회원가입',
+      'hero.badge':'CFTC 공인 거래소','hero.h1':'모든 것에<br/><span>거래하세요</span>',
+      'hero.sub':'스포츠, 금융, 정치 등 실제 사건의 결과에 대한 계약을 사고팔 수 있습니다.',
+      'hero.start':'거래 시작 →','hero.explore':'마켓 탐색',
+      'hero.trust1':'CFTC 규제','hero.trust2':'무료 가입','hero.trust3':'즉시 입금','hero.trust4':'$4.39B+ 거래',
+      'strip.h2':'🏆 10월 기록: 거래량 $4.39B','strip.p':'Foket 역사상 가장 큰 단월 거래량입니다. 수백만 거래자들과 함께하세요.',
+      'strip.stat1':'활성 거래자','strip.stat2':'공개 마켓','strip.stat3':'10월 거래량',
+      'section.trending':'🔥 인기 마켓','section.viewall':'전체보기 →','section.sports':'🏆 스포츠 마켓',
+      'section.financial':'📈 금융 마켓','section.browse':'카테고리별 탐색',
+      'hiw.title':'Foket이 작동하는 방식','hiw.sub':'세계 최초의 연방 규제 예측 마켓',
+      'hiw.s1.title':'마켓 선택','hiw.s1.text':'스포츠, 금융, 정치 등 수천 개의 마켓을 탐색하세요. 모든 마켓은 예 또는 아니오로 결정됩니다.',
+      'hiw.s2.title':'포지션 취하기','hiw.s2.text':'일어날 것 같으면 "예", 아니면 "아니오"를 구매하세요. 가격은 확률을 반영해 1¢~99¢ 범위입니다.',
+      'hiw.s3.title':'언제든지 거래','hiw.s3.text':'마켓은 24/7 운영됩니다. 결정 전 언제든지 계약을 사고팔아 수익을 확정하거나 손실을 줄일 수 있습니다.',
+      'hiw.s4.title':'수익 받기','hiw.s4.text':'당첨 계약은 각 $1을 지급합니다. 은행, 직불카드 또는 디지털 지갑으로 즉시 출금 가능합니다.',
+      'stats.title':'숫자가 말해줍니다','stats.sub':'Foket은 미국 최고의 규제 예측 마켓입니다',
+      'stats.s1':'기록 월간 거래량 (2025년 10월)','stats.s2':'활성 등록 거래자','stats.s3':'언제든지 공개 마켓','stats.s4':'CFTC 규제 예측 마켓',
+      'test.title':'거래자들의 이야기',
+      'cta.h2':'거래를 시작할 준비가 됐나요?','cta.p':'유일한 CFTC 규제 예측 마켓에서 수백만 거래자들과 함께하세요. 무료 가입, 즉시 입금 지원.',
+      'cta.create':'무료 계정 만들기 →',
+      'footer.brand':'Foket은 미국 최초의 연방 규제 예측 마켓입니다. CFTC 공인 거래소. 중요한 모든 것에 거래하세요.',
+      'footer.col1.title':'마켓','footer.col1.l1':'스포츠','footer.col1.l2':'금융','footer.col1.l3':'정치','footer.col1.l4':'크립토','footer.col1.l5':'날씨','footer.col1.l6':'문화',
+      'footer.col2.title':'회사','footer.col2.l1':'회사 소개','footer.col2.l2':'블로그','footer.col2.l3':'채용','footer.col2.l4':'언론','footer.col2.l5':'파트너',
+      'footer.col3.title':'지원','footer.col3.l1':'도움말','footer.col3.l2':'사용 방법','footer.col3.l3':'수수료','footer.col3.l4':'문의하기','footer.col3.l5':'상태',
+      'footer.col4.title':'법적 고지','footer.col4.l1':'이용약관','footer.col4.l2':'개인정보처리방침','footer.col4.l3':'위험 공시','footer.col4.l4':'규제 정보',
+      'footer.copy':'© 2026 Foket Inc. 모든 권리 보유. CFTC 공인 거래소.',
+      'modal.login.h2':'다시 오신 것을 환영합니다','modal.login.p':'Foket 계정에 로그인하세요',
+      'modal.google':'Google로 계속','modal.apple':'Apple로 계속','modal.or':'또는',
+      'modal.email':'이메일','modal.emailPh':'이메일을 입력하세요','modal.emailPh2':'hong@example.com',
+      'modal.pw':'비밀번호','modal.pwPh':'비밀번호를 입력하세요','modal.pwCreate':'비밀번호를 만드세요',
+      'modal.login.switch':'계정이 없으신가요?',
+      'modal.signup.h2':'계정 만들기','modal.signup.p':'Foket에서 수백만 거래자들과 함께하세요',
+      'modal.name':'전체 이름','modal.namePh':'홍길동','modal.signup.btn':'계정 만들기','modal.signup.switch':'이미 계정이 있으신가요?',
+      'trade.title':'거래 실행','trade.yes':'✓ 예','trade.no':'✗ 아니오','trade.amount':'금액',
+      'trade.price':'계약당 가격','trade.contracts':'계약 수','trade.profit':'최대 수익','trade.cost':'총 비용','trade.confirm':'거래 확인 →'
+    },
+    en: {
+      'nav.home':'Home','nav.hot':'Hot Issues','nav.politics':'Politics','nav.sports':'Sports',
+      'nav.culture':'Culture','nav.trading':'Trading','nav.weather':'Weather',
+      'nav.economy':'Economy','nav.statement':'Statements','nav.neighbor':'My Neighbors','nav.science':'Science & Tech',
+      'nav.mypage':'My Page','nav.login':'Log in','nav.signup':'Sign up',
+      'hero.badge':'CFTC Regulated Exchange','hero.h1':'Trade on <span>anything</span><br/>that matters',
+      'hero.sub':'Buy and sell contracts on the outcomes of real-world events across sports, finance, politics, and more.',
+      'hero.start':'Start Trading →','hero.explore':'Explore Markets',
+      'hero.trust1':'CFTC Regulated','hero.trust2':'Free to sign up','hero.trust3':'Instant deposits','hero.trust4':'$4.39B+ traded',
+      'strip.h2':'🏆 October Record: $4.39B Volume','strip.p':'The largest single-month trading volume in Foket history. Join millions of traders.',
+      'strip.stat1':'Active traders','strip.stat2':'Open markets','strip.stat3':'Oct volume',
+      'section.trending':'🔥 Trending Markets','section.viewall':'View all →','section.sports':'🏆 Sports Markets',
+      'section.financial':'📈 Financial Markets','section.browse':'Browse by Category',
+      'hiw.title':'How Foket works','hiw.sub':'The world\'s first federally regulated prediction market',
+      'hiw.s1.title':'Pick a market','hiw.s1.text':'Browse thousands of markets across sports, finance, politics, and more. Every market resolves to Yes or No.',
+      'hiw.s2.title':'Take a position','hiw.s2.text':'Buy "Yes" if you think it\'ll happen, or "No" if you don\'t. Prices range from 1¢ to 99¢ reflecting the probability.',
+      'hiw.s3.title':'Trade anytime','hiw.s3.text':'Markets are live 24/7. Buy and sell contracts any time before resolution — lock in profits or cut losses.',
+      'hiw.s4.title':'Get paid','hiw.s4.text':'Winning contracts pay $1 each. Instant withdrawal to your bank, debit card, or digital wallet.',
+      'stats.title':'The numbers speak for themselves','stats.sub':'Foket is the leading regulated prediction market in the United States',
+      'stats.s1':'Record monthly volume (Oct 2025)','stats.s2':'Active registered traders','stats.s3':'Open markets at any time','stats.s4':'CFTC regulated prediction market',
+      'test.title':'What traders are saying',
+      'cta.h2':'Ready to start trading?','cta.p':'Join millions of traders on the only CFTC-regulated prediction market. Free to sign up, instant deposits.',
+      'cta.create':'Create free account →',
+      'footer.brand':'Foket is the first federally regulated prediction market in the United States. CFTC licensed exchange. Trade on anything that matters.',
+      'footer.col1.title':'Markets','footer.col1.l1':'Sports','footer.col1.l2':'Financials','footer.col1.l3':'Politics','footer.col1.l4':'Crypto','footer.col1.l5':'Weather','footer.col1.l6':'Culture',
+      'footer.col2.title':'Company','footer.col2.l1':'About us','footer.col2.l2':'Blog','footer.col2.l3':'Careers','footer.col2.l4':'Press','footer.col2.l5':'Partners',
+      'footer.col3.title':'Support','footer.col3.l1':'Help center','footer.col3.l2':'How it works','footer.col3.l3':'Fees','footer.col3.l4':'Contact us','footer.col3.l5':'Status',
+      'footer.col4.title':'Legal','footer.col4.l1':'Terms of service','footer.col4.l2':'Privacy policy','footer.col4.l3':'Risk disclosure','footer.col4.l4':'Regulatory info',
+      'footer.copy':'© 2026 Foket Inc. All rights reserved. CFTC licensed exchange.',
+      'modal.login.h2':'Welcome back','modal.login.p':'Sign in to your Foket account',
+      'modal.google':'Continue with Google','modal.apple':'Continue with Apple','modal.or':'or',
+      'modal.email':'Email','modal.emailPh':'Enter your email','modal.emailPh2':'john@example.com',
+      'modal.pw':'Password','modal.pwPh':'Enter your password','modal.pwCreate':'Create a password',
+      'modal.login.switch':'Don\'t have an account?',
+      'modal.signup.h2':'Create account','modal.signup.p':'Join millions of traders on Foket',
+      'modal.name':'Full name','modal.namePh':'John Doe','modal.signup.btn':'Create account','modal.signup.switch':'Already have an account?',
+      'trade.title':'Place a Trade','trade.yes':'✓ Yes','trade.no':'✗ No','trade.amount':'Amount',
+      'trade.price':'Price per contract','trade.contracts':'Contracts','trade.profit':'Max profit','trade.cost':'Total cost','trade.confirm':'Confirm Trade →'
+    },
+    ja: {
+      'nav.home':'ホーム','nav.hot':'ホット','nav.politics':'政治','nav.sports':'スポーツ',
+      'nav.culture':'文化','nav.trading':'トレーディング','nav.weather':'天気',
+      'nav.economy':'経済','nav.statement':'発言','nav.neighbor':'近所の人','nav.science':'科学・技術',
+      'nav.mypage':'マイページ','nav.login':'ログイン','nav.signup':'新規登録',
+      'hero.badge':'CFTC認定取引所','hero.h1':'重要なことすべてに<br/><span>取引しよう</span>',
+      'hero.sub':'スポーツ、金融、政治など実際の出来事の結果に基づく契約を売買できます。',
+      'hero.start':'取引を始める →','hero.explore':'マーケットを探す',
+      'hero.trust1':'CFTC規制','hero.trust2':'無料登録','hero.trust3':'即時入金','hero.trust4':'$4.39B+取引済',
+      'strip.h2':'🏆 10月記録: 取引量 $4.39B','strip.p':'Foket史上最大の月間取引量。数百万のトレーダーと共に。',
+      'strip.stat1':'アクティブトレーダー','strip.stat2':'公開マーケット','strip.stat3':'10月取引量',
+      'section.trending':'🔥 トレンドマーケット','section.viewall':'すべて見る →','section.sports':'🏆 スポーツマーケット',
+      'section.financial':'📈 金融マーケット','section.browse':'カテゴリ別ブラウズ',
+      'hiw.title':'Foketの仕組み','hiw.sub':'世界初の連邦規制予測マーケット',
+      'hiw.s1.title':'マーケットを選ぶ','hiw.s1.text':'スポーツ、金融、政治など数千のマーケットを検索。すべてのマーケットはYesまたはNoで決定。',
+      'hiw.s2.title':'ポジションを取る','hiw.s2.text':'起きると思えば「Yes」、そうでなければ「No」を購入。価格は確率を反映して1¢〜99¢の範囲。',
+      'hiw.s3.title':'いつでも取引','hiw.s3.text':'マーケットは24/7稼働中。決済前にいつでも契約を売買できます。',
+      'hiw.s4.title':'利益を得る','hiw.s4.text':'当選契約はそれぞれ$1を支払います。銀行口座やデジタルウォレットへ即時出金。',
+      'stats.title':'数字が物語る','stats.sub':'Foketは米国最大の規制予測マーケットです',
+      'stats.s1':'記録的月間取引量（2025年10月）','stats.s2':'アクティブ登録トレーダー','stats.s3':'常時公開マーケット','stats.s4':'CFTC規制予測マーケット',
+      'test.title':'トレーダーの声',
+      'cta.h2':'取引を始めましょう','cta.p':'唯一のCFTC規制予測マーケットで数百万のトレーダーと共に。無料登録、即時入金対応。',
+      'cta.create':'無料アカウント作成 →',
+      'footer.brand':'Foketは米国初の連邦規制予測マーケットです。CFTC認定取引所。重要なことすべてに取引を。',
+      'footer.col1.title':'マーケット','footer.col1.l1':'スポーツ','footer.col1.l2':'金融','footer.col1.l3':'政治','footer.col1.l4':'クリプト','footer.col1.l5':'天気','footer.col1.l6':'文化',
+      'footer.col2.title':'会社','footer.col2.l1':'会社概要','footer.col2.l2':'ブログ','footer.col2.l3':'採用','footer.col2.l4':'プレス','footer.col2.l5':'パートナー',
+      'footer.col3.title':'サポート','footer.col3.l1':'ヘルプセンター','footer.col3.l2':'使い方','footer.col3.l3':'手数料','footer.col3.l4':'お問い合わせ','footer.col3.l5':'ステータス',
+      'footer.col4.title':'法的情報','footer.col4.l1':'利用規約','footer.col4.l2':'プライバシーポリシー','footer.col4.l3':'リスク開示','footer.col4.l4':'規制情報',
+      'footer.copy':'© 2026 Foket Inc. 全著作権所有。CFTC認定取引所。',
+      'modal.login.h2':'おかえりなさい','modal.login.p':'Foketアカウントにサインイン',
+      'modal.google':'Googleで続ける','modal.apple':'Appleで続ける','modal.or':'または',
+      'modal.email':'メール','modal.emailPh':'メールアドレスを入力','modal.emailPh2':'example@email.com',
+      'modal.pw':'パスワード','modal.pwPh':'パスワードを入力','modal.pwCreate':'パスワードを作成',
+      'modal.login.switch':'アカウントをお持ちでない方は',
+      'modal.signup.h2':'アカウント作成','modal.signup.p':'Foketで数百万のトレーダーと共に',
+      'modal.name':'氏名','modal.namePh':'山田 太郎','modal.signup.btn':'アカウント作成','modal.signup.switch':'すでにアカウントをお持ちの方は',
+      'trade.title':'取引を実行','trade.yes':'✓ はい','trade.no':'✗ いいえ','trade.amount':'金額',
+      'trade.price':'契約あたりの価格','trade.contracts':'契約数','trade.profit':'最大利益','trade.cost':'合計費用','trade.confirm':'取引を確定 →'
+    },
+    zh: {
+      'nav.home':'首页','nav.hot':'热点话题','nav.politics':'政治','nav.sports':'体育',
+      'nav.culture':'文化','nav.trading':'交易','nav.weather':'天气',
+      'nav.economy':'经济','nav.statement':'声明','nav.neighbor':'我的邻居','nav.science':'科学技术',
+      'nav.mypage':'我的页面','nav.login':'登录','nav.signup':'注册',
+      'hero.badge':'CFTC认证交易所','hero.h1':'交易<span>任何重要</span><br/>的事情',
+      'hero.sub':'在体育、金融、政治等真实世界事件的结果上买卖合约。',
+      'hero.start':'开始交易 →','hero.explore':'探索市场',
+      'hero.trust1':'CFTC监管','hero.trust2':'免费注册','hero.trust3':'即时存款','hero.trust4':'$4.39B+交易额',
+      'strip.h2':'🏆 10月记录：交易量 $4.39B','strip.p':'Foket历史上最大单月交易量。加入数百万交易者。',
+      'strip.stat1':'活跃交易者','strip.stat2':'开放市场','strip.stat3':'10月交易量',
+      'section.trending':'🔥 热门市场','section.viewall':'查看全部 →','section.sports':'🏆 体育市场',
+      'section.financial':'📈 金融市场','section.browse':'按分类浏览',
+      'hiw.title':'Foket如何运作','hiw.sub':'全球首个联邦监管预测市场',
+      'hiw.s1.title':'选择市场','hiw.s1.text':'浏览体育、金融、政治等数千个市场。每个市场以是或否结算。',
+      'hiw.s2.title':'建立仓位','hiw.s2.text':'认为会发生就买"是"，否则买"否"。价格从1¢到99¢反映概率。',
+      'hiw.s3.title':'随时交易','hiw.s3.text':'市场全天候运营。在结算前随时买卖合约，锁定利润或减少损失。',
+      'hiw.s4.title':'获得收益','hiw.s4.text':'获胜合约每份支付$1。即时提款至银行、借记卡或数字钱包。',
+      'stats.title':'数字说明一切','stats.sub':'Foket是美国领先的监管预测市场',
+      'stats.s1':'创纪录月交易量（2025年10月）','stats.s2':'活跃注册交易者','stats.s3':'随时开放市场','stats.s4':'CFTC监管预测市场',
+      'test.title':'交易者怎么说',
+      'cta.h2':'准备好开始交易了吗？','cta.p':'在唯一的CFTC监管预测市场与数百万交易者共同交易。免费注册，即时存款。',
+      'cta.create':'创建免费账户 →',
+      'footer.brand':'Foket是美国首个联邦监管预测市场。CFTC认证交易所。交易任何重要的事情。',
+      'footer.col1.title':'市场','footer.col1.l1':'体育','footer.col1.l2':'金融','footer.col1.l3':'政治','footer.col1.l4':'加密货币','footer.col1.l5':'天气','footer.col1.l6':'文化',
+      'footer.col2.title':'公司','footer.col2.l1':'关于我们','footer.col2.l2':'博客','footer.col2.l3':'招聘','footer.col2.l4':'媒体','footer.col2.l5':'合作伙伴',
+      'footer.col3.title':'支持','footer.col3.l1':'帮助中心','footer.col3.l2':'使用方法','footer.col3.l3':'费用','footer.col3.l4':'联系我们','footer.col3.l5':'状态',
+      'footer.col4.title':'法律','footer.col4.l1':'服务条款','footer.col4.l2':'隐私政策','footer.col4.l3':'风险披露','footer.col4.l4':'监管信息',
+      'footer.copy':'© 2026 Foket Inc. 版权所有。CFTC认证交易所。',
+      'modal.login.h2':'欢迎回来','modal.login.p':'登录您的Foket账户',
+      'modal.google':'通过Google继续','modal.apple':'通过Apple继续','modal.or':'或者',
+      'modal.email':'电子邮件','modal.emailPh':'输入您的电子邮件','modal.emailPh2':'example@email.com',
+      'modal.pw':'密码','modal.pwPh':'输入您的密码','modal.pwCreate':'创建密码',
+      'modal.login.switch':'还没有账户？',
+      'modal.signup.h2':'创建账户','modal.signup.p':'在Foket与数百万交易者共同交易',
+      'modal.name':'全名','modal.namePh':'张三','modal.signup.btn':'创建账户','modal.signup.switch':'已有账户？',
+      'trade.title':'执行交易','trade.yes':'✓ 是','trade.no':'✗ 否','trade.amount':'金额',
+      'trade.price':'每份合约价格','trade.contracts':'合约数','trade.profit':'最大收益','trade.cost':'总费用','trade.confirm':'确认交易 →'
+    },
+    fr: {
+      'nav.home':'Accueil','nav.hot':'Tendances','nav.politics':'Politique','nav.sports':'Sports',
+      'nav.culture':'Culture','nav.trading':'Trading','nav.weather':'Météo',
+      'nav.economy':'Économie','nav.statement':'Déclarations','nav.neighbor':'Mon Quartier','nav.science':'Science & Tech',
+      'nav.mypage':'Mon espace','nav.login':'Connexion','nav.signup':'S\'inscrire',
+      'hero.badge':'Bourse régulée CFTC','hero.h1':'Tradez sur <span>n\'importe quoi</span><br/>qui compte',
+      'hero.sub':'Achetez et vendez des contrats sur les résultats d\'événements réels dans les sports, la finance, la politique et plus encore.',
+      'hero.start':'Commencer →','hero.explore':'Explorer',
+      'hero.trust1':'Régulé CFTC','hero.trust2':'Inscription gratuite','hero.trust3':'Dépôts instantanés','hero.trust4':'$4.39B+ échangés',
+      'strip.h2':'🏆 Record octobre : $4.39B de volume','strip.p':'Le plus grand volume mensuel de l\'histoire de Foket. Rejoignez des millions de traders.',
+      'strip.stat1':'Traders actifs','strip.stat2':'Marchés ouverts','strip.stat3':'Volume octobre',
+      'section.trending':'🔥 Marchés tendance','section.viewall':'Voir tout →','section.sports':'🏆 Marchés sportifs',
+      'section.financial':'📈 Marchés financiers','section.browse':'Parcourir par catégorie',
+      'hiw.title':'Comment fonctionne Foket','hiw.sub':'Le premier marché de prédiction réglementé au monde',
+      'hiw.s1.title':'Choisir un marché','hiw.s1.text':'Parcourez des milliers de marchés dans les sports, la finance, la politique et plus. Chaque marché se résout en Oui ou Non.',
+      'hiw.s2.title':'Prendre position','hiw.s2.text':'Achetez "Oui" si vous pensez que ça arrivera, ou "Non" sinon. Les prix vont de 1¢ à 99¢.',
+      'hiw.s3.title':'Trader à tout moment','hiw.s3.text':'Les marchés sont actifs 24/7. Achetez et vendez des contrats avant la résolution.',
+      'hiw.s4.title':'Être payé','hiw.s4.text':'Les contrats gagnants paient chacun $1. Retrait instantané vers votre banque ou portefeuille numérique.',
+      'stats.title':'Les chiffres parlent d\'eux-mêmes','stats.sub':'Foket est le principal marché de prédiction réglementé aux États-Unis',
+      'stats.s1':'Volume mensuel record (oct. 2025)','stats.s2':'Traders inscrits actifs','stats.s3':'Marchés ouverts en permanence','stats.s4':'Marché de prédiction n°1 CFTC',
+      'test.title':'Ce que disent les traders',
+      'cta.h2':'Prêt à commencer ?','cta.p':'Rejoignez des millions de traders sur le seul marché de prédiction régulé CFTC. Inscription gratuite.',
+      'cta.create':'Créer un compte gratuit →',
+      'footer.brand':'Foket est le premier marché de prédiction réglementé aux États-Unis. Bourse CFTC. Tradez sur tout ce qui compte.',
+      'footer.col1.title':'Marchés','footer.col1.l1':'Sports','footer.col1.l2':'Finance','footer.col1.l3':'Politique','footer.col1.l4':'Crypto','footer.col1.l5':'Météo','footer.col1.l6':'Culture',
+      'footer.col2.title':'Entreprise','footer.col2.l1':'À propos','footer.col2.l2':'Blog','footer.col2.l3':'Carrières','footer.col2.l4':'Presse','footer.col2.l5':'Partenaires',
+      'footer.col3.title':'Support','footer.col3.l1':'Centre d\'aide','footer.col3.l2':'Comment ça marche','footer.col3.l3':'Frais','footer.col3.l4':'Contact','footer.col3.l5':'Statut',
+      'footer.col4.title':'Légal','footer.col4.l1':'CGU','footer.col4.l2':'Confidentialité','footer.col4.l3':'Divulgation des risques','footer.col4.l4':'Info réglementaire',
+      'footer.copy':'© 2026 Foket Inc. Tous droits réservés. Bourse CFTC.',
+      'modal.login.h2':'Bon retour','modal.login.p':'Connectez-vous à votre compte Foket',
+      'modal.google':'Continuer avec Google','modal.apple':'Continuer avec Apple','modal.or':'ou',
+      'modal.email':'E-mail','modal.emailPh':'Entrez votre e-mail','modal.emailPh2':'ex@email.com',
+      'modal.pw':'Mot de passe','modal.pwPh':'Entrez votre mot de passe','modal.pwCreate':'Créez un mot de passe',
+      'modal.login.switch':'Pas de compte ?',
+      'modal.signup.h2':'Créer un compte','modal.signup.p':'Rejoignez des millions de traders sur Foket',
+      'modal.name':'Nom complet','modal.namePh':'Jean Dupont','modal.signup.btn':'Créer un compte','modal.signup.switch':'Déjà un compte ?',
+      'trade.title':'Placer un trade','trade.yes':'✓ Oui','trade.no':'✗ Non','trade.amount':'Montant',
+      'trade.price':'Prix par contrat','trade.contracts':'Contrats','trade.profit':'Profit max','trade.cost':'Coût total','trade.confirm':'Confirmer →'
+    },
+    de: {
+      'nav.home':'Startseite','nav.hot':'Trending','nav.politics':'Politik','nav.sports':'Sport',
+      'nav.culture':'Kultur','nav.trading':'Handel','nav.weather':'Wetter',
+      'nav.economy':'Wirtschaft','nav.statement':'Aussagen','nav.neighbor':'Meine Nachbarn','nav.science':'Wissenschaft & Tech',
+      'nav.mypage':'Mein Bereich','nav.login':'Anmelden','nav.signup':'Registrieren',
+      'hero.badge':'CFTC-regulierte Börse','hero.h1':'Handel auf <span>alles</span><br/>was wichtig ist',
+      'hero.sub':'Kaufen und verkaufen Sie Kontrakte auf die Ergebnisse realer Ereignisse in Sport, Finanzen, Politik und mehr.',
+      'hero.start':'Jetzt handeln →','hero.explore':'Märkte entdecken',
+      'hero.trust1':'CFTC-reguliert','hero.trust2':'Kostenlose Anmeldung','hero.trust3':'Soforteinzahlung','hero.trust4':'$4.39B+ gehandelt',
+      'strip.h2':'🏆 Oktober-Rekord: $4,39B Volumen','strip.p':'Das größte monatliche Handelsvolumen in der Geschichte von Foket. Millionen Trader warten.',
+      'strip.stat1':'Aktive Trader','strip.stat2':'Offene Märkte','strip.stat3':'Okt. Volumen',
+      'section.trending':'🔥 Trending Märkte','section.viewall':'Alle anzeigen →','section.sports':'🏆 Sport-Märkte',
+      'section.financial':'📈 Finanz-Märkte','section.browse':'Nach Kategorie durchsuchen',
+      'hiw.title':'Wie Foket funktioniert','hiw.sub':'Der weltweit erste regulierte Vorhersagemarkt',
+      'hiw.s1.title':'Markt wählen','hiw.s1.text':'Durchsuchen Sie tausende Märkte in Sport, Finanzen und Politik. Jeder Markt löst sich in Ja oder Nein auf.',
+      'hiw.s2.title':'Position einnehmen','hiw.s2.text':'Kaufen Sie „Ja" wenn Sie denken es passiert, sonst „Nein". Preise von 1¢ bis 99¢.',
+      'hiw.s3.title':'Jederzeit handeln','hiw.s3.text':'Märkte laufen 24/7. Kaufen und verkaufen Sie Kontrakte jederzeit vor der Auflösung.',
+      'hiw.s4.title':'Ausgezahlt werden','hiw.s4.text':'Gewinnende Kontrakte zahlen jeweils $1. Sofortauszahlung auf Bank oder digitale Geldbörse.',
+      'stats.title':'Die Zahlen sprechen für sich','stats.sub':'Foket ist der führende regulierte Vorhersagemarkt in den USA',
+      'stats.s1':'Rekord-Monatsvolumen (Okt. 2025)','stats.s2':'Aktive registrierte Trader','stats.s3':'Offene Märkte jederzeit','stats.s4':'Nr. 1 CFTC-regulierter Markt',
+      'test.title':'Was Trader sagen',
+      'cta.h2':'Bereit zu handeln?','cta.p':'Schließen Sie sich Millionen von Tradern auf dem einzigen CFTC-regulierten Vorhersagemarkt an. Kostenlose Anmeldung.',
+      'cta.create':'Kostenloses Konto erstellen →',
+      'footer.brand':'Foket ist der erste regulierte Vorhersagemarkt in den USA. CFTC-lizenzierte Börse. Handeln Sie auf alles Wichtige.',
+      'footer.col1.title':'Märkte','footer.col1.l1':'Sport','footer.col1.l2':'Finanzen','footer.col1.l3':'Politik','footer.col1.l4':'Krypto','footer.col1.l5':'Wetter','footer.col1.l6':'Kultur',
+      'footer.col2.title':'Unternehmen','footer.col2.l1':'Über uns','footer.col2.l2':'Blog','footer.col2.l3':'Karriere','footer.col2.l4':'Presse','footer.col2.l5':'Partner',
+      'footer.col3.title':'Support','footer.col3.l1':'Hilfe','footer.col3.l2':'Funktionsweise','footer.col3.l3':'Gebühren','footer.col3.l4':'Kontakt','footer.col3.l5':'Status',
+      'footer.col4.title':'Rechtliches','footer.col4.l1':'Nutzungsbedingungen','footer.col4.l2':'Datenschutz','footer.col4.l3':'Risikohinweis','footer.col4.l4':'Regulierungsinfo',
+      'footer.copy':'© 2026 Foket Inc. Alle Rechte vorbehalten. CFTC-lizenzierte Börse.',
+      'modal.login.h2':'Willkommen zurück','modal.login.p':'Bei Ihrem Foket-Konto anmelden',
+      'modal.google':'Mit Google fortfahren','modal.apple':'Mit Apple fortfahren','modal.or':'oder',
+      'modal.email':'E-Mail','modal.emailPh':'E-Mail eingeben','modal.emailPh2':'beispiel@email.com',
+      'modal.pw':'Passwort','modal.pwPh':'Passwort eingeben','modal.pwCreate':'Passwort erstellen',
+      'modal.login.switch':'Noch kein Konto?',
+      'modal.signup.h2':'Konto erstellen','modal.signup.p':'Millionen Trader warten bei Foket',
+      'modal.name':'Vollständiger Name','modal.namePh':'Max Mustermann','modal.signup.btn':'Konto erstellen','modal.signup.switch':'Bereits ein Konto?',
+      'trade.title':'Trade platzieren','trade.yes':'✓ Ja','trade.no':'✗ Nein','trade.amount':'Betrag',
+      'trade.price':'Preis pro Kontrakt','trade.contracts':'Kontrakte','trade.profit':'Max. Gewinn','trade.cost':'Gesamtkosten','trade.confirm':'Trade bestätigen →'
+    },
+    es: {
+      'nav.home':'Inicio','nav.hot':'Tendencias','nav.politics':'Política','nav.sports':'Deportes',
+      'nav.culture':'Cultura','nav.trading':'Trading','nav.weather':'Clima',
+      'nav.economy':'Economía','nav.statement':'Declaraciones','nav.neighbor':'Mi Barrio','nav.science':'Ciencia & Tech',
+      'nav.mypage':'Mi página','nav.login':'Iniciar sesión','nav.signup':'Registrarse',
+      'hero.badge':'Bolsa regulada por CFTC','hero.h1':'Opera en <span>cualquier cosa</span><br/>que importa',
+      'hero.sub':'Compra y vende contratos sobre los resultados de eventos del mundo real en deportes, finanzas, política y más.',
+      'hero.start':'Empezar →','hero.explore':'Explorar mercados',
+      'hero.trust1':'Regulado CFTC','hero.trust2':'Registro gratuito','hero.trust3':'Depósitos instantáneos','hero.trust4':'$4.39B+ operados',
+      'strip.h2':'🏆 Récord de octubre: $4.39B en volumen','strip.p':'El mayor volumen mensual de la historia de Foket. Únete a millones de traders.',
+      'strip.stat1':'Traders activos','strip.stat2':'Mercados abiertos','strip.stat3':'Volumen oct.',
+      'section.trending':'🔥 Mercados en tendencia','section.viewall':'Ver todo →','section.sports':'🏆 Mercados deportivos',
+      'section.financial':'📈 Mercados financieros','section.browse':'Explorar por categoría',
+      'hiw.title':'Cómo funciona Foket','hiw.sub':'El primer mercado de predicción regulado federalmente',
+      'hiw.s1.title':'Elige un mercado','hiw.s1.text':'Explora miles de mercados en deportes, finanzas, política y más. Cada mercado se resuelve en Sí o No.',
+      'hiw.s2.title':'Toma una posición','hiw.s2.text':'Compra "Sí" si crees que sucederá, o "No" si no. Los precios van de 1¢ a 99¢.',
+      'hiw.s3.title':'Opera cuando quieras','hiw.s3.text':'Los mercados están activos 24/7. Compra y vende contratos antes de la resolución.',
+      'hiw.s4.title':'Cobra tus ganancias','hiw.s4.text':'Los contratos ganadores pagan $1 cada uno. Retiro instantáneo a tu banco o cartera digital.',
+      'stats.title':'Los números hablan por sí solos','stats.sub':'Foket es el principal mercado de predicción regulado en Estados Unidos',
+      'stats.s1':'Volumen mensual récord (oct. 2025)','stats.s2':'Traders registrados activos','stats.s3':'Mercados siempre abiertos','stats.s4':'Mercado n.º 1 regulado CFTC',
+      'test.title':'Lo que dicen los traders',
+      'cta.h2':'¿Listo para empezar?','cta.p':'Únete a millones de traders en el único mercado de predicción regulado por CFTC. Registro gratuito.',
+      'cta.create':'Crear cuenta gratuita →',
+      'footer.brand':'Foket es el primer mercado de predicción regulado federalmente en EE.UU. Bolsa con licencia CFTC.',
+      'footer.col1.title':'Mercados','footer.col1.l1':'Deportes','footer.col1.l2':'Finanzas','footer.col1.l3':'Política','footer.col1.l4':'Cripto','footer.col1.l5':'Clima','footer.col1.l6':'Cultura',
+      'footer.col2.title':'Empresa','footer.col2.l1':'Sobre nosotros','footer.col2.l2':'Blog','footer.col2.l3':'Empleo','footer.col2.l4':'Prensa','footer.col2.l5':'Socios',
+      'footer.col3.title':'Soporte','footer.col3.l1':'Centro de ayuda','footer.col3.l2':'Cómo funciona','footer.col3.l3':'Tarifas','footer.col3.l4':'Contacto','footer.col3.l5':'Estado',
+      'footer.col4.title':'Legal','footer.col4.l1':'Términos de servicio','footer.col4.l2':'Privacidad','footer.col4.l3':'Divulgación de riesgos','footer.col4.l4':'Info regulatoria',
+      'footer.copy':'© 2026 Foket Inc. Todos los derechos reservados. Bolsa CFTC.',
+      'modal.login.h2':'Bienvenido de nuevo','modal.login.p':'Inicia sesión en tu cuenta Foket',
+      'modal.google':'Continuar con Google','modal.apple':'Continuar con Apple','modal.or':'o',
+      'modal.email':'Correo electrónico','modal.emailPh':'Ingresa tu correo','modal.emailPh2':'ejemplo@email.com',
+      'modal.pw':'Contraseña','modal.pwPh':'Ingresa tu contraseña','modal.pwCreate':'Crea una contraseña',
+      'modal.login.switch':'¿No tienes cuenta?',
+      'modal.signup.h2':'Crear cuenta','modal.signup.p':'Únete a millones de traders en Foket',
+      'modal.name':'Nombre completo','modal.namePh':'Juan García','modal.signup.btn':'Crear cuenta','modal.signup.switch':'¿Ya tienes cuenta?',
+      'trade.title':'Realizar operación','trade.yes':'✓ Sí','trade.no':'✗ No','trade.amount':'Monto',
+      'trade.price':'Precio por contrato','trade.contracts':'Contratos','trade.profit':'Ganancia máx.','trade.cost':'Costo total','trade.confirm':'Confirmar →'
+    },
+    ru: {
+      'nav.home':'Главная','nav.hot':'Горячее','nav.politics':'Политика','nav.sports':'Спорт',
+      'nav.culture':'Культура','nav.trading':'Трейдинг','nav.weather':'Погода',
+      'nav.economy':'Экономика','nav.statement':'Заявления','nav.neighbor':'Мои соседи','nav.science':'Наука и Тех',
+      'nav.mypage':'Мой профиль','nav.login':'Войти','nav.signup':'Регистрация',
+      'hero.badge':'Биржа под надзором CFTC','hero.h1':'Торгуй на <span>всём важном</span><br/>в мире',
+      'hero.sub':'Покупайте и продавайте контракты на исходы реальных событий: спорт, финансы, политика и многое другое.',
+      'hero.start':'Начать торговлю →','hero.explore':'Исследовать рынки',
+      'hero.trust1':'Регулируется CFTC','hero.trust2':'Бесплатная регистрация','hero.trust3':'Мгновенные депозиты','hero.trust4':'$4.39B+ торгов',
+      'strip.h2':'🏆 Рекорд октября: объём $4.39B','strip.p':'Крупнейший месячный объём торгов в истории Foket. Присоединяйтесь к миллионам.',
+      'strip.stat1':'Активные трейдеры','strip.stat2':'Открытых рынков','strip.stat3':'Объём за октябрь',
+      'section.trending':'🔥 Популярные рынки','section.viewall':'Смотреть все →','section.sports':'🏆 Спортивные рынки',
+      'section.financial':'📈 Финансовые рынки','section.browse':'Просмотр по категориям',
+      'hiw.title':'Как работает Foket','hiw.sub':'Первый в мире предсказательный рынок под федеральным надзором',
+      'hiw.s1.title':'Выберите рынок','hiw.s1.text':'Просматривайте тысячи рынков в спорте, финансах и политике. Каждый рынок разрешается как Да или Нет.',
+      'hiw.s2.title':'Займите позицию','hiw.s2.text':'Купите «Да», если считаете, что событие произойдёт, или «Нет» — если нет. Цены от 1¢ до 99¢.',
+      'hiw.s3.title':'Торгуйте в любое время','hiw.s3.text':'Рынки работают 24/7. Покупайте и продавайте контракты в любой момент до завершения.',
+      'hiw.s4.title':'Получайте выплаты','hiw.s4.text':'Выигрышные контракты платят по $1 каждый. Мгновенный вывод на банк или цифровой кошелёк.',
+      'stats.title':'Цифры говорят сами за себя','stats.sub':'Foket — ведущий регулируемый предсказательный рынок в США',
+      'stats.s1':'Рекордный месячный объём (окт. 2025)','stats.s2':'Активных зарегистрированных трейдеров','stats.s3':'Открытых рынков постоянно','stats.s4':'Рынок №1 под надзором CFTC',
+      'test.title':'Что говорят трейдеры',
+      'cta.h2':'Готовы начать торговлю?','cta.p':'Присоединяйтесь к миллионам трейдеров на единственном рынке под надзором CFTC. Бесплатная регистрация.',
+      'cta.create':'Создать бесплатный аккаунт →',
+      'footer.brand':'Foket — первый предсказательный рынок под федеральным надзором в США. Биржа с лицензией CFTC.',
+      'footer.col1.title':'Рынки','footer.col1.l1':'Спорт','footer.col1.l2':'Финансы','footer.col1.l3':'Политика','footer.col1.l4':'Крипто','footer.col1.l5':'Погода','footer.col1.l6':'Культура',
+      'footer.col2.title':'Компания','footer.col2.l1':'О нас','footer.col2.l2':'Блог','footer.col2.l3':'Карьера','footer.col2.l4':'Пресса','footer.col2.l5':'Партнёры',
+      'footer.col3.title':'Поддержка','footer.col3.l1':'Справка','footer.col3.l2':'Как это работает','footer.col3.l3':'Комиссии','footer.col3.l4':'Связаться','footer.col3.l5':'Статус',
+      'footer.col4.title':'Правовая информация','footer.col4.l1':'Условия использования','footer.col4.l2':'Конфиденциальность','footer.col4.l3':'Раскрытие рисков','footer.col4.l4':'Регуляторная информация',
+      'footer.copy':'© 2026 Foket Inc. Все права защищены. Биржа с лицензией CFTC.',
+      'modal.login.h2':'Добро пожаловать назад','modal.login.p':'Войдите в свой аккаунт Foket',
+      'modal.google':'Продолжить с Google','modal.apple':'Продолжить с Apple','modal.or':'или',
+      'modal.email':'Электронная почта','modal.emailPh':'Введите вашу почту','modal.emailPh2':'пример@почта.com',
+      'modal.pw':'Пароль','modal.pwPh':'Введите пароль','modal.pwCreate':'Придумайте пароль',
+      'modal.login.switch':'Нет аккаунта?',
+      'modal.signup.h2':'Создать аккаунт','modal.signup.p':'Присоединяйтесь к миллионам трейдеров на Foket',
+      'modal.name':'Полное имя','modal.namePh':'Иван Иванов','modal.signup.btn':'Создать аккаунт','modal.signup.switch':'Уже есть аккаунт?',
+      'trade.title':'Разместить сделку','trade.yes':'✓ Да','trade.no':'✗ Нет','trade.amount':'Сумма',
+      'trade.price':'Цена за контракт','trade.contracts':'Контракты','trade.profit':'Макс. прибыль','trade.cost':'Итого','trade.confirm':'Подтвердить →'
+    }
+  };
+
+  const langMeta = {
+    ko: { flag: '🇰🇷', name: '한국어' },
+    en: { flag: '🇺🇸', name: 'English' },
+    ja: { flag: '🇯🇵', name: '日本語' },
+    zh: { flag: '🇨🇳', name: '中文' },
+    fr: { flag: '🇫🇷', name: 'Français' },
+    de: { flag: '🇩🇪', name: 'Deutsch' },
+    es: { flag: '🇪🇸', name: 'Español' },
+    ru: { flag: '🇷🇺', name: 'Русский' }
+  };
+
+  let currentLang = localStorage.getItem('foket-lang') || 'ko';
+
+  function applyLanguage(lang) {
+    const t = T[lang] || T.ko;
+    // Update data-i18n elements
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (!t[key]) return;
+      if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+        el.placeholder = t[key];
+      } else {
+        el.textContent = t[key];
+      }
+    });
+    // Special: hero h1 uses innerHTML (contains span + br)
+    if (t['hero.h1']) {
+      document.getElementById('heroH1').innerHTML = t['hero.h1'];
+    }
+    document.documentElement.lang = lang;
+  }
+
+  function setLang(lang) {
+    currentLang = lang;
+    localStorage.setItem('foket-lang', lang);
+    // Update button display
+    document.getElementById('langFlag').textContent = langMeta[lang].flag;
+    document.getElementById('langName').textContent = langMeta[lang].name;
+    // Update active option
+    document.querySelectorAll('.lang-option').forEach(opt => {
+      opt.classList.toggle('active', opt.getAttribute('data-lang') === lang);
+    });
+    document.getElementById('langDropdown').classList.remove('open');
+    applyLanguage(lang);
+  }
+
+  function toggleLangMenu() {
+    document.getElementById('langDropdown').classList.toggle('open');
+  }
+
+  // Close dropdown on outside click
+  document.addEventListener('click', e => {
+    const sel = document.getElementById('langSelector');
+    if (sel && !sel.contains(e.target)) {
+      document.getElementById('langDropdown').classList.remove('open');
+    }
+  });
+
+  // Init language on load
+  document.addEventListener('DOMContentLoaded', () => setLang(currentLang));
+
+  /* ── Category filter ── */
+  function filterCat(el, cat) {
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    const cards = document.querySelectorAll('#marketGrid .market-card');
+    cards.forEach(card => {
+      card.style.display = (cat === 'all' || card.dataset.cat === cat) ? '' : 'none';
+    });
+  }
+
+  /* ── Auth modal ── */
+  function openModal(type) {
+    document.getElementById('authModal').classList.add('open');
+    document.getElementById('loginForm').style.display = type === 'login' ? 'block' : 'none';
+    document.getElementById('signupForm').style.display = type === 'signup' ? 'block' : 'none';
+  }
+  function closeModal() { document.getElementById('authModal').classList.remove('open'); }
+  function closeModalOutside(e) { if (e.target === document.getElementById('authModal')) closeModal(); }
+  function switchModal(type) {
+    document.getElementById('loginForm').style.display = type === 'login' ? 'block' : 'none';
+    document.getElementById('signupForm').style.display = type === 'signup' ? 'block' : 'none';
+  }
+
+  /* ── Trade modal ── */
+  let currentProb = 67;
+  let currentSide = 'yes';
+
+  function openTrade(question, prob) {
+    currentProb = prob;
+    currentSide = 'yes';
+    document.getElementById('tradeQuestion').textContent = question;
+    document.getElementById('tradeYesBtn').className = 'trade-yes active';
+    document.getElementById('tradeNoBtn').className = 'trade-no';
+    document.getElementById('tradeModal').classList.add('open');
+    updateTrade();
+  }
+  function closeTrade() { document.getElementById('tradeModal').classList.remove('open'); }
+  function closeTradeOutside(e) { if (e.target === document.getElementById('tradeModal')) closeTrade(); }
+
+  function selectSide(side) {
+    currentSide = side;
+    document.getElementById('tradeYesBtn').className = side === 'yes' ? 'trade-yes active' : 'trade-yes';
+    document.getElementById('tradeNoBtn').className = side === 'no' ? 'trade-no active' : 'trade-no';
+    updateTrade();
+  }
+
+  function setAmount(val) {
+    document.getElementById('tradeAmount').value = val;
+    updateTrade();
+  }
+
+  function updateTrade() {
+    const amount = parseFloat(document.getElementById('tradeAmount').value) || 0;
+    const price = currentSide === 'yes' ? currentProb : (100 - currentProb);
+    const pricePerContract = price / 100;
+    const contracts = Math.floor(amount / pricePerContract);
+    const maxProfit = (contracts * (1 - pricePerContract)).toFixed(2);
+    document.getElementById('tradePrice').textContent = price + '¢';
+    document.getElementById('tradeContracts').textContent = contracts;
+    document.getElementById('tradeProfit').textContent = '$' + maxProfit;
+    document.getElementById('tradeCost').textContent = '$' + amount.toFixed(2);
+  }
+
+  function confirmTrade() {
+    closeTrade();
+    const t = T[currentLang] || T.ko;
+    showToast((t['trade.confirm'] || '거래 확인') + ' 🎉');
+  }
+
+  /* ── Toast ── */
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  /* ── Firebase Auth ── */
+  let auth = null;
+  function initFirebaseAuth() {
+    try {
+      const cfg = window.FOKET_FIREBASE_CONFIG;
+      if (!cfg || !cfg.apiKey || String(cfg.apiKey).includes('YOUR_')) return false;
+      if (!window.firebase) return false;
+      if (!window.firebase.apps || window.firebase.apps.length === 0) {
+        window.firebase.initializeApp(cfg);
+      }
+      auth = window.firebase.auth();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  const firebaseReady = initFirebaseAuth();
+
+  function ensureFirebase() {
+    if (!firebaseReady || !auth) {
+      showToast('Firebase 설정이 필요합니다. `firebase-config.js`를 채워주세요.');
+      return false;
+    }
+    return true;
+  }
+
+  async function handleGoogleLogin() {
+    if (!ensureFirebase()) return;
+    try {
+      const provider = new window.firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      await auth.signInWithPopup(provider);
+      showToast('Google 로그인 성공! 🎉');
+      closeModal();
+    } catch (err) {
+      showToast(err && err.message ? err.message : 'Google 로그인에 실패했습니다.');
+    }
+  }
+
+  async function handleEmailLogin() {
+    if (!ensureFirebase()) return;
+    try {
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      if (!email || !password) {
+        showToast('이메일과 비밀번호를 입력해주세요.');
+        return;
+      }
+      await auth.signInWithEmailAndPassword(email, password);
+      showToast('로그인 성공! 🎉');
+      closeModal();
+    } catch (err) {
+      showToast(err && err.message ? err.message : '이메일 로그인에 실패했습니다.');
+    }
+  }
+
+  /* ── Keyboard ── */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeModal(); closeTrade(); }
+  });
+</script>
+
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async></script>
+
+<script>
+// ── Foket Auth ──────────────────────────────────────────────────────────────
+const API_BASE       = 'http://localhost:4000';
+// Google Client ID: Google Cloud Console에서 발급 후 아래에 입력
+const GOOGLE_CLIENT_ID = window.FOKET_GOOGLE_CLIENT_ID || '';
+
+/* 로그인 상태 관리 */
+let currentUser = null;
+try { currentUser = JSON.parse(localStorage.getItem('foket-user') || 'null'); } catch(e){}
+
+function onAuthSuccess(token, user, isNew) {
+  localStorage.setItem('foket-token', token);
+  localStorage.setItem('foket-user', JSON.stringify(user));
+  currentUser = user;
+  updateNavAuth(user);
+  closeModal();
+  showToast(isNew ? `환영합니다, ${user.full_name}님! 회원가입이 완료되었습니다.` : `안녕하세요, ${user.full_name}님!`);
+}
+
+function updateNavAuth(user) {
+  const mypageBtn = document.querySelector('[data-i18n="nav.mypage"]');
+  const loginBtn  = document.querySelector('[data-i18n="nav.login"]');
+  const signupBtn = document.querySelector('[data-i18n="nav.signup"]');
+  if (!user) return;
+  if (mypageBtn) mypageBtn.textContent = user.full_name.split(' ')[0];
+  if (loginBtn)  loginBtn.style.display  = 'none';
+  if (signupBtn) signupBtn.style.display = 'none';
+}
+
+/* 초기 로드 시 로그인 상태 복원 */
+document.addEventListener('DOMContentLoaded', () => {
+  if (currentUser) updateNavAuth(currentUser);
+  if (GOOGLE_CLIENT_ID) initGoogleSignIn();
+});
+
+/* Google Identity Services 초기화 */
+function initGoogleSignIn() {
+  if (!window.google) return;
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleGoogleCredential,
+    auto_select: false,
+    cancel_on_tap_outside: true
+  });
+}
+window.addEventListener('load', () => { if (GOOGLE_CLIENT_ID && window.google) initGoogleSignIn(); });
+
+async function handleGoogleCredential(response) {
+  const btn = document.getElementById('signupGoogleBtn');
+  if (btn) btn.style.opacity = '0.6';
+  try {
+    const res = await fetch(`${API_BASE}/api/google-auth`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential: response.credential })
+    });
+    const data = await res.json();
+    if (!res.ok) { showToast(data.error || 'Google 로그인 실패'); return; }
+    onAuthSuccess(data.token, data.user, data.isNew);
+  } catch(e) {
+    showToast('서버에 연결할 수 없습니다. (API 서버 확인)');
+  } finally {
+    if (btn) btn.style.opacity = '1';
+  }
+}
+
+/* Google 버튼 클릭 */
+function handleGoogleSignup() {
+  if (!GOOGLE_CLIENT_ID) {
+    showToast('Google Client ID가 설정되지 않았습니다. firebase-config.js를 확인하세요.');
+    return;
+  }
+  if (!window.google) { showToast('Google 라이브러리 로딩 중...'); return; }
+  google.accounts.id.prompt(notification => {
+    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+      // One-tap이 차단된 경우 팝업으로 전환
+      google.accounts.id.renderButton(
+        document.getElementById('signupGoogleBtn'),
+        { theme: 'outline', size: 'large', width: '100%' }
+      );
+    }
+  });
+}
+
+function handleGoogleLogin() {
+  handleGoogleSignup(); // 로그인/회원가입 동일 처리
+}
+
+/* 이메일 회원가입 */
+async function handleEmailSignup() {
+  const name     = document.getElementById('signupName')?.value.trim();
+  const email    = document.getElementById('signupEmail')?.value.trim();
+  const password = document.getElementById('signupPassword')?.value;
+  const errEl    = document.getElementById('signupError');
+  const btn      = document.getElementById('signupSubmitBtn');
+
+  function showErr(msg) { if(errEl){ errEl.textContent=msg; errEl.style.display='block'; } }
+  function hideErr()    { if(errEl) errEl.style.display='none'; }
+  hideErr();
+
+  if (!name)     return showErr('이름을 입력하세요');
+  if (!email)    return showErr('이메일을 입력하세요');
+  if (!password) return showErr('비밀번호를 입력하세요');
+  if (password.length < 8) return showErr('비밀번호는 8자 이상이어야 합니다');
+
+  btn.disabled = true;
+  btn.querySelector('span').textContent = '처리 중...';
+  try {
+    const res = await fetch(`${API_BASE}/api/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ full_name: name, email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) return showErr(data.error || '회원가입 실패');
+    onAuthSuccess(data.token, data.user, true);
+  } catch(e) {
+    showErr('서버에 연결할 수 없습니다. API 서버가 실행 중인지 확인하세요.');
+  } finally {
+    btn.disabled = false;
+    btn.querySelector('span').textContent = '계정 만들기';
+  }
+}
+
+/* 이메일 로그인 (기존 함수 교체) */
+async function handleEmailLogin() {
+  const email    = document.getElementById('loginEmail')?.value.trim();
+  const password = document.getElementById('loginPassword')?.value;
+  const errEl    = document.getElementById('loginError');
+  const btn      = document.getElementById('loginSubmitBtn');
+
+  function showErr(msg) { if(errEl){ errEl.textContent=msg; errEl.style.display='block'; } }
+  function hideErr()    { if(errEl) errEl.style.display='none'; }
+  hideErr();
+
+  if (!email || !password) return showErr('이메일과 비밀번호를 입력하세요');
+
+  btn.disabled = true;
+  btn.querySelector('span').textContent = '로그인 중...';
+  try {
+    const res = await fetch(`${API_BASE}/api/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) return showErr(data.error || '로그인 실패');
+    onAuthSuccess(data.token, data.user, false);
+  } catch(e) {
+    showErr('서버에 연결할 수 없습니다. API 서버가 실행 중인지 확인하세요.');
+  } finally {
+    btn.disabled = false;
+    btn.querySelector('span').textContent = '로그인';
+  }
+}
+
+/* 로그아웃 */
+function logout() {
+  localStorage.removeItem('foket-token');
+  localStorage.removeItem('foket-user');
+  currentUser = null;
+  location.reload();
+}
+// ────────────────────────────────────────────────────────────────────────────
+</script>
+</body>
+</html>

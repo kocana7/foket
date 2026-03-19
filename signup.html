@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>회원가입 - Foket</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue: #334BFA;
+      --blue-dark: #2438e0;
+      --blue-light: #EEF0FF;
+      --green: #00C896;
+      --green-bg: #E6FBF5;
+      --red: #F04438;
+      --red-bg: #FEE9E7;
+      --gray-50: #F9FAFB;
+      --gray-100: #F2F4F7;
+      --gray-200: #E4E7EC;
+      --gray-300: #D0D5DD;
+      --gray-400: #98A2B3;
+      --gray-500: #667085;
+      --gray-600: #475467;
+      --gray-700: #344054;
+      --gray-800: #1D2939;
+      --gray-900: #101828;
+      --white: #FFFFFF;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    body {
+      font-family: var(--font);
+      background: var(--white);
+      color: var(--gray-900);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      -webkit-font-smoothing: antialiased;
+    }
+    .shell {
+      width: 100%;
+      max-width: 480px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      gap: 10px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      font-size: 20px;
+    }
+    .card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 24px;
+      padding: 34px 28px;
+      box-shadow: 0 10px 40px rgba(16,24,40,0.06);
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+    .sub {
+      font-size: 14px;
+      color: var(--gray-500);
+      margin-bottom: 22px;
+      line-height: 1.6;
+    }
+    .social-btn {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--gray-300);
+      background: var(--white);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .social-btn:hover { background: var(--gray-50); border-color: var(--gray-200); }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--gray-400);
+      font-size: 13px;
+      margin: 18px 0;
+    }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--gray-200); }
+
+    .form-group { margin-bottom: 14px; }
+    .label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gray-700);
+      margin-bottom: 6px;
+    }
+    .input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--gray-300);
+      border-radius: 12px;
+      font-size: 14px;
+      font-family: var(--font);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      background: var(--white);
+      color: var(--gray-900);
+    }
+    .input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px var(--blue-light);
+    }
+    .btn {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 800;
+      transition: background 0.15s, transform 0.02s;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary { background: var(--blue); color: var(--white); }
+    .btn-primary:hover { background: var(--blue-dark); }
+    .btn-ghost {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--gray-300);
+      cursor: pointer;
+      background: var(--white);
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--gray-700);
+      transition: background 0.15s, border-color 0.15s;
+      margin-top: 12px;
+    }
+    .btn-ghost:hover { background: var(--gray-50); border-color: var(--gray-200); }
+
+    .hint {
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--gray-500);
+      line-height: 1.6;
+    }
+    .link {
+      color: var(--blue);
+      cursor: pointer;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--gray-900);
+      color: var(--white);
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 800;
+      display: none;
+      z-index: 5000;
+      max-width: calc(100vw - 48px);
+      text-align: center;
+    }
+    .toast.show { display: block; animation: toastIn 0.25s ease; }
+    @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="brand">FOKET.COM</div>
+
+    <div class="card" role="main">
+      <h1>계정 만들기</h1>
+      <div class="sub">구글 또는 이메일로 가입할 수 있습니다. (로컬 데모: 브라우저에만 저장됩니다)</div>
+
+      <button class="social-btn" type="button" onclick="handleGoogleSignup()">
+        <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+          <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+          <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+        </svg>
+        Google로 계속
+      </button>
+
+      <div class="divider">또는</div>
+
+      <form id="signupForm" onsubmit="handleEmailSignup(event)">
+        <div class="form-group">
+          <label class="label" for="name">전체 이름</label>
+          <input class="input" id="name" name="name" type="text" placeholder="홍길동" autocomplete="name" required />
+        </div>
+
+        <div class="form-group">
+          <label class="label" for="email">이메일</label>
+          <input class="input" id="email" name="email" type="email" placeholder="hong@example.com" autocomplete="email" required />
+        </div>
+
+        <div class="form-group">
+          <label class="label" for="password">비밀번호</label>
+          <input class="input" id="password" name="password" type="password" placeholder="비밀번호를 만드세요" autocomplete="new-password" minlength="6" required />
+        </div>
+
+        <button class="btn btn-primary" id="submitBtn" type="submit">계정 만들기</button>
+      </form>
+
+      <button class="btn-ghost" type="button" onclick="window.location.href='main.html'">메인으로 돌아가기</button>
+
+      <div class="hint">
+        `firebase-config.js`에 Firebase 웹 앱 설정을 넣으면 Google OAuth/이메일 가입이 실제로 동작합니다.
+        (값이 비어있으면 지금은 로컬 데모 모드로 동작합니다)
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+  <script>
+    let auth = null;
+    function initFirebaseAuth() {
+      try {
+        const cfg = window.FOKET_FIREBASE_CONFIG;
+        if (!cfg || !cfg.apiKey || String(cfg.apiKey).includes('YOUR_')) return false;
+        if (!window.firebase) return false;
+        if (!window.firebase.apps || window.firebase.apps.length === 0) {
+          window.firebase.initializeApp(cfg);
+        }
+        auth = window.firebase.auth();
+        return true;
+      } catch {
+        return false;
+      }
+    }
+    const firebaseReady = initFirebaseAuth();
+
+    const USERS_KEY = 'foket-users-v1';
+    const SESSION_KEY = 'foket-session-v1';
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function getUsers() {
+      try {
+        const raw = localStorage.getItem(USERS_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function setUsers(users) {
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    }
+
+    function normalizeEmail(email) {
+      return String(email || '').trim().toLowerCase();
+    }
+
+    function fnv1a(str) {
+      // Simple, fast fallback hash (demo only). Avoids crypto.subtle restrictions in local file contexts.
+      let h = 0x811c9dc5;
+      for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = (h * 0x01000193) >>> 0;
+      }
+      return h.toString(16).padStart(8, '0');
+    }
+
+    async function sha256(text) {
+      try {
+        if (!crypto || !crypto.subtle || !crypto.subtle.digest) {
+          return 'fnv1a_' + fnv1a(String(text || ''));
+        }
+        const enc = new TextEncoder();
+        const buf = await crypto.subtle.digest('SHA-256', enc.encode(String(text || '')));
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      } catch {
+        return 'fnv1a_' + fnv1a(String(text || ''));
+      }
+    }
+
+    function setSession(email) {
+      localStorage.setItem(SESSION_KEY, normalizeEmail(email));
+    }
+
+    function isEmailUsed(users, email) {
+      const e = normalizeEmail(email);
+      return users.some(u => normalizeEmail(u.email) === e);
+    }
+
+    async function createUser({ provider, name, email, password }) {
+      const users = getUsers();
+      const e = normalizeEmail(email);
+
+      if (!e) throw new Error('이메일을 입력해주세요.');
+      if (isEmailUsed(users, e)) throw new Error('이미 가입된 이메일입니다.');
+
+      const id = 'u_' + Math.random().toString(16).slice(2) + '_' + Date.now();
+      let passwordHash = null;
+      if (provider === 'email') {
+        if (!password || password.length < 6) throw new Error('비밀번호는 최소 6자 이상이어야 합니다.');
+        passwordHash = await sha256(password);
+      }
+
+      users.push({
+        id,
+        provider,
+        name: String(name || '').trim(),
+        email: e,
+        passwordHash,
+        createdAt: new Date().toISOString(),
+      });
+      setUsers(users);
+      setSession(e);
+    }
+
+    async function handleEmailSignup(event) {
+      event.preventDefault();
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      const original = btn.textContent;
+      btn.textContent = '생성 중...';
+
+      try {
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        if (firebaseReady) {
+          const cred = await auth.createUserWithEmailAndPassword(email, password);
+          if (name && cred && cred.user && cred.user.updateProfile) {
+            await cred.user.updateProfile({ displayName: String(name).trim() });
+          }
+          if (cred && cred.user && cred.user.email) setSession(cred.user.email);
+          showToast('계정이 생성되었습니다! Foket에 오신 것을 환영합니다 🎉');
+        } else {
+          // 로컬 데모 모드(서버 없이 동작)
+          await createUser({ provider: 'email', name, email, password });
+          showToast('계정이 생성되었습니다! Foket에 오신 것을 환영합니다 🎉');
+        }
+        window.location.href = 'main.html';
+      } catch (err) {
+        showToast(err && err.message ? err.message : '가입에 실패했습니다. 다시 시도해주세요.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = original;
+      }
+    }
+
+    async function handleGoogleSignup() {
+      try {
+        if (firebaseReady) {
+          const provider = new window.firebase.auth.GoogleAuthProvider();
+          // 계정 선택 화면을 강제로 띄워 사용자 혼선을 줄입니다.
+          provider.setCustomParameters({ prompt: 'select_account' });
+          const cred = await auth.signInWithPopup(provider);
+          if (cred && cred.user && cred.user.email) setSession(cred.user.email);
+          showToast('Google 가입/로그인 완료! 🎉');
+        } else {
+          // 로컬 데모 모드(서버 없이 동작)
+          const email = prompt('Google로 계속하기 (데모) - Google 이메일을 입력하세요', 'user@gmail.com');
+          if (!email) return;
+          const name = prompt('이름을 입력하세요', '홍길동') || '사용자';
+          await createUser({ provider: 'google', name, email, password: null });
+          showToast('Google 가입 완료! 🎉');
+        }
+        window.location.href = 'main.html';
+      } catch (err) {
+        showToast(err && err.message ? err.message : 'Google 가입에 실패했습니다.');
+      }
+    }
+  </script>
+</body>
+</html>
+
