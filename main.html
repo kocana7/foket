@@ -423,8 +423,13 @@
         </div>
       </div>
       <button class="btn btn-ghost btn-sm" data-i18n="nav.mypage" onclick="showToast('마이페이지 준비 중!')">마이페이지</button>
-      <button class="btn btn-ghost btn-sm" data-i18n="nav.login" onclick="openModal('login')">로그인</button>
-      <button class="btn btn-primary btn-sm" data-i18n="nav.signup" onclick="window.location.href='signup.html'">회원가입</button>
+      <span id="navGuest">
+        <button class="btn btn-ghost btn-sm" data-i18n="nav.login" onclick="openModal('login')">로그인</button>
+        <button class="btn btn-primary btn-sm" data-i18n="nav.signup" onclick="openModal('signup')">회원가입</button>
+      </span>
+      <span id="navUser" style="display:none">
+        <button class="btn btn-ghost btn-sm" onclick="logout()">로그아웃</button>
+      </span>
     </div>
   </div>
 </nav>
@@ -452,7 +457,34 @@
   </div>
 </div>
 
-
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge"><span></span> <span data-i18n="hero.badge">CFTC 공인 거래소</span></div>
+  <h1 id="heroH1">중요한 모든 것에<br/><span>거래하세요</span></h1>
+  <p class="hero-sub" data-i18n="hero.sub">스포츠, 금융, 정치 등 실제 사건의 결과에 대한 계약을 사고팔 수 있습니다.</p>
+  <div class="hero-cta">
+    <button class="btn btn-primary btn-lg" data-i18n="hero.start" onclick="openModal('signup')">거래 시작 →</button>
+    <button class="btn btn-ghost btn-lg" data-i18n="hero.explore" onclick="document.getElementById('markets').scrollIntoView({behavior:'smooth'})">마켓 탐색</button>
+  </div>
+  <div class="hero-trust">
+    <div class="trust-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span data-i18n="hero.trust1">CFTC 규제</span>
+    </div>
+    <div class="trust-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span data-i18n="hero.trust2">무료 가입</span>
+    </div>
+    <div class="trust-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span data-i18n="hero.trust3">즉시 입금</span>
+    </div>
+    <div class="trust-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span data-i18n="hero.trust4">$4.39B+ 거래</span>
+    </div>
+  </div>
+</section>
 
 <!-- STRIP CARD -->
 <section class="section" style="padding-top:0">
@@ -793,7 +825,7 @@
     <h2 data-i18n="cta.h2">거래를 시작할 준비가 됐나요?</h2>
     <p data-i18n="cta.p">유일한 CFTC 규제 예측 마켓에서 수백만 거래자들과 함께하세요. 무료 가입, 즉시 입금 지원.</p>
     <div class="cta-actions">
-      <button class="btn btn-primary btn-lg" data-i18n="cta.create" onclick="window.location.href='signup.html'">무료 계정 만들기 →</button>
+    <button class="btn btn-primary btn-lg" data-i18n="cta.create" onclick="openModal('signup')">무료 계정 만들기 →</button>
       <button class="btn btn-ghost btn-lg" data-i18n="nav.login" onclick="openModal('login')">로그인</button>
     </div>
   </div>
@@ -857,7 +889,7 @@
     <button class="modal-close" onclick="closeModal()">✕</button>
     <h2 data-i18n="modal.login.h2">다시 오신 것을 환영합니다</h2>
     <p data-i18n="modal.login.p">Foket 계정에 로그인하세요</p>
-    <div class="social-btn" onclick="handleGoogleLogin()">
+    <div class="social-btn" onclick="showToast('Google 로그인 준비 중!')">
       <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
       <span data-i18n="modal.google">Google로 계속</span>
     </div>
@@ -875,10 +907,8 @@
       <input class="form-input" id="loginPassword" name="loginPassword" type="password" data-i18n="modal.pwPh" placeholder="비밀번호를 입력하세요" autocomplete="current-password" required />
     </div>
     <div id="loginError" style="display:none;color:#F04438;font-size:13px;margin-bottom:8px;padding:8px 12px;background:#FEE9E7;border-radius:8px"></div>
-    <button class="btn btn-primary btn-md" id="loginSubmitBtn" style="width:100%;margin-top:8px" onclick="handleEmailLogin()">
-      <span data-i18n="nav.login">로그인</span>
-    </button>
-    <div class="modal-switch"><span data-i18n="modal.login.switch">계정이 없으신가요?</span> <a data-i18n="nav.signup" onclick="switchModal('signup')" style="cursor:pointer">회원가입</a></div>
+    <button class="btn btn-primary btn-md" style="width:100%;margin-top:8px" data-i18n="nav.login" onclick="showToast('로그인 성공! 🎉');closeModal()">로그인</button>
+    <div class="modal-switch"><span data-i18n="modal.login.switch">계정이 없으신가요?</span> <a data-i18n="nav.signup" onclick="switchModal('signup')">회원가입</a></div>
   </div>
 
   <div class="modal" id="signupForm" style="display:none">
@@ -886,7 +916,7 @@
     <h2 data-i18n="modal.signup.h2">계정 만들기</h2>
     <p data-i18n="modal.signup.p">Foket에서 수백만 거래자들과 함께하세요</p>
     <!-- Google 회원가입 버튼 -->
-    <div class="social-btn" id="signupGoogleBtn" onclick="handleGoogleSignup()">
+    <div class="social-btn" onclick="showToast('Google 가입 준비 중!')">
       <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
       <span data-i18n="modal.google">Google로 계속</span>
     </div>
@@ -905,9 +935,7 @@
       <input class="form-input" id="signupPassword" type="password" placeholder="8자 이상 입력하세요" autocomplete="new-password" />
     </div>
     <div id="signupError" style="display:none;color:#F04438;font-size:13px;margin-bottom:8px;padding:8px 12px;background:#FEE9E7;border-radius:8px"></div>
-    <button class="btn btn-primary btn-md" id="signupSubmitBtn" style="width:100%;margin-top:8px" onclick="handleEmailSignup()">
-      <span data-i18n="modal.signup.btn">계정 만들기</span>
-    </button>
+    <button class="btn btn-primary btn-md" style="width:100%;margin-top:8px" data-i18n="modal.signup.btn" onclick="showToast('계정이 생성됐습니다! Foket에 오신 것을 환영합니다 🎉');closeModal()">계정 만들기</button>
     <div class="modal-switch"><span data-i18n="modal.signup.switch">이미 계정이 있으신가요?</span> <a data-i18n="nav.login" onclick="switchModal('login')" style="cursor:pointer">로그인</a></div>
   </div>
 </div>
@@ -946,10 +974,6 @@
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
-
-<script src="firebase-config.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
 <script>
   /* ── i18n ── */
@@ -1424,235 +1448,41 @@
     setTimeout(() => toast.classList.remove('show'), 3000);
   }
 
-  /* ── Firebase Auth ── */
-  let auth = null;
-  function initFirebaseAuth() {
-    try {
-      const cfg = window.FOKET_FIREBASE_CONFIG;
-      if (!cfg || !cfg.apiKey || String(cfg.apiKey).includes('YOUR_')) return false;
-      if (!window.firebase) return false;
-      if (!window.firebase.apps || window.firebase.apps.length === 0) {
-        window.firebase.initializeApp(cfg);
-      }
-      auth = window.firebase.auth();
-      return true;
-    } catch {
-      return false;
-    }
-  }
-  const firebaseReady = initFirebaseAuth();
-
-  function ensureFirebase() {
-    if (!firebaseReady || !auth) {
-      showToast('Firebase 설정이 필요합니다. `firebase-config.js`를 채워주세요.');
-      return false;
-    }
-    return true;
-  }
-
-  async function handleGoogleLogin() {
-    if (!ensureFirebase()) return;
-    try {
-      const provider = new window.firebase.auth.GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: 'select_account' });
-      await auth.signInWithPopup(provider);
-      showToast('Google 로그인 성공! 🎉');
-      closeModal();
-    } catch (err) {
-      showToast(err && err.message ? err.message : 'Google 로그인에 실패했습니다.');
-    }
-  }
-
-  async function handleEmailLogin() {
-    if (!ensureFirebase()) return;
-    try {
-      const email = document.getElementById('loginEmail').value;
-      const password = document.getElementById('loginPassword').value;
-      if (!email || !password) {
-        showToast('이메일과 비밀번호를 입력해주세요.');
-        return;
-      }
-      await auth.signInWithEmailAndPassword(email, password);
-      showToast('로그인 성공! 🎉');
-      closeModal();
-    } catch (err) {
-      showToast(err && err.message ? err.message : '이메일 로그인에 실패했습니다.');
-    }
-  }
-
   /* ── Keyboard ── */
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { closeModal(); closeTrade(); }
   });
-</script>
 
-<!-- Google Identity Services -->
-<script src="https://accounts.google.com/gsi/client" async></script>
-
-<script>
-// ── Foket Auth ──────────────────────────────────────────────────────────────
-const API_BASE       = 'http://localhost:4000';
-// Google Client ID: Google Cloud Console에서 발급 후 아래에 입력
-const GOOGLE_CLIENT_ID = window.FOKET_GOOGLE_CLIENT_ID || '';
-
-/* 로그인 상태 관리 */
-let currentUser = null;
-try { currentUser = JSON.parse(localStorage.getItem('foket-user') || 'null'); } catch(e){}
-
-function onAuthSuccess(token, user, isNew) {
-  localStorage.setItem('foket-token', token);
-  localStorage.setItem('foket-user', JSON.stringify(user));
-  currentUser = user;
-  updateNavAuth(user);
-  closeModal();
-  showToast(isNew ? `환영합니다, ${user.full_name}님! 회원가입이 완료되었습니다.` : `안녕하세요, ${user.full_name}님!`);
-}
-
-function updateNavAuth(user) {
-  const mypageBtn = document.querySelector('[data-i18n="nav.mypage"]');
-  const loginBtn  = document.querySelector('[data-i18n="nav.login"]');
-  const signupBtn = document.querySelector('[data-i18n="nav.signup"]');
-  if (!user) return;
-  if (mypageBtn) mypageBtn.textContent = user.full_name.split(' ')[0];
-  if (loginBtn)  loginBtn.style.display  = 'none';
-  if (signupBtn) signupBtn.style.display = 'none';
-}
-
-/* 초기 로드 시 로그인 상태 복원 */
-document.addEventListener('DOMContentLoaded', () => {
-  if (currentUser) updateNavAuth(currentUser);
-  if (GOOGLE_CLIENT_ID) initGoogleSignIn();
-});
-
-/* Google Identity Services 초기화 */
-function initGoogleSignIn() {
-  if (!window.google) return;
-  google.accounts.id.initialize({
-    client_id: GOOGLE_CLIENT_ID,
-    callback: handleGoogleCredential,
-    auto_select: false,
-    cancel_on_tap_outside: true
-  });
-}
-window.addEventListener('load', () => { if (GOOGLE_CLIENT_ID && window.google) initGoogleSignIn(); });
-
-async function handleGoogleCredential(response) {
-  const btn = document.getElementById('signupGoogleBtn');
-  if (btn) btn.style.opacity = '0.6';
-  try {
-    const res = await fetch(`${API_BASE}/api/google-auth`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ credential: response.credential })
-    });
-    const data = await res.json();
-    if (!res.ok) { showToast(data.error || 'Google 로그인 실패'); return; }
-    onAuthSuccess(data.token, data.user, data.isNew);
-  } catch(e) {
-    showToast('서버에 연결할 수 없습니다. (API 서버 확인)');
-  } finally {
-    if (btn) btn.style.opacity = '1';
+  /* ── 로그인 상태 관리 ── */
+  function updateNavAuth() {
+    const token = localStorage.getItem('foket-token');
+    const guest = document.getElementById('navGuest');
+    const user  = document.getElementById('navUser');
+    if (token) { guest.style.display = 'none'; user.style.display = ''; }
+    else        { guest.style.display = ''; user.style.display = 'none'; }
   }
-}
 
-/* Google 버튼 클릭 */
-function handleGoogleSignup() {
-  if (!GOOGLE_CLIENT_ID) {
-    showToast('Google Client ID가 설정되지 않았습니다. firebase-config.js를 확인하세요.');
-    return;
+  function logout() {
+    localStorage.removeItem('foket-token');
+    localStorage.removeItem('foket-user');
+    updateNavAuth();
+    showToast('로그아웃 되었습니다.');
   }
-  if (!window.google) { showToast('Google 라이브러리 로딩 중...'); return; }
-  google.accounts.id.prompt(notification => {
-    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-      // One-tap이 차단된 경우 팝업으로 전환
-      google.accounts.id.renderButton(
-        document.getElementById('signupGoogleBtn'),
-        { theme: 'outline', size: 'large', width: '100%' }
-      );
-    }
-  });
-}
 
-function handleGoogleLogin() {
-  handleGoogleSignup(); // 로그인/회원가입 동일 처리
-}
-
-/* 이메일 회원가입 */
-async function handleEmailSignup() {
-  const name     = document.getElementById('signupName')?.value.trim();
-  const email    = document.getElementById('signupEmail')?.value.trim();
-  const password = document.getElementById('signupPassword')?.value;
-  const errEl    = document.getElementById('signupError');
-  const btn      = document.getElementById('signupSubmitBtn');
-
-  function showErr(msg) { if(errEl){ errEl.textContent=msg; errEl.style.display='block'; } }
-  function hideErr()    { if(errEl) errEl.style.display='none'; }
-  hideErr();
-
-  if (!name)     return showErr('이름을 입력하세요');
-  if (!email)    return showErr('이메일을 입력하세요');
-  if (!password) return showErr('비밀번호를 입력하세요');
-  if (password.length < 8) return showErr('비밀번호는 8자 이상이어야 합니다');
-
-  btn.disabled = true;
-  btn.querySelector('span').textContent = '처리 중...';
-  try {
-    const res = await fetch(`${API_BASE}/api/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ full_name: name, email, password })
-    });
-    const data = await res.json();
-    if (!res.ok) return showErr(data.error || '회원가입 실패');
-    onAuthSuccess(data.token, data.user, true);
-  } catch(e) {
-    showErr('서버에 연결할 수 없습니다. API 서버가 실행 중인지 확인하세요.');
-  } finally {
-    btn.disabled = false;
-    btn.querySelector('span').textContent = '계정 만들기';
+  async function sendHeartbeat() {
+    const token = localStorage.getItem('foket-token');
+    if (!token) return;
+    try {
+      await fetch('/api/heartbeat', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+    } catch {}
   }
-}
 
-/* 이메일 로그인 (기존 함수 교체) */
-async function handleEmailLogin() {
-  const email    = document.getElementById('loginEmail')?.value.trim();
-  const password = document.getElementById('loginPassword')?.value;
-  const errEl    = document.getElementById('loginError');
-  const btn      = document.getElementById('loginSubmitBtn');
-
-  function showErr(msg) { if(errEl){ errEl.textContent=msg; errEl.style.display='block'; } }
-  function hideErr()    { if(errEl) errEl.style.display='none'; }
-  hideErr();
-
-  if (!email || !password) return showErr('이메일과 비밀번호를 입력하세요');
-
-  btn.disabled = true;
-  btn.querySelector('span').textContent = '로그인 중...';
-  try {
-    const res = await fetch(`${API_BASE}/api/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-    const data = await res.json();
-    if (!res.ok) return showErr(data.error || '로그인 실패');
-    onAuthSuccess(data.token, data.user, false);
-  } catch(e) {
-    showErr('서버에 연결할 수 없습니다. API 서버가 실행 중인지 확인하세요.');
-  } finally {
-    btn.disabled = false;
-    btn.querySelector('span').textContent = '로그인';
-  }
-}
-
-/* 로그아웃 */
-function logout() {
-  localStorage.removeItem('foket-token');
-  localStorage.removeItem('foket-user');
-  currentUser = null;
-  location.reload();
-}
-// ────────────────────────────────────────────────────────────────────────────
+  updateNavAuth();
+  sendHeartbeat();
+  setInterval(sendHeartbeat, 30000);
 </script>
 </body>
 </html>

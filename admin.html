@@ -742,7 +742,7 @@
       <div class="card">
         <div class="table-wrap">
           <table>
-            <thead><tr><th>회원</th><th>계정 ID</th><th>잔액</th><th>총 거래금액</th><th>가입일</th><th>KYC</th><th>상태</th><th>작업</th></tr></thead>
+            <thead><tr><th>회원</th><th>계정 ID</th><th>잔액</th><th>총 거래금액</th><th>가입일</th><th>KYC</th><th>접속</th><th>상태</th><th>작업</th></tr></thead>
             <tbody id="usersTableBody">
               <tr><td colspan="8" style="text-align:center;color:var(--gray-400);padding:40px">로딩 중...</td></tr>
             </tbody>
@@ -1206,6 +1206,10 @@ async function loadUsers() {
       const color = avatarColor(u.email);
       const bal   = u.balance ? `<b class="fcur">F</b>${Number(u.balance).toLocaleString()}` : '<b class="fcur">F</b>0';
       const vol   = u.total_traded ? `<b class="fcur">F</b>${Number(u.total_traded).toLocaleString()}` : '<b class="fcur">F</b>0';
+      const isOnline = u.last_seen_at && (Date.now() - new Date(u.last_seen_at).getTime()) < 5 * 60 * 1000;
+      const onlineBadge = isOnline
+        ? `<span style="display:inline-flex;align-items:center;gap:4px;background:#E6FBF5;color:#00C896;font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px"><span style="width:6px;height:6px;border-radius:50%;background:#00C896;display:inline-block"></span>접속 중</span>`
+        : `<span style="display:inline-flex;align-items:center;gap:4px;background:#F2F4F7;color:#98A2B3;font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px"><span style="width:6px;height:6px;border-radius:50%;background:#98A2B3;display:inline-block"></span>오프라인</span>`;
       return `
         <tr>
           <td><div class="user-cell">
@@ -1220,6 +1224,7 @@ async function loadUsers() {
           <td>${vol}</td>
           <td>${formatDate(u.created_at)}</td>
           <td>${kycBadge(u.kyc_status)}</td>
+          <td>${onlineBadge}</td>
           <td>${statusBadge(u.status)}</td>
           <td><div class="action-btns">
             ${u.status === 'ACTIVE'
@@ -1229,7 +1234,7 @@ async function loadUsers() {
         </tr>`;
     }).join('');
   } catch(e) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--red);padding:40px">API 서버에 연결할 수 없습니다 (localhost:4000)</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--red);padding:40px">API 서버에 연결할 수 없습니다</td></tr>`;
   }
 }
 

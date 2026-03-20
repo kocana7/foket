@@ -225,12 +225,12 @@ app.get('/api/admin/users', adminMiddleware, async (req, res) => {
     const result = await req2.query(`
       SELECT u.user_id, u.email, u.full_name, u.grade, u.balance,
              u.total_traded, u.kyc_status, u.status, u.created_at,
-             COUNT(t.trade_id) AS trade_count
+             u.last_seen_at, COUNT(t.trade_id) AS trade_count
       FROM dbo.Users u
       LEFT JOIN dbo.Trades t ON u.user_id = t.user_id
       ${where}
       GROUP BY u.user_id, u.email, u.full_name, u.grade, u.balance,
-               u.total_traded, u.kyc_status, u.status, u.created_at
+               u.total_traded, u.kyc_status, u.status, u.created_at, u.last_seen_at
       ORDER BY u.created_at DESC
       OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY
     `);
@@ -262,6 +262,19 @@ app.patch('/api/admin/users/:id/status', adminMiddleware, async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: '서버 오류' });
+  }
+});
+
+// ── Heartbeat (접속 상태 갱신) ────────────────────────────
+app.post('/api/heartbeat', authMiddleware, async (req, res) => {
+  try {
+    const db = await getPool();
+    await db.request()
+      .input('userId', sql.BigInt, req.user.userId)
+      .query('UPDATE dbo.Users SET last_seen_at = GETDATE() WHERE user_id = @userId');
+    res.json({ ok: true });
+  } catch {
+    res.json({ ok: false });
   }
 });
 
