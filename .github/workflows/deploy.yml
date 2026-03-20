@@ -19,12 +19,9 @@ jobs:
           cd /c/foket/api
           npm install --production
 
-      - name: API 서버 재시작
+      - name: API 서버 재시작 (PM2)
         shell: bash
         run: |
-          pkill -f "node.*server.js" || true
-          pkill -f "node.*webhook.js" || true
-          sleep 2
-          nohup node /c/foket/api/server.js > /c/foket/api/server.log 2>&1 &
-          nohup node /c/foket/api/webhook.js > /c/foket/api/webhook.log 2>&1 &
+          pm2 restart foket-api || pm2 start /c/foket/api/server.js --name foket-api --log /c/foket/api/server.log
+          pm2 save
           echo "배포 완료"
