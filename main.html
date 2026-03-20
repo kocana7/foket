@@ -1281,9 +1281,11 @@
     let n;
     while (n = walker.nextNode()) nodes.push(n);
     nodes.forEach(n => {
-      if (/\$(?=[\d,])/.test(n.textContent)) {
+      if (/\$(?=[\d,])|¢/.test(n.textContent)) {
         const span = document.createElement('span');
-        span.innerHTML = n.textContent.replace(/\$(?=[\d,])/g, '<b class="fcur">F</b>');
+        span.innerHTML = n.textContent
+          .replace(/\$(?=[\d,])/g, '<b class="fcur">F</b>')
+          .replace(/¢/g, '<b class="fcur">F</b>');
         n.parentNode.replaceChild(span, n);
       }
     });
@@ -1395,7 +1397,7 @@
     const pricePerContract = price / 100;
     const contracts = Math.floor(amount / pricePerContract);
     const maxProfit = (contracts * (1 - pricePerContract)).toFixed(2);
-    document.getElementById('tradePrice').textContent = price + '¢';
+    document.getElementById('tradePrice').innerHTML = price + '<b class="fcur">F</b>';
     document.getElementById('tradeContracts').textContent = contracts;
     document.getElementById('tradeProfit').textContent = '$' + maxProfit;
     document.getElementById('tradeCost').textContent = '$' + amount.toFixed(2);

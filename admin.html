@@ -1112,7 +1112,7 @@
     const endDate = document.getElementById('betEnd').value;
     const settle = document.getElementById('betSettle').value.trim();
     if (!q) { showToast('내기 질문을 입력해주세요.'); return; }
-    if (!price || price < 1 || price > 99) { showToast('Yes 가격을 1~99¢ 사이로 입력해주세요.'); return; }
+    if (!price || price < 1 || price > 99) { showToast('Yes 가격을 1~99 사이로 입력해주세요.'); return; }
     if (!endDate) { showToast('종료 날짜를 선택해주세요.'); return; }
     if (!settle) { showToast('정산 기준을 입력해주세요.'); return; }
     const status = document.getElementById('betStatus').value;
@@ -1296,9 +1296,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let n;
     while (n = walker.nextNode()) nodes.push(n);
     nodes.forEach(n => {
-      if (/\$(?=[\d,])/.test(n.textContent)) {
+      if (/\$(?=[\d,])|¢/.test(n.textContent)) {
         const span = document.createElement('span');
-        span.innerHTML = n.textContent.replace(/\$(?=[\d,])/g, '<b class="fcur">F</b>');
+        span.innerHTML = n.textContent
+          .replace(/\$(?=[\d,])/g, '<b class="fcur">F</b>')
+          .replace(/¢/g, '<b class="fcur">F</b>');
         n.parentNode.replaceChild(span, n);
       }
     });
