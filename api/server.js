@@ -264,6 +264,11 @@ app.patch('/api/admin/users/:id/status', adminMiddleware, async (req, res) => {
   }
 });
 
+// ── 공개 설정 (프론트엔드용) ──────────────────────────────
+app.get('/api/public-config', (req, res) => {
+  res.json({ googleClientId: GOOGLE_CLIENT_ID || '' });
+});
+
 // ── 서버 시작 ─────────────────────────────────────────────
 getPool()
   .then(() => {
