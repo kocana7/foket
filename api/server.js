@@ -265,6 +265,25 @@ app.patch('/api/admin/users/:id/status', adminMiddleware, async (req, res) => {
   }
 });
 
+// ── 관리자: 회원 강제탈퇴 ────────────────────────────────
+app.delete('/api/admin/users/:id', adminMiddleware, async (req, res) => {
+  try {
+    const db = await getPool();
+    const userId = req.params.id;
+    // 연관 데이터 순서대로 삭제
+    await db.request().input('userId', sql.BigInt, userId).query('DELETE FROM dbo.ComplianceFlags WHERE user_id = @userId');
+    await db.request().input('userId', sql.BigInt, userId).query('DELETE FROM dbo.Transactions WHERE user_id = @userId');
+    await db.request().input('userId', sql.BigInt, userId).query('DELETE FROM dbo.Withdrawals WHERE user_id = @userId');
+    await db.request().input('userId', sql.BigInt, userId).query('DELETE FROM dbo.Trades WHERE user_id = @userId');
+    await db.request().input('userId', sql.BigInt, userId).query('DELETE FROM dbo.VoteResponses WHERE user_id = @userId');
+    await db.request().input('userId', sql.BigInt, userId).query('DELETE FROM dbo.Users WHERE user_id = @userId');
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
 // ── Heartbeat (접속 상태 갱신) ────────────────────────────
 app.post('/api/heartbeat', authMiddleware, async (req, res) => {
   try {

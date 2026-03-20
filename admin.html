@@ -1230,6 +1230,7 @@ async function loadUsers() {
             ${u.status === 'ACTIVE'
               ? `<button class="action-btn danger" onclick="updateUserStatus(${u.user_id},'SUSPENDED')">정지</button>`
               : `<button class="action-btn primary" onclick="updateUserStatus(${u.user_id},'ACTIVE')">활성화</button>`}
+            <button class="action-btn danger" onclick="confirmDeleteUser(${u.user_id},'${(u.full_name||'').replace(/'/g,'')}')" style="background:var(--red-bg);color:var(--red);margin-left:4px">강제탈퇴</button>
           </div></td>
         </tr>`;
     }).join('');
@@ -1313,6 +1314,61 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 동적 콘텐츠(회원 테이블 등) 렌더링 후 재적용
   document.addEventListener('fcur-refresh', () => replaceWithFSymbol());
+</script>
+<!-- 강제탈퇴 확인 모달 -->
+<div id="deleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9000;display:none;align-items:center;justify-content:center;">
+  <div style="background:var(--white);border-radius:20px;padding:32px 28px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+    <div style="width:48px;height:48px;border-radius:14px;background:var(--red-bg);display:flex;align-items:center;justify-content:center;margin-bottom:16px">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#F04438" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+    </div>
+    <div style="font-size:17px;font-weight:800;color:var(--gray-900);margin-bottom:8px">회원을 강제탈퇴 하시겠습니까?</div>
+    <div style="font-size:13px;color:var(--gray-500);margin-bottom:6px">대상: <strong id="deleteUserName" style="color:var(--gray-900)"></strong></div>
+    <div style="font-size:13px;color:var(--red);margin-bottom:24px">이 작업은 되돌릴 수 없습니다. 회원의 모든 데이터가 DB에서 삭제됩니다.</div>
+    <div style="display:flex;gap:10px">
+      <button onclick="closeDeleteModal()" style="flex:1;padding:11px;border-radius:12px;border:1px solid var(--gray-300);background:var(--white);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font)">취소</button>
+      <button onclick="deleteUser()" style="flex:1;padding:11px;border-radius:12px;border:none;background:var(--red);color:var(--white);font-size:14px;font-weight:800;cursor:pointer;font-family:var(--font)">강제탈퇴 확인</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let _deleteTargetId = null;
+
+  function confirmDeleteUser(userId, name) {
+    _deleteTargetId = userId;
+    document.getElementById('deleteUserName').textContent = name || `#${userId}`;
+    const modal = document.getElementById('deleteModal');
+    modal.style.display = 'flex';
+  }
+
+  function closeDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+    _deleteTargetId = null;
+  }
+
+  async function deleteUser() {
+    if (!_deleteTargetId) return;
+    try {
+      const res = await fetch(`${ADMIN_API}/api/admin/users/${_deleteTargetId}`, {
+        method: 'DELETE',
+        headers: { 'x-admin-key': ADMIN_KEY }
+      });
+      if (res.ok) {
+        closeDeleteModal();
+        showToast('회원이 삭제되었습니다.');
+        loadUsers();
+      } else {
+        const d = await res.json();
+        showToast('오류: ' + (d.error || '삭제 실패'));
+      }
+    } catch {
+      showToast('API 서버에 연결할 수 없습니다.');
+    }
+  }
+
+  document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteModal();
+  });
 </script>
 </body>
 </html>
