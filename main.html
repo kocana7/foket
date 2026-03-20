@@ -3918,7 +3918,7 @@ const CARD_DATA = {
       document.getElementById('voteOptions').innerHTML = `
         <div class="mp-option-row"><input class="mp-input" type="text" placeholder="선택지 1" style="flex:1" /><button onclick="mpRemoveOption(this)" style="width:32px;height:42px;border-radius:8px;border:1.5px solid var(--gray-200);background:white;cursor:pointer;font-size:16px;color:var(--gray-400);flex-shrink:0">✕</button></div>
         <div class="mp-option-row"><input class="mp-input" type="text" placeholder="선택지 2" style="flex:1" /><button onclick="mpRemoveOption(this)" style="width:32px;height:42px;border-radius:8px;border:1.5px solid var(--gray-200);background:white;cursor:pointer;font-size:16px;color:var(--gray-400);flex-shrink:0">✕</button></div>`;
-    } catch { errEl.textContent = '네트워크 오류'; errEl.style.display = 'block'; }
+    } catch(e) { errEl.textContent = '네트워크 오류: ' + e.message; errEl.style.display = 'block'; }
   }
 
   /* 내기 등록 */
@@ -3947,7 +3947,7 @@ const CARD_DATA = {
       document.getElementById('betProb').value = 50;
       document.getElementById('betProbVal').textContent = '50%';
       document.getElementById('betEndDate').value = '';
-    } catch { errEl.textContent = '네트워크 오류'; errEl.style.display = 'block'; }
+    } catch(e) { errEl.textContent = '네트워크 오류: ' + e.message; errEl.style.display = 'block'; }
   }
 
   /* ── 닉네임 미설정 회원 처리 ── */

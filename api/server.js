@@ -11,6 +11,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ── 요청 로거 ────────────────────────────────────────────
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} | body:${JSON.stringify(req.body)} | auth:${req.headers['authorization'] ? 'yes' : 'no'}`);
+  }
+  next();
+});
+
 // ── 정적 파일 서빙 (C:\foket 루트 디렉토리) ───────────────
 app.use(express.static(path.join(__dirname, '..')));
 // / → main.html 기본 제공
