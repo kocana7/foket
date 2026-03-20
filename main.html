@@ -55,9 +55,11 @@
     .nav-logo svg { width: 32px; height: 32px; }
     .nav-links {
       display: flex; align-items: center; gap: 1px;
-      flex: 0 1 auto;
-      overflow: hidden;
+      flex: 1 1 0;
+      overflow-x: auto; overflow-y: hidden;
+      scrollbar-width: none;
     }
+    .nav-links::-webkit-scrollbar { display: none; }
     .nav-link {
       padding: 6px 9px; border-radius: 8px;
       font-size: 13px; font-weight: 700; color: var(--gray-700);
