@@ -464,7 +464,7 @@
   <div class="section-inner">
     <div class="strip-card">
       <div class="strip-left">
-        <h2 data-i18n="strip.h2">10월 기록: 거래량 <b class="fcur">F</b>4.39B</h2>
+        <h2 data-i18n="strip.h2">🏆 10월 기록: 거래량 <b class="fcur">F</b>4.39B</h2>
         <p data-i18n="strip.p">Foket 역사상 가장 큰 단월 거래량입니다. 수백만 거래자들과 함께하세요.</p>
       </div>
       <div class="strip-stats">
@@ -476,27 +476,253 @@
   </div>
 </section>
 
-<!-- HOT 이슈 CATEGORIES -->
+<!-- TRENDING MARKETS -->
 <section class="section" id="markets">
   <div class="section-inner">
     <div class="section-header">
-      <div class="section-title">Hot 이슈</div>
+      <div class="section-title" data-i18n="section.trending">🔥 인기 마켓</div>
+      <a class="section-link" data-i18n="section.viewall" href="#">전체보기 →</a>
     </div>
-    <div class="cat-grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
-      <a class="cat-card" href="#hot"><span class="cat-emoji">🔥</span><div class="cat-name">Hot 이슈</div><div class="cat-count">오늘의 핫이슈</div></a>
-      <a class="cat-card" href="#politics"><span class="cat-emoji">🗳️</span><div class="cat-name">정치</div><div class="cat-count">95+ 마켓</div></a>
-      <a class="cat-card" href="#sports"><span class="cat-emoji">🏆</span><div class="cat-name">스포츠</div><div class="cat-count">240+ 마켓</div></a>
-      <a class="cat-card" href="#culture"><span class="cat-emoji">🎭</span><div class="cat-name">문화</div><div class="cat-count">75+ 마켓</div></a>
-      <a class="cat-card" href="#trading"><span class="cat-emoji">📈</span><div class="cat-name">트레이딩</div><div class="cat-count">180+ 마켓</div></a>
-      <a class="cat-card" href="#weather"><span class="cat-emoji">🌤️</span><div class="cat-name">날씨</div><div class="cat-count">60+ 마켓</div></a>
-      <a class="cat-card" href="#economy"><span class="cat-emoji">💹</span><div class="cat-name">경제</div><div class="cat-count">110+ 마켓</div></a>
-      <a class="cat-card" href="#statement"><span class="cat-emoji">💬</span><div class="cat-name">발언</div><div class="cat-count">40+ 마켓</div></a>
-      <a class="cat-card" href="#science"><span class="cat-emoji">🔬</span><div class="cat-name">과학 &amp; 기술</div><div class="cat-count">50+ 마켓</div></a>
-      <a class="cat-card" href="#neighbor"><span class="cat-emoji">🏘️</span><div class="cat-name">나의 이웃</div><div class="cat-count">30+ 마켓</div></a>
+    <div class="market-grid" id="marketGrid">
+
+      <div class="market-card" data-cat="sports" onclick="openTrade('Will the Kansas City Chiefs win the Super Bowl?', 71)">
+        <div class="market-card-top">
+          <div class="market-icon">🏈</div>
+          <div class="market-meta">
+            <div class="market-category">NFL · Sports</div>
+            <div class="market-question">Will the Kansas City Chiefs win the Super Bowl?</div>
+          </div>
+        </div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:71%"></div></div>
+        <div class="market-card-bottom">
+          <div class="market-chance"><div class="market-chance-val">71<b class="fcur">F</b></div><div class="market-chance-label">Yes chance</div></div>
+          <div>
+            <div class="market-vol"><b class="fcur">F</b>2.1M Vol</div>
+            <div class="market-btns"><button class="btn-yes">Yes 71<b class="fcur">F</b></button><button class="btn-no">No 29<b class="fcur">F</b></button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="market-card" data-cat="finance" onclick="openTrade('Will the S&P 500 close above 5,200 today?', 67)">
+        <div class="market-card-top">
+          <div class="market-icon">📈</div>
+          <div class="market-meta">
+            <div class="market-category">S&P 500 · Financials</div>
+            <div class="market-question">Will the S&P 500 close above 5,200 today?</div>
+          </div>
+        </div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:67%"></div></div>
+        <div class="market-card-bottom">
+          <div class="market-chance"><div class="market-chance-val">67<b class="fcur">F</b></div><div class="market-chance-label">Yes chance</div></div>
+          <div>
+            <div class="market-vol"><b class="fcur">F</b>4.7M Vol</div>
+            <div class="market-btns"><button class="btn-yes">Yes 67<b class="fcur">F</b></button><button class="btn-no">No 33<b class="fcur">F</b></button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="market-card" data-cat="crypto" onclick="openTrade('Will Bitcoin exceed <b class="fcur">F</b>80,000 this week?', 52)">
+        <div class="market-card-top">
+          <div class="market-icon">₿</div>
+          <div class="market-meta">
+            <div class="market-category">Bitcoin · Crypto</div>
+            <div class="market-question">Will Bitcoin exceed <b class="fcur">F</b>80,000 this week?</div>
+          </div>
+        </div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:52%"></div></div>
+        <div class="market-card-bottom">
+          <div class="market-chance"><div class="market-chance-val">52<b class="fcur">F</b></div><div class="market-chance-label">Yes chance</div></div>
+          <div>
+            <div class="market-vol"><b class="fcur">F</b>6.3M Vol</div>
+            <div class="market-btns"><button class="btn-yes">Yes 52<b class="fcur">F</b></button><button class="btn-no">No 48<b class="fcur">F</b></button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="market-card" data-cat="econ" onclick="openTrade('Will the Fed cut rates in March 2026?', 28)">
+        <div class="market-card-top">
+          <div class="market-icon">🏦</div>
+          <div class="market-meta">
+            <div class="market-category">Fed Rates · Economics</div>
+            <div class="market-question">Will the Fed cut rates in March 2026?</div>
+          </div>
+        </div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:28%; background:var(--red)"></div></div>
+        <div class="market-card-bottom">
+          <div class="market-chance"><div class="market-chance-val">28<b class="fcur">F</b></div><div class="market-chance-label">Yes chance</div></div>
+          <div>
+            <div class="market-vol"><b class="fcur">F</b>3.2M Vol</div>
+            <div class="market-btns"><button class="btn-yes">Yes 28<b class="fcur">F</b></button><button class="btn-no">No 72<b class="fcur">F</b></button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="market-card" data-cat="politics" onclick="openTrade('Will Trump\\'s approval rating exceed 50% in March?', 44)">
+        <div class="market-card-top">
+          <div class="market-icon">🗳️</div>
+          <div class="market-meta">
+            <div class="market-category">Approval · Politics</div>
+            <div class="market-question">Will Trump's approval rating exceed 50% in March?</div>
+          </div>
+        </div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:44%"></div></div>
+        <div class="market-card-bottom">
+          <div class="market-chance"><div class="market-chance-val">44<b class="fcur">F</b></div><div class="market-chance-label">Yes chance</div></div>
+          <div>
+            <div class="market-vol"><b class="fcur">F</b>1.8M Vol</div>
+            <div class="market-btns"><button class="btn-yes">Yes 44<b class="fcur">F</b></button><button class="btn-no">No 56<b class="fcur">F</b></button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="market-card" data-cat="climate" onclick="openTrade('Will average US temp exceed 60°F in March?', 79)">
+        <div class="market-card-top">
+          <div class="market-icon">🌡️</div>
+          <div class="market-meta">
+            <div class="market-category">Temperature · Climate</div>
+            <div class="market-question">Will average US temp exceed 60°F in March?</div>
+          </div>
+        </div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:79%"></div></div>
+        <div class="market-card-bottom">
+          <div class="market-chance"><div class="market-chance-val">79<b class="fcur">F</b></div><div class="market-chance-label">Yes chance</div></div>
+          <div>
+            <div class="market-vol"><b class="fcur">F</b>890K Vol</div>
+            <div class="market-btns"><button class="btn-yes">Yes 79<b class="fcur">F</b></button><button class="btn-no">No 21<b class="fcur">F</b></button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="market-card" data-cat="finance" onclick="openTrade('Will Nasdaq 100 close up today?', 58)">
+        <div class="market-card-top">
+          <div class="market-icon">💹</div>
+          <div class="market-meta">
+            <div class="market-category">Nasdaq 100 · Financials</div>
+            <div class="market-question">Will Nasdaq 100 close up today?</div>
+          </div>
+        </div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:58%"></div></div>
+        <div class="market-card-bottom">
+          <div class="market-chance"><div class="market-chance-val">58<b class="fcur">F</b></div><div class="market-chance-label">Yes chance</div></div>
+          <div>
+            <div class="market-vol"><b class="fcur">F</b>3.4M Vol</div>
+            <div class="market-btns"><button class="btn-yes">Yes 58<b class="fcur">F</b></button><button class="btn-no">No 42<b class="fcur">F</b></button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="market-card" data-cat="culture" onclick="openTrade('Will Taylor Swift win Album of the Year at Grammys?', 62)">
+        <div class="market-card-top">
+          <div class="market-icon">🎵</div>
+          <div class="market-meta">
+            <div class="market-category">Grammys · Culture</div>
+            <div class="market-question">Will Taylor Swift win Album of the Year at Grammys?</div>
+          </div>
+        </div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:62%"></div></div>
+        <div class="market-card-bottom">
+          <div class="market-chance"><div class="market-chance-val">62<b class="fcur">F</b></div><div class="market-chance-label">Yes chance</div></div>
+          <div>
+            <div class="market-vol"><b class="fcur">F</b>1.2M Vol</div>
+            <div class="market-btns"><button class="btn-yes">Yes 62<b class="fcur">F</b></button><button class="btn-no">No 38<b class="fcur">F</b></button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="market-card" data-cat="tech" onclick="openTrade('Will Apple release a new iPhone model in Q1 2026?', 18)">
+        <div class="market-card-top">
+          <div class="market-icon">📱</div>
+          <div class="market-meta">
+            <div class="market-category">Apple · Tech</div>
+            <div class="market-question">Will Apple release a new iPhone model in Q1 2026?</div>
+          </div>
+        </div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:18%; background:var(--red)"></div></div>
+        <div class="market-card-bottom">
+          <div class="market-chance"><div class="market-chance-val">18<b class="fcur">F</b></div><div class="market-chance-label">Yes chance</div></div>
+          <div>
+            <div class="market-vol"><b class="fcur">F</b>670K Vol</div>
+            <div class="market-btns"><button class="btn-yes">Yes 18<b class="fcur">F</b></button><button class="btn-no">No 82<b class="fcur">F</b></button></div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
 
+<!-- SPORTS -->
+<section class="section" id="sports" style="background:var(--gray-50)">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="section-title" data-i18n="section.sports">🏆 스포츠 마켓</div>
+      <a class="section-link" data-i18n="section.viewall" href="#">전체보기 →</a>
+    </div>
+    <div class="market-grid">
+      <div class="market-card" data-cat="sports" onclick="openTrade('Will the Lakers make the NBA playoffs?', 55)">
+        <div class="market-card-top"><div class="market-icon">🏀</div><div class="market-meta"><div class="market-category">NBA · Basketball</div><div class="market-question">Will the Lakers make the NBA playoffs?</div></div></div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:55%"></div></div>
+        <div class="market-card-bottom"><div class="market-chance"><div class="market-chance-val">55<b class="fcur">F</b></div><div class="market-chance-label">Yes chance</div></div><div><div class="market-vol"><b class="fcur">F</b>980K Vol</div><div class="market-btns"><button class="btn-yes">Yes 55<b class="fcur">F</b></button><button class="btn-no">No 45<b class="fcur">F</b></button></div></div></div>
+      </div>
+      <div class="market-card" data-cat="sports" onclick="openTrade('Will Manchester City win the Premier League?', 38)">
+        <div class="market-card-top"><div class="market-icon">⚽</div><div class="market-meta"><div class="market-category">Soccer · Premier League</div><div class="market-question">Will Manchester City win the Premier League?</div></div></div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:38%"></div></div>
+        <div class="market-card-bottom"><div class="market-chance"><div class="market-chance-val">38<b class="fcur">F</b></div><div class="market-chance-label">Yes chance</div></div><div><div class="market-vol"><b class="fcur">F</b>1.5M Vol</div><div class="market-btns"><button class="btn-yes">Yes 38<b class="fcur">F</b></button><button class="btn-no">No 62<b class="fcur">F</b></button></div></div></div>
+      </div>
+      <div class="market-card" data-cat="sports" onclick="openTrade('Will the New York Yankees win the World Series?', 22)">
+        <div class="market-card-top"><div class="market-icon">⚾</div><div class="market-meta"><div class="market-category">MLB · Baseball</div><div class="market-question">Will the New York Yankees win the World Series?</div></div></div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:22%; background:var(--red)"></div></div>
+        <div class="market-card-bottom"><div class="market-chance"><div class="market-chance-val">22<b class="fcur">F</b></div><div class="market-chance-label">Yes chance</div></div><div><div class="market-vol"><b class="fcur">F</b>760K Vol</div><div class="market-btns"><button class="btn-yes">Yes 22<b class="fcur">F</b></button><button class="btn-no">No 78<b class="fcur">F</b></button></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINANCIALS -->
+<section class="section" id="financials">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="section-title" data-i18n="section.financial">📈 금융 마켓</div>
+      <a class="section-link" data-i18n="section.viewall" href="#">전체보기 →</a>
+    </div>
+    <div class="market-grid">
+      <div class="market-card" onclick="openTrade('Will WTI Crude Oil close above <b class="fcur">F</b>80 today?', 61)">
+        <div class="market-card-top"><div class="market-icon">🛢️</div><div class="market-meta"><div class="market-category">WTI Oil · Commodities</div><div class="market-question">Will WTI Crude Oil close above <b class="fcur">F</b>80 today?</div></div></div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:61%"></div></div>
+        <div class="market-card-bottom"><div class="market-chance"><div class="market-chance-val">61<b class="fcur">F</b></div><div class="market-chance-label">Yes chance</div></div><div><div class="market-vol"><b class="fcur">F</b>2.2M Vol</div><div class="market-btns"><button class="btn-yes">Yes 61<b class="fcur">F</b></button><button class="btn-no">No 39<b class="fcur">F</b></button></div></div></div>
+      </div>
+      <div class="market-card" onclick="openTrade('Will Gold close above <b class="fcur">F</b>2,100 per ounce today?', 79)">
+        <div class="market-card-top"><div class="market-icon">🥇</div><div class="market-meta"><div class="market-category">Gold · Commodities</div><div class="market-question">Will Gold close above <b class="fcur">F</b>2,100 per ounce today?</div></div></div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:79%"></div></div>
+        <div class="market-card-bottom"><div class="market-chance"><div class="market-chance-val">79<b class="fcur">F</b></div><div class="market-chance-label">Yes chance</div></div><div><div class="market-vol"><b class="fcur">F</b>1.8M Vol</div><div class="market-btns"><button class="btn-yes">Yes 79<b class="fcur">F</b></button><button class="btn-no">No 21<b class="fcur">F</b></button></div></div></div>
+      </div>
+      <div class="market-card" onclick="openTrade('Will inflation (CPI) come in below 3% at the next report?', 41)">
+        <div class="market-card-top"><div class="market-icon">💰</div><div class="market-meta"><div class="market-category">CPI · Economics</div><div class="market-question">Will inflation (CPI) come in below 3% at next report?</div></div></div>
+        <div class="market-prob-bar"><div class="market-prob-fill" style="width:41%"></div></div>
+        <div class="market-card-bottom"><div class="market-chance"><div class="market-chance-val">41<b class="fcur">F</b></div><div class="market-chance-label">Yes chance</div></div><div><div class="market-vol"><b class="fcur">F</b>1.1M Vol</div><div class="market-btns"><button class="btn-yes">Yes 41<b class="fcur">F</b></button><button class="btn-no">No 59<b class="fcur">F</b></button></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="section" style="background:var(--gray-50)">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="section-title" data-i18n="section.browse">카테고리별 탐색</div>
+    </div>
+    <div class="cat-grid">
+      <a class="cat-card" href="#sports"><span class="cat-emoji">🏆</span><div class="cat-name">Sports</div><div class="cat-count">240+ markets</div></a>
+      <a class="cat-card" href="#financials"><span class="cat-emoji">📈</span><div class="cat-name">Financials</div><div class="cat-count">180+ markets</div></a>
+      <a class="cat-card" href="#politics"><span class="cat-emoji">🗳️</span><div class="cat-name">Politics</div><div class="cat-count">95+ markets</div></a>
+      <a class="cat-card" href="#crypto"><span class="cat-emoji">₿</span><div class="cat-name">Crypto</div><div class="cat-count">120+ markets</div></a>
+      <a class="cat-card" href="#"><span class="cat-emoji">🌡️</span><div class="cat-name">Climate</div><div class="cat-count">60+ markets</div></a>
+      <a class="cat-card" href="#"><span class="cat-emoji">🎭</span><div class="cat-name">Culture</div><div class="cat-count">75+ markets</div></a>
+      <a class="cat-card" href="#"><span class="cat-emoji">💹</span><div class="cat-name">Economics</div><div class="cat-count">110+ markets</div></a>
+      <a class="cat-card" href="#"><span class="cat-emoji">💻</span><div class="cat-name">Tech</div><div class="cat-count">50+ markets</div></a>
+    </div>
+  </div>
+</section>
 
 <!-- HOW IT WORKS -->
 <section class="hiw-section" id="how-it-works">
@@ -728,9 +954,9 @@
       'hero.sub':'스포츠, 금융, 정치 등 실제 사건의 결과에 대한 계약을 사고팔 수 있습니다.',
       'hero.start':'거래 시작 →','hero.explore':'마켓 탐색',
       'hero.trust1':'CFTC 규제','hero.trust2':'무료 가입','hero.trust3':'즉시 입금','hero.trust4':'$4.39B+ 거래',
-      'strip.h2':'10월 기록: 거래량 $4.39B','strip.p':'Foket 역사상 가장 큰 단월 거래량입니다. 수백만 거래자들과 함께하세요.',
+      'strip.h2':'🏆 10월 기록: 거래량 $4.39B','strip.p':'Foket 역사상 가장 큰 단월 거래량입니다. 수백만 거래자들과 함께하세요.',
       'strip.stat1':'활성 거래자','strip.stat2':'공개 마켓','strip.stat3':'10월 거래량',
-      'section.trending':'인기 마켓','section.viewall':'전체보기 →','section.sports':'🏆 스포츠 마켓',
+      'section.trending':'🔥 인기 마켓','section.viewall':'전체보기 →','section.sports':'🏆 스포츠 마켓',
       'section.financial':'📈 금융 마켓','section.browse':'카테고리별 탐색',
       'hiw.title':'Foket이 작동하는 방식','hiw.sub':'세계 최초의 연방 규제 예측 마켓',
       'hiw.s1.title':'마켓 선택','hiw.s1.text':'스포츠, 금융, 정치 등 수천 개의 마켓을 탐색하세요. 모든 마켓은 예 또는 아니오로 결정됩니다.',
@@ -767,7 +993,7 @@
       'hero.sub':'Buy and sell contracts on the outcomes of real-world events across sports, finance, politics, and more.',
       'hero.start':'Start Trading →','hero.explore':'Explore Markets',
       'hero.trust1':'CFTC Regulated','hero.trust2':'Free to sign up','hero.trust3':'Instant deposits','hero.trust4':'$4.39B+ traded',
-      'strip.h2':'October Record: $4.39B Volume','strip.p':'The largest single-month trading volume in Foket history. Join millions of traders.',
+      'strip.h2':'🏆 October Record: $4.39B Volume','strip.p':'The largest single-month trading volume in Foket history. Join millions of traders.',
       'strip.stat1':'Active traders','strip.stat2':'Open markets','strip.stat3':'Oct volume',
       'section.trending':'🔥 Trending Markets','section.viewall':'View all →','section.sports':'🏆 Sports Markets',
       'section.financial':'📈 Financial Markets','section.browse':'Browse by Category',
@@ -806,7 +1032,7 @@
       'hero.sub':'スポーツ、金融、政治など実際の出来事の結果に基づく契約を売買できます。',
       'hero.start':'取引を始める →','hero.explore':'マーケットを探す',
       'hero.trust1':'CFTC規制','hero.trust2':'無料登録','hero.trust3':'即時入金','hero.trust4':'$4.39B+取引済',
-      'strip.h2':'10月記録: 取引量 $4.39B','strip.p':'Foket史上最大の月間取引量。数百万のトレーダーと共に。',
+      'strip.h2':'🏆 10月記録: 取引量 $4.39B','strip.p':'Foket史上最大の月間取引量。数百万のトレーダーと共に。',
       'strip.stat1':'アクティブトレーダー','strip.stat2':'公開マーケット','strip.stat3':'10月取引量',
       'section.trending':'🔥 トレンドマーケット','section.viewall':'すべて見る →','section.sports':'🏆 スポーツマーケット',
       'section.financial':'📈 金融マーケット','section.browse':'カテゴリ別ブラウズ',
@@ -845,7 +1071,7 @@
       'hero.sub':'在体育、金融、政治等真实世界事件的结果上买卖合约。',
       'hero.start':'开始交易 →','hero.explore':'探索市场',
       'hero.trust1':'CFTC监管','hero.trust2':'免费注册','hero.trust3':'即时存款','hero.trust4':'$4.39B+交易额',
-      'strip.h2':'10月记录：交易量 $4.39B','strip.p':'Foket历史上最大单月交易量。加入数百万交易者。',
+      'strip.h2':'🏆 10月记录：交易量 $4.39B','strip.p':'Foket历史上最大单月交易量。加入数百万交易者。',
       'strip.stat1':'活跃交易者','strip.stat2':'开放市场','strip.stat3':'10月交易量',
       'section.trending':'🔥 热门市场','section.viewall':'查看全部 →','section.sports':'🏆 体育市场',
       'section.financial':'📈 金融市场','section.browse':'按分类浏览',
@@ -884,7 +1110,7 @@
       'hero.sub':'Achetez et vendez des contrats sur les résultats d\'événements réels dans les sports, la finance, la politique et plus encore.',
       'hero.start':'Commencer →','hero.explore':'Explorer',
       'hero.trust1':'Régulé CFTC','hero.trust2':'Inscription gratuite','hero.trust3':'Dépôts instantanés','hero.trust4':'$4.39B+ échangés',
-      'strip.h2':'Record octobre : $4.39B de volume','strip.p':'Le plus grand volume mensuel de l\'histoire de Foket. Rejoignez des millions de traders.',
+      'strip.h2':'🏆 Record octobre : $4.39B de volume','strip.p':'Le plus grand volume mensuel de l\'histoire de Foket. Rejoignez des millions de traders.',
       'strip.stat1':'Traders actifs','strip.stat2':'Marchés ouverts','strip.stat3':'Volume octobre',
       'section.trending':'🔥 Marchés tendance','section.viewall':'Voir tout →','section.sports':'🏆 Marchés sportifs',
       'section.financial':'📈 Marchés financiers','section.browse':'Parcourir par catégorie',
@@ -923,7 +1149,7 @@
       'hero.sub':'Kaufen und verkaufen Sie Kontrakte auf die Ergebnisse realer Ereignisse in Sport, Finanzen, Politik und mehr.',
       'hero.start':'Jetzt handeln →','hero.explore':'Märkte entdecken',
       'hero.trust1':'CFTC-reguliert','hero.trust2':'Kostenlose Anmeldung','hero.trust3':'Soforteinzahlung','hero.trust4':'$4.39B+ gehandelt',
-      'strip.h2':'Oktober-Rekord: $4,39B Volumen','strip.p':'Das größte monatliche Handelsvolumen in der Geschichte von Foket. Millionen Trader warten.',
+      'strip.h2':'🏆 Oktober-Rekord: $4,39B Volumen','strip.p':'Das größte monatliche Handelsvolumen in der Geschichte von Foket. Millionen Trader warten.',
       'strip.stat1':'Aktive Trader','strip.stat2':'Offene Märkte','strip.stat3':'Okt. Volumen',
       'section.trending':'🔥 Trending Märkte','section.viewall':'Alle anzeigen →','section.sports':'🏆 Sport-Märkte',
       'section.financial':'📈 Finanz-Märkte','section.browse':'Nach Kategorie durchsuchen',
@@ -1001,7 +1227,7 @@
       'hero.sub':'Покупайте и продавайте контракты на исходы реальных событий: спорт, финансы, политика и многое другое.',
       'hero.start':'Начать торговлю →','hero.explore':'Исследовать рынки',
       'hero.trust1':'Регулируется CFTC','hero.trust2':'Бесплатная регистрация','hero.trust3':'Мгновенные депозиты','hero.trust4':'$4.39B+ торгов',
-      'strip.h2':'Рекорд октября: объём $4.39B','strip.p':'Крупнейший месячный объём торгов в истории Foket. Присоединяйтесь к миллионам.',
+      'strip.h2':'🏆 Рекорд октября: объём $4.39B','strip.p':'Крупнейший месячный объём торгов в истории Foket. Присоединяйтесь к миллионам.',
       'strip.stat1':'Активные трейдеры','strip.stat2':'Открытых рынков','strip.stat3':'Объём за октябрь',
       'section.trending':'🔥 Популярные рынки','section.viewall':'Смотреть все →','section.sports':'🏆 Спортивные рынки',
       'section.financial':'📈 Финансовые рынки','section.browse':'Просмотр по категориям',
