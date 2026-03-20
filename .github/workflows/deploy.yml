@@ -1,0 +1,27 @@
+name: 자동 배포
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, foket-server]
+
+    steps:
+      - name: 코드 최신화
+        run: git -C C:\foket pull origin main
+
+      - name: 패키지 설치 (변경 시)
+        run: |
+          cd C:\foket\api
+          npm install --production
+
+      - name: API 서버 재시작
+        run: |
+          Get-Process -Name "node" -ErrorAction SilentlyContinue | Stop-Process -Force
+          Start-Sleep -Seconds 2
+          Start-Process -FilePath "node" -ArgumentList "C:\foket\api\server.js" -WorkingDirectory "C:\foket\api" -WindowStyle Hidden
+          Start-Process -FilePath "node" -ArgumentList "C:\foket\api\webhook.js" -WorkingDirectory "C:\foket\api" -WindowStyle Hidden
+          Write-Host "배포 완료"
+        shell: powershell
