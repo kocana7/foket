@@ -742,9 +742,9 @@
       <div class="card">
         <div class="table-wrap">
           <table>
-            <thead><tr><th>회원</th><th>계정 ID</th><th>잔액</th><th>총 거래금액</th><th>가입일</th><th>접속</th><th>상태</th><th>작업</th></tr></thead>
+            <thead><tr><th>회원</th><th>닉네임</th><th>계정 ID</th><th>잔액</th><th>총 거래금액</th><th>가입일</th><th>접속</th><th>상태</th><th>작업</th></tr></thead>
             <tbody id="usersTableBody">
-              <tr><td colspan="8" style="text-align:center;color:var(--gray-400);padding:40px">로딩 중...</td></tr>
+              <tr><td colspan="9" style="text-align:center;color:var(--gray-400);padding:40px">로딩 중...</td></tr>
             </tbody>
           </table>
         </div>
@@ -1178,7 +1178,7 @@ async function loadUsers() {
   const status = document.getElementById('userStatusFilter')?.value || 'all';
   const grade  = document.getElementById('userGradeFilter')?.value  || 'all';
 
-  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray-400);padding:40px">로딩 중...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--gray-400);padding:40px">로딩 중...</td></tr>';
 
   try {
     const params = new URLSearchParams();
@@ -1190,14 +1190,14 @@ async function loadUsers() {
       headers: { 'x-admin-key': ADMIN_KEY }
     });
 
-    if (!res.ok) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--red);padding:40px">API 오류: ' + res.status + '</td></tr>'; return; }
+    if (!res.ok) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--red);padding:40px">API 오류: ' + res.status + '</td></tr>'; return; }
 
     const { users, total } = await res.json();
     const countEl = document.getElementById('userCount');
     if (countEl) countEl.textContent = `총 ${users.length}명`;
 
     if (!users.length) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--gray-400);padding:40px">등록된 회원이 없습니다</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--gray-400);padding:40px">등록된 회원이 없습니다</td></tr>';
       return;
     }
 
@@ -1220,6 +1220,7 @@ async function loadUsers() {
               <div style="font-size:11px;color:var(--gray-400)">${u.email}</div>
             </div>
           </div></td>
+          <td style="font-weight:600;font-size:13px;color:var(--blue)">${u.nickname ? '@' + u.nickname : '<span style="color:var(--gray-300);font-size:12px">미설정</span>'}</td>
           <td style="color:var(--gray-500)">#${u.user_id}</td>
           <td class="td-bold">${bal}</td>
           <td>${vol}</td>

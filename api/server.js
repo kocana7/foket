@@ -57,13 +57,61 @@ function adminMiddleware(req, res, next) {
   res.status(403).json({ error: '관리자 권한 없음' });
 }
 
+// ── 닉네임 중복 확인 ──────────────────────────────────────
+app.get('/api/check-nickname', async (req, res) => {
+  const { nickname } = req.query;
+  if (!nickname || nickname.trim().length < 2)
+    return res.json({ available: false, reason: '닉네임은 2자 이상이어야 합니다' });
+  if (nickname.trim().length > 20)
+    return res.json({ available: false, reason: '닉네임은 20자 이하여야 합니다' });
+  try {
+    const db = await getPool();
+    const result = await db.request()
+      .input('nickname', sql.NVarChar, nickname.trim())
+      .query('SELECT user_id FROM dbo.Users WHERE nickname = @nickname');
+    res.json({ available: result.recordset.length === 0 });
+  } catch (err) {
+    res.status(500).json({ available: false, reason: '서버 오류' });
+  }
+});
+
+// ── 닉네임 설정 (로그인 후 미설정 회원용) ─────────────────
+app.post('/api/set-nickname', authMiddleware, async (req, res) => {
+  const { nickname } = req.body;
+  if (!nickname || nickname.trim().length < 2)
+    return res.status(400).json({ error: '닉네임은 2자 이상이어야 합니다' });
+  if (nickname.trim().length > 20)
+    return res.status(400).json({ error: '닉네임은 20자 이하여야 합니다' });
+  try {
+    const db = await getPool();
+    const dup = await db.request()
+      .input('nickname', sql.NVarChar, nickname.trim())
+      .input('userId',   sql.BigInt,   req.user.userId)
+      .query('SELECT user_id FROM dbo.Users WHERE nickname = @nickname AND user_id <> @userId');
+    if (dup.recordset.length > 0)
+      return res.status(409).json({ error: '이미 사용 중인 닉네임입니다' });
+    await db.request()
+      .input('nickname', sql.NVarChar, nickname.trim())
+      .input('userId',   sql.BigInt,   req.user.userId)
+      .query('UPDATE dbo.Users SET nickname = @nickname, updated_at = GETDATE() WHERE user_id = @userId');
+    res.json({ ok: true, nickname: nickname.trim() });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
 // ── 이메일 회원가입 ───────────────────────────────────────
 app.post('/api/register', async (req, res) => {
-  const { full_name, email, password } = req.body;
+  const { full_name, email, password, nickname } = req.body;
   if (!full_name || !email || !password)
     return res.status(400).json({ error: '이름, 이메일, 비밀번호를 입력하세요' });
   if (password.length < 8)
     return res.status(400).json({ error: '비밀번호는 8자 이상이어야 합니다' });
+  if (!nickname || nickname.trim().length < 2)
+    return res.status(400).json({ error: '닉네임은 2자 이상이어야 합니다' });
+  if (nickname.trim().length > 20)
+    return res.status(400).json({ error: '닉네임은 20자 이하여야 합니다' });
 
   try {
     const db = await getPool();
@@ -75,21 +123,29 @@ app.post('/api/register', async (req, res) => {
     if (existing.recordset.length > 0)
       return res.status(409).json({ error: '이미 사용 중인 이메일입니다' });
 
+    // 닉네임 중복 확인
+    const nickDup = await db.request()
+      .input('nickname', sql.NVarChar, nickname.trim())
+      .query('SELECT user_id FROM dbo.Users WHERE nickname = @nickname');
+    if (nickDup.recordset.length > 0)
+      return res.status(409).json({ error: '이미 사용 중인 닉네임입니다' });
+
     const hash = await bcrypt.hash(password, 12);
 
     const result = await db.request()
       .input('email',     sql.NVarChar, email)
       .input('hash',      sql.NVarChar, hash)
       .input('full_name', sql.NVarChar, full_name)
+      .input('nickname',  sql.NVarChar, nickname.trim())
       .query(`
-        INSERT INTO dbo.Users (email, password_hash, full_name, kyc_status, status)
-        OUTPUT INSERTED.user_id, INSERTED.email, INSERTED.full_name, INSERTED.created_at
-        VALUES (@email, @hash, @full_name, 'PENDING', 'ACTIVE')
+        INSERT INTO dbo.Users (email, password_hash, full_name, nickname, kyc_status, status)
+        OUTPUT INSERTED.user_id, INSERTED.email, INSERTED.full_name, INSERTED.nickname, INSERTED.created_at
+        VALUES (@email, @hash, @full_name, @nickname, 'PENDING', 'ACTIVE')
       `);
 
     const user = result.recordset[0];
     const token = makeToken(user);
-    res.json({ token, user: { user_id: user.user_id, email: user.email, full_name: user.full_name } });
+    res.json({ token, user: { user_id: user.user_id, email: user.email, full_name: user.full_name, nickname: user.nickname } });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: '서버 오류' });
@@ -106,7 +162,7 @@ app.post('/api/login', async (req, res) => {
     const db = await getPool();
     const result = await db.request()
       .input('email', sql.NVarChar, email)
-      .query('SELECT user_id, email, full_name, password_hash, status FROM dbo.Users WHERE email = @email');
+      .query('SELECT user_id, email, full_name, nickname, password_hash, status FROM dbo.Users WHERE email = @email');
 
     if (result.recordset.length === 0)
       return res.status(401).json({ error: '이메일 또는 비밀번호가 올바르지 않습니다' });
@@ -125,7 +181,7 @@ app.post('/api/login', async (req, res) => {
       .query('UPDATE dbo.Users SET last_login_at = GETDATE() WHERE user_id = @userId');
 
     const token = makeToken(user);
-    res.json({ token, user: { user_id: user.user_id, email: user.email, full_name: user.full_name } });
+    res.json({ token, user: { user_id: user.user_id, email: user.email, full_name: user.full_name, nickname: user.nickname } });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: '서버 오류' });
@@ -150,7 +206,7 @@ app.post('/api/google-auth', async (req, res) => {
     // 기존 회원 조회
     const existing = await db.request()
       .input('email', sql.NVarChar, email)
-      .query('SELECT user_id, email, full_name, status FROM dbo.Users WHERE email = @email');
+      .query('SELECT user_id, email, full_name, nickname, status FROM dbo.Users WHERE email = @email');
 
     let user;
     if (existing.recordset.length > 0) {
@@ -176,7 +232,7 @@ app.post('/api/google-auth', async (req, res) => {
     }
 
     const token = makeToken(user);
-    res.json({ token, user: { user_id: user.user_id, email: user.email, full_name: user.full_name }, isNew: !existing.recordset.length });
+    res.json({ token, user: { user_id: user.user_id, email: user.email, full_name: user.full_name, nickname: user.nickname }, isNew: !existing.recordset.length });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Google 인증 실패' });

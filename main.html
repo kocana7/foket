@@ -2142,9 +2142,35 @@
       <label class="form-label" data-i18n="modal.pw">비밀번호</label>
       <input class="form-input" id="signupPassword" type="password" placeholder="8자 이상 입력하세요" autocomplete="new-password" />
     </div>
+    <div class="form-group">
+      <label class="form-label">포켓 닉네임</label>
+      <div style="display:flex;gap:8px">
+        <input class="form-input" id="signupNickname" type="text" placeholder="foket_user (2~20자)" autocomplete="off" oninput="resetNicknameCheck()" style="flex:1" />
+        <button type="button" onclick="checkNicknameDup()" id="nickCheckBtn" style="padding:0 14px;border-radius:10px;border:1.5px solid var(--blue);background:white;color:var(--blue);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">중복확인</button>
+      </div>
+      <div id="nickCheckMsg" style="font-size:12px;margin-top:4px;display:none"></div>
+    </div>
     <div id="signupError" style="display:none;color:#F04438;font-size:13px;margin-bottom:8px;padding:8px 12px;background:#FEE9E7;border-radius:8px"></div>
     <button class="btn btn-primary btn-md" style="width:100%;margin-top:8px" data-i18n="modal.signup.btn" onclick="signupWithEmail()">계정 만들기</button>
     <div class="modal-switch"><span data-i18n="modal.signup.switch">이미 계정이 있으신가요?</span> <a data-i18n="nav.login" onclick="switchModal('login')" style="cursor:pointer">로그인</a></div>
+  </div>
+</div>
+
+<!-- NICKNAME SETUP MODAL -->
+<div class="modal-overlay" id="nicknameModal" style="display:none;align-items:center;justify-content:center;z-index:10000">
+  <div class="modal" style="max-width:400px;width:90%;padding:32px">
+    <h2 style="font-size:20px;font-weight:800;margin-bottom:8px">포켓 닉네임 설정</h2>
+    <p style="font-size:14px;color:var(--gray-500);margin-bottom:20px">포켓에서 사용할 닉네임을 설정해주세요.<br>다른 회원들에게 표시되는 이름입니다.</p>
+    <div class="form-group">
+      <label class="form-label">닉네임 (2~20자)</label>
+      <div style="display:flex;gap:8px">
+        <input class="form-input" id="setNicknameInput" type="text" placeholder="foket_user" autocomplete="off" oninput="resetSetNicknameCheck()" style="flex:1" />
+        <button type="button" onclick="checkSetNicknameDup()" id="setNickCheckBtn" style="padding:0 14px;border-radius:10px;border:1.5px solid var(--blue);background:white;color:var(--blue);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">중복확인</button>
+      </div>
+      <div id="setNickCheckMsg" style="font-size:12px;margin-top:4px;display:none"></div>
+    </div>
+    <div id="setNicknameError" style="display:none;color:#F04438;font-size:13px;margin-bottom:8px;padding:8px 12px;background:#FEE9E7;border-radius:8px"></div>
+    <button onclick="saveNickname()" style="width:100%;padding:12px;border-radius:12px;border:none;background:var(--blue);color:white;font-size:15px;font-weight:800;cursor:pointer;margin-top:4px">저장하기</button>
   </div>
 </div>
 
@@ -3523,26 +3549,55 @@ const CARD_DATA = {
   sendHeartbeat();
   setInterval(sendHeartbeat, 30000);
 
+  /* ── 닉네임 중복확인 (회원가입용) ── */
+  let _nickChecked = false;
+  async function checkNicknameDup() {
+    const nick = document.getElementById('signupNickname').value.trim();
+    const msgEl = document.getElementById('nickCheckMsg');
+    msgEl.style.display = 'block';
+    if (!nick) { msgEl.textContent = '닉네임을 입력하세요.'; msgEl.style.color = '#F04438'; _nickChecked = false; return; }
+    msgEl.textContent = '확인 중...'; msgEl.style.color = '#667085';
+    try {
+      const res = await fetch('/api/check-nickname?nickname=' + encodeURIComponent(nick));
+      const data = await res.json();
+      if (data.available) {
+        msgEl.textContent = '✓ 사용 가능한 닉네임입니다.'; msgEl.style.color = '#00C896'; _nickChecked = true;
+      } else {
+        msgEl.textContent = '✗ ' + (data.reason || '이미 사용 중인 닉네임입니다.'); msgEl.style.color = '#F04438'; _nickChecked = false;
+      }
+    } catch { msgEl.textContent = '확인 실패. 다시 시도해주세요.'; msgEl.style.color = '#F04438'; _nickChecked = false; }
+  }
+  function resetNicknameCheck() { _nickChecked = false; const m = document.getElementById('nickCheckMsg'); m.style.display = 'none'; }
+
   /* ── 이메일 회원가입 ── */
   async function signupWithEmail() {
     const name     = document.getElementById('signupName').value.trim();
     const email    = document.getElementById('signupEmail').value.trim();
     const password = document.getElementById('signupPassword').value;
+    const nickname = document.getElementById('signupNickname').value.trim();
     const errEl    = document.getElementById('signupError');
     errEl.style.display = 'none';
     if (!name || !email || !password) {
       errEl.textContent = '이름, 이메일, 비밀번호를 입력하세요.';
       errEl.style.display = 'block'; return;
     }
+    if (!nickname) {
+      errEl.textContent = '닉네임을 입력하세요.';
+      errEl.style.display = 'block'; return;
+    }
+    if (!_nickChecked) {
+      errEl.textContent = '닉네임 중복확인을 먼저 완료해주세요.';
+      errEl.style.display = 'block'; return;
+    }
     try {
-      const res  = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ full_name: name, email, password }) });
+      const res  = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ full_name: name, email, password, nickname }) });
       const data = await res.json();
       if (!res.ok) { errEl.textContent = data.error || '회원가입 실패'; errEl.style.display = 'block'; return; }
       localStorage.setItem('foket-token', data.token);
       localStorage.setItem('foket-user', JSON.stringify(data.user));
       closeModal();
       updateNavAuth();
-      showToast('환영합니다, ' + data.user.full_name + '!');
+      showToast('환영합니다, ' + (data.user.nickname || data.user.full_name) + '!');
     } catch { errEl.textContent = '네트워크 오류'; errEl.style.display = 'block'; }
   }
 
@@ -3565,6 +3620,7 @@ const CARD_DATA = {
       closeModal();
       updateNavAuth();
       showToast('로그인 성공! 환영합니다.');
+      checkNicknamePrompt(data.user, data.token);
     } catch { errEl.textContent = '네트워크 오류'; errEl.style.display = 'block'; }
   }
 
@@ -3579,8 +3635,99 @@ const CARD_DATA = {
       closeModal();
       updateNavAuth();
       showToast(data.isNew ? '환영합니다, ' + data.user.full_name + '!' : '다시 오셨군요, ' + data.user.full_name + '!');
+      checkNicknamePrompt(data.user, data.token);
     } catch { showToast('Google 인증 오류'); }
   }
+
+  /* ── 닉네임 미설정 회원 처리 ── */
+  function checkNicknamePrompt(user, token) {
+    if (!user || user.nickname) return;
+    // 닉네임이 없으면 설정 모달 표시
+    setTimeout(() => openNicknameModal(token), 400);
+  }
+
+  function openNicknameModal(token) {
+    document.getElementById('setNicknameInput').value = '';
+    document.getElementById('setNickCheckMsg').style.display = 'none';
+    document.getElementById('setNicknameError').style.display = 'none';
+    const modal = document.getElementById('nicknameModal');
+    modal.style.display = 'flex';
+    modal._token = token || localStorage.getItem('foket-token');
+  }
+
+  let _setNickChecked = false;
+  async function checkSetNicknameDup() {
+    const nick = document.getElementById('setNicknameInput').value.trim();
+    const msgEl = document.getElementById('setNickCheckMsg');
+    msgEl.style.display = 'block';
+    if (!nick) { msgEl.textContent = '닉네임을 입력하세요.'; msgEl.style.color = '#F04438'; _setNickChecked = false; return; }
+    msgEl.textContent = '확인 중...'; msgEl.style.color = '#667085';
+    try {
+      const res = await fetch('/api/check-nickname?nickname=' + encodeURIComponent(nick));
+      const data = await res.json();
+      if (data.available) {
+        msgEl.textContent = '✓ 사용 가능한 닉네임입니다.'; msgEl.style.color = '#00C896'; _setNickChecked = true;
+      } else {
+        msgEl.textContent = '✗ ' + (data.reason || '이미 사용 중인 닉네임입니다.'); msgEl.style.color = '#F04438'; _setNickChecked = false;
+      }
+    } catch { msgEl.textContent = '확인 실패. 다시 시도해주세요.'; msgEl.style.color = '#F04438'; _setNickChecked = false; }
+  }
+  function resetSetNicknameCheck() { _setNickChecked = false; const m = document.getElementById('setNickCheckMsg'); m.style.display = 'none'; }
+
+  async function saveNickname() {
+    const nick = document.getElementById('setNicknameInput').value.trim();
+    const errEl = document.getElementById('setNicknameError');
+    errEl.style.display = 'none';
+    if (!nick) { errEl.textContent = '닉네임을 입력하세요.'; errEl.style.display = 'block'; return; }
+    if (!_setNickChecked) { errEl.textContent = '닉네임 중복확인을 먼저 완료해주세요.'; errEl.style.display = 'block'; return; }
+    const token = document.getElementById('nicknameModal')._token;
+    try {
+      const res = await fetch('/api/set-nickname', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ nickname: nick })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        _setNickChecked = false;
+        document.getElementById('setNickCheckMsg').textContent = '✗ ' + (data.error || '저장 실패');
+        document.getElementById('setNickCheckMsg').style.color = '#F04438';
+        document.getElementById('setNickCheckMsg').style.display = 'block';
+        errEl.textContent = data.error || '저장 실패'; errEl.style.display = 'block'; return;
+      }
+      // 로컬 user 정보 업데이트
+      try {
+        const u = JSON.parse(localStorage.getItem('foket-user') || '{}');
+        u.nickname = data.nickname;
+        localStorage.setItem('foket-user', JSON.stringify(u));
+      } catch {}
+      document.getElementById('nicknameModal').style.display = 'none';
+      showToast('닉네임이 설정되었습니다: ' + data.nickname);
+    } catch { errEl.textContent = '네트워크 오류'; errEl.style.display = 'block'; }
+  }
+
+  // 페이지 로드 시 로그인된 상태면 닉네임 확인
+  (function checkNicknameOnLoad() {
+    const token = localStorage.getItem('foket-token');
+    if (!token) return;
+    try {
+      const user = JSON.parse(localStorage.getItem('foket-user') || '{}');
+      if (!user.nickname) {
+        // 서버에서 최신 정보 확인
+        fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + token } })
+          .then(r => r.json())
+          .then(u => {
+            if (!u.nickname) openNicknameModal(token);
+            else {
+              // 로컬 정보 업데이트
+              const stored = JSON.parse(localStorage.getItem('foket-user') || '{}');
+              stored.nickname = u.nickname;
+              localStorage.setItem('foket-user', JSON.stringify(stored));
+            }
+          }).catch(() => {});
+      }
+    } catch {}
+  })();
 
   /* ── GSI 초기화 ── */
   (async () => {
