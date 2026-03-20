@@ -19,6 +19,7 @@
       --gray-900: #101828; --white: #FFFFFF; --sidebar-w: 260px;
       --font: 'Noto Sans KR', -apple-system, sans-serif;
     }
+    .fcur { font-weight: 900; color: #334BFA; font-style: normal; font-size: 0.92em; }
     html { scroll-behavior: smooth; }
     body { font-family: var(--font); background: var(--gray-50); color: var(--gray-900); display: flex; min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
@@ -196,7 +197,7 @@
 <!-- 사이드바 -->
 <aside class="sidebar">
   <div class="sidebar-logo">
-    <img src="logo.png" alt="FOKET.COM" style="height:36px;width:auto;display:block;" />
+    <img src="logo.svg" alt="FOKET.COM" style="height:36px;width:auto;display:block;" />
     <div class="logo-badge" style="margin-left:6px">관리자 패널</div>
   </div>
 
@@ -1203,8 +1204,8 @@ async function loadUsers() {
     tbody.innerHTML = users.map(u => {
       const ini   = initials(u.full_name);
       const color = avatarColor(u.email);
-      const bal   = u.balance ? `$${Number(u.balance).toLocaleString()}` : '$0';
-      const vol   = u.total_traded ? `$${Number(u.total_traded).toLocaleString()}` : '$0';
+      const bal   = u.balance ? `<b class="fcur">F</b>${Number(u.balance).toLocaleString()}` : '<b class="fcur">F</b>0';
+      const vol   = u.total_traded ? `<b class="fcur">F</b>${Number(u.total_traded).toLocaleString()}` : '<b class="fcur">F</b>0';
       return `
         <tr>
           <td><div class="user-cell">
@@ -1278,6 +1279,35 @@ document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('page-users')?.classList.contains('active')) loadUsers();
 });
 // ─────────────────────────────────────────────────────────────────────────────
+
+  function replaceWithFSymbol(root) {
+    const walker = document.createTreeWalker(
+      root || document.body, NodeFilter.SHOW_TEXT,
+      { acceptNode: n => ['SCRIPT','STYLE','INPUT','TEXTAREA'].includes(n.parentElement?.tagName) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT }
+    );
+    const nodes = [];
+    let n;
+    while (n = walker.nextNode()) nodes.push(n);
+    nodes.forEach(n => {
+      if (/\$(?=[\d,])/.test(n.textContent)) {
+        const span = document.createElement('span');
+        span.innerHTML = n.textContent.replace(/\$(?=[\d,])/g, '<b class="fcur">F</b>');
+        n.parentNode.replaceChild(span, n);
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    replaceWithFSymbol();
+    // loadUsers 등 동적 렌더링 후에도 적용
+    const origLoadUsers = typeof loadUsers === 'function' ? loadUsers : null;
+    if (origLoadUsers) {
+      window._loadUsersOrig = origLoadUsers;
+    }
+  });
+
+  // 동적 콘텐츠(회원 테이블 등) 렌더링 후 재적용
+  document.addEventListener('fcur-refresh', () => replaceWithFSymbol());
 </script>
 </body>
 </html>
