@@ -1134,21 +1134,22 @@
     document.getElementById('topbarTitle').textContent = titles[id] || id;
   }
 
-  /* ── 카테고리 탭 드롭다운 (mouseleave 딜레이) ── */
-  document.querySelectorAll('.cat-tab-wrap').forEach(function(wrap) {
-    var dropdown = wrap.querySelector('.cat-dropdown');
-    if (!dropdown) return;
-    var hideTimer;
-    wrap.addEventListener('mouseenter', function() {
-      clearTimeout(hideTimer);
-      dropdown.classList.add('open');
-    });
-    wrap.addEventListener('mouseleave', function() {
-      hideTimer = setTimeout(function() {
-        dropdown.classList.remove('open');
-      }, 200);
+  /* ── 카테고리 탭 드롭다운 (클릭 토글) ── */
+  function closeAllDropdowns() {
+    document.querySelectorAll('.cat-dropdown.open').forEach(function(d) { d.classList.remove('open'); });
+  }
+  document.querySelectorAll('.cat-tab-wrap .cat-tab').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      var dropdown = btn.closest('.cat-tab-wrap').querySelector('.cat-dropdown');
+      var isOpen = dropdown.classList.contains('open');
+      closeAllDropdowns();
+      if (!isOpen) {
+        dropdown.classList.add('open');
+        e.stopPropagation();
+      }
     });
   });
+  document.addEventListener('click', closeAllDropdowns);
 
   /* ── 전체 탭 (투표전체 / 내기전체) ── */
   const CAT_LABELS = {
@@ -1193,6 +1194,7 @@
 
   /* ── 카테고리 탭 전환 ── */
   function switchCat(id, el, type) {
+    closeAllDropdowns();
     document.querySelectorAll('.cat-content').forEach(c => c.classList.remove('active'));
     document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
     document.getElementById('cat-' + id).classList.add('active');
