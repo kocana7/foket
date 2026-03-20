@@ -182,9 +182,9 @@
     .cat-tab.all-bet:hover { background: #f0fdf4; color: var(--green); }
     .cat-tab.all-bet.active { background: var(--green); color: var(--white); }
     .cat-tab-divider { width: 1px; background: var(--gray-200); margin: 4px 4px; align-self: stretch; flex-shrink: 0; }
-    .cat-dropdown { display: none; position: absolute; top: 100%; left: 0; padding-top: 6px; min-width: 90px; z-index: 200; }
+    .cat-dropdown { display: none; position: absolute; top: calc(100% + 2px); left: 0; min-width: 90px; z-index: 200; }
     .cat-dropdown-inner { background: var(--white); border: 1px solid var(--gray-200); border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); padding: 4px; }
-    .cat-tab-wrap:hover .cat-dropdown { display: block; }
+    .cat-dropdown.open { display: block; }
     .cat-dropdown-item { display: block; width: 100%; text-align: left; padding: 7px 14px; border: none; background: none; border-radius: 7px; cursor: pointer; font-size: 12px; font-weight: 600; transition: background 0.1s; white-space: nowrap; font-family: var(--font); }
     .cat-dropdown-item.vote { color: var(--blue); }
     .cat-dropdown-item.bet { color: var(--green); }
@@ -1133,6 +1133,22 @@
     const titles = { dashboard:'대시보드', analytics:'분석', markets:'질문', users:'회원', trades:'거래', payouts:'출금', compliance:'컴플라이언스', reports:'보고서', settings:'설정' };
     document.getElementById('topbarTitle').textContent = titles[id] || id;
   }
+
+  /* ── 카테고리 탭 드롭다운 (mouseleave 딜레이) ── */
+  document.querySelectorAll('.cat-tab-wrap').forEach(function(wrap) {
+    var dropdown = wrap.querySelector('.cat-dropdown');
+    if (!dropdown) return;
+    var hideTimer;
+    wrap.addEventListener('mouseenter', function() {
+      clearTimeout(hideTimer);
+      dropdown.classList.add('open');
+    });
+    wrap.addEventListener('mouseleave', function() {
+      hideTimer = setTimeout(function() {
+        dropdown.classList.remove('open');
+      }, 200);
+    });
+  });
 
   /* ── 전체 탭 (투표전체 / 내기전체) ── */
   const CAT_LABELS = {
