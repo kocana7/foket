@@ -413,7 +413,7 @@ app.get('/api/public-config', (req, res) => {
   res.json({ googleClientId: GOOGLE_CLIENT_ID || '' });
 });
 
-// ── DB 초기화 (테이블 없으면 생성) ────────────────────────
+// ── DB 초기화 (테이블 없으면 생성, 컬럼 누락 시 추가) ────
 async function initDb() {
   try {
     const db = await getPool();
@@ -450,6 +450,30 @@ async function initDb() {
         created_at   DATETIME     DEFAULT NOW()
       ) CHARACTER SET utf8mb4
     `);
+
+    // 기존 테이블에 누락된 컬럼 추가 마이그레이션
+    const [cols] = await db.execute(
+      `SELECT column_name FROM information_schema.columns
+       WHERE table_schema = DATABASE() AND table_name = 'Users'`
+    );
+    const existing = new Set(cols.map(c => c.column_name || c.COLUMN_NAME));
+
+    const migrations = [
+      { name: 'grade',         sql: "ALTER TABLE Users ADD COLUMN grade VARCHAR(20) DEFAULT 'BASIC'" },
+      { name: 'balance',       sql: 'ALTER TABLE Users ADD COLUMN balance DECIMAL(18,2) DEFAULT 0' },
+      { name: 'kyc_status',    sql: "ALTER TABLE Users ADD COLUMN kyc_status VARCHAR(20) DEFAULT 'PENDING'" },
+      { name: 'status',        sql: "ALTER TABLE Users ADD COLUMN status VARCHAR(20) DEFAULT 'ACTIVE'" },
+      { name: 'last_login_at', sql: 'ALTER TABLE Users ADD COLUMN last_login_at DATETIME' },
+      { name: 'last_seen_at',  sql: 'ALTER TABLE Users ADD COLUMN last_seen_at DATETIME' },
+      { name: 'updated_at',    sql: 'ALTER TABLE Users ADD COLUMN updated_at DATETIME DEFAULT NOW()' },
+    ];
+
+    for (const m of migrations) {
+      if (!existing.has(m.name)) {
+        await db.execute(m.sql);
+        console.log(`컬럼 추가: Users.${m.name}`);
+      }
+    }
 
     console.log('DB 초기화 완료 (Users, Questions 테이블 확인)');
   } catch (err) {
