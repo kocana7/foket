@@ -742,7 +742,7 @@
       <div class="card">
         <div class="table-wrap">
           <table>
-            <thead><tr><th>회원</th><th>계정 ID</th><th>잔액</th><th>총 거래금액</th><th>가입일</th><th>KYC</th><th>접속</th><th>상태</th><th>작업</th></tr></thead>
+            <thead><tr><th>회원</th><th>계정 ID</th><th>잔액</th><th>총 거래금액</th><th>가입일</th><th>접속</th><th>상태</th><th>작업</th></tr></thead>
             <tbody id="usersTableBody">
               <tr><td colspan="8" style="text-align:center;color:var(--gray-400);padding:40px">로딩 중...</td></tr>
             </tbody>
@@ -1178,7 +1178,7 @@ async function loadUsers() {
   const status = document.getElementById('userStatusFilter')?.value || 'all';
   const grade  = document.getElementById('userGradeFilter')?.value  || 'all';
 
-  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--gray-400);padding:40px">로딩 중...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray-400);padding:40px">로딩 중...</td></tr>';
 
   try {
     const params = new URLSearchParams();
@@ -1223,7 +1223,6 @@ async function loadUsers() {
           <td class="td-bold">${bal}</td>
           <td>${vol}</td>
           <td>${formatDate(u.created_at)}</td>
-          <td>${kycBadge(u.kyc_status)}</td>
           <td>${onlineBadge}</td>
           <td>${statusBadge(u.status)}</td>
           <td><div class="action-btns">
@@ -1235,7 +1234,7 @@ async function loadUsers() {
         </tr>`;
     }).join('');
   } catch(e) {
-    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--red);padding:40px">API 서버에 연결할 수 없습니다</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--red);padding:40px">API 서버에 연결할 수 없습니다</td></tr>`;
   }
 }
 
@@ -1254,11 +1253,11 @@ async function updateUserStatus(userId, status) {
 function exportUsersCSV() {
   const rows = document.querySelectorAll('#usersTableBody tr');
   if (!rows.length || rows[0].querySelector('td[colspan]')) { showToast('내보낼 데이터가 없습니다'); return; }
-  const headers = ['ID','이름','이메일','잔액','총거래금액','가입일','KYC','상태'];
+  const headers = ['ID','이름','이메일','잔액','총거래금액','가입일','접속','상태'];
   const lines = [headers.join(',')];
   rows.forEach(r => {
     const cells = r.querySelectorAll('td');
-    if (cells.length < 8) return;
+    if (cells.length < 7) return;
     const name  = cells[0].querySelector('div > div > div:first-child')?.textContent || '';
     const email = cells[0].querySelector('div > div > div:last-child')?.textContent  || '';
     const id    = cells[1].textContent.replace('#','');
