@@ -10,18 +10,18 @@ jobs:
 
     steps:
       - name: 코드 최신화
-        run: git -C C:\foket pull origin main
+        run: git -C ~/foket pull origin main
 
       - name: 패키지 설치 (변경 시)
         run: |
-          cd C:\foket\api
+          cd ~/foket/api
           npm install --production
 
       - name: API 서버 재시작
         run: |
-          Get-Process -Name "node" -ErrorAction SilentlyContinue | Stop-Process -Force
-          Start-Sleep -Seconds 2
-          Start-Process -FilePath "node" -ArgumentList "C:\foket\api\server.js" -WorkingDirectory "C:\foket\api" -WindowStyle Hidden
-          Start-Process -FilePath "node" -ArgumentList "C:\foket\api\webhook.js" -WorkingDirectory "C:\foket\api" -WindowStyle Hidden
-          Write-Host "배포 완료"
-        shell: powershell
+          pkill -f "node.*server.js" || true
+          pkill -f "node.*webhook.js" || true
+          sleep 2
+          nohup node ~/foket/api/server.js > ~/foket/api/server.log 2>&1 &
+          nohup node ~/foket/api/webhook.js > ~/foket/api/webhook.log 2>&1 &
+          echo "배포 완료"
