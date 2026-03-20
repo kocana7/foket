@@ -175,6 +175,13 @@
     .cat-tab:hover { background: var(--gray-100); color: var(--gray-800); }
     .cat-tab.active { background: var(--blue); color: var(--white); font-weight: 600; }
     .cat-tab.active:hover { background: var(--blue); color: var(--white); }
+    .cat-tab.all-vote { color: var(--blue); font-weight: 600; }
+    .cat-tab.all-vote:hover { background: #eff6ff; color: var(--blue); }
+    .cat-tab.all-vote.active { background: var(--blue); color: var(--white); }
+    .cat-tab.all-bet { color: var(--green); font-weight: 600; }
+    .cat-tab.all-bet:hover { background: #f0fdf4; color: var(--green); }
+    .cat-tab.all-bet.active { background: var(--green); color: var(--white); }
+    .cat-tab-divider { width: 1px; background: var(--gray-200); margin: 4px 4px; align-self: stretch; flex-shrink: 0; }
     .cat-dropdown { display: none; position: absolute; top: calc(100% + 4px); left: 0; background: var(--white); border: 1px solid var(--gray-200); border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); min-width: 90px; z-index: 200; padding: 4px; }
     .cat-tab-wrap:hover .cat-dropdown { display: block; }
     .cat-dropdown-item { display: block; width: 100%; text-align: left; padding: 7px 14px; border: none; background: none; border-radius: 7px; cursor: pointer; font-size: 12px; font-weight: 600; transition: background 0.1s; white-space: nowrap; font-family: var(--font); }
@@ -482,6 +489,9 @@
 
       <!-- 카테고리 탭 -->
       <div class="cat-tabs">
+        <button class="cat-tab all-vote" onclick="switchAllCat('vote',this)">🗳️ 투표전체</button>
+        <button class="cat-tab all-bet" onclick="switchAllCat('bet',this)">💰 내기전체</button>
+        <div class="cat-tab-divider"></div>
         <div class="cat-tab-wrap">
           <button class="cat-tab active" onclick="switchCat('politics',this)">🗳️ 정치</button>
           <div class="cat-dropdown">
@@ -745,6 +755,32 @@
               <tr><td><span class="type-tag vote">투표</span></td><td class="td-bold">2026년 가장 주목할 기술 트렌드는?</td><td>6가지 선택지</td><td>22,100명</td><td>2026.12.31</td><td><span class="badge badge-green">● 활성</span></td><td><div class="action-btns"><button class="action-btn primary">편집</button><button class="action-btn danger">종료</button></div></td></tr>
               <tr><td><span class="type-tag bet">내기</span></td><td class="td-bold">GPT-5가 2026년 상반기 출시될까요?</td><td><strong style="color:var(--blue)">63¢</strong></td><td>$2.4M</td><td>2026.6.30</td><td><span class="badge badge-green">● 활성</span></td><td><div class="action-btns"><button class="action-btn primary">편집</button><button class="action-btn">정산</button><button class="action-btn danger">정지</button></div></td></tr>
             </tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- ── 투표 전체 ── -->
+      <div class="cat-content" id="cat-all-vote">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🗳️ 투표 전체</div>
+          </div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>카테고리</th><th>제목 / 질문</th><th>선택지</th><th>참여</th><th>종료</th><th>상태</th><th>작업</th></tr></thead>
+            <tbody id="tbody-all-vote"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- ── 내기 전체 ── -->
+      <div class="cat-content" id="cat-all-bet">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">💰 내기 전체</div>
+          </div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>카테고리</th><th>제목 / 질문</th><th>Yes 가격</th><th>거래량</th><th>종료</th><th>상태</th><th>작업</th></tr></thead>
+            <tbody id="tbody-all-bet"></tbody>
           </table></div>
         </div>
       </div>
@@ -1095,6 +1131,47 @@
     el.classList.add('active');
     const titles = { dashboard:'대시보드', analytics:'분석', markets:'질문', users:'회원', trades:'거래', payouts:'출금', compliance:'컴플라이언스', reports:'보고서', settings:'설정' };
     document.getElementById('topbarTitle').textContent = titles[id] || id;
+  }
+
+  /* ── 전체 탭 (투표전체 / 내기전체) ── */
+  const CAT_LABELS = {
+    politics:'🗳️ 정치', sports:'🏆 스포츠', culture:'🎭 문화',
+    trading:'📈 트레이딩', weather:'🌡️ 날씨', economy:'💹 경제',
+    statement:'💬 발언', science:'🔬 과학&기술', neighbor:'🏘️ 나의 이웃'
+  };
+
+  function buildAllView(typeLabel) {
+    var tbodyId = typeLabel === '투표' ? 'tbody-all-vote' : 'tbody-all-bet';
+    var tbody = document.getElementById(tbodyId);
+    tbody.innerHTML = '';
+    Object.keys(CAT_LABELS).forEach(function(catId) {
+      var content = document.getElementById('cat-' + catId);
+      if (!content) return;
+      content.querySelectorAll('tbody tr').forEach(function(row) {
+        var tag = row.querySelector('.type-tag');
+        if (!tag || tag.textContent.trim() !== typeLabel) return;
+        // build new row: skip type-tag cell, prepend category cell, keep rest
+        var tr = document.createElement('tr');
+        var catTd = document.createElement('td');
+        catTd.textContent = CAT_LABELS[catId];
+        catTd.style.cssText = 'font-size:12px;white-space:nowrap';
+        tr.appendChild(catTd);
+        // clone cells starting from index 1 (skip type-tag td at index 0)
+        Array.from(row.cells).slice(1).forEach(function(cell) {
+          tr.appendChild(cell.cloneNode(true));
+        });
+        tbody.appendChild(tr);
+      });
+    });
+  }
+
+  function switchAllCat(type, el) {
+    document.querySelectorAll('.cat-content').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+    var typeLabel = type === 'vote' ? '투표' : '내기';
+    buildAllView(typeLabel);
+    document.getElementById('cat-all-' + type).classList.add('active');
+    el.classList.add('active');
   }
 
   /* ── 카테고리 탭 전환 ── */
