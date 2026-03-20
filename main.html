@@ -371,12 +371,13 @@
     .lang-flag { font-size: 16px; line-height: 1; }
 
     /* ─── MY PAGE ─── */
-    #mypageOverlay { position:fixed;inset:0;background:#F4F6FA;z-index:5000;overflow-y:auto;display:none; }
-    .mp-wrap { max-width:700px;margin:0 auto;padding:28px 20px 80px; }
-    .mp-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:28px; }
-    .mp-title { font-size:20px;font-weight:800;color:var(--gray-900); }
-    .mp-close { padding:8px 18px;border-radius:10px;border:1.5px solid var(--gray-200);background:white;font-size:13px;font-weight:700;cursor:pointer;color:var(--gray-600); }
-    .mp-close:hover { background:var(--gray-100); }
+    #mypageOverlay { position:fixed;inset:0;background:rgba(16,24,40,0.6);backdrop-filter:blur(4px);z-index:5000;display:none;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto; }
+    .mp-wrap { background:white;border-radius:24px;width:100%;max-width:640px;margin:auto;position:relative;animation:modalIn 0.25s ease;overflow:hidden; }
+    .mp-header { display:flex;align-items:center;justify-content:space-between;padding:24px 28px 18px;border-bottom:1px solid var(--gray-100);position:sticky;top:0;background:white;z-index:10; }
+    .mp-title { font-size:18px;font-weight:800;color:var(--gray-900); }
+    .mp-close { width:32px;height:32px;border-radius:8px;border:none;background:var(--gray-100);font-size:18px;color:var(--gray-500);cursor:pointer;display:flex;align-items:center;justify-content:center; }
+    .mp-close:hover { background:var(--gray-200); }
+    .mp-body { padding:20px 28px 28px;display:flex;flex-direction:column;gap:18px; }
     .mp-card { background:white;border-radius:20px;padding:24px 28px;margin-bottom:18px;box-shadow:0 1px 6px rgba(0,0,0,0.06); }
     .mp-card-title { font-size:16px;font-weight:800;color:var(--gray-900);margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--gray-100); }
     .mp-info-row { display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray-50); }
@@ -2204,132 +2205,135 @@
 </div>
 
 <!-- MY PAGE OVERLAY -->
-<div id="mypageOverlay">
+<div id="mypageOverlay" onclick="closeMypageOutside(event)">
   <div class="mp-wrap">
+    <!-- 헤더 (고정) -->
     <div class="mp-header">
       <div class="mp-title">마이페이지 및 질문등록</div>
-      <button class="mp-close" onclick="closeMyPage()">✕ 닫기</button>
+      <button class="mp-close" onclick="closeMyPage()">✕</button>
     </div>
 
-    <!-- 내 정보 카드 -->
-    <div class="mp-card">
-      <div class="mp-card-title">내 정보</div>
-      <div class="mp-info-row">
-        <span class="mp-info-label">이메일</span>
-        <span class="mp-info-value" id="mpEmail">-</span>
-      </div>
-      <div class="mp-info-row">
-        <span class="mp-info-label">닉네임</span>
-        <span class="mp-info-value" id="mpNickname">-</span>
-      </div>
-      <div style="padding:14px 0 4px">
-        <span class="mp-info-label">보유 포켓포인트</span>
-        <div class="mp-balance"><b class="fcur">F</b><span id="mpBalance">0</span></div>
-        <div style="font-size:12px;color:var(--gray-400)">1 포켓포인트 = 예측 참여 1회</div>
-      </div>
-    </div>
-
-    <!-- 닉네임 변경 카드 -->
-    <div class="mp-card">
-      <div class="mp-card-title">닉네임 변경</div>
-      <label class="mp-form-label">새 닉네임 (2~20자)</label>
-      <div class="mp-nick-row">
-        <input class="mp-input" id="mpNickInput" type="text" placeholder="새 닉네임 입력" oninput="mpResetNickCheck()" style="flex:1" />
-        <button class="mp-check-btn" onclick="mpCheckNick()">중복확인</button>
-        <button class="mp-save-btn" onclick="mpSaveNick()">변경</button>
-      </div>
-      <div id="mpNickMsg" style="font-size:12px;margin-top:6px;display:none"></div>
-    </div>
-
-    <!-- 질문 등록 카드 -->
-    <div class="mp-card">
-      <div class="mp-card-title">질문 등록</div>
-      <div class="mp-tabs">
-        <button class="mp-tab active" id="mpTabVote" onclick="mpSetTab('vote')">🗳️ 투표</button>
-        <button class="mp-tab" id="mpTabBet" onclick="mpSetTab('bet')">🎯 내기</button>
-      </div>
-
-      <!-- 투표 폼 -->
-      <div id="mpFormVote">
-        <div style="margin-bottom:14px">
-          <label class="mp-form-label">질문 *</label>
-          <input class="mp-input" id="voteQuestion" type="text" placeholder="예) 2026년 가장 인기 있는 K-pop 그룹은?" />
+    <div class="mp-body">
+      <!-- 내 정보 카드 -->
+      <div class="mp-card">
+        <div class="mp-card-title">내 정보</div>
+        <div class="mp-info-row">
+          <span class="mp-info-label">이메일</span>
+          <span class="mp-info-value" id="mpEmail">-</span>
         </div>
-        <div style="margin-bottom:14px">
-          <label class="mp-form-label">카테고리 *</label>
-          <select class="mp-select" id="voteCategory">
-            <option value="">카테고리 선택</option>
-            <option value="politics">정치</option>
-            <option value="sports">스포츠</option>
-            <option value="culture">문화</option>
-            <option value="economy">경제</option>
-            <option value="trading">트레이딩</option>
-            <option value="weather">날씨</option>
-            <option value="statement">발언</option>
-            <option value="science">과학&기술</option>
-            <option value="neighbor">나의 이웃</option>
-            <option value="etc">기타</option>
-          </select>
+        <div class="mp-info-row">
+          <span class="mp-info-label">닉네임</span>
+          <span class="mp-info-value" id="mpNickname">-</span>
         </div>
-        <div style="margin-bottom:14px">
-          <label class="mp-form-label">투표 선택지 (최소 2개) *</label>
-          <div class="mp-vote-options" id="voteOptions">
-            <div class="mp-option-row">
-              <input class="mp-input" type="text" placeholder="선택지 1" style="flex:1" />
-              <button onclick="mpRemoveOption(this)" style="width:32px;height:42px;border-radius:8px;border:1.5px solid var(--gray-200);background:white;cursor:pointer;font-size:16px;color:var(--gray-400);flex-shrink:0">✕</button>
+        <div style="padding:12px 0 4px">
+          <span class="mp-info-label">보유 포켓포인트</span>
+          <div class="mp-balance"><b class="fcur">F</b><span id="mpBalance">0</span></div>
+          <div style="font-size:12px;color:var(--gray-400)">1 포켓포인트 = 예측 참여 1회</div>
+        </div>
+      </div>
+
+      <!-- 닉네임 변경 카드 -->
+      <div class="mp-card">
+        <div class="mp-card-title">닉네임 변경</div>
+        <label class="mp-form-label">새 닉네임 (2~20자)</label>
+        <div class="mp-nick-row">
+          <input class="mp-input" id="mpNickInput" type="text" placeholder="새 닉네임 입력" oninput="mpResetNickCheck()" style="flex:1" />
+          <button class="mp-check-btn" onclick="mpCheckNick()">중복확인</button>
+          <button class="mp-save-btn" onclick="mpSaveNick()">변경</button>
+        </div>
+        <div id="mpNickMsg" style="font-size:12px;margin-top:6px;display:none"></div>
+      </div>
+
+      <!-- 질문 등록 카드 -->
+      <div class="mp-card">
+        <div class="mp-card-title">질문 등록</div>
+        <div class="mp-tabs">
+          <button class="mp-tab active" id="mpTabVote" onclick="mpSetTab('vote')">🗳️ 투표</button>
+          <button class="mp-tab" id="mpTabBet" onclick="mpSetTab('bet')">🎯 내기</button>
+        </div>
+
+        <!-- 투표 폼 -->
+        <div id="mpFormVote">
+          <div style="margin-bottom:14px">
+            <label class="mp-form-label">질문 *</label>
+            <input class="mp-input" id="voteQuestion" type="text" placeholder="예) 2026년 가장 인기 있는 K-pop 그룹은?" />
+          </div>
+          <div style="margin-bottom:14px">
+            <label class="mp-form-label">카테고리 *</label>
+            <select class="mp-select" id="voteCategory">
+              <option value="">카테고리 선택</option>
+              <option value="politics">정치</option>
+              <option value="sports">스포츠</option>
+              <option value="culture">문화</option>
+              <option value="economy">경제</option>
+              <option value="trading">트레이딩</option>
+              <option value="weather">날씨</option>
+              <option value="statement">발언</option>
+              <option value="science">과학&기술</option>
+              <option value="neighbor">나의 이웃</option>
+              <option value="etc">기타</option>
+            </select>
+          </div>
+          <div style="margin-bottom:14px">
+            <label class="mp-form-label">투표 선택지 (최소 2개) *</label>
+            <div class="mp-vote-options" id="voteOptions">
+              <div class="mp-option-row">
+                <input class="mp-input" type="text" placeholder="선택지 1" style="flex:1" />
+                <button onclick="mpRemoveOption(this)" style="width:32px;height:42px;border-radius:8px;border:1.5px solid var(--gray-200);background:white;cursor:pointer;font-size:16px;color:var(--gray-400);flex-shrink:0">✕</button>
+              </div>
+              <div class="mp-option-row">
+                <input class="mp-input" type="text" placeholder="선택지 2" style="flex:1" />
+                <button onclick="mpRemoveOption(this)" style="width:32px;height:42px;border-radius:8px;border:1.5px solid var(--gray-200);background:white;cursor:pointer;font-size:16px;color:var(--gray-400);flex-shrink:0">✕</button>
+              </div>
             </div>
-            <div class="mp-option-row">
-              <input class="mp-input" type="text" placeholder="선택지 2" style="flex:1" />
-              <button onclick="mpRemoveOption(this)" style="width:32px;height:42px;border-radius:8px;border:1.5px solid var(--gray-200);background:white;cursor:pointer;font-size:16px;color:var(--gray-400);flex-shrink:0">✕</button>
+            <button class="mp-add-opt" onclick="mpAddOption()">+ 선택지 추가 (최대 4개)</button>
+          </div>
+          <div style="margin-bottom:14px">
+            <label class="mp-form-label">종료 일시 *</label>
+            <input class="mp-input" id="voteEndDate" type="datetime-local" />
+          </div>
+          <div id="voteError" style="display:none;color:#F04438;font-size:13px;padding:8px 12px;background:#FEE9E7;border-radius:10px;margin-bottom:10px"></div>
+          <button class="mp-submit" onclick="mpSubmitVote()">투표 질문 등록하기</button>
+        </div>
+
+        <!-- 내기 폼 -->
+        <div id="mpFormBet" style="display:none">
+          <div style="margin-bottom:14px">
+            <label class="mp-form-label">예측 질문 * <span style="font-size:11px;color:var(--gray-400);font-weight:400">(Yes/No로 답할 수 있는 질문)</span></label>
+            <input class="mp-input" id="betQuestion" type="text" placeholder="예) 손흥민이 올 시즌 30골을 넣을까요?" />
+          </div>
+          <div style="margin-bottom:14px">
+            <label class="mp-form-label">카테고리 *</label>
+            <select class="mp-select" id="betCategory">
+              <option value="">카테고리 선택</option>
+              <option value="politics">정치</option>
+              <option value="sports">스포츠</option>
+              <option value="culture">문화</option>
+              <option value="economy">경제</option>
+              <option value="trading">트레이딩</option>
+              <option value="weather">날씨</option>
+              <option value="statement">발언</option>
+              <option value="science">과학&기술</option>
+              <option value="neighbor">나의 이웃</option>
+              <option value="etc">기타</option>
+            </select>
+          </div>
+          <div style="margin-bottom:14px">
+            <label class="mp-form-label">초기 Yes 확률 (%)</label>
+            <div style="display:flex;align-items:center;gap:12px">
+              <input class="mp-input" id="betProb" type="range" min="5" max="95" value="50" oninput="document.getElementById('betProbVal').textContent=this.value+'%'" style="flex:1;padding:4px 0;border:none;background:transparent" />
+              <span id="betProbVal" style="font-size:16px;font-weight:800;color:var(--blue);min-width:42px;text-align:right">50%</span>
             </div>
           </div>
-          <button class="mp-add-opt" onclick="mpAddOption()">+ 선택지 추가 (최대 4개)</button>
-        </div>
-        <div style="margin-bottom:14px">
-          <label class="mp-form-label">종료 일시 *</label>
-          <input class="mp-input" id="voteEndDate" type="datetime-local" />
-        </div>
-        <div id="voteError" style="display:none;color:#F04438;font-size:13px;padding:8px 12px;background:#FEE9E7;border-radius:10px;margin-bottom:10px"></div>
-        <button class="mp-submit" onclick="mpSubmitVote()">투표 질문 등록하기</button>
-      </div>
-
-      <!-- 내기 폼 -->
-      <div id="mpFormBet" style="display:none">
-        <div style="margin-bottom:14px">
-          <label class="mp-form-label">예측 질문 * <span style="font-size:11px;color:var(--gray-400);font-weight:400">(Yes/No로 답할 수 있는 질문)</span></label>
-          <input class="mp-input" id="betQuestion" type="text" placeholder="예) 손흥민이 올 시즌 30골을 넣을까요?" />
-        </div>
-        <div style="margin-bottom:14px">
-          <label class="mp-form-label">카테고리 *</label>
-          <select class="mp-select" id="betCategory">
-            <option value="">카테고리 선택</option>
-            <option value="politics">정치</option>
-            <option value="sports">스포츠</option>
-            <option value="culture">문화</option>
-            <option value="economy">경제</option>
-            <option value="trading">트레이딩</option>
-            <option value="weather">날씨</option>
-            <option value="statement">발언</option>
-            <option value="science">과학&기술</option>
-            <option value="neighbor">나의 이웃</option>
-            <option value="etc">기타</option>
-          </select>
-        </div>
-        <div style="margin-bottom:14px">
-          <label class="mp-form-label">초기 Yes 확률 (%)</label>
-          <div style="display:flex;align-items:center;gap:12px">
-            <input class="mp-input" id="betProb" type="range" min="5" max="95" value="50" oninput="document.getElementById('betProbVal').textContent=this.value+'%'" style="flex:1;padding:4px 0;border:none;background:transparent" />
-            <span id="betProbVal" style="font-size:16px;font-weight:800;color:var(--blue);min-width:42px;text-align:right">50%</span>
+          <div style="margin-bottom:14px">
+            <label class="mp-form-label">종료 일시 *</label>
+            <input class="mp-input" id="betEndDate" type="datetime-local" />
           </div>
+          <div id="betError" style="display:none;color:#F04438;font-size:13px;padding:8px 12px;background:#FEE9E7;border-radius:10px;margin-bottom:10px"></div>
+          <button class="mp-submit" onclick="mpSubmitBet()">내기 질문 등록하기</button>
         </div>
-        <div style="margin-bottom:14px">
-          <label class="mp-form-label">종료 일시 *</label>
-          <input class="mp-input" id="betEndDate" type="datetime-local" />
-        </div>
-        <div id="betError" style="display:none;color:#F04438;font-size:13px;padding:8px 12px;background:#FEE9E7;border-radius:10px;margin-bottom:10px"></div>
-        <button class="mp-submit" onclick="mpSubmitBet()">내기 질문 등록하기</button>
       </div>
-    </div>
+    </div><!-- /mp-body -->
   </div>
 </div>
 
@@ -3674,7 +3678,7 @@ const CARD_DATA = {
 
   /* ── Keyboard ── */
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closeModal(); closeTrade(); }
+    if (e.key === 'Escape') { closeModal(); closeTrade(); closeMyPage(); }
   });
 
   /* ── 로그인 상태 관리 ── */
@@ -3802,7 +3806,7 @@ const CARD_DATA = {
   async function openMyPage() {
     const token = localStorage.getItem('foket-token');
     if (!token) { openModal('login'); return; }
-    document.getElementById('mypageOverlay').style.display = 'block';
+    document.getElementById('mypageOverlay').style.display = 'flex';
     document.body.style.overflow = 'hidden';
     // 최신 유저 정보 로드
     try {
@@ -3825,6 +3829,9 @@ const CARD_DATA = {
   function closeMyPage() {
     document.getElementById('mypageOverlay').style.display = 'none';
     document.body.style.overflow = '';
+  }
+  function closeMypageOutside(e) {
+    if (e.target === document.getElementById('mypageOverlay')) closeMyPage();
   }
 
   function mpSetTab(tab) {
