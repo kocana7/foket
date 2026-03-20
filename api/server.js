@@ -4,11 +4,17 @@ const cors    = require('cors');
 const bcrypt  = require('bcryptjs');
 const jwt     = require('jsonwebtoken');
 const sql     = require('mssql');
+const path    = require('path');
 const { OAuth2Client } = require('google-auth-library');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// ── 정적 파일 서빙 (C:\foket 루트 디렉토리) ───────────────
+app.use(express.static(path.join(__dirname, '..')));
+// / → main.html 기본 제공
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, '..', 'main.html')));
 
 // ── 설정 ──────────────────────────────────────────────────
 const JWT_SECRET      = process.env.JWT_SECRET      || 'foket-jwt-secret-change-in-production';
