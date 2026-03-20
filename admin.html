@@ -1132,6 +1132,7 @@
     el.classList.add('active');
     const titles = { dashboard:'대시보드', analytics:'분석', markets:'질문', users:'회원', trades:'거래', payouts:'출금', compliance:'컴플라이언스', reports:'보고서', settings:'설정' };
     document.getElementById('topbarTitle').textContent = titles[id] || id;
+    if (id === 'markets') loadAdminQuestions();
   }
 
   /* ── 카테고리 탭 드롭다운 (클릭 토글) ── */
@@ -1190,6 +1191,91 @@
     buildAllView(typeLabel);
     document.getElementById('cat-all-' + type).classList.add('active');
     el.classList.add('active');
+  }
+
+  /* ── DB 질문 로드 & 렌더 ── */
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function buildDbQuestionRow(q) {
+    var statusBadge = q.status === 'APPROVED' ? '<span class="badge badge-green">● 활성</span>'
+                    : q.status === 'REJECTED'  ? '<span class="badge badge-red">⊘ 거절됨</span>'
+                    : '<span class="badge badge-yellow">⏳ 승인대기</span>';
+    var typeTag = q.type === 'vote'
+      ? '<span class="type-tag vote">투표</span>'
+      : '<span class="type-tag bet">내기</span>';
+    var priceOrOptions = '';
+    if (q.type === 'vote') {
+      try { var opts = JSON.parse(q.options || '[]'); priceOrOptions = opts.length + '가지 선택지'; } catch { priceOrOptions = '-'; }
+    } else {
+      priceOrOptions = '<strong style="color:var(--blue)">' + (q.initial_prob || 50) + '%</strong>';
+    }
+    var endDate = q.end_date ? new Date(q.end_date).toLocaleDateString('ko-KR') : '-';
+    var submitter = q.nickname ? '@' + q.nickname : (q.email || '-');
+    var actionBtns = q.status === 'PENDING'
+      ? '<div class="action-btns">'
+        + '<button class="action-btn primary" onclick="adminApproveQ(' + q.question_id + ')">승인</button>'
+        + '<button class="action-btn danger" onclick="adminRejectQ(' + q.question_id + ')">거절</button>'
+        + '</div>'
+      : '<div class="action-btns"><button class="action-btn danger" onclick="adminDeleteQ(' + q.question_id + ')">삭제</button></div>';
+    return '<tr class="db-q-row" data-qid="' + q.question_id + '">'
+      + '<td>' + typeTag + '</td>'
+      + '<td class="td-bold">' + escHtml(q.question) + '<br><span style="font-size:11px;color:var(--gray-400)">' + escHtml(submitter) + '</span></td>'
+      + '<td>' + priceOrOptions + '</td>'
+      + '<td>-</td>'
+      + '<td>' + endDate + '</td>'
+      + '<td>' + statusBadge + '</td>'
+      + '<td>' + actionBtns + '</td>'
+      + '</tr>';
+  }
+
+  async function loadAdminQuestions() {
+    try {
+      var res = await fetch(ADMIN_API + '/api/admin/questions', { headers: { 'x-admin-key': ADMIN_KEY } });
+      if (!res.ok) return;
+      var data = await res.json();
+      var questions = data.questions || [];
+      // 기존 DB행 제거
+      document.querySelectorAll('.db-q-row').forEach(function(r) { r.remove(); });
+      // 카테고리별로 해당 tbody 앞에 삽입
+      questions.forEach(function(q) {
+        var cat = q.category || 'etc';
+        var tbody = document.querySelector('#cat-' + cat + ' tbody');
+        if (!tbody) return;
+        tbody.insertAdjacentHTML('afterbegin', buildDbQuestionRow(q));
+      });
+    } catch(e) { console.error('질문 로드 실패:', e); }
+  }
+
+  async function adminApproveQ(id) {
+    await fetch(ADMIN_API + '/api/admin/questions/' + id + '/status', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
+      body: JSON.stringify({ status: 'APPROVED' })
+    });
+    loadAdminQuestions();
+    showToast('승인되었습니다.');
+  }
+
+  async function adminRejectQ(id) {
+    await fetch(ADMIN_API + '/api/admin/questions/' + id + '/status', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
+      body: JSON.stringify({ status: 'REJECTED' })
+    });
+    loadAdminQuestions();
+    showToast('거절되었습니다.');
+  }
+
+  async function adminDeleteQ(id) {
+    if (!confirm('이 질문을 삭제하시겠습니까?')) return;
+    await fetch(ADMIN_API + '/api/admin/questions/' + id, {
+      method: 'DELETE',
+      headers: { 'x-admin-key': ADMIN_KEY }
+    });
+    loadAdminQuestions();
+    showToast('삭제되었습니다.');
   }
 
   /* ── 카테고리 탭 전환 ── */

@@ -10,18 +10,21 @@ jobs:
 
     steps:
       - name: 코드 최신화
-        run: git -C ~/foket pull origin main
+        shell: bash
+        run: git -C /c/foket pull origin main
 
       - name: 패키지 설치 (변경 시)
+        shell: bash
         run: |
-          cd ~/foket/api
+          cd /c/foket/api
           npm install --production
 
       - name: API 서버 재시작
+        shell: bash
         run: |
           pkill -f "node.*server.js" || true
           pkill -f "node.*webhook.js" || true
           sleep 2
-          nohup node ~/foket/api/server.js > ~/foket/api/server.log 2>&1 &
-          nohup node ~/foket/api/webhook.js > ~/foket/api/webhook.log 2>&1 &
+          nohup node /c/foket/api/server.js > /c/foket/api/server.log 2>&1 &
+          nohup node /c/foket/api/webhook.js > /c/foket/api/webhook.log 2>&1 &
           echo "배포 완료"

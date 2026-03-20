@@ -25,7 +25,7 @@ const dbConfig = {
 
 let pool;
 async function getPool() {
-  if (!pool) {
+  if (!pool || !pool.connected) {
     pool = await sql.connect(dbConfig);
   }
   return pool;
@@ -421,7 +421,65 @@ app.post('/api/questions', authMiddleware, async (req, res) => {
       `);
     res.json({ ok: true, question_id: result.recordset[0].question_id });
   } catch (err) {
-    console.error(err);
+    console.error('[questions POST]', err.message);
+    res.status(500).json({ error: '서버 오류: ' + err.message });
+  }
+});
+
+// ── 관리자: 질문 목록 ─────────────────────────────────────
+app.get('/api/admin/questions', adminMiddleware, async (req, res) => {
+  const { category, type, status } = req.query;
+  try {
+    const db = await getPool();
+    let where = 'WHERE 1=1';
+    const r = db.request();
+    if (category) { where += ' AND q.category = @category'; r.input('category', sql.NVarChar, category); }
+    if (type)     { where += ' AND q.type = @type';         r.input('type',     sql.NVarChar, type); }
+    if (status)   { where += ' AND q.status = @status';     r.input('status',   sql.NVarChar, status); }
+    const result = await r.query(`
+      SELECT q.question_id, q.user_id, q.type, q.question, q.category,
+             q.options, q.initial_prob, q.end_date, q.status, q.created_at,
+             u.email, u.nickname, u.full_name
+      FROM dbo.Questions q
+      LEFT JOIN dbo.Users u ON q.user_id = u.user_id
+      ${where}
+      ORDER BY q.created_at DESC
+    `);
+    res.json({ questions: result.recordset });
+  } catch (err) {
+    console.error('[admin/questions GET]', err.message);
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
+// ── 관리자: 질문 상태 변경 (승인/거절) ───────────────────
+app.patch('/api/admin/questions/:id/status', adminMiddleware, async (req, res) => {
+  const { status } = req.body;
+  if (!['APPROVED', 'REJECTED', 'PENDING'].includes(status))
+    return res.status(400).json({ error: '유효하지 않은 상태값' });
+  try {
+    const db = await getPool();
+    await db.request()
+      .input('id',     sql.BigInt,   req.params.id)
+      .input('status', sql.NVarChar, status)
+      .query('UPDATE dbo.Questions SET status = @status WHERE question_id = @id');
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[admin/questions PATCH]', err.message);
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
+// ── 관리자: 질문 삭제 ─────────────────────────────────────
+app.delete('/api/admin/questions/:id', adminMiddleware, async (req, res) => {
+  try {
+    const db = await getPool();
+    await db.request()
+      .input('id', sql.BigInt, req.params.id)
+      .query('DELETE FROM dbo.Questions WHERE question_id = @id');
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[admin/questions DELETE]', err.message);
     res.status(500).json({ error: '서버 오류' });
   }
 });
