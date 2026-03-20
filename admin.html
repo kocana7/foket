@@ -1201,6 +1201,7 @@ async function loadUsers() {
       return;
     }
 
+    users.forEach(u => { _usersCache[u.user_id] = u; });
     tbody.innerHTML = users.map(u => {
       const ini   = initials(u.full_name);
       const color = avatarColor(u.email);
@@ -1226,6 +1227,7 @@ async function loadUsers() {
           <td>${onlineBadge}</td>
           <td>${statusBadge(u.status)}</td>
           <td><div class="action-btns">
+            <button class="action-btn primary" onclick="openEditModal(${u.user_id})" style="margin-right:4px">수정</button>
             ${u.status === 'ACTIVE'
               ? `<button class="action-btn danger" onclick="updateUserStatus(${u.user_id},'SUSPENDED')">정지</button>`
               : `<button class="action-btn primary" onclick="updateUserStatus(${u.user_id},'ACTIVE')">활성화</button>`}
@@ -1314,6 +1316,51 @@ document.addEventListener('DOMContentLoaded', () => {
   // 동적 콘텐츠(회원 테이블 등) 렌더링 후 재적용
   document.addEventListener('fcur-refresh', () => replaceWithFSymbol());
 </script>
+<!-- 회원 정보 수정 모달 -->
+<div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9000;align-items:center;justify-content:center;">
+  <div style="background:var(--white);border-radius:20px;padding:32px 28px;max-width:460px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div style="font-size:17px;font-weight:800;color:var(--gray-900)">회원 정보 수정</div>
+      <button onclick="closeEditModal()" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--gray-400);line-height:1">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--gray-600);margin-bottom:5px">이름</div>
+        <input id="editName" type="text" style="width:100%;padding:9px 12px;border:1px solid var(--gray-300);border-radius:10px;font-size:14px;font-family:var(--font);outline:none" placeholder="이름" />
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--gray-600);margin-bottom:5px">이메일</div>
+        <input id="editEmail" type="email" style="width:100%;padding:9px 12px;border:1px solid var(--gray-300);border-radius:10px;font-size:14px;font-family:var(--font);outline:none" placeholder="이메일" />
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--gray-600);margin-bottom:5px">닉네임</div>
+        <input id="editNickname" type="text" style="width:100%;padding:9px 12px;border:1px solid var(--gray-300);border-radius:10px;font-size:14px;font-family:var(--font);outline:none" placeholder="닉네임 (선택)" />
+      </div>
+      <div style="display:flex;gap:12px">
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:600;color:var(--gray-600);margin-bottom:5px">등급</div>
+          <select id="editGrade" style="width:100%;padding:9px 12px;border:1px solid var(--gray-300);border-radius:10px;font-size:14px;font-family:var(--font);outline:none;background:var(--white)">
+            <option value="BRONZE">BRONZE</option>
+            <option value="SILVER">SILVER</option>
+            <option value="GOLD">GOLD</option>
+            <option value="PLATINUM">PLATINUM</option>
+            <option value="VIP">VIP</option>
+          </select>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:600;color:var(--gray-600);margin-bottom:5px">잔액 (F)</div>
+          <input id="editBalance" type="number" min="0" step="0.01" style="width:100%;padding:9px 12px;border:1px solid var(--gray-300);border-radius:10px;font-size:14px;font-family:var(--font);outline:none" placeholder="0" />
+        </div>
+      </div>
+      <div id="editError" style="display:none;color:var(--red);font-size:13px;padding:8px 12px;background:var(--red-bg);border-radius:8px"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:22px">
+      <button onclick="closeEditModal()" style="flex:1;padding:11px;border-radius:12px;border:1px solid var(--gray-300);background:var(--white);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font)">취소</button>
+      <button onclick="saveUserEdit()" style="flex:1;padding:11px;border-radius:12px;border:none;background:var(--blue);color:var(--white);font-size:14px;font-weight:800;cursor:pointer;font-family:var(--font)">저장</button>
+    </div>
+  </div>
+</div>
+
 <!-- 강제탈퇴 확인 모달 -->
 <div id="deleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9000;display:none;align-items:center;justify-content:center;">
   <div style="background:var(--white);border-radius:20px;padding:32px 28px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
@@ -1331,6 +1378,59 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 
 <script>
+  let _usersCache = {};
+  let _editTargetId = null;
+
+  function openEditModal(userId) {
+    const u = _usersCache[userId];
+    if (!u) return;
+    _editTargetId = userId;
+    document.getElementById('editName').value     = u.full_name  || '';
+    document.getElementById('editEmail').value    = u.email      || '';
+    document.getElementById('editNickname').value = u.nickname   || '';
+    document.getElementById('editGrade').value    = u.grade      || 'BRONZE';
+    document.getElementById('editBalance').value  = u.balance    || 0;
+    document.getElementById('editError').style.display = 'none';
+    document.getElementById('editModal').style.display = 'flex';
+  }
+
+  function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+    _editTargetId = null;
+  }
+
+  async function saveUserEdit() {
+    if (!_editTargetId) return;
+    const body = {
+      full_name: document.getElementById('editName').value.trim(),
+      email:     document.getElementById('editEmail').value.trim(),
+      nickname:  document.getElementById('editNickname').value.trim(),
+      grade:     document.getElementById('editGrade').value,
+      balance:   parseFloat(document.getElementById('editBalance').value) || 0
+    };
+    const errEl = document.getElementById('editError');
+    errEl.style.display = 'none';
+    if (!body.full_name || !body.email) {
+      errEl.textContent = '이름과 이메일은 필수입니다.'; errEl.style.display = 'block'; return;
+    }
+    try {
+      const res = await fetch(`${ADMIN_API}/api/admin/users/${_editTargetId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (!res.ok) { errEl.textContent = data.error || '저장 실패'; errEl.style.display = 'block'; return; }
+      closeEditModal();
+      showToast('회원 정보가 저장되었습니다.');
+      loadUsers();
+    } catch { errEl.textContent = 'API 서버에 연결할 수 없습니다.'; errEl.style.display = 'block'; }
+  }
+
+  document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target === this) closeEditModal();
+  });
+
   let _deleteTargetId = null;
 
   function confirmDeleteUser(userId, name) {

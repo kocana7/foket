@@ -247,6 +247,29 @@ app.get('/api/admin/users', adminMiddleware, async (req, res) => {
   }
 });
 
+// ── 관리자: 회원 정보 수정 ────────────────────────────────
+app.patch('/api/admin/users/:id', adminMiddleware, async (req, res) => {
+  const { full_name, email, nickname, grade, balance } = req.body;
+  const fields = [];
+  const request = (await getPool()).request().input('userId', sql.BigInt, req.params.id);
+
+  if (full_name !== undefined) { fields.push('full_name = @full_name'); request.input('full_name', sql.NVarChar, full_name); }
+  if (email     !== undefined) { fields.push('email = @email');         request.input('email',     sql.NVarChar, email); }
+  if (nickname  !== undefined) { fields.push('nickname = @nickname');   request.input('nickname',  sql.NVarChar, nickname); }
+  if (grade     !== undefined) { fields.push('grade = @grade');         request.input('grade',     sql.NVarChar, grade); }
+  if (balance   !== undefined) { fields.push('balance = @balance');     request.input('balance',   sql.Decimal(18,2), balance); }
+
+  if (!fields.length) return res.status(400).json({ error: '수정할 항목이 없습니다' });
+
+  try {
+    await request.query(`UPDATE dbo.Users SET ${fields.join(', ')}, updated_at = GETDATE() WHERE user_id = @userId`);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
 // ── 관리자: 회원 상태 변경 ────────────────────────────────
 app.patch('/api/admin/users/:id/status', adminMiddleware, async (req, res) => {
   const { status } = req.body;
