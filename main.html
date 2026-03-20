@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -889,10 +890,7 @@
     <button class="modal-close" onclick="closeModal()">✕</button>
     <h2 data-i18n="modal.login.h2">다시 오신 것을 환영합니다</h2>
     <p data-i18n="modal.login.p">Foket 계정에 로그인하세요</p>
-    <div class="social-btn" onclick="showToast('Google 로그인 준비 중!')">
-      <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
-      <span data-i18n="modal.google">Google로 계속</span>
-    </div>
+    <div id="loginGoogleBtn" style="display:flex;justify-content:center;min-height:40px"></div>
     <div class="social-btn" onclick="showToast('Apple 로그인 준비 중!')">
       <svg width="18" height="18" viewBox="0 0 814 1000"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-37.3-155.5-127.1c-43.5-82.4-78.8-214.4-78.8-340.8 0-170.3 111.4-260.2 220.5-260.2 58.5 0 107.5 38.3 144.2 38.3 35.3 0 90.2-40.4 156.7-40.4 25.2 0 108.2 2.6 168.4 81.9zm-225.6-73.4c29.6-34.5 50.1-82.4 50.1-130.3 0-6.5-.6-13-1.9-18.2-47.5 1.9-104 31.8-138 70.6-26.5 29.7-51 77.6-51 126.1 0 7.1 1.3 14.2 1.9 16.5 3.2.6 8.4 1.3 13.6 1.3 43.1 0 97.7-28.6 125.3-65.9z" fill="currentColor"/></svg>
       <span data-i18n="modal.apple">Apple로 계속</span>
@@ -907,7 +905,7 @@
       <input class="form-input" id="loginPassword" name="loginPassword" type="password" data-i18n="modal.pwPh" placeholder="비밀번호를 입력하세요" autocomplete="current-password" required />
     </div>
     <div id="loginError" style="display:none;color:#F04438;font-size:13px;margin-bottom:8px;padding:8px 12px;background:#FEE9E7;border-radius:8px"></div>
-    <button class="btn btn-primary btn-md" style="width:100%;margin-top:8px" data-i18n="nav.login" onclick="showToast('로그인 성공! 🎉');closeModal()">로그인</button>
+    <button class="btn btn-primary btn-md" style="width:100%;margin-top:8px" data-i18n="nav.login" onclick="loginWithEmail()">로그인</button>
     <div class="modal-switch"><span data-i18n="modal.login.switch">계정이 없으신가요?</span> <a data-i18n="nav.signup" onclick="switchModal('signup')">회원가입</a></div>
   </div>
 
@@ -916,10 +914,7 @@
     <h2 data-i18n="modal.signup.h2">계정 만들기</h2>
     <p data-i18n="modal.signup.p">Foket에서 수백만 거래자들과 함께하세요</p>
     <!-- Google 회원가입 버튼 -->
-    <div class="social-btn" onclick="showToast('Google 가입 준비 중!')">
-      <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
-      <span data-i18n="modal.google">Google로 계속</span>
-    </div>
+    <div id="signupGoogleBtn" style="display:flex;justify-content:center;min-height:40px"></div>
     <div class="form-divider" data-i18n="modal.or">또는</div>
     <!-- 이메일 회원가입 폼 -->
     <div class="form-group">
@@ -935,7 +930,7 @@
       <input class="form-input" id="signupPassword" type="password" placeholder="8자 이상 입력하세요" autocomplete="new-password" />
     </div>
     <div id="signupError" style="display:none;color:#F04438;font-size:13px;margin-bottom:8px;padding:8px 12px;background:#FEE9E7;border-radius:8px"></div>
-    <button class="btn btn-primary btn-md" style="width:100%;margin-top:8px" data-i18n="modal.signup.btn" onclick="showToast('계정이 생성됐습니다! Foket에 오신 것을 환영합니다 🎉');closeModal()">계정 만들기</button>
+    <button class="btn btn-primary btn-md" style="width:100%;margin-top:8px" data-i18n="modal.signup.btn" onclick="signupWithEmail()">계정 만들기</button>
     <div class="modal-switch"><span data-i18n="modal.signup.switch">이미 계정이 있으신가요?</span> <a data-i18n="nav.login" onclick="switchModal('login')" style="cursor:pointer">로그인</a></div>
   </div>
 </div>
@@ -1483,6 +1478,82 @@
   updateNavAuth();
   sendHeartbeat();
   setInterval(sendHeartbeat, 30000);
+
+  /* ── 이메일 회원가입 ── */
+  async function signupWithEmail() {
+    const name     = document.getElementById('signupName').value.trim();
+    const email    = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    const errEl    = document.getElementById('signupError');
+    errEl.style.display = 'none';
+    if (!name || !email || !password) {
+      errEl.textContent = '이름, 이메일, 비밀번호를 입력하세요.';
+      errEl.style.display = 'block'; return;
+    }
+    try {
+      const res  = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ full_name: name, email, password }) });
+      const data = await res.json();
+      if (!res.ok) { errEl.textContent = data.error || '회원가입 실패'; errEl.style.display = 'block'; return; }
+      localStorage.setItem('foket-token', data.token);
+      localStorage.setItem('foket-user', JSON.stringify(data.user));
+      closeModal();
+      updateNavAuth();
+      showToast('환영합니다, ' + data.user.full_name + '!');
+    } catch { errEl.textContent = '네트워크 오류'; errEl.style.display = 'block'; }
+  }
+
+  /* ── 이메일 로그인 ── */
+  async function loginWithEmail() {
+    const email    = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errEl    = document.getElementById('loginError');
+    errEl.style.display = 'none';
+    if (!email || !password) {
+      errEl.textContent = '이메일과 비밀번호를 입력하세요.';
+      errEl.style.display = 'block'; return;
+    }
+    try {
+      const res  = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+      const data = await res.json();
+      if (!res.ok) { errEl.textContent = data.error || '로그인 실패'; errEl.style.display = 'block'; return; }
+      localStorage.setItem('foket-token', data.token);
+      localStorage.setItem('foket-user', JSON.stringify(data.user));
+      closeModal();
+      updateNavAuth();
+      showToast('로그인 성공! 환영합니다.');
+    } catch { errEl.textContent = '네트워크 오류'; errEl.style.display = 'block'; }
+  }
+
+  /* ── Google 인증 후 처리 ── */
+  async function handleGoogleCredential(response) {
+    try {
+      const res  = await fetch('/api/google-auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ credential: response.credential }) });
+      const data = await res.json();
+      if (!res.ok) { showToast(data.error || 'Google 인증 실패'); return; }
+      localStorage.setItem('foket-token', data.token);
+      localStorage.setItem('foket-user', JSON.stringify(data.user));
+      closeModal();
+      updateNavAuth();
+      showToast(data.isNew ? '환영합니다, ' + data.user.full_name + '!' : '다시 오셨군요, ' + data.user.full_name + '!');
+    } catch { showToast('Google 인증 오류'); }
+  }
+
+  /* ── GSI 초기화 ── */
+  (async () => {
+    try {
+      const cfg = await fetch('/api/public-config').then(r => r.json());
+      if (!cfg.googleClientId) return;
+      const clientId = cfg.googleClientId;
+      function waitGsi(cb) { if (window.google) cb(); else setTimeout(() => waitGsi(cb), 100); }
+      waitGsi(() => {
+        google.accounts.id.initialize({ client_id: clientId, callback: handleGoogleCredential });
+        ['signupGoogleBtn', 'loginGoogleBtn'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) google.accounts.id.renderButton(el, { theme: 'outline', size: 'large', width: 340, text: id.startsWith('login') ? 'signin_with' : 'signup_with' });
+        });
+      });
+    } catch {}
+  })();
 </script>
 </body>
 </html>
