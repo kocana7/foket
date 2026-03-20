@@ -376,6 +376,56 @@ app.post('/api/heartbeat', authMiddleware, async (req, res) => {
   }
 });
 
+/*
+  DB 초기화 (한 번만 실행):
+  CREATE TABLE dbo.Questions (
+    question_id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    user_id     BIGINT NOT NULL,
+    type        NVARCHAR(10) NOT NULL,        -- 'vote' | 'bet'
+    question    NVARCHAR(500) NOT NULL,
+    category    NVARCHAR(50),
+    options     NVARCHAR(MAX),               -- JSON array (투표용)
+    initial_prob INT,                        -- 내기 초기 확률 (%)
+    end_date    DATETIME,
+    status      NVARCHAR(20) DEFAULT 'PENDING', -- PENDING | APPROVED | REJECTED
+    created_at  DATETIME DEFAULT GETDATE()
+  );
+*/
+// ── 질문 등록 ─────────────────────────────────────────────
+app.post('/api/questions', authMiddleware, async (req, res) => {
+  const { type, question, category, options, initial_prob, end_date } = req.body;
+  if (!type || !question || !category || !end_date)
+    return res.status(400).json({ error: '필수 항목을 모두 입력하세요' });
+  if (!['vote', 'bet'].includes(type))
+    return res.status(400).json({ error: '질문 유형이 올바르지 않습니다' });
+  if (question.trim().length < 5)
+    return res.status(400).json({ error: '질문은 5자 이상 입력하세요' });
+  if (type === 'vote' && (!options || options.length < 2))
+    return res.status(400).json({ error: '투표 선택지를 2개 이상 입력하세요' });
+  try {
+    const db = await getPool();
+    const optionsJson = options ? JSON.stringify(options) : null;
+    const prob = (type === 'bet') ? (initial_prob || 50) : null;
+    const result = await db.request()
+      .input('userId',      sql.BigInt,   req.user.userId)
+      .input('type',        sql.NVarChar, type)
+      .input('question',    sql.NVarChar, question.trim())
+      .input('category',    sql.NVarChar, category)
+      .input('options',     sql.NVarChar, optionsJson)
+      .input('initialProb', sql.Int,      prob)
+      .input('endDate',     sql.DateTime, new Date(end_date))
+      .query(`
+        INSERT INTO dbo.Questions (user_id, type, question, category, options, initial_prob, end_date, status, created_at)
+        OUTPUT INSERTED.question_id
+        VALUES (@userId, @type, @question, @category, @options, @initialProb, @endDate, 'PENDING', GETDATE())
+      `);
+    res.json({ ok: true, question_id: result.recordset[0].question_id });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
 // ── 공개 설정 (프론트엔드용) ──────────────────────────────
 app.get('/api/public-config', (req, res) => {
   res.json({ googleClientId: GOOGLE_CLIENT_ID || '' });

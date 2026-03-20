@@ -370,6 +370,35 @@
     .lang-option.active { background: var(--blue-light); color: var(--blue); font-weight: 600; }
     .lang-flag { font-size: 16px; line-height: 1; }
 
+    /* ─── MY PAGE ─── */
+    #mypageOverlay { position:fixed;inset:0;background:#F4F6FA;z-index:5000;overflow-y:auto;display:none; }
+    .mp-wrap { max-width:700px;margin:0 auto;padding:28px 20px 80px; }
+    .mp-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:28px; }
+    .mp-title { font-size:20px;font-weight:800;color:var(--gray-900); }
+    .mp-close { padding:8px 18px;border-radius:10px;border:1.5px solid var(--gray-200);background:white;font-size:13px;font-weight:700;cursor:pointer;color:var(--gray-600); }
+    .mp-close:hover { background:var(--gray-100); }
+    .mp-card { background:white;border-radius:20px;padding:24px 28px;margin-bottom:18px;box-shadow:0 1px 6px rgba(0,0,0,0.06); }
+    .mp-card-title { font-size:16px;font-weight:800;color:var(--gray-900);margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--gray-100); }
+    .mp-info-row { display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray-50); }
+    .mp-info-label { font-size:13px;color:var(--gray-400);font-weight:600; }
+    .mp-info-value { font-size:14px;font-weight:700;color:var(--gray-900); }
+    .mp-balance { font-size:22px;font-weight:800;color:var(--blue);margin:6px 0 2px; }
+    .mp-tabs { display:flex;gap:8px;margin-bottom:20px; }
+    .mp-tab { flex:1;padding:10px;border-radius:12px;border:1.5px solid var(--gray-200);background:white;font-size:14px;font-weight:700;cursor:pointer;color:var(--gray-500);transition:all .15s; }
+    .mp-tab.active { border-color:var(--blue);background:var(--blue);color:white; }
+    .mp-form-label { font-size:13px;font-weight:700;color:var(--gray-700);margin-bottom:6px;display:block; }
+    .mp-input { width:100%;padding:11px 14px;border:1.5px solid var(--gray-200);border-radius:12px;font-size:14px;font-family:var(--font);outline:none;box-sizing:border-box;color:var(--gray-900); }
+    .mp-input:focus { border-color:var(--blue); }
+    .mp-select { width:100%;padding:11px 14px;border:1.5px solid var(--gray-200);border-radius:12px;font-size:14px;font-family:var(--font);outline:none;background:white;color:var(--gray-900);cursor:pointer; }
+    .mp-vote-options { display:flex;flex-direction:column;gap:8px; }
+    .mp-option-row { display:flex;gap:8px;align-items:center; }
+    .mp-add-opt { margin-top:6px;padding:8px;border-radius:10px;border:1.5px dashed var(--gray-200);background:white;font-size:13px;font-weight:600;cursor:pointer;color:var(--blue);width:100%; }
+    .mp-submit { width:100%;padding:13px;border-radius:14px;border:none;background:var(--blue);color:white;font-size:15px;font-weight:800;cursor:pointer;margin-top:6px; }
+    .mp-submit:hover { background:#2a3de0; }
+    .mp-nick-row { display:flex;gap:8px;align-items:center;margin-top:14px; }
+    .mp-check-btn { padding:0 14px;height:42px;border-radius:10px;border:1.5px solid var(--blue);background:white;color:var(--blue);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap; }
+    .mp-save-btn { padding:0 16px;height:42px;border-radius:10px;border:none;background:var(--blue);color:white;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap; }
+
     /* Toast */
     .toast {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
@@ -423,7 +452,7 @@
           <button class="lang-option" data-lang="ru" onclick="setLang('ru')"><span class="lang-flag">🇷🇺</span>Русский</button>
         </div>
       </div>
-      <button class="btn btn-ghost btn-sm" data-i18n="nav.mypage" onclick="showToast('마이페이지 준비 중!')">마이페이지 및 질문등록</button>
+      <button class="btn btn-ghost btn-sm" data-i18n="nav.mypage" onclick="openMyPage()">마이페이지 및 질문등록</button>
       <span id="navGuest">
         <button class="btn btn-ghost btn-sm" data-i18n="nav.login" onclick="openModal('login')">로그인</button>
         <button class="btn btn-primary btn-sm" data-i18n="nav.signup" onclick="openModal('signup')">회원가입</button>
@@ -2174,6 +2203,136 @@
   </div>
 </div>
 
+<!-- MY PAGE OVERLAY -->
+<div id="mypageOverlay">
+  <div class="mp-wrap">
+    <div class="mp-header">
+      <div class="mp-title">마이페이지 및 질문등록</div>
+      <button class="mp-close" onclick="closeMyPage()">✕ 닫기</button>
+    </div>
+
+    <!-- 내 정보 카드 -->
+    <div class="mp-card">
+      <div class="mp-card-title">내 정보</div>
+      <div class="mp-info-row">
+        <span class="mp-info-label">이메일</span>
+        <span class="mp-info-value" id="mpEmail">-</span>
+      </div>
+      <div class="mp-info-row">
+        <span class="mp-info-label">닉네임</span>
+        <span class="mp-info-value" id="mpNickname">-</span>
+      </div>
+      <div style="padding:14px 0 4px">
+        <span class="mp-info-label">보유 포켓포인트</span>
+        <div class="mp-balance"><b class="fcur">F</b><span id="mpBalance">0</span></div>
+        <div style="font-size:12px;color:var(--gray-400)">1 포켓포인트 = 예측 참여 1회</div>
+      </div>
+    </div>
+
+    <!-- 닉네임 변경 카드 -->
+    <div class="mp-card">
+      <div class="mp-card-title">닉네임 변경</div>
+      <label class="mp-form-label">새 닉네임 (2~20자)</label>
+      <div class="mp-nick-row">
+        <input class="mp-input" id="mpNickInput" type="text" placeholder="새 닉네임 입력" oninput="mpResetNickCheck()" style="flex:1" />
+        <button class="mp-check-btn" onclick="mpCheckNick()">중복확인</button>
+        <button class="mp-save-btn" onclick="mpSaveNick()">변경</button>
+      </div>
+      <div id="mpNickMsg" style="font-size:12px;margin-top:6px;display:none"></div>
+    </div>
+
+    <!-- 질문 등록 카드 -->
+    <div class="mp-card">
+      <div class="mp-card-title">질문 등록</div>
+      <div class="mp-tabs">
+        <button class="mp-tab active" id="mpTabVote" onclick="mpSetTab('vote')">🗳️ 투표</button>
+        <button class="mp-tab" id="mpTabBet" onclick="mpSetTab('bet')">🎯 내기</button>
+      </div>
+
+      <!-- 투표 폼 -->
+      <div id="mpFormVote">
+        <div style="margin-bottom:14px">
+          <label class="mp-form-label">질문 *</label>
+          <input class="mp-input" id="voteQuestion" type="text" placeholder="예) 2026년 가장 인기 있는 K-pop 그룹은?" />
+        </div>
+        <div style="margin-bottom:14px">
+          <label class="mp-form-label">카테고리 *</label>
+          <select class="mp-select" id="voteCategory">
+            <option value="">카테고리 선택</option>
+            <option value="politics">정치</option>
+            <option value="sports">스포츠</option>
+            <option value="culture">문화</option>
+            <option value="economy">경제</option>
+            <option value="trading">트레이딩</option>
+            <option value="weather">날씨</option>
+            <option value="statement">발언</option>
+            <option value="science">과학&기술</option>
+            <option value="neighbor">나의 이웃</option>
+            <option value="etc">기타</option>
+          </select>
+        </div>
+        <div style="margin-bottom:14px">
+          <label class="mp-form-label">투표 선택지 (최소 2개) *</label>
+          <div class="mp-vote-options" id="voteOptions">
+            <div class="mp-option-row">
+              <input class="mp-input" type="text" placeholder="선택지 1" style="flex:1" />
+              <button onclick="mpRemoveOption(this)" style="width:32px;height:42px;border-radius:8px;border:1.5px solid var(--gray-200);background:white;cursor:pointer;font-size:16px;color:var(--gray-400);flex-shrink:0">✕</button>
+            </div>
+            <div class="mp-option-row">
+              <input class="mp-input" type="text" placeholder="선택지 2" style="flex:1" />
+              <button onclick="mpRemoveOption(this)" style="width:32px;height:42px;border-radius:8px;border:1.5px solid var(--gray-200);background:white;cursor:pointer;font-size:16px;color:var(--gray-400);flex-shrink:0">✕</button>
+            </div>
+          </div>
+          <button class="mp-add-opt" onclick="mpAddOption()">+ 선택지 추가 (최대 4개)</button>
+        </div>
+        <div style="margin-bottom:14px">
+          <label class="mp-form-label">종료 일시 *</label>
+          <input class="mp-input" id="voteEndDate" type="datetime-local" />
+        </div>
+        <div id="voteError" style="display:none;color:#F04438;font-size:13px;padding:8px 12px;background:#FEE9E7;border-radius:10px;margin-bottom:10px"></div>
+        <button class="mp-submit" onclick="mpSubmitVote()">투표 질문 등록하기</button>
+      </div>
+
+      <!-- 내기 폼 -->
+      <div id="mpFormBet" style="display:none">
+        <div style="margin-bottom:14px">
+          <label class="mp-form-label">예측 질문 * <span style="font-size:11px;color:var(--gray-400);font-weight:400">(Yes/No로 답할 수 있는 질문)</span></label>
+          <input class="mp-input" id="betQuestion" type="text" placeholder="예) 손흥민이 올 시즌 30골을 넣을까요?" />
+        </div>
+        <div style="margin-bottom:14px">
+          <label class="mp-form-label">카테고리 *</label>
+          <select class="mp-select" id="betCategory">
+            <option value="">카테고리 선택</option>
+            <option value="politics">정치</option>
+            <option value="sports">스포츠</option>
+            <option value="culture">문화</option>
+            <option value="economy">경제</option>
+            <option value="trading">트레이딩</option>
+            <option value="weather">날씨</option>
+            <option value="statement">발언</option>
+            <option value="science">과학&기술</option>
+            <option value="neighbor">나의 이웃</option>
+            <option value="etc">기타</option>
+          </select>
+        </div>
+        <div style="margin-bottom:14px">
+          <label class="mp-form-label">초기 Yes 확률 (%)</label>
+          <div style="display:flex;align-items:center;gap:12px">
+            <input class="mp-input" id="betProb" type="range" min="5" max="95" value="50" oninput="document.getElementById('betProbVal').textContent=this.value+'%'" style="flex:1;padding:4px 0;border:none;background:transparent" />
+            <span id="betProbVal" style="font-size:16px;font-weight:800;color:var(--blue);min-width:42px;text-align:right">50%</span>
+          </div>
+        </div>
+        <div style="margin-bottom:14px">
+          <label class="mp-form-label">종료 일시 *</label>
+          <input class="mp-input" id="betEndDate" type="datetime-local" />
+        </div>
+        <div id="betError" style="display:none;color:#F04438;font-size:13px;padding:8px 12px;background:#FEE9E7;border-radius:10px;margin-bottom:10px"></div>
+        <button class="mp-submit" onclick="mpSubmitBet()">내기 질문 등록하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- TRADE MODAL -->
 <div class="modal-overlay" id="tradeModal" onclick="closeTradeOutside(event)">
   <div class="modal trade-modal">
@@ -3637,6 +3796,162 @@ const CARD_DATA = {
       showToast(data.isNew ? '환영합니다, ' + data.user.full_name + '!' : '다시 오셨군요, ' + data.user.full_name + '!');
       checkNicknamePrompt(data.user, data.token);
     } catch { showToast('Google 인증 오류'); }
+  }
+
+  /* ── 마이페이지 ── */
+  async function openMyPage() {
+    const token = localStorage.getItem('foket-token');
+    if (!token) { openModal('login'); return; }
+    document.getElementById('mypageOverlay').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    // 최신 유저 정보 로드
+    try {
+      const res = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + token } });
+      if (!res.ok) { closeMyPage(); openModal('login'); return; }
+      const u = await res.json();
+      document.getElementById('mpEmail').textContent = u.email || '-';
+      document.getElementById('mpNickname').textContent = u.nickname ? '@' + u.nickname : '미설정';
+      document.getElementById('mpBalance').textContent = Number(u.balance || 0).toLocaleString();
+      // 저장
+      try {
+        const stored = JSON.parse(localStorage.getItem('foket-user') || '{}');
+        Object.assign(stored, { nickname: u.nickname, balance: u.balance });
+        localStorage.setItem('foket-user', JSON.stringify(stored));
+      } catch {}
+    } catch { showToast('정보를 불러오지 못했습니다.'); }
+    replaceWithFSymbol();
+  }
+
+  function closeMyPage() {
+    document.getElementById('mypageOverlay').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  function mpSetTab(tab) {
+    document.getElementById('mpFormVote').style.display = tab === 'vote' ? 'block' : 'none';
+    document.getElementById('mpFormBet').style.display  = tab === 'bet'  ? 'block' : 'none';
+    document.getElementById('mpTabVote').classList.toggle('active', tab === 'vote');
+    document.getElementById('mpTabBet').classList.toggle('active', tab === 'bet');
+  }
+
+  /* 닉네임 변경 */
+  let _mpNickChecked = false;
+  async function mpCheckNick() {
+    const nick = document.getElementById('mpNickInput').value.trim();
+    const msg  = document.getElementById('mpNickMsg');
+    msg.style.display = 'block';
+    if (!nick) { msg.textContent = '닉네임을 입력하세요.'; msg.style.color = '#F04438'; _mpNickChecked = false; return; }
+    msg.textContent = '확인 중...'; msg.style.color = '#667085';
+    try {
+      const res  = await fetch('/api/check-nickname?nickname=' + encodeURIComponent(nick));
+      const data = await res.json();
+      if (data.available) { msg.textContent = '✓ 사용 가능한 닉네임입니다.'; msg.style.color = '#00C896'; _mpNickChecked = true; }
+      else { msg.textContent = '✗ ' + (data.reason || '이미 사용 중인 닉네임입니다.'); msg.style.color = '#F04438'; _mpNickChecked = false; }
+    } catch { msg.textContent = '확인 실패. 다시 시도해주세요.'; msg.style.color = '#F04438'; _mpNickChecked = false; }
+  }
+  function mpResetNickCheck() { _mpNickChecked = false; document.getElementById('mpNickMsg').style.display = 'none'; }
+
+  async function mpSaveNick() {
+    const nick  = document.getElementById('mpNickInput').value.trim();
+    const msg   = document.getElementById('mpNickMsg');
+    msg.style.display = 'block';
+    if (!nick) { msg.textContent = '닉네임을 입력하세요.'; msg.style.color = '#F04438'; return; }
+    if (!_mpNickChecked) { msg.textContent = '중복확인을 먼저 해주세요.'; msg.style.color = '#F04438'; return; }
+    const token = localStorage.getItem('foket-token');
+    try {
+      const res  = await fetch('/api/set-nickname', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ nickname: nick })
+      });
+      const data = await res.json();
+      if (!res.ok) { _mpNickChecked = false; msg.textContent = '✗ ' + (data.error || '저장 실패'); msg.style.color = '#F04438'; return; }
+      document.getElementById('mpNickname').textContent = '@' + data.nickname;
+      document.getElementById('mpNickInput').value = '';
+      msg.textContent = '✓ 닉네임이 변경되었습니다.'; msg.style.color = '#00C896';
+      _mpNickChecked = false;
+      try {
+        const u = JSON.parse(localStorage.getItem('foket-user') || '{}');
+        u.nickname = data.nickname; localStorage.setItem('foket-user', JSON.stringify(u));
+      } catch {}
+      showToast('닉네임이 변경되었습니다: @' + data.nickname);
+    } catch { msg.textContent = '네트워크 오류'; msg.style.color = '#F04438'; }
+  }
+
+  /* 투표 선택지 */
+  function mpAddOption() {
+    const container = document.getElementById('voteOptions');
+    if (container.children.length >= 4) { showToast('최대 4개까지 추가할 수 있습니다.'); return; }
+    const n = container.children.length + 1;
+    const row = document.createElement('div');
+    row.className = 'mp-option-row';
+    row.innerHTML = `<input class="mp-input" type="text" placeholder="선택지 ${n}" style="flex:1" /><button onclick="mpRemoveOption(this)" style="width:32px;height:42px;border-radius:8px;border:1.5px solid var(--gray-200);background:white;cursor:pointer;font-size:16px;color:var(--gray-400);flex-shrink:0">✕</button>`;
+    container.appendChild(row);
+  }
+  function mpRemoveOption(btn) {
+    const container = document.getElementById('voteOptions');
+    if (container.children.length <= 2) { showToast('최소 2개는 있어야 합니다.'); return; }
+    btn.parentElement.remove();
+  }
+
+  /* 투표 등록 */
+  async function mpSubmitVote() {
+    const q    = document.getElementById('voteQuestion').value.trim();
+    const cat  = document.getElementById('voteCategory').value;
+    const end  = document.getElementById('voteEndDate').value;
+    const errEl = document.getElementById('voteError');
+    errEl.style.display = 'none';
+    const opts = Array.from(document.querySelectorAll('#voteOptions .mp-option-row input')).map(i => i.value.trim()).filter(v => v);
+    if (!q) { errEl.textContent = '질문을 입력해주세요.'; errEl.style.display = 'block'; return; }
+    if (!cat) { errEl.textContent = '카테고리를 선택해주세요.'; errEl.style.display = 'block'; return; }
+    if (opts.length < 2) { errEl.textContent = '선택지를 2개 이상 입력해주세요.'; errEl.style.display = 'block'; return; }
+    if (!end) { errEl.textContent = '종료 일시를 선택해주세요.'; errEl.style.display = 'block'; return; }
+    const token = localStorage.getItem('foket-token');
+    try {
+      const res  = await fetch('/api/questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ type: 'vote', question: q, category: cat, options: opts, end_date: end })
+      });
+      const data = await res.json();
+      if (!res.ok) { errEl.textContent = data.error || '등록 실패'; errEl.style.display = 'block'; return; }
+      showToast('투표 질문이 등록되었습니다! 관리자 승인 후 게시됩니다.');
+      document.getElementById('voteQuestion').value = '';
+      document.getElementById('voteCategory').value = '';
+      document.getElementById('voteEndDate').value = '';
+      document.getElementById('voteOptions').innerHTML = `
+        <div class="mp-option-row"><input class="mp-input" type="text" placeholder="선택지 1" style="flex:1" /><button onclick="mpRemoveOption(this)" style="width:32px;height:42px;border-radius:8px;border:1.5px solid var(--gray-200);background:white;cursor:pointer;font-size:16px;color:var(--gray-400);flex-shrink:0">✕</button></div>
+        <div class="mp-option-row"><input class="mp-input" type="text" placeholder="선택지 2" style="flex:1" /><button onclick="mpRemoveOption(this)" style="width:32px;height:42px;border-radius:8px;border:1.5px solid var(--gray-200);background:white;cursor:pointer;font-size:16px;color:var(--gray-400);flex-shrink:0">✕</button></div>`;
+    } catch { errEl.textContent = '네트워크 오류'; errEl.style.display = 'block'; }
+  }
+
+  /* 내기 등록 */
+  async function mpSubmitBet() {
+    const q    = document.getElementById('betQuestion').value.trim();
+    const cat  = document.getElementById('betCategory').value;
+    const prob = document.getElementById('betProb').value;
+    const end  = document.getElementById('betEndDate').value;
+    const errEl = document.getElementById('betError');
+    errEl.style.display = 'none';
+    if (!q) { errEl.textContent = '질문을 입력해주세요.'; errEl.style.display = 'block'; return; }
+    if (!cat) { errEl.textContent = '카테고리를 선택해주세요.'; errEl.style.display = 'block'; return; }
+    if (!end) { errEl.textContent = '종료 일시를 선택해주세요.'; errEl.style.display = 'block'; return; }
+    const token = localStorage.getItem('foket-token');
+    try {
+      const res  = await fetch('/api/questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ type: 'bet', question: q, category: cat, initial_prob: parseInt(prob), end_date: end })
+      });
+      const data = await res.json();
+      if (!res.ok) { errEl.textContent = data.error || '등록 실패'; errEl.style.display = 'block'; return; }
+      showToast('내기 질문이 등록되었습니다! 관리자 승인 후 게시됩니다.');
+      document.getElementById('betQuestion').value = '';
+      document.getElementById('betCategory').value = '';
+      document.getElementById('betProb').value = 50;
+      document.getElementById('betProbVal').textContent = '50%';
+      document.getElementById('betEndDate').value = '';
+    } catch { errEl.textContent = '네트워크 오류'; errEl.style.display = 'block'; }
   }
 
   /* ── 닉네임 미설정 회원 처리 ── */
