@@ -279,13 +279,13 @@ app.get('/api/admin/users', adminMiddleware, async (req, res) => {
     req2.input('limit',  sql.Int, parseInt(limit));
 
     const result = await req2.query(`
-      SELECT u.user_id, u.email, u.full_name, u.grade, u.balance,
+      SELECT u.user_id, u.email, u.full_name, u.nickname, u.grade, u.balance,
              u.total_traded, u.kyc_status, u.status, u.created_at,
              u.last_seen_at, COUNT(t.trade_id) AS trade_count
       FROM dbo.Users u
       LEFT JOIN dbo.Trades t ON u.user_id = t.user_id
       ${where}
-      GROUP BY u.user_id, u.email, u.full_name, u.grade, u.balance,
+      GROUP BY u.user_id, u.email, u.full_name, u.nickname, u.grade, u.balance,
                u.total_traded, u.kyc_status, u.status, u.created_at, u.last_seen_at
       ORDER BY u.created_at DESC
       OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY
