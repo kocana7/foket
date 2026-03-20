@@ -182,7 +182,8 @@
     .cat-tab.all-bet:hover { background: #f0fdf4; color: var(--green); }
     .cat-tab.all-bet.active { background: var(--green); color: var(--white); }
     .cat-tab-divider { width: 1px; background: var(--gray-200); margin: 4px 4px; align-self: stretch; flex-shrink: 0; }
-    .cat-dropdown { display: none; position: absolute; top: calc(100% + 4px); left: 0; background: var(--white); border: 1px solid var(--gray-200); border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); min-width: 90px; z-index: 200; padding: 4px; }
+    .cat-dropdown { display: none; position: absolute; top: 100%; left: 0; padding-top: 6px; min-width: 90px; z-index: 200; }
+    .cat-dropdown-inner { background: var(--white); border: 1px solid var(--gray-200); border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); padding: 4px; }
     .cat-tab-wrap:hover .cat-dropdown { display: block; }
     .cat-dropdown-item { display: block; width: 100%; text-align: left; padding: 7px 14px; border: none; background: none; border-radius: 7px; cursor: pointer; font-size: 12px; font-weight: 600; transition: background 0.1s; white-space: nowrap; font-family: var(--font); }
     .cat-dropdown-item.vote { color: var(--blue); }
@@ -494,66 +495,66 @@
         <div class="cat-tab-divider"></div>
         <div class="cat-tab-wrap">
           <button class="cat-tab active" onclick="switchCat('politics',this)">🗳️ 정치</button>
-          <div class="cat-dropdown">
+          <div class="cat-dropdown"><div class="cat-dropdown-inner">
             <button class="cat-dropdown-item vote" onclick="switchCat('politics',this,'투표')">🗳️ 투표</button>
             <button class="cat-dropdown-item bet" onclick="switchCat('politics',this,'내기')">💰 내기</button>
-          </div>
+          </div></div>
         </div>
         <div class="cat-tab-wrap">
           <button class="cat-tab" onclick="switchCat('sports',this)">🏆 스포츠</button>
-          <div class="cat-dropdown">
+          <div class="cat-dropdown"><div class="cat-dropdown-inner">
             <button class="cat-dropdown-item vote" onclick="switchCat('sports',this,'투표')">🗳️ 투표</button>
             <button class="cat-dropdown-item bet" onclick="switchCat('sports',this,'내기')">💰 내기</button>
-          </div>
+          </div></div>
         </div>
         <div class="cat-tab-wrap">
           <button class="cat-tab" onclick="switchCat('culture',this)">🎭 문화</button>
-          <div class="cat-dropdown">
+          <div class="cat-dropdown"><div class="cat-dropdown-inner">
             <button class="cat-dropdown-item vote" onclick="switchCat('culture',this,'투표')">🗳️ 투표</button>
             <button class="cat-dropdown-item bet" onclick="switchCat('culture',this,'내기')">💰 내기</button>
-          </div>
+          </div></div>
         </div>
         <div class="cat-tab-wrap">
           <button class="cat-tab" onclick="switchCat('trading',this)">📈 트레이딩</button>
-          <div class="cat-dropdown">
+          <div class="cat-dropdown"><div class="cat-dropdown-inner">
             <button class="cat-dropdown-item vote" onclick="switchCat('trading',this,'투표')">🗳️ 투표</button>
             <button class="cat-dropdown-item bet" onclick="switchCat('trading',this,'내기')">💰 내기</button>
-          </div>
+          </div></div>
         </div>
         <div class="cat-tab-wrap">
           <button class="cat-tab" onclick="switchCat('weather',this)">🌡️ 날씨</button>
-          <div class="cat-dropdown">
+          <div class="cat-dropdown"><div class="cat-dropdown-inner">
             <button class="cat-dropdown-item vote" onclick="switchCat('weather',this,'투표')">🗳️ 투표</button>
             <button class="cat-dropdown-item bet" onclick="switchCat('weather',this,'내기')">💰 내기</button>
-          </div>
+          </div></div>
         </div>
         <div class="cat-tab-wrap">
           <button class="cat-tab" onclick="switchCat('economy',this)">💹 경제</button>
-          <div class="cat-dropdown">
+          <div class="cat-dropdown"><div class="cat-dropdown-inner">
             <button class="cat-dropdown-item vote" onclick="switchCat('economy',this,'투표')">🗳️ 투표</button>
             <button class="cat-dropdown-item bet" onclick="switchCat('economy',this,'내기')">💰 내기</button>
-          </div>
+          </div></div>
         </div>
         <div class="cat-tab-wrap">
           <button class="cat-tab" onclick="switchCat('statement',this)">💬 발언</button>
-          <div class="cat-dropdown">
+          <div class="cat-dropdown"><div class="cat-dropdown-inner">
             <button class="cat-dropdown-item vote" onclick="switchCat('statement',this,'투표')">🗳️ 투표</button>
             <button class="cat-dropdown-item bet" onclick="switchCat('statement',this,'내기')">💰 내기</button>
-          </div>
+          </div></div>
         </div>
         <div class="cat-tab-wrap">
           <button class="cat-tab" onclick="switchCat('science',this)">🔬 과학 &amp; 기술</button>
-          <div class="cat-dropdown">
+          <div class="cat-dropdown"><div class="cat-dropdown-inner">
             <button class="cat-dropdown-item vote" onclick="switchCat('science',this,'투표')">🗳️ 투표</button>
             <button class="cat-dropdown-item bet" onclick="switchCat('science',this,'내기')">💰 내기</button>
-          </div>
+          </div></div>
         </div>
         <div class="cat-tab-wrap">
           <button class="cat-tab" onclick="switchCat('neighbor',this)">🏘️ 나의 이웃</button>
-          <div class="cat-dropdown">
+          <div class="cat-dropdown"><div class="cat-dropdown-inner">
             <button class="cat-dropdown-item vote" onclick="switchCat('neighbor',this,'투표')">🗳️ 투표</button>
             <button class="cat-dropdown-item bet" onclick="switchCat('neighbor',this,'내기')">💰 내기</button>
-          </div>
+          </div></div>
         </div>
       </div>
 
