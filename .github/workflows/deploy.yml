@@ -5,7 +5,8 @@ on:
     branches: [ main ]
 
 jobs:
-  deploy:
+  # ── 로컬 서버 배포 (Windows self-hosted runner) ──────────
+  deploy-local:
     runs-on: [self-hosted, foket-server]
 
     steps:
@@ -24,4 +25,30 @@ jobs:
         run: |
           pm2 restart foket-api || pm2 start /c/foket/api/server.js --name foket-api --log /c/foket/api/server.log
           pm2 save
-          echo "배포 완료"
+          echo "로컬 배포 완료"
+
+  # ── 프로덕션 서버 배포 (EC2) ─────────────────────────────
+  # 사전 설정: GitHub 저장소 Settings → Secrets and variables → Actions 에서
+  #   EC2_HOST     = ec2-54-187-53-139.us-west-2.compute.amazonaws.com
+  #   EC2_USER     = ubuntu
+  #   EC2_SSH_KEY  = foket.pem 파일의 전체 내용 (-----BEGIN RSA PRIVATE KEY----- 포함)
+  # 그리고 EC2 보안 그룹에서 포트 22를 열어야 합니다.
+  deploy-production:
+    runs-on: ubuntu-latest
+    continue-on-error: true  # 시크릿 미설정 시 전체 워크플로 실패 방지
+
+    steps:
+      - name: EC2 SSH 배포
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/foket
+            git pull origin main
+            cd api
+            npm install --production
+            pm2 restart foket-api || pm2 start /home/ubuntu/foket/api/server.js --name foket-api
+            pm2 save
+            echo "프로덕션 배포 완료"

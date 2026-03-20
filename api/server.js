@@ -503,9 +503,35 @@ app.get('/api/public-config', (req, res) => {
   res.json({ googleClientId: GOOGLE_CLIENT_ID || '' });
 });
 
+// ── DB 초기화 (테이블 없으면 생성) ────────────────────────
+async function initDb() {
+  try {
+    const db = await getPool();
+    await db.request().query(`
+      IF NOT EXISTS (SELECT * FROM sys.tables WHERE name='Questions' AND schema_id = SCHEMA_ID('dbo'))
+      CREATE TABLE dbo.Questions (
+        question_id BIGINT IDENTITY(1,1) PRIMARY KEY,
+        user_id     BIGINT NOT NULL,
+        type        NVARCHAR(10) NOT NULL,
+        question    NVARCHAR(500) NOT NULL,
+        category    NVARCHAR(50),
+        options     NVARCHAR(MAX),
+        initial_prob INT,
+        end_date    DATETIME,
+        status      NVARCHAR(20) DEFAULT 'PENDING',
+        created_at  DATETIME DEFAULT GETDATE()
+      )
+    `);
+    console.log('DB 초기화 완료 (dbo.Questions 테이블 확인)');
+  } catch (err) {
+    console.error('DB 초기화 실패:', err.message);
+  }
+}
+
 // ── 서버 시작 ─────────────────────────────────────────────
 getPool()
-  .then(() => {
+  .then(async () => {
+    await initDb();
     app.listen(PORT, () => console.log(`Foket API 서버 실행 중: http://localhost:${PORT}`));
   })
   .catch(err => {
