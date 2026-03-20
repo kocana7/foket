@@ -54,12 +54,13 @@
     }
     .nav-logo svg { width: 32px; height: 32px; }
     .nav-links {
-      display: flex; align-items: center; gap: 2px;
-      flex: 1;
+      display: flex; align-items: center; gap: 1px;
+      flex: 0 1 auto;
+      overflow: hidden;
     }
     .nav-link {
-      padding: 8px 14px; border-radius: 8px;
-      font-size: 14px; font-weight: 700; color: var(--gray-700);
+      padding: 6px 9px; border-radius: 8px;
+      font-size: 13px; font-weight: 700; color: var(--gray-700);
       text-decoration: none; white-space: nowrap;
       transition: background 0.15s, color 0.15s;
       display: flex; align-items: center; gap: 5px;
@@ -68,7 +69,7 @@
     .nav-link:hover { background: var(--gray-900); color: var(--white); }
     .nav-link.active { color: var(--white); background: var(--blue); }
     .nav-link svg { width: 14px; height: 14px; }
-    .nav-spacer { flex: 1; }
+    .nav-spacer { flex: 0; }
     .nav-actions { display: flex; align-items: center; gap: 10px; }
     .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; border: none; text-decoration: none; white-space: nowrap; }
     .btn-sm { padding: 8px 16px; font-size: 13px; }
