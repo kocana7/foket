@@ -1218,9 +1218,12 @@
       }
       var endDate = q.end_date ? new Date(q.end_date).toLocaleDateString('ko-KR') : '-';
       var submitter = q.nickname ? '@' + q.nickname : (q.email || '-');
+      var koLine = q.question_ko
+        ? '<br><span style="font-size:11px;color:var(--blue);font-weight:500">🇰🇷 ' + escHtml(q.question_ko) + '</span>'
+        : '';
       return '<tr class="db-q-row" data-qid="' + q.question_id + '" onclick="openQuestionDetail(' + q.question_id + ')" style="cursor:pointer">'
         + '<td style="font-size:12px;white-space:nowrap">' + catLabel + '</td>'
-        + '<td class="td-bold">' + escHtml(q.question) + '<br><span style="font-size:11px;color:var(--gray-400)">' + escHtml(submitter) + '</span></td>'
+        + '<td class="td-bold">' + escHtml(q.question) + koLine + '<br><span style="font-size:11px;color:var(--gray-400)">' + escHtml(submitter) + '</span></td>'
         + '<td>' + priceOrOptions + '</td>'
         + buildParticipationCells(q)
         + '<td>' + endDate + '</td>'
@@ -1297,9 +1300,12 @@
         + '<button class="action-btn danger" onclick="event.stopPropagation();confirmDeleteQ(' + q.question_id + ')">삭제</button>'
         + '</div>'
       : '<div class="action-btns"><button class="action-btn danger" onclick="event.stopPropagation();confirmDeleteQ(' + q.question_id + ')">삭제</button></div>';
+    var koLine2 = q.question_ko
+      ? '<br><span style="font-size:11px;color:var(--blue);font-weight:500">🇰🇷 ' + escHtml(q.question_ko) + '</span>'
+      : '';
     return '<tr class="db-q-row" data-qid="' + q.question_id + '" onclick="openQuestionDetail(' + q.question_id + ')" style="cursor:pointer">'
       + '<td>' + typeTag + '</td>'
-      + '<td class="td-bold">' + escHtml(q.question) + '<br><span style="font-size:11px;color:var(--gray-400)">' + escHtml(submitter) + '</span></td>'
+      + '<td class="td-bold">' + escHtml(q.question) + koLine2 + '<br><span style="font-size:11px;color:var(--gray-400)">' + escHtml(submitter) + '</span></td>'
       + '<td>' + priceOrOptions + '</td>'
       + buildParticipationCells(q)
       + '<td>' + endDate + '</td>'
@@ -1963,7 +1969,8 @@ document.addEventListener('DOMContentLoaded', () => {
       + '<span style="padding:4px 10px;background:var(--gray-100);color:var(--gray-600);border-radius:20px;font-size:13px">' + (catMap[q.category] || q.category || '-') + '</span>'
       + '<span style="padding:4px 10px;background:var(--gray-50);color:var(--gray-500);border-radius:20px;font-size:13px">' + statusText + '</span>'
       + '</div>'
-      + '<div style="font-size:17px;font-weight:700;color:var(--gray-900);line-height:1.5;margin-bottom:12px">' + escHtml(q.question) + '</div>'
+      + '<div style="font-size:17px;font-weight:700;color:var(--gray-900);line-height:1.5;margin-bottom:4px">' + escHtml(q.question) + '</div>'
+      + (q.question_ko ? '<div style="font-size:13px;color:var(--blue);font-weight:500;margin-bottom:12px">🇰🇷 ' + escHtml(q.question_ko) + '</div>' : '<div style="margin-bottom:12px"></div>')
       + extraHtml
       + '<div style="margin-top:14px;font-size:13px;color:var(--gray-500);display:flex;flex-direction:column;gap:4px">'
       + '<div>등록자: <b>' + escHtml(submitter) + '</b></div>'

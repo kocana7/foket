@@ -509,7 +509,7 @@ app.get('/api/admin/questions', adminMiddleware, async (req, res) => {
     if (status)   { where += ' AND q.status = ?';   params.push(status); }
 
     const [rows] = await db.execute(
-      `SELECT q.question_id, q.user_id, q.type, q.question, q.category,
+      `SELECT q.question_id, q.user_id, q.type, q.question, q.question_ko, q.category,
               q.options, q.initial_prob, q.end_date, q.status, q.created_at,
               u.email, u.nickname, u.full_name,
               (SELECT COUNT(*) FROM Participations p WHERE p.question_id = q.question_id) AS participant_count
@@ -657,6 +657,17 @@ async function initDb() {
     if (pidx.length > 0) {
       await db.execute('ALTER TABLE Participations DROP INDEX uq_user_question');
       console.log('Participations UNIQUE 제약 제거 완료');
+    }
+
+    // Questions 테이블 question_ko 컬럼 추가
+    const [qcols] = await db.execute(
+      `SELECT column_name FROM information_schema.columns
+       WHERE table_schema = DATABASE() AND table_name = 'Questions'`
+    );
+    const qExisting = new Set(qcols.map(c => c.column_name || c.COLUMN_NAME));
+    if (!qExisting.has('question_ko')) {
+      await db.execute('ALTER TABLE Questions ADD COLUMN question_ko VARCHAR(500)');
+      console.log('컬럼 추가: Questions.question_ko');
     }
 
     await db.execute(`
@@ -830,6 +841,101 @@ const BOT_LANG_DATA = {
   },
 };
 
+// ── 외국어 질문 → 한국어 번역 맵 ─────────────────────────────────────
+const QUESTION_KO_MAP = {
+  // English
+  'Will Trump impose additional tariffs on EU goods before end of 2026?': '트럼프가 2026년 말 이전에 EU 상품에 추가 관세를 부과할까요?',
+  'Who will be the biggest geopolitical story of 2026?': '2026년 가장 큰 지정학적 이슈는 무엇이 될까요?',
+  'Will the Golden State Warriors make the NBA playoffs in 2026?': '골든스테이트 워리어스가 2026년 NBA 플레이오프에 진출할까요?',
+  'Who wins the 2026 FIFA World Cup?': '2026 FIFA 월드컵 우승국은?',
+  'Will a Marvel film top the global box office in 2026?': '마블 영화가 2026년 글로벌 박스오피스 1위를 차지할까요?',
+  'Best streaming platform of 2026?': '2026년 최고의 스트리밍 플랫폼은?',
+  'Will Bitcoin exceed $120,000 by end of 2026?': '비트코인이 2026년 말까지 12만 달러를 초과할까요?',
+  'Will the S&P 500 hit 6,000 points in 2026?': 'S&P 500이 2026년에 6,000포인트를 달성할까요?',
+  'Will the US Fed cut interest rates twice in 2026?': '미국 연준이 2026년에 두 차례 금리를 인하할까요?',
+  'Biggest economic risk for the US in 2026?': '2026년 미국의 가장 큰 경제 리스크는?',
+  'Will GPT-5 be publicly released in the first half of 2026?': 'GPT-5가 2026년 상반기에 공개 출시될까요?',
+  'Which tech trend will dominate 2026?': '2026년을 주도할 기술 트렌드는?',
+  'Will Elon Musk sell X (Twitter) in 2026?': '일론 머스크가 2026년에 X(트위터)를 매각할까요?',
+  'Most controversial tech CEO statement of 2026?': '2026년 가장 논란이 된 테크 CEO 발언은?',
+  'Will a Category 5 hurricane hit the US mainland in 2026?': '2026년에 카테고리 5 허리케인이 미국 본토를 강타할까요?',
+  'Most used word of 2026?': '2026년 가장 많이 사용된 단어는?',
+  // Japanese
+  '2026年の参議院選挙で自民党は過半数を維持できるでしょうか？': '2026년 참의원 선거에서 자민당이 과반수를 유지할 수 있을까요?',
+  '2026年の日本の最重要政治課題は？': '2026년 일본의 가장 중요한 정치 과제는?',
+  '大谷翔平が2026年のMLBシーズンで50本塁打以上を達成するでしょうか？': '오타니 쇼헤이가 2026 MLB 시즌에 50홈런 이상을 달성할까요?',
+  '2026年のWBCで最も優勝候補の国は？': '2026년 WBC에서 가장 유력한 우승 후보국은?',
+  '2026年に日本のアニメ映画が世界興行収入トップ10に入るでしょうか？': '2026년 일본 애니메이션 영화가 세계 흥행 수입 TOP 10에 진입할까요?',
+  '2026年最も注目される日本のエンタメは？': '2026년 가장 주목받는 일본 엔터테인먼트는?',
+  '日本銀行が2026年中に利上げを実施するでしょうか？': '일본은행이 2026년 중 금리를 인상할까요?',
+  '2026年の日本経済の最大リスクは？': '2026년 일본 경제의 최대 리스크는?',
+  '日経平均が2026年に45,000円を突破するでしょうか？': '닛케이 평균이 2026년에 45,000엔을 돌파할까요?',
+  'ソニーが2026年にAIロボット製品を一般向けに発売するでしょうか？': '소니가 2026년에 AI 로봇 제품을 일반 소비자에게 출시할까요?',
+  '2026年最もブレイクするテクノロジーは？': '2026년 가장 주목받을 기술은?',
+  '2026年の夏、東京で40度以上の気温が記録されるでしょうか？': '2026년 여름 도쿄에서 40도 이상의 기온이 기록될까요?',
+  '2026年最も流行る日本の食トレンドは？': '2026년 가장 유행할 일본 음식 트렌드는?',
+  // Chinese
+  '中美关系在2026年下半年会出现重大缓和吗？': '미중 관계가 2026년 하반기에 큰 폭의 완화를 보일까요?',
+  '2026年最影响中国外交格局的因素是？': '2026년 중국 외교 구도에 가장 큰 영향을 미칠 요인은?',
+  '上证指数2026年能否突破4000点？': '상하이 종합지수가 2026년에 4,000포인트를 돌파할 수 있을까요?',
+  '2026年中国最具投资价值的板块是？': '2026년 중국에서 가장 투자 가치 있는 섹터는?',
+  '中国2026年GDP增速能否达到5%以上？': '중국의 2026년 GDP 성장률이 5% 이상을 달성할 수 있을까요?',
+  '2026年中国经济的最大挑战是？': '2026년 중국 경제의 최대 도전은?',
+  '华为在2026年能否量产7nm以下芯片？': '화웨이가 2026년에 7nm 이하 칩을 양산할 수 있을까요?',
+  '2026年中国最突破性的科技成就会是？': '2026년 중국의 가장 혁신적인 과학기술 성과는?',
+  '中国男足能否在2026年世界杯小组赛出线？': '중국 남자 축구가 2026년 월드컵 조별리그를 통과할 수 있을까요?',
+  '2026年最火的中国文化现象是？': '2026년 가장 뜨거운 중국 문화 현상은?',
+  '2026年中国南方洪涝灾害损失会超过2024年吗？': '2026년 중국 남부 홍수 피해가 2024년을 초과할까요?',
+  '2026年中国最热门的年轻人生活方式是？': '2026년 중국 젊은이들 사이에서 가장 인기 있는 라이프스타일은?',
+  // Spanish
+  '¿Ganará la izquierda las próximas elecciones en España en 2026?': '2026년 스페인 차기 선거에서 좌파가 승리할까요?',
+  '¿Cuál es el mayor desafío político de América Latina en 2026?': '2026년 라틴아메리카의 가장 큰 정치적 과제는?',
+  '¿Ganará el Real Madrid la Champions League 2025-26?': '레알 마드리드가 2025-26 챔피언스리그를 우승할까요?',
+  '¿Quién será el mejor jugador de la Liga Española en 2026?': '2026년 스페인 리그 최고의 선수는?',
+  '¿Superará una serie en español a "La Casa de Papel" en Netflix en 2026?': '2026년 스페인어 시리즈가 넷플릭스에서 "종이의 집"을 능가할까요?',
+  '¿Cuál es el mayor aporte cultural de España al mundo en 2026?': '2026년 스페인이 세계에 기여하는 가장 큰 문화적 기여는?',
+  '¿Bajará la inflación en España por debajo del 2% en 2026?': '2026년 스페인의 인플레이션이 2% 이하로 떨어질까요?',
+  '¿Cuál es el mayor riesgo económico para América Latina en 2026?': '2026년 라틴아메리카의 가장 큰 경제 리스크는?',
+  '¿Superará el IBEX 35 los 13,000 puntos en 2026?': 'IBEX 35가 2026년에 13,000포인트를 넘어설까요?',
+  '¿Será 2026 el verano más caluroso registrado en España?': '2026년이 스페인에서 기록상 가장 더운 여름이 될까요?',
+  '¿Qué tecnología transformará más España en 2026?': '2026년 스페인을 가장 많이 변화시킬 기술은?',
+  // French
+  'Macron terminera-t-il son mandat sans démission en 2026 ?': '마크롱이 2026년에 사임 없이 임기를 마칠까요?',
+  'Quel est le plus grand défi politique de la France en 2026 ?': '2026년 프랑스의 가장 큰 정치적 도전은?',
+  'Le PSG remportera-t-il la Ligue des Champions 2025-26 ?': 'PSG가 2025-26 챔피언스리그를 우승할까요?',
+  'Qui sera le meilleur joueur de Ligue 1 en 2026 ?': '2026년 리그 1 최고의 선수는?',
+  'Un film français gagnera-t-il la Palme d\'Or à Cannes 2026 ?': '2026년 칸 영화제에서 프랑스 영화가 황금종려상을 수상할까요?',
+  'Quelle tendance culturelle dominera la France en 2026 ?': '2026년 프랑스를 지배할 문화 트렌드는?',
+  'Le taux de chômage en France passera-t-il sous les 7% en 2026 ?': '2026년 프랑스 실업률이 7% 이하로 떨어질까요?',
+  'Quel secteur sera le moteur de l\'économie française en 2026 ?': '2026년 프랑스 경제의 성장 동력이 될 섹터는?',
+  'Le CAC 40 atteindra-t-il 9,000 points en 2026 ?': 'CAC 40이 2026년에 9,000포인트에 도달할까요?',
+  'La France lancera-t-elle son premier satellite quantique en 2026 ?': '프랑스가 2026년에 첫 번째 양자 위성을 발사할까요?',
+  'Quelle catastrophe naturelle menace le plus la France en 2026 ?': '2026년 프랑스를 가장 위협하는 자연재해는?',
+  // Arabic
+  'هل ستشهد منطقة الشرق الأوسط اتفاقية سلام جديدة في 2026؟': '2026년 중동 지역에서 새로운 평화 협정이 체결될까요?',
+  'ما أكبر تحدٍّ سياسي يواجه العالم العربي في 2026؟': '2026년 아랍 세계가 직면한 가장 큰 정치적 도전은?',
+  'هل ستتأهل المنتخبات العربية لدور الثمانية في كأس العالم 2026؟': '아랍 국가 대표팀이 2026년 월드컵 8강에 진출할까요?',
+  'من سيكون أبرز لاعب عربي في 2026؟': '2026년 가장 주목받는 아랍 축구 선수는?',
+  'هل ستتجاوز أسعار النفط 100 دولار للبرميل في 2026؟': '2026년 유가가 배럴당 100달러를 넘어설까요?',
+  'أي دولة خليجية ستحقق أعلى نمو اقتصادي في 2026؟': '2026년 가장 높은 경제 성장을 달성할 걸프 국가는?',
+  'هل ستطلق المملكة العربية السعودية عملتها الرقمية بحلول 2026؟': '사우디아라비아가 2026년까지 디지털 화폐를 출시할까요?',
+  'هل ستنجح مهمة الإمارات لاستكشاف حزام الكويكبات في 2026؟': '2026년 UAE의 소행성대 탐사 임무가 성공할까요?',
+  'ما أبرز ظاهرة ثقافية عربية في 2026؟': '2026년 가장 주목받는 아랍 문화 현상은?',
+  'هل ستعاني منطقة الشرق الأوسط من موجات حر قياسية في صيف 2026؟': '2026년 여름 중동이 기록적인 폭염에 시달릴까요?',
+  // German
+  'Wird die CDU die Bundestagswahl 2026 mit absoluter Mehrheit gewinnen?': 'CDU가 2026년 연방의회 선거에서 절대 과반을 획득할까요?',
+  'Was ist die größte politische Herausforderung Deutschlands 2026?': '2026년 독일의 가장 큰 정치적 도전은?',
+  'Wird Bayern München die Champions League 2025-26 gewinnen?': '바이에른 뮌헨이 2025-26 챔피언스리그를 우승할까요?',
+  'Welcher Verein wird Deutscher Meister 2026?': '2026년 독일 분데스리가 우승 클럽은?',
+  'Wird Deutschland 2026 die Rezession überwinden und positives BIP-Wachstum erzielen?': '독일이 2026년에 경기침체를 극복하고 플러스 GDP 성장을 달성할까요?',
+  'Was ist das größte Wirtschaftsrisiko für Deutschland in 2026?': '2026년 독일의 가장 큰 경제 리스크는?',
+  'Wird der DAX 2026 die 22.000-Punkte-Marke überschreiten?': 'DAX가 2026년에 22,000포인트를 돌파할까요?',
+  'Wird ein deutsches Unternehmen 2026 einen kommerziellen Quantencomputer vorstellen?': '2026년 독일 기업이 상용 양자 컴퓨터를 선보일까요?',
+  'Welche Technologie wird Deutschland 2026 am stärksten prägen?': '2026년 독일을 가장 크게 변화시킬 기술은?',
+  'Wird der Rhein 2026 erneut durch extreme Niedrigwasser Schifffahrtsprobleme verursachen?': '2026년 라인강이 다시 극심한 저수위로 항운에 문제를 일으킬까요?',
+  'Was wird 2026 den deutschen Kulturdiskurs dominieren?': '2026년 독일 문화 담론을 지배할 것은?',
+};
+
 // ── 수퍼포켓 봇 닉네임 풀 (언어별 100 × 200 = 20,000 조합) ───────────
 const BOT_NICK_PARTS = {
   ko: {
@@ -907,8 +1013,9 @@ async function postBotQuestion() {
   if (!_botUserId) return;
   try {
     const db = await getPool();
-    // 한국어만 사용
-    const lang = 'ko';
+    // 랜덤 언어 선택 (닉네임 언어 = 질문 언어)
+    const langs = Object.keys(BOT_LANG_DATA);
+    const lang = langs[Math.floor(Math.random() * langs.length)];
     const langData = BOT_LANG_DATA[lang];
 
     // 해당 언어 닉네임 랜덤 생성 (20,000 조합 풀)
@@ -927,9 +1034,10 @@ async function postBotQuestion() {
     const endDate = new Date();
     endDate.setDate(endDate.getDate() + (q.days || 30));
     const options = q.options ? JSON.stringify(q.options) : null;
+    const question_ko = lang === 'ko' ? null : (QUESTION_KO_MAP[q.question] || null);
     await db.execute(
-      'INSERT INTO Questions (user_id, type, question, category, options, initial_prob, end_date, status) VALUES (?,?,?,?,?,?,?,?)',
-      [_botUserId, q.type, q.question, q.category, options, q.initial_prob || null, endDate, 'APPROVED']
+      'INSERT INTO Questions (user_id, type, question, question_ko, category, options, initial_prob, end_date, status) VALUES (?,?,?,?,?,?,?,?,?)',
+      [_botUserId, q.type, q.question, question_ko, q.category, options, q.initial_prob || null, endDate, 'APPROVED']
     );
     console.log(`[수퍼포켓 봇] [${lang}] "${nick}" 게시: [${q.category}] ${q.question.slice(0,40)}...`);
   } catch (err) {
