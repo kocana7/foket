@@ -664,6 +664,9 @@
   </div>
 </section>
 
+<!-- 랜덤 섹션 컨테이너 시작 -->
+<div id="random-sections">
+
 <!-- 정치 -->
 <section class="section" id="politics" style="background:var(--gray-50)">
   <div class="section-inner">
@@ -2010,6 +2013,8 @@
     </div>
   </div>
 </section>
+
+</div><!-- #random-sections 끝 -->
 
 <!-- HOW IT WORKS -->
 <section class="hiw-section" id="how-it-works">
@@ -3623,20 +3628,19 @@ const CARD_DATA = {
 
   /* ── 섹션 랜덤 순서 ── */
   function shuffleSections() {
-    var ids = ['politics','sports','culture','trading','weather','economy','statement','science','neighbor','etc'];
-    var sections = ids.map(function(id) { return document.getElementById(id); }).filter(Boolean);
-    if (!sections.length) return;
+    var container = document.getElementById('random-sections');
+    if (!container) return;
+    var sections = Array.from(container.querySelectorAll(':scope > section'));
+    if (sections.length < 2) return;
     // Fisher-Yates 셔플
     for (var i = sections.length - 1; i > 0; i--) {
       var j = Math.floor(Math.random() * (i + 1));
       var tmp = sections[i]; sections[i] = sections[j]; sections[j] = tmp;
     }
-    // how-it-works 앞에 셔플된 순서대로 삽입 (배경색 교차 유지)
-    var hiw = document.getElementById('how-it-works');
-    var parent = hiw ? hiw.parentNode : sections[0].parentNode;
+    // 셔플된 순서대로 재삽입 + 배경색 교차
     sections.forEach(function(sec, idx) {
       sec.style.background = idx % 2 === 0 ? '' : 'var(--gray-50)';
-      hiw ? parent.insertBefore(sec, hiw) : parent.appendChild(sec);
+      container.appendChild(sec);
     });
   }
 
