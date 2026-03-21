@@ -1149,11 +1149,25 @@
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
     document.getElementById('page-' + id).classList.add('active');
-    el.classList.add('active');
+    if (el) el.classList.add('active');
+    else {
+      var btn = document.querySelector('.sidebar-link[onclick*="showPage(\'' + id + '\'"]');
+      if (btn) btn.classList.add('active');
+    }
     const titles = { dashboard:'대시보드', analytics:'분석', markets:'질문', users:'회원', trades:'거래', payouts:'출금', compliance:'컴플라이언스', reports:'보고서', settings:'설정' };
     document.getElementById('topbarTitle').textContent = titles[id] || id;
     if (id === 'markets') loadAdminQuestions();
+    location.hash = id;
   }
+
+  /* ── 새로고침 시 마지막 페이지 복원 ── */
+  (function restorePageFromHash() {
+    var hash = location.hash.replace('#', '');
+    var valid = ['dashboard','analytics','markets','users','trades','payouts','compliance','reports','settings'];
+    if (hash && valid.includes(hash)) {
+      showPage(hash, null);
+    }
+  })();
 
   /* ── 카테고리 탭 드롭다운 (클릭 토글) ── */
   function closeAllDropdowns() {
