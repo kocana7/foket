@@ -18,8 +18,9 @@ jobs:
         run: npm install --production
 
       - name: API 서버 재시작 (PM2)
+        shell: bash
         run: |
-          pm2 restart foket-api || pm2 start "${{ github.workspace }}/api/server.js" --name foket-api
+          pm2 restart foket-api || pm2 start "$GITHUB_WORKSPACE/api/server.js" --name foket-api
           pm2 save
           echo "로컬 배포 완료"
 
