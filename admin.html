@@ -1244,8 +1244,9 @@
       ? '<div class="action-btns">'
         + '<button class="action-btn primary" onclick="event.stopPropagation();adminApproveQ(' + q.question_id + ')">승인</button>'
         + '<button class="action-btn danger" onclick="event.stopPropagation();adminRejectQ(' + q.question_id + ')">반려</button>'
+        + '<button class="action-btn danger" onclick="event.stopPropagation();confirmDeleteQ(' + q.question_id + ')">삭제</button>'
         + '</div>'
-      : '<div class="action-btns"><button class="action-btn danger" onclick="event.stopPropagation();adminDeleteQ(' + q.question_id + ')">삭제</button></div>';
+      : '<div class="action-btns"><button class="action-btn danger" onclick="event.stopPropagation();confirmDeleteQ(' + q.question_id + ')">삭제</button></div>';
     return '<tr class="db-q-row" data-qid="' + q.question_id + '" onclick="openQuestionDetail(' + q.question_id + ')" style="cursor:pointer">'
       + '<td>' + typeTag + '</td>'
       + '<td class="td-bold">' + escHtml(q.question) + '<br><span style="font-size:11px;color:var(--gray-400)">' + escHtml(submitter) + '</span></td>'
@@ -1304,8 +1305,26 @@
     showToast('거절되었습니다.');
   }
 
-  async function adminDeleteQ(id) {
-    if (!confirm('이 질문을 삭제하시겠습니까?')) return;
+  var _deleteQTargetId = null;
+
+  function confirmDeleteQ(id) {
+    _deleteQTargetId = id;
+    var q = _qDetailMap[id];
+    var qText = q ? q.question : '이 질문';
+    document.getElementById('deleteQText').textContent = qText.length > 60 ? qText.slice(0, 60) + '…' : qText;
+    var modal = document.getElementById('deleteQModal');
+    modal.style.display = 'flex';
+  }
+
+  function closeDeleteQModal() {
+    document.getElementById('deleteQModal').style.display = 'none';
+    _deleteQTargetId = null;
+  }
+
+  async function adminDeleteQ() {
+    if (!_deleteQTargetId) return;
+    var id = _deleteQTargetId;
+    closeDeleteQModal();
     await fetch(ADMIN_API + '/api/admin/questions/' + id, {
       method: 'DELETE',
       headers: { 'x-admin-key': ADMIN_KEY }
@@ -1664,6 +1683,22 @@ document.addEventListener('DOMContentLoaded', () => {
     <div style="display:flex;gap:10px">
       <button onclick="closeDeleteModal()" style="flex:1;padding:11px;border-radius:12px;border:1px solid var(--gray-300);background:var(--white);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font)">취소</button>
       <button onclick="deleteUser()" style="flex:1;padding:11px;border-radius:12px;border:none;background:var(--red);color:var(--white);font-size:14px;font-weight:800;cursor:pointer;font-family:var(--font)">강제탈퇴 확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- 질문 삭제 확인 모달 -->
+<div id="deleteQModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9100;align-items:center;justify-content:center;">
+  <div style="background:var(--white);border-radius:20px;padding:32px 28px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+    <div style="width:48px;height:48px;border-radius:14px;background:var(--red-bg);display:flex;align-items:center;justify-content:center;margin-bottom:16px">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#F04438" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m5 0V4a1 1 0 011-1h2a1 1 0 011 1v2"/></svg>
+    </div>
+    <div style="font-size:17px;font-weight:800;color:var(--gray-900);margin-bottom:8px">질문을 삭제하시겠습니까?</div>
+    <div style="font-size:13px;color:var(--gray-500);margin-bottom:6px">대상: <strong id="deleteQText" style="color:var(--gray-900)"></strong></div>
+    <div style="font-size:13px;color:var(--red);margin-bottom:24px">이 작업은 되돌릴 수 없습니다. 질문이 DB에서 완전히 삭제됩니다.</div>
+    <div style="display:flex;gap:10px">
+      <button onclick="closeDeleteQModal()" style="flex:1;padding:11px;border-radius:12px;border:1px solid var(--gray-300);background:var(--white);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font)">취소</button>
+      <button onclick="adminDeleteQ()" style="flex:1;padding:11px;border-radius:12px;border:none;background:var(--red);color:var(--white);font-size:14px;font-weight:800;cursor:pointer;font-family:var(--font)">삭제 확인</button>
     </div>
   </div>
 </div>
