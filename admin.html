@@ -1171,6 +1171,7 @@
     });
   });
   document.addEventListener('click', closeAllDropdowns);
+  document.addEventListener('DOMContentLoaded', addSampleDeleteBtns);
 
   /* ── 전체 탭 (투표전체 / 내기전체) ── */
   const CAT_LABELS = {
@@ -1282,6 +1283,7 @@
         if (q.type === 'vote' && allVoteTbody) allVoteTbody.insertAdjacentHTML('beforeend', html);
         if (q.type === 'bet'  && allBetTbody)  allBetTbody.insertAdjacentHTML('beforeend', html);
       });
+      addSampleDeleteBtns();
     } catch(e) { console.error('질문 로드 실패:', e); }
   }
 
@@ -1306,31 +1308,62 @@
   }
 
   var _deleteQTargetId = null;
+  var _deleteSampleTr  = null;
 
   function confirmDeleteQ(id) {
     _deleteQTargetId = id;
+    _deleteSampleTr  = null;
     var q = _qDetailMap[id];
     var qText = q ? q.question : '이 질문';
     document.getElementById('deleteQText').textContent = qText.length > 60 ? qText.slice(0, 60) + '…' : qText;
-    var modal = document.getElementById('deleteQModal');
-    modal.style.display = 'flex';
+    document.getElementById('deleteQModal').style.display = 'flex';
+  }
+
+  function confirmDeleteSampleRow(tr) {
+    _deleteSampleTr  = tr;
+    _deleteQTargetId = null;
+    var tdBold = tr.querySelector('.td-bold');
+    var qText = tdBold ? tdBold.textContent.trim() : '이 질문';
+    document.getElementById('deleteQText').textContent = qText.length > 60 ? qText.slice(0, 60) + '…' : qText;
+    document.getElementById('deleteQModal').style.display = 'flex';
   }
 
   function closeDeleteQModal() {
     document.getElementById('deleteQModal').style.display = 'none';
     _deleteQTargetId = null;
+    _deleteSampleTr  = null;
   }
 
   async function adminDeleteQ() {
-    if (!_deleteQTargetId) return;
-    var id = _deleteQTargetId;
-    closeDeleteQModal();
-    await fetch(ADMIN_API + '/api/admin/questions/' + id, {
-      method: 'DELETE',
-      headers: { 'x-admin-key': ADMIN_KEY }
+    if (_deleteSampleTr) {
+      var tr = _deleteSampleTr;
+      closeDeleteQModal();
+      tr.remove();
+      showToast('삭제되었습니다.');
+    } else if (_deleteQTargetId) {
+      var id = _deleteQTargetId;
+      closeDeleteQModal();
+      await fetch(ADMIN_API + '/api/admin/questions/' + id, {
+        method: 'DELETE',
+        headers: { 'x-admin-key': ADMIN_KEY }
+      });
+      loadAdminQuestions();
+      showToast('삭제되었습니다.');
+    }
+  }
+
+  /* 샘플 행에 삭제 버튼 자동 추가 */
+  function addSampleDeleteBtns() {
+    document.querySelectorAll('.cat-content tbody tr:not(.db-q-row)').forEach(function(tr) {
+      if (tr.querySelector('.sample-del-btn')) return; // 중복 방지
+      var actionDiv = tr.querySelector('.action-btns');
+      if (!actionDiv) return;
+      var btn = document.createElement('button');
+      btn.className = 'action-btn danger sample-del-btn';
+      btn.textContent = '삭제';
+      btn.onclick = function(e) { e.stopPropagation(); confirmDeleteSampleRow(tr); };
+      actionDiv.appendChild(btn);
     });
-    loadAdminQuestions();
-    showToast('삭제되었습니다.');
   }
 
   /* ── 카테고리 탭 전환 ── */
