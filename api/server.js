@@ -51,6 +51,36 @@ function makeToken(user) {
   return jwt.sign({ userId: String(user.user_id), email: user.email, role: 'user' }, JWT_SECRET, { expiresIn: '7d' });
 }
 
+function getClientIp(req) {
+  return (req.headers['x-forwarded-for'] || '').split(',')[0].trim()
+      || req.socket?.remoteAddress
+      || req.ip
+      || 'unknown';
+}
+
+// ── 차단 IP 관리 (메모리 캐시) ─────────────────────────────
+let _blockedIps = new Set();
+async function refreshBlockedIps() {
+  try {
+    const db = await getPool();
+    const [rows] = await db.execute('SELECT ip FROM BlockedIPs');
+    _blockedIps = new Set(rows.map(r => r.ip));
+  } catch {}
+}
+
+function ipBlockMiddleware(req, res, next) {
+  const ip = getClientIp(req);
+  if (_blockedIps.has(ip)) {
+    return res.status(403).json({ error: '접속이 차단된 IP입니다' });
+  }
+  next();
+}
+// 관리자 API를 제외한 모든 경로에 차단 미들웨어 적용
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/admin')) return next();
+  return ipBlockMiddleware(req, res, next);
+});
+
 function authMiddleware(req, res, next) {
   const header = req.headers['authorization'];
   if (!header) return res.status(401).json({ error: '인증 필요' });
@@ -167,7 +197,8 @@ app.post('/api/login', async (req, res) => {
     if (!ok)
       return res.status(401).json({ error: '이메일 또는 비밀번호가 올바르지 않습니다' });
 
-    await db.execute('UPDATE Users SET last_login_at = NOW() WHERE user_id = ?', [user.user_id]);
+    const loginIp = getClientIp(req);
+    await db.execute('UPDATE Users SET last_login_at = NOW(), last_login_ip = ? WHERE user_id = ?', [loginIp, user.user_id]);
 
     const token = makeToken(user);
     res.json({ token, user: { user_id: user.user_id, email: user.email, full_name: user.full_name, nickname: user.nickname } });
@@ -200,7 +231,8 @@ app.post('/api/google-auth', async (req, res) => {
       user = existing[0];
       if (user.status === 'SUSPENDED')
         return res.status(403).json({ error: '정지된 계정입니다' });
-      await db.execute('UPDATE Users SET last_login_at = NOW() WHERE user_id = ?', [user.user_id]);
+      const googleLoginIp = getClientIp(req);
+      await db.execute('UPDATE Users SET last_login_at = NOW(), last_login_ip = ? WHERE user_id = ?', [googleLoginIp, user.user_id]);
     } else {
       const [result] = await db.execute(
         'INSERT INTO Users (email, password_hash, full_name, kyc_status, status) VALUES (?, ?, ?, ?, ?)',
@@ -251,7 +283,7 @@ app.get('/api/admin/users', adminMiddleware, async (req, res) => {
     const offset = (parseInt(page) - 1) * lim;
     const [rows] = await db.execute(
       `SELECT u.user_id, u.email, u.full_name, u.nickname, u.grade, u.balance,
-              u.kyc_status, u.status, u.created_at, u.last_seen_at
+              u.kyc_status, u.status, u.created_at, u.last_seen_at, u.last_login_ip
        FROM Users u ${where}
        ORDER BY u.created_at DESC LIMIT ${lim} OFFSET ${offset}`,
       params
@@ -314,6 +346,49 @@ app.delete('/api/admin/users/:id', adminMiddleware, async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     console.error(err);
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
+// ── 관리자: IP 차단 ────────────────────────────────────────
+app.post('/api/admin/users/:id/block-ip', adminMiddleware, async (req, res) => {
+  try {
+    const db = await getPool();
+    const [users] = await db.execute('SELECT last_login_ip FROM Users WHERE user_id = ?', [req.params.id]);
+    if (!users.length || !users[0].last_login_ip)
+      return res.status(400).json({ error: '해당 회원의 접속 IP가 없습니다' });
+    const ip = users[0].last_login_ip;
+    await db.execute(
+      'INSERT INTO BlockedIPs (ip, user_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE user_id = VALUES(user_id)',
+      [ip, req.params.id]
+    );
+    await refreshBlockedIps();
+    res.json({ ok: true, ip });
+  } catch (err) {
+    console.error('[block-ip]', err.message);
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
+// ── 관리자: IP 차단 해제 ──────────────────────────────────
+app.delete('/api/admin/blocked-ips/:ip', adminMiddleware, async (req, res) => {
+  try {
+    const db = await getPool();
+    await db.execute('DELETE FROM BlockedIPs WHERE ip = ?', [req.params.ip]);
+    await refreshBlockedIps();
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
+// ── 관리자: 차단된 IP 목록 ────────────────────────────────
+app.get('/api/admin/blocked-ips', adminMiddleware, async (req, res) => {
+  try {
+    const db = await getPool();
+    const [rows] = await db.execute('SELECT ip, user_id, blocked_at FROM BlockedIPs ORDER BY blocked_at DESC');
+    res.json({ blocked_ips: rows });
+  } catch (err) {
     res.status(500).json({ error: '서버 오류' });
   }
 });
@@ -546,13 +621,14 @@ async function initDb() {
     const existing = new Set(cols.map(c => c.column_name || c.COLUMN_NAME));
 
     const migrations = [
-      { name: 'grade',         sql: "ALTER TABLE Users ADD COLUMN grade VARCHAR(20) DEFAULT 'BASIC'" },
-      { name: 'balance',       sql: 'ALTER TABLE Users ADD COLUMN balance DECIMAL(18,2) DEFAULT 0' },
-      { name: 'kyc_status',    sql: "ALTER TABLE Users ADD COLUMN kyc_status VARCHAR(20) DEFAULT 'PENDING'" },
-      { name: 'status',        sql: "ALTER TABLE Users ADD COLUMN status VARCHAR(20) DEFAULT 'ACTIVE'" },
-      { name: 'last_login_at', sql: 'ALTER TABLE Users ADD COLUMN last_login_at DATETIME' },
-      { name: 'last_seen_at',  sql: 'ALTER TABLE Users ADD COLUMN last_seen_at DATETIME' },
-      { name: 'updated_at',    sql: 'ALTER TABLE Users ADD COLUMN updated_at DATETIME DEFAULT NOW()' },
+      { name: 'grade',          sql: "ALTER TABLE Users ADD COLUMN grade VARCHAR(20) DEFAULT 'BASIC'" },
+      { name: 'balance',        sql: 'ALTER TABLE Users ADD COLUMN balance DECIMAL(18,2) DEFAULT 0' },
+      { name: 'kyc_status',     sql: "ALTER TABLE Users ADD COLUMN kyc_status VARCHAR(20) DEFAULT 'PENDING'" },
+      { name: 'status',         sql: "ALTER TABLE Users ADD COLUMN status VARCHAR(20) DEFAULT 'ACTIVE'" },
+      { name: 'last_login_at',  sql: 'ALTER TABLE Users ADD COLUMN last_login_at DATETIME' },
+      { name: 'last_seen_at',   sql: 'ALTER TABLE Users ADD COLUMN last_seen_at DATETIME' },
+      { name: 'updated_at',     sql: 'ALTER TABLE Users ADD COLUMN updated_at DATETIME DEFAULT NOW()' },
+      { name: 'last_login_ip',  sql: 'ALTER TABLE Users ADD COLUMN last_login_ip VARCHAR(45)' },
     ];
 
     for (const m of migrations) {
@@ -569,11 +645,30 @@ async function initDb() {
         user_id     BIGINT NOT NULL,
         choice      VARCHAR(500),
         created_at  DATETIME DEFAULT NOW(),
-        UNIQUE KEY uq_user_question (user_id, question_id)
+        INDEX idx_user_question (user_id, question_id)
       ) CHARACTER SET utf8mb4
     `);
 
-    console.log('DB 초기화 완료 (Users, Questions, Participations 테이블 확인)');
+    // 기존 UNIQUE 제약 제거 (수퍼포켓 중복 참여 허용)
+    const [pidx] = await db.execute(
+      `SELECT INDEX_NAME FROM information_schema.STATISTICS
+       WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Participations' AND INDEX_NAME = 'uq_user_question'`
+    );
+    if (pidx.length > 0) {
+      await db.execute('ALTER TABLE Participations DROP INDEX uq_user_question');
+      console.log('Participations UNIQUE 제약 제거 완료');
+    }
+
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS BlockedIPs (
+        id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+        ip         VARCHAR(45) NOT NULL UNIQUE,
+        user_id    BIGINT,
+        blocked_at DATETIME DEFAULT NOW()
+      ) CHARACTER SET utf8mb4
+    `);
+
+    console.log('DB 초기화 완료 (Users, Questions, Participations, BlockedIPs 테이블 확인)');
   } catch (err) {
     console.error('DB 초기화 실패:', err.message);
   }
@@ -846,18 +941,15 @@ async function botParticipate() {
   if (!_botUserId) return;
   try {
     const db = await getPool();
-    // 아직 참여 안 한 승인된 질문 목록
+    // 승인된 질문 중 랜덤 5개 선택 (중복 참여 허용)
     const [questions] = await db.execute(`
       SELECT q.question_id, q.type, q.options
       FROM Questions q
       WHERE q.status = 'APPROVED'
         AND q.end_date > NOW()
-        AND q.question_id NOT IN (
-          SELECT question_id FROM Participations WHERE user_id = ?
-        )
       ORDER BY RAND()
       LIMIT 5
-    `, [_botUserId]);
+    `);
 
     for (const q of questions) {
       let choice;
@@ -870,7 +962,7 @@ async function botParticipate() {
         choice = Math.random() < 0.5 ? 'YES' : 'NO';
       }
       await db.execute(
-        'INSERT IGNORE INTO Participations (question_id, user_id, choice) VALUES (?,?,?)',
+        'INSERT INTO Participations (question_id, user_id, choice) VALUES (?,?,?)',
         [q.question_id, _botUserId, choice]
       );
     }
@@ -886,6 +978,8 @@ pool.getConnection()
   .then(async (conn) => {
     conn.release();
     await initDb();
+    await refreshBlockedIps();
+    setInterval(refreshBlockedIps, 60 * 1000); // 1분마다 갱신
     await initBotUser();
     app.listen(PORT, () => console.log(`Foket API 서버 실행 중: http://localhost:${PORT}`));
   })

@@ -861,9 +861,9 @@
       <div class="card">
         <div class="table-wrap">
           <table>
-            <thead><tr><th>회원</th><th>닉네임</th><th>계정 ID</th><th>잔액</th><th>총 거래금액</th><th>가입일</th><th>접속</th><th>상태</th><th>작업</th></tr></thead>
+            <thead><tr><th>회원</th><th>닉네임</th><th>계정 ID</th><th>잔액</th><th>총 거래금액</th><th>가입일</th><th>접속</th><th>상태</th><th>접속 IP</th><th>작업</th></tr></thead>
             <tbody id="usersTableBody">
-              <tr><td colspan="9" style="text-align:center;color:var(--gray-400);padding:40px">로딩 중...</td></tr>
+              <tr><td colspan="10" style="text-align:center;color:var(--gray-400);padding:40px">로딩 중...</td></tr>
             </tbody>
           </table>
         </div>
@@ -1578,7 +1578,7 @@ async function loadUsers() {
   const status = document.getElementById('userStatusFilter')?.value || 'all';
   const grade  = document.getElementById('userGradeFilter')?.value  || 'all';
 
-  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--gray-400);padding:40px">로딩 중...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--gray-400);padding:40px">로딩 중...</td></tr>';
 
   try {
     const params = new URLSearchParams();
@@ -1627,17 +1627,25 @@ async function loadUsers() {
           <td>${formatDate(u.created_at)}</td>
           <td>${onlineBadge}</td>
           <td>${statusBadge(u.status)}</td>
+          <td style="font-size:12px;color:var(--gray-500);font-family:monospace">
+            ${u.last_login_ip
+              ? `<span>${u.last_login_ip}</span>`
+              : `<span style="color:var(--gray-300)">-</span>`}
+          </td>
           <td><div class="action-btns">
             <button class="action-btn primary" onclick="openEditModal(${u.user_id})" style="margin-right:4px">수정</button>
             ${u.status === 'ACTIVE'
               ? `<button class="action-btn danger" onclick="updateUserStatus(${u.user_id},'SUSPENDED')">정지</button>`
               : `<button class="action-btn primary" onclick="updateUserStatus(${u.user_id},'ACTIVE')">활성화</button>`}
             <button class="action-btn danger" onclick="confirmDeleteUser(${u.user_id},'${(u.full_name||'').replace(/'/g,'')}')" style="background:var(--red-bg);color:var(--red);margin-left:4px">강제탈퇴</button>
+            ${u.last_login_ip
+              ? `<button class="action-btn danger" onclick="blockUserIp(${u.user_id},'${u.last_login_ip}')" style="background:#fff3e0;color:#e65100;margin-left:4px">🚫 IP 차단</button>`
+              : ''}
           </div></td>
         </tr>`;
     }).join('');
   } catch(e) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--red);padding:40px">API 서버에 연결할 수 없습니다</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:var(--red);padding:40px">API 서버에 연결할 수 없습니다</td></tr>`;
   }
 }
 
@@ -1650,6 +1658,35 @@ async function updateUserStatus(userId, status) {
     });
     if (res.ok) { showToast(`회원 상태가 ${status === 'ACTIVE' ? '활성' : '정지'}으로 변경되었습니다`); loadUsers(); }
     else showToast('상태 변경 실패');
+  } catch { showToast('API 서버에 연결할 수 없습니다'); }
+}
+
+async function blockUserIp(userId, ip) {
+  if (!confirm(`IP [${ip}] 를 차단하시겠습니까?\n해당 IP로 접속한 모든 회원이 차단됩니다.`)) return;
+  try {
+    const res = await fetch(`${ADMIN_API}/api/admin/users/${userId}/block-ip`, {
+      method: 'POST',
+      headers: { 'x-admin-key': ADMIN_KEY }
+    });
+    const d = await res.json();
+    if (res.ok) {
+      showToast(`IP [${ip}] 차단 완료`);
+      loadUsers();
+    } else {
+      showToast('차단 실패: ' + (d.error || '알 수 없는 오류'));
+    }
+  } catch { showToast('API 서버에 연결할 수 없습니다'); }
+}
+
+async function unblockIp(ip) {
+  if (!confirm(`IP [${ip}] 차단을 해제하시겠습니까?`)) return;
+  try {
+    const res = await fetch(`${ADMIN_API}/api/admin/blocked-ips/${encodeURIComponent(ip)}`, {
+      method: 'DELETE',
+      headers: { 'x-admin-key': ADMIN_KEY }
+    });
+    if (res.ok) { showToast(`IP [${ip}] 차단 해제 완료`); loadUsers(); }
+    else showToast('해제 실패');
   } catch { showToast('API 서버에 연결할 수 없습니다'); }
 }
 
