@@ -340,13 +340,33 @@ app.get('/api/questions', async (req, res) => {
     const [rows] = await db.execute(
       `SELECT q.question_id, q.type, q.question, q.category,
               q.options, q.initial_prob, q.end_date, q.created_at,
-              u.nickname
+              u.nickname,
+              (SELECT COUNT(*) FROM Participations p WHERE p.question_id = q.question_id) AS participant_count
        FROM Questions q
        LEFT JOIN Users u ON q.user_id = u.user_id
        ${where}
        ORDER BY q.created_at DESC`,
       params
     );
+    // 선택지별 참여 수 조회
+    if (rows.length > 0) {
+      const qIds = rows.map(r => r.question_id);
+      const placeholders = qIds.map(() => '?').join(',');
+      const [choices] = await db.execute(
+        `SELECT question_id, choice, COUNT(*) AS cnt
+         FROM Participations WHERE question_id IN (${placeholders})
+         GROUP BY question_id, choice`,
+        qIds
+      );
+      const choiceMap = {};
+      choices.forEach(c => {
+        if (!choiceMap[c.question_id]) choiceMap[c.question_id] = {};
+        choiceMap[c.question_id][c.choice] = Number(c.cnt);
+      });
+      rows.forEach(r => { r.choices = choiceMap[r.question_id] || {}; });
+    } else {
+      rows.forEach(r => { r.choices = {}; });
+    }
     res.json({ questions: rows });
   } catch (err) {
     console.error('[questions GET]', err.message);

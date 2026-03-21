@@ -182,6 +182,24 @@
     }
     .btn-no:hover { background: var(--red); color: var(--white); }
 
+    /* ─── 참여 통계 ─── */
+    .part-count { font-size: 11px; color: var(--gray-400); font-weight: 500; margin-top: 2px; }
+    .bet-stats { display: flex; gap: 10px; align-items: flex-start; width: 100%; flex-direction: column; }
+    .bet-stat-row { display: flex; align-items: center; gap: 8px; width: 100%; }
+    .bet-stat-bar-wrap { flex: 1; background: var(--gray-100); border-radius: 4px; height: 6px; overflow: hidden; }
+    .bet-stat-bar-yes { height: 100%; border-radius: 4px; background: var(--green); transition: width 0.4s; }
+    .bet-stat-bar-no  { height: 100%; border-radius: 4px; background: var(--red);   transition: width 0.4s; }
+    .bet-stat-yes { font-size: 12px; font-weight: 700; color: var(--green); min-width: 52px; }
+    .bet-stat-no  { font-size: 12px; font-weight: 700; color: var(--red);   min-width: 52px; }
+    .vote-opts { display: flex; flex-direction: column; gap: 5px; width: 100%; }
+    .vote-opt-row { display: flex; align-items: center; gap: 6px; }
+    .vote-opt-bar-wrap { flex: 1; background: var(--gray-100); border-radius: 4px; height: 5px; overflow: hidden; }
+    .vote-opt-bar { height: 100%; border-radius: 4px; background: #93c5fd; transition: width 0.4s; }
+    .vote-opt-bar.top { background: #2563eb; }
+    .vote-opt-label { font-size: 11px; color: var(--gray-700); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80px; flex-shrink: 0; }
+    .vote-opt-pct { font-size: 11px; font-weight: 700; color: var(--gray-500); min-width: 30px; text-align: right; }
+    .vote-opt-more { font-size: 10px; color: var(--gray-400); margin-top: 1px; }
+
     /* ─── FEATURED STRIP ─── */
     .strip-card {
       background: var(--gray-900);
@@ -3665,26 +3683,57 @@ const CARD_DATA = {
   };
 
   function buildDbMainCard(q) {
-    var prob = Math.min(100, Math.max(0, parseInt(q.initial_prob) || 50));
-    var pctNo = 100 - prob;
     var icon = CAT_ICONS[q.category] || '📋';
     var catLabel = CAT_NAMES[q.category] || q.category || '';
     var typeLabel = q.type === 'vote' ? '투표' : '내기';
     var qText = (q.question || '').replace(/'/g, '&#39;');
-    return '<div class="market-card db-main-card" data-cat="' + (q.category||'') + '" onclick="openTrade(\'' + qText.replace(/\\/g,'\\\\') + '\',' + prob + ')">'
+    var totalCount = parseInt(q.participant_count) || 0;
+    var choices = q.choices || {};
+    var statsHtml = '';
+
+    if (q.type === 'bet') {
+      var yesCount = choices['YES'] || 0;
+      var noCount  = choices['NO']  || 0;
+      var betTotal = yesCount + noCount;
+      var prob     = Math.min(100, Math.max(0, parseInt(q.initial_prob) || 50));
+      var yesPct   = betTotal > 0 ? Math.round(yesCount / betTotal * 100) : prob;
+      var noPct    = 100 - yesPct;
+      statsHtml = '<div class="bet-stats">'
+        + '<div class="bet-stat-row"><span class="bet-stat-yes">Yes ' + yesPct + '%</span><div class="bet-stat-bar-wrap"><div class="bet-stat-bar-yes" style="width:' + yesPct + '%"></div></div></div>'
+        + '<div class="bet-stat-row"><span class="bet-stat-no">No ' + noPct + '%</span><div class="bet-stat-bar-wrap"><div class="bet-stat-bar-no" style="width:' + noPct + '%"></div></div></div>'
+        + '<span class="part-count">👥 ' + totalCount + '명 참여</span>'
+        + '</div>';
+    } else {
+      var opts = [];
+      try { opts = JSON.parse(q.options || '[]'); } catch(e) { opts = []; }
+      var voteTotal = Object.values(choices).reduce(function(a, b) { return a + b; }, 0);
+      var topOpt = '';
+      var topCnt = 0;
+      Object.keys(choices).forEach(function(k) { if ((choices[k] || 0) > topCnt) { topOpt = k; topCnt = choices[k]; } });
+      var optsHtml = opts.slice(0, 3).map(function(opt) {
+        var cnt  = choices[opt] || 0;
+        var pct  = voteTotal > 0 ? Math.round(cnt / voteTotal * 100) : 0;
+        var isTop = opt === topOpt && voteTotal > 0;
+        return '<div class="vote-opt-row">'
+          + '<span class="vote-opt-label" title="' + opt + '">' + opt + '</span>'
+          + '<div class="vote-opt-bar-wrap"><div class="vote-opt-bar' + (isTop ? ' top' : '') + '" style="width:' + pct + '%"></div></div>'
+          + '<span class="vote-opt-pct">' + (voteTotal > 0 ? pct + '%' : '-') + '</span>'
+          + '</div>';
+      }).join('');
+      if (opts.length > 3) optsHtml += '<div class="vote-opt-more">+' + (opts.length - 3) + '개 더</div>';
+      statsHtml = '<div class="vote-opts">' + optsHtml + '</div>'
+        + '<span class="part-count">👥 ' + totalCount + '명 참여</span>';
+    }
+
+    return '<div class="market-card db-main-card" data-cat="' + (q.category||'') + '" onclick="openTrade(\'' + qText.replace(/\\/g,'\\\\') + '\',' + (parseInt(q.initial_prob)||50) + ')">'
       + '<div class="market-card-top">'
       + '<div class="market-icon">' + icon + '</div>'
       + '<div class="market-meta">'
       + '<div class="market-category">' + catLabel + ' · ' + typeLabel + '</div>'
       + '<div class="market-question">' + (q.question || '') + '</div>'
       + '</div></div>'
-      + '<div class="market-prob-bar"><div class="market-prob-fill" style="width:' + prob + '%"></div></div>'
-      + '<div class="market-card-bottom">'
-      + '<div class="market-chance"><div class="market-chance-val">' + prob + '<b class="fcur">F</b></div><div class="market-chance-label">Yes chance</div></div>'
-      + '<div><div class="market-btns">'
-      + '<button class="btn-yes" data-pct="' + prob + '">Yes ' + prob + '<b class="fcur">F</b></button>'
-      + '<button class="btn-no" data-pct="' + pctNo + '">No ' + pctNo + '<b class="fcur">F</b></button>'
-      + '</div></div></div></div>';
+      + statsHtml
+      + '</div>';
   }
 
   async function loadSectionCards() {
@@ -3822,10 +3871,47 @@ const CARD_DATA = {
         var typeLabel = q.type === 'vote' ? '투표' : '내기';
         var typeColor = q.type === 'vote' ? '#3b82f6' : '#f59e0b';
         var endDate = q.end_date ? q.end_date.slice(0,10) : '';
+        var totalCount = parseInt(q.participant_count) || 0;
+        var choices = q.choices || {};
+        var statsHtml = '';
+
+        if (q.type === 'bet') {
+          var yesCount = choices['YES'] || 0;
+          var noCount  = choices['NO']  || 0;
+          var betTotal = yesCount + noCount;
+          var prob     = Math.min(100, Math.max(0, parseInt(q.initial_prob) || 50));
+          var yesPct   = betTotal > 0 ? Math.round(yesCount / betTotal * 100) : prob;
+          var noPct    = 100 - yesPct;
+          statsHtml = '<div class="bet-stats" style="margin-top:8px">'
+            + '<div class="bet-stat-row"><span class="bet-stat-yes">Yes ' + yesPct + '%</span><div class="bet-stat-bar-wrap"><div class="bet-stat-bar-yes" style="width:' + yesPct + '%"></div></div></div>'
+            + '<div class="bet-stat-row"><span class="bet-stat-no">No ' + noPct + '%</span><div class="bet-stat-bar-wrap"><div class="bet-stat-bar-no" style="width:' + noPct + '%"></div></div></div>'
+            + '<span class="part-count">👥 ' + totalCount + '명 참여</span></div>';
+        } else {
+          var opts = [];
+          try { opts = JSON.parse(q.options || '[]'); } catch(e) { opts = []; }
+          var voteTotal = Object.values(choices).reduce(function(a, b) { return a + b; }, 0);
+          var topOpt = '';
+          var topCnt = 0;
+          Object.keys(choices).forEach(function(k) { if ((choices[k]||0) > topCnt) { topOpt = k; topCnt = choices[k]; } });
+          var optsHtml = opts.map(function(opt) {
+            var cnt = choices[opt] || 0;
+            var pct = voteTotal > 0 ? Math.round(cnt / voteTotal * 100) : 0;
+            var isTop = opt === topOpt && voteTotal > 0;
+            return '<div class="vote-opt-row">'
+              + '<span class="vote-opt-label" title="' + opt + '" style="max-width:140px">' + opt + '</span>'
+              + '<div class="vote-opt-bar-wrap"><div class="vote-opt-bar' + (isTop ? ' top' : '') + '" style="width:' + pct + '%"></div></div>'
+              + '<span class="vote-opt-pct">' + (voteTotal > 0 ? pct + '%' + ' (' + cnt + ')' : '-') + '</span>'
+              + '</div>';
+          }).join('');
+          statsHtml = '<div class="vote-opts" style="margin-top:8px">' + optsHtml + '</div>'
+            + '<span class="part-count" style="display:block;margin-top:4px">👥 ' + totalCount + '명 참여</span>';
+        }
+
         return '<div class="va-card">'
           + '<div class="va-card-type" style="background:' + typeColor + '">' + typeLabel + '</div>'
           + '<div class="va-card-q">' + (q.question || '') + '</div>'
-          + (q.nickname ? '<div class="va-card-meta">등록자: ' + q.nickname + (endDate ? ' · 마감: ' + endDate : '') + '</div>' : '')
+          + statsHtml
+          + (q.nickname ? '<div class="va-card-meta" style="margin-top:6px">등록자: ' + q.nickname + (endDate ? ' · 마감: ' + endDate : '') + '</div>' : '')
           + '</div>';
       }).join('');
     } catch(e) {
