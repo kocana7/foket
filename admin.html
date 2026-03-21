@@ -1290,18 +1290,24 @@
         return new Date(b.created_at) - new Date(a.created_at);
       });
 
-      // 기존 DB행 전체 제거
-      document.querySelectorAll('.db-q-row').forEach(function(r) { r.remove(); });
+      // 기존 DB행 전체 제거 (카테고리 섹션만 - all 섹션 제외)
+      var validCats = Object.keys(CAT_LABELS);
+      validCats.forEach(function(cat) {
+        var tbody = document.querySelector('#cat-' + cat + ' tbody');
+        if (tbody) tbody.querySelectorAll('.db-q-row').forEach(function(r) { r.remove(); });
+      });
 
-      // 카테고리별 섹션에만 삽입 (엄격히 해당 카테고리만)
-      var validCats = Object.keys(CAT_LABELS); // ['politics','sports','culture',...]
+      // 카테고리별 섹션에 삽입
       questions.forEach(function(q) {
         var cat = q.category || 'etc';
-        // 유효한 영문 카테고리인지 확인, 아니면 etc로
         if (!validCats.includes(cat)) cat = 'etc';
-        var catTbody = document.querySelector('#cat-' + cat + ' > .card > .table-wrap > table > tbody');
+        var catTbody = document.querySelector('#cat-' + cat + ' tbody');
         if (catTbody) catTbody.insertAdjacentHTML('afterbegin', buildDbQuestionRow(q));
       });
+
+      // 투표전체 / 내기전체 섹션도 항상 최신 데이터로 갱신
+      buildAllViewFromData('vote');
+      buildAllViewFromData('bet');
 
       addSampleDeleteBtns();
     } catch(e) { console.error('질문 로드 실패:', e); }
