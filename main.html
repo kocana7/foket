@@ -3890,19 +3890,28 @@ const CARD_DATA = {
     btn.parentElement.remove();
   }
 
+  function mpShowErr(errEl, msg) {
+    errEl.textContent = msg;
+    errEl.style.display = 'block';
+    errEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
   /* 투표 등록 */
   async function mpSubmitVote() {
     const q    = document.getElementById('voteQuestion').value.trim();
     const cat  = document.getElementById('voteCategory').value;
     const end  = document.getElementById('voteEndDate').value;
     const errEl = document.getElementById('voteError');
+    const btn  = document.querySelector('#mpFormVote .mp-submit');
     errEl.style.display = 'none';
     const opts = Array.from(document.querySelectorAll('#voteOptions .mp-option-row input')).map(i => i.value.trim()).filter(v => v);
-    if (!q) { errEl.textContent = '질문을 입력해주세요.'; errEl.style.display = 'block'; return; }
-    if (!cat) { errEl.textContent = '카테고리를 선택해주세요.'; errEl.style.display = 'block'; return; }
-    if (opts.length < 2) { errEl.textContent = '선택지를 2개 이상 입력해주세요.'; errEl.style.display = 'block'; return; }
-    if (!end) { errEl.textContent = '종료 일시를 선택해주세요.'; errEl.style.display = 'block'; return; }
+    if (!q)           { mpShowErr(errEl, '질문을 입력해주세요.'); return; }
+    if (!cat)         { mpShowErr(errEl, '카테고리를 선택해주세요.'); return; }
+    if (opts.length < 2) { mpShowErr(errEl, '선택지를 2개 이상 입력해주세요.'); return; }
+    if (!end)         { mpShowErr(errEl, '종료 일시를 선택해주세요.'); return; }
     const token = localStorage.getItem('foket-token');
+    if (!token) { mpShowErr(errEl, '로그인이 필요합니다. 다시 로그인해주세요.'); return; }
+    btn.disabled = true; btn.textContent = '등록 중...';
     try {
       const res  = await fetch('/api/questions', {
         method: 'POST',
@@ -3910,15 +3919,11 @@ const CARD_DATA = {
         body: JSON.stringify({ type: 'vote', question: q, category: cat, options: opts, end_date: end })
       });
       const data = await res.json();
-      if (!res.ok) { errEl.textContent = data.error || '등록 실패'; errEl.style.display = 'block'; return; }
-      showToast('투표 질문이 등록되었습니다! 관리자 승인 후 게시됩니다.');
-      document.getElementById('voteQuestion').value = '';
-      document.getElementById('voteCategory').value = '';
-      document.getElementById('voteEndDate').value = '';
-      document.getElementById('voteOptions').innerHTML = `
-        <div class="mp-option-row"><input class="mp-input" type="text" placeholder="선택지 1" style="flex:1" /><button onclick="mpRemoveOption(this)" style="width:32px;height:42px;border-radius:8px;border:1.5px solid var(--gray-200);background:white;cursor:pointer;font-size:16px;color:var(--gray-400);flex-shrink:0">✕</button></div>
-        <div class="mp-option-row"><input class="mp-input" type="text" placeholder="선택지 2" style="flex:1" /><button onclick="mpRemoveOption(this)" style="width:32px;height:42px;border-radius:8px;border:1.5px solid var(--gray-200);background:white;cursor:pointer;font-size:16px;color:var(--gray-400);flex-shrink:0">✕</button></div>`;
-    } catch(e) { errEl.textContent = '네트워크 오류: ' + e.message; errEl.style.display = 'block'; }
+      if (!res.ok) { mpShowErr(errEl, data.error || '등록 실패'); return; }
+      closeMyPage();
+      showToast('✅ 투표 질문이 등록되었습니다! 관리자 승인 후 게시됩니다.');
+    } catch(e) { mpShowErr(errEl, '네트워크 오류: ' + e.message); }
+    finally { btn.disabled = false; btn.textContent = '투표 질문 등록하기'; }
   }
 
   /* 내기 등록 */
@@ -3928,11 +3933,14 @@ const CARD_DATA = {
     const prob = document.getElementById('betProb').value;
     const end  = document.getElementById('betEndDate').value;
     const errEl = document.getElementById('betError');
+    const btn  = document.querySelector('#mpFormBet .mp-submit');
     errEl.style.display = 'none';
-    if (!q) { errEl.textContent = '질문을 입력해주세요.'; errEl.style.display = 'block'; return; }
-    if (!cat) { errEl.textContent = '카테고리를 선택해주세요.'; errEl.style.display = 'block'; return; }
-    if (!end) { errEl.textContent = '종료 일시를 선택해주세요.'; errEl.style.display = 'block'; return; }
+    if (!q)   { mpShowErr(errEl, '질문을 입력해주세요.'); return; }
+    if (!cat) { mpShowErr(errEl, '카테고리를 선택해주세요.'); return; }
+    if (!end) { mpShowErr(errEl, '종료 일시를 선택해주세요.'); return; }
     const token = localStorage.getItem('foket-token');
+    if (!token) { mpShowErr(errEl, '로그인이 필요합니다. 다시 로그인해주세요.'); return; }
+    btn.disabled = true; btn.textContent = '등록 중...';
     try {
       const res  = await fetch('/api/questions', {
         method: 'POST',
@@ -3940,14 +3948,11 @@ const CARD_DATA = {
         body: JSON.stringify({ type: 'bet', question: q, category: cat, initial_prob: parseInt(prob), end_date: end })
       });
       const data = await res.json();
-      if (!res.ok) { errEl.textContent = data.error || '등록 실패'; errEl.style.display = 'block'; return; }
-      showToast('내기 질문이 등록되었습니다! 관리자 승인 후 게시됩니다.');
-      document.getElementById('betQuestion').value = '';
-      document.getElementById('betCategory').value = '';
-      document.getElementById('betProb').value = 50;
-      document.getElementById('betProbVal').textContent = '50%';
-      document.getElementById('betEndDate').value = '';
-    } catch(e) { errEl.textContent = '네트워크 오류: ' + e.message; errEl.style.display = 'block'; }
+      if (!res.ok) { mpShowErr(errEl, data.error || '등록 실패'); return; }
+      closeMyPage();
+      showToast('✅ 내기 질문이 등록되었습니다! 관리자 승인 후 게시됩니다.');
+    } catch(e) { mpShowErr(errEl, '네트워크 오류: ' + e.message); }
+    finally { btn.disabled = false; btn.textContent = '내기 질문 등록하기'; }
   }
 
   /* ── 닉네임 미설정 회원 처리 ── */
