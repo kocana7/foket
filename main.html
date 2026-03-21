@@ -2302,8 +2302,12 @@
             <label class="mp-form-label">종료 일시 *</label>
             <input class="mp-input" id="voteEndDate" type="datetime-local" />
           </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:#EFF6FF;border-radius:10px;margin-bottom:10px;font-size:13px;color:#1d4ed8">
+            <span style="font-size:16px">💰</span>
+            <span>투표 질문 등록 시 <strong>1F</strong>가 차감됩니다.</span>
+          </div>
           <div id="voteError" style="display:none;color:#F04438;font-size:13px;padding:8px 12px;background:#FEE9E7;border-radius:10px;margin-bottom:10px"></div>
-          <button class="mp-submit" onclick="mpSubmitVote()">투표 질문 등록하기</button>
+          <button class="mp-submit" onclick="mpSubmitVote()">투표 질문 등록하기 (1F)</button>
         </div>
 
         <!-- 내기 폼 -->
@@ -2339,8 +2343,12 @@
             <label class="mp-form-label">종료 일시 *</label>
             <input class="mp-input" id="betEndDate" type="datetime-local" />
           </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:#FFFBEB;border-radius:10px;margin-bottom:10px;font-size:13px;color:#b45309">
+            <span style="font-size:16px">💰</span>
+            <span>내기 질문 등록 시 <strong>2F</strong>가 차감됩니다.</span>
+          </div>
           <div id="betError" style="display:none;color:#F04438;font-size:13px;padding:8px 12px;background:#FEE9E7;border-radius:10px;margin-bottom:10px"></div>
-          <button class="mp-submit" onclick="mpSubmitBet()">내기 질문 등록하기</button>
+          <button class="mp-submit" onclick="mpSubmitBet()">내기 질문 등록하기 (2F)</button>
         </div>
       </div>
     </div><!-- /mp-body -->
@@ -4086,7 +4094,7 @@ const CARD_DATA = {
       const data = await res.json();
       if (!res.ok) { mpShowErr(errEl, data.error || '등록 실패'); return; }
       closeMyPage();
-      showToast('✅ 투표 질문이 등록되었습니다! 관리자 승인 후 게시됩니다.');
+      showToast('✅ 투표 질문이 등록되었습니다! 1F 차감 · 관리자 승인 후 게시됩니다.');
     } catch(e) { mpShowErr(errEl, '네트워크 오류: ' + e.message); }
     finally { btn.disabled = false; btn.textContent = '투표 질문 등록하기'; }
   }
@@ -4115,7 +4123,7 @@ const CARD_DATA = {
       const data = await res.json();
       if (!res.ok) { mpShowErr(errEl, data.error || '등록 실패'); return; }
       closeMyPage();
-      showToast('✅ 내기 질문이 등록되었습니다! 관리자 승인 후 게시됩니다.');
+      showToast('✅ 내기 질문이 등록되었습니다! 2F 차감 · 관리자 승인 후 게시됩니다.');
     } catch(e) { mpShowErr(errEl, '네트워크 오류: ' + e.message); }
     finally { btn.disabled = false; btn.textContent = '내기 질문 등록하기'; }
   }

@@ -27,6 +27,7 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname, '..', 'main.html'))
 const JWT_SECRET       = process.env.JWT_SECRET       || 'foket-jwt-secret-change-in-production';
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
 const PORT             = process.env.PORT              || 4000;
+const BOT_EMAIL_CONST  = 'superfoket@foket.com'; // 수퍼포켓 봇 이메일 (잔액 차감 제외용)
 
 // ── MySQL 연결 풀 ─────────────────────────────────────────
 const pool = mysql.createPool({
@@ -366,6 +367,18 @@ app.post('/api/questions', authMiddleware, async (req, res) => {
     return res.status(400).json({ error: '투표 선택지를 2개 이상 입력하세요' });
   try {
     const db = await getPool();
+
+    // 수퍼포켓 봇 제외 — 잔액 차감
+    const [userRows] = await db.execute('SELECT email, balance FROM Users WHERE user_id = ?', [req.user.userId]);
+    if (!userRows.length) return res.status(404).json({ error: '회원 정보를 찾을 수 없습니다' });
+    const user = userRows[0];
+    if (user.email !== BOT_EMAIL_CONST) {
+      const cost = type === 'vote' ? 1 : 2;
+      if ((user.balance || 0) < cost)
+        return res.status(402).json({ error: `잔액이 부족합니다. ${type === 'vote' ? '투표' : '내기'} 질문 등록에는 ${cost}F가 필요합니다.` });
+      await db.execute('UPDATE Users SET balance = balance - ? WHERE user_id = ?', [cost, req.user.userId]);
+    }
+
     const optionsJson = options ? JSON.stringify(options) : null;
     const prob = (type === 'bet') ? (initial_prob || 50) : null;
     const [result] = await db.execute(
