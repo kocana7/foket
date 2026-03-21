@@ -1212,6 +1212,7 @@
   }
 
   function buildDbQuestionRow(q) {
+    _qDetailMap[q.question_id] = q;
     var statusBadge = q.status === 'APPROVED' ? '<span class="badge badge-green">● 활성</span>'
                     : q.status === 'REJECTED'  ? '<span class="badge badge-red">⊘ 거절됨</span>'
                     : '<span class="badge badge-yellow">⏳ 승인대기</span>';
@@ -1228,11 +1229,11 @@
     var submitter = q.nickname ? '@' + q.nickname : (q.email || '-');
     var actionBtns = q.status === 'PENDING'
       ? '<div class="action-btns">'
-        + '<button class="action-btn primary" onclick="adminApproveQ(' + q.question_id + ')">승인</button>'
-        + '<button class="action-btn danger" onclick="adminRejectQ(' + q.question_id + ')">거절</button>'
+        + '<button class="action-btn primary" onclick="event.stopPropagation();adminApproveQ(' + q.question_id + ')">승인</button>'
+        + '<button class="action-btn danger" onclick="event.stopPropagation();adminRejectQ(' + q.question_id + ')">반려</button>'
         + '</div>'
-      : '<div class="action-btns"><button class="action-btn danger" onclick="adminDeleteQ(' + q.question_id + ')">삭제</button></div>';
-    return '<tr class="db-q-row" data-qid="' + q.question_id + '">'
+      : '<div class="action-btns"><button class="action-btn danger" onclick="event.stopPropagation();adminDeleteQ(' + q.question_id + ')">삭제</button></div>';
+    return '<tr class="db-q-row" data-qid="' + q.question_id + '" onclick="openQuestionDetail(' + q.question_id + ')" style="cursor:pointer">'
       + '<td>' + typeTag + '</td>'
       + '<td class="td-bold">' + escHtml(q.question) + '<br><span style="font-size:11px;color:var(--gray-400)">' + escHtml(submitter) + '</span></td>'
       + '<td>' + priceOrOptions + '</td>'
@@ -1745,6 +1746,75 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('deleteModal').addEventListener('click', function(e) {
     if (e.target === this) closeDeleteModal();
   });
+
+  /* ── 질문 상세 모달 ── */
+  var _qDetailMap = {};
+
+  function openQuestionDetail(qid) {
+    var q = _qDetailMap[qid];
+    if (!q) return;
+    var catMap = { politics:'정치', sports:'스포츠', culture:'문화', economy:'경제', trading:'트레이딩', weather:'날씨', statement:'발언', science:'과학&기술', neighbor:'나의 이웃', etc:'기타' };
+    var typeLabel = q.type === 'vote' ? '🗳️ 투표' : '🎯 내기';
+    var submitter = q.nickname ? '@' + q.nickname : (q.email || '-');
+    var endDate   = q.end_date ? new Date(q.end_date).toLocaleString('ko-KR') : '-';
+    var statusText = q.status === 'APPROVED' ? '✅ 승인됨' : q.status === 'REJECTED' ? '❌ 반려됨' : '⏳ 승인대기';
+
+    var extraHtml = '';
+    if (q.type === 'vote') {
+      try {
+        var opts = JSON.parse(q.options || '[]');
+        extraHtml = '<div style="margin-top:12px"><div style="font-size:12px;color:var(--gray-500);margin-bottom:6px">선택지</div>'
+          + opts.map(function(o,i){ return '<div style="padding:8px 12px;background:var(--gray-50);border-radius:8px;margin-bottom:6px;font-size:14px">' + (i+1) + '. ' + escHtml(o) + '</div>'; }).join('')
+          + '</div>';
+      } catch {}
+    } else {
+      extraHtml = '<div style="margin-top:12px;padding:10px 14px;background:var(--blue-light);border-radius:10px;font-size:14px">초기 확률: <b>' + (q.initial_prob || 50) + '%</b></div>';
+    }
+
+    var btnHtml = '';
+    if (q.status === 'PENDING') {
+      btnHtml = '<button onclick="adminApproveQ(' + qid + ');closeQuestionDetail()" style="flex:1;padding:12px;border-radius:12px;border:none;background:var(--blue);color:white;font-size:15px;font-weight:700;cursor:pointer">✅ 승인</button>'
+              + '<button onclick="adminRejectQ(' + qid + ');closeQuestionDetail()" style="flex:1;padding:12px;border-radius:12px;border:none;background:var(--red);color:white;font-size:15px;font-weight:700;cursor:pointer">❌ 반려</button>';
+    } else {
+      btnHtml = '<button onclick="adminDeleteQ(' + qid + ');closeQuestionDetail()" style="flex:1;padding:12px;border-radius:12px;border:none;background:var(--red);color:white;font-size:15px;font-weight:700;cursor:pointer">🗑️ 삭제</button>';
+    }
+
+    document.getElementById('qDetailContent').innerHTML =
+      '<div style="display:flex;gap:8px;align-items:center;margin-bottom:16px">'
+      + '<span style="padding:4px 10px;background:var(--blue-light);color:var(--blue);border-radius:20px;font-size:13px;font-weight:600">' + typeLabel + '</span>'
+      + '<span style="padding:4px 10px;background:var(--gray-100);color:var(--gray-600);border-radius:20px;font-size:13px">' + (catMap[q.category] || q.category || '-') + '</span>'
+      + '<span style="padding:4px 10px;background:var(--gray-50);color:var(--gray-500);border-radius:20px;font-size:13px">' + statusText + '</span>'
+      + '</div>'
+      + '<div style="font-size:17px;font-weight:700;color:var(--gray-900);line-height:1.5;margin-bottom:12px">' + escHtml(q.question) + '</div>'
+      + extraHtml
+      + '<div style="margin-top:14px;font-size:13px;color:var(--gray-500);display:flex;flex-direction:column;gap:4px">'
+      + '<div>등록자: <b>' + escHtml(submitter) + '</b></div>'
+      + '<div>종료 일시: <b>' + endDate + '</b></div>'
+      + '</div>'
+      + '<div style="display:flex;gap:10px;margin-top:20px">' + btnHtml + '</div>';
+
+    document.getElementById('qDetailModal').style.display = 'flex';
+  }
+
+  function closeQuestionDetail() {
+    document.getElementById('qDetailModal').style.display = 'none';
+  }
+
+  document.getElementById('qDetailModal').addEventListener('click', function(e) {
+    if (e.target === this) closeQuestionDetail();
+  });
 </script>
+
+<!-- 질문 상세 모달 -->
+<div id="qDetailModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9000;align-items:center;justify-content:center;">
+  <div style="background:var(--white);border-radius:20px;padding:28px 24px;max-width:500px;width:92%;box-shadow:0 20px 60px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div style="font-size:17px;font-weight:800;color:var(--gray-900)">질문 상세</div>
+      <button onclick="closeQuestionDetail()" style="width:32px;height:32px;border-radius:8px;border:none;background:var(--gray-100);font-size:18px;cursor:pointer">✕</button>
+    </div>
+    <div id="qDetailContent"></div>
+  </div>
+</div>
+
 </body>
 </html>
