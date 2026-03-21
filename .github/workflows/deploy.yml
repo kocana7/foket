@@ -11,20 +11,21 @@ jobs:
 
     steps:
       - name: 코드 최신화
-        shell: cmd
-        run: git -C C:\foket pull origin main
+        shell: bash
+        run: git -C /mnt/c/foket pull origin main
 
       - name: 패키지 설치 (변경 시)
-        shell: cmd
+        shell: bash
         run: |
-          cd /d C:\foket\api && npm install --production
+          cd /mnt/c/foket/api
+          npm install --production
 
       - name: API 서버 재시작 (PM2)
-        shell: cmd
+        shell: bash
         run: |
-          pm2 restart foket-api || pm2 start C:\foket\api\server.js --name foket-api --log C:\foket\api\server.log
+          pm2 restart foket-api || pm2 start /mnt/c/foket/api/server.js --name foket-api --log /mnt/c/foket/api/server.log
           pm2 save
-          echo 로컬 배포 완료
+          echo "로컬 배포 완료"
 
   # ── 프로덕션 서버 배포 (EC2) ─────────────────────────────
   # 사전 설정: GitHub 저장소 Settings → Secrets and variables → Actions 에서
