@@ -1194,44 +1194,49 @@
     statement:'💬 발언', science:'🔬 과학&기술', neighbor:'🏘️ 나의 이웃', etc:'기타'
   };
 
-  function buildAllView(typeLabel) {
-    var tbodyId = typeLabel === '투표' ? 'tbody-all-vote' : 'tbody-all-bet';
+  var _allQuestionsCache = [];
+
+  function buildAllViewFromData(type) {
+    var tbodyId = type === 'vote' ? 'tbody-all-vote' : 'tbody-all-bet';
     var tbody = document.getElementById(tbodyId);
-    tbody.innerHTML = '';
-    Object.keys(CAT_LABELS).forEach(function(catId) {
-      var content = document.getElementById('cat-' + catId);
-      if (!content) return;
-      content.querySelectorAll('tbody tr').forEach(function(row) {
-        var tag = row.querySelector('.type-tag');
-        if (!tag || tag.textContent.trim() !== typeLabel) return;
-        // build new row: skip type-tag cell, prepend category cell, keep rest
-        var tr = document.createElement('tr');
-        tr.style.cursor = 'pointer';
-        var qid = row.getAttribute('data-qid');
-        if (qid) {
-          tr.setAttribute('data-qid', qid);
-          tr.setAttribute('onclick', 'openQuestionDetail(' + qid + ')');
-        }
-        var catTd = document.createElement('td');
-        catTd.textContent = CAT_LABELS[catId];
-        catTd.style.cssText = 'font-size:12px;white-space:nowrap';
-        tr.appendChild(catTd);
-        // clone cells starting from index 1 (skip type-tag td at index 0)
-        Array.from(row.cells).slice(1).forEach(function(cell) {
-          tr.appendChild(cell.cloneNode(true));
-        });
-        tbody.appendChild(tr);
-      });
-    });
+    if (!tbody) return;
+    var filtered = _allQuestionsCache.filter(function(q) { return q.type === type; });
+    if (!filtered.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray-400);padding:32px">등록된 질문이 없습니다.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = filtered.map(function(q) {
+      var catLabel = CAT_LABELS[q.category] || q.category || '기타';
+      var statusBadge = q.status === 'APPROVED' ? '<span class="badge badge-green">● 활성</span>'
+                      : q.status === 'REJECTED'  ? '<span class="badge badge-red">⊘ 거절됨</span>'
+                      : '<span class="badge badge-yellow">⏳ 승인대기</span>';
+      var priceOrOptions = '';
+      if (q.type === 'vote') {
+        try { var opts = JSON.parse(q.options || '[]'); priceOrOptions = opts.length + '가지 선택지'; } catch(e) { priceOrOptions = '-'; }
+      } else {
+        priceOrOptions = '<strong style="color:var(--blue)">' + (q.initial_prob || 50) + '%</strong>';
+      }
+      var endDate = q.end_date ? new Date(q.end_date).toLocaleDateString('ko-KR') : '-';
+      var submitter = q.nickname ? '@' + q.nickname : (q.email || '-');
+      return '<tr class="db-q-row" data-qid="' + q.question_id + '" onclick="openQuestionDetail(' + q.question_id + ')" style="cursor:pointer">'
+        + '<td style="font-size:12px;white-space:nowrap">' + catLabel + '</td>'
+        + '<td class="td-bold">' + escHtml(q.question) + '<br><span style="font-size:11px;color:var(--gray-400)">' + escHtml(submitter) + '</span></td>'
+        + '<td>' + priceOrOptions + '</td>'
+        + '<td>-</td>'
+        + '<td>' + endDate + '</td>'
+        + '<td>' + statusBadge + '</td>'
+        + '<td><div class="action-btns"><button class="action-btn danger" onclick="event.stopPropagation();confirmDeleteQ(' + q.question_id + ')">삭제</button></div></td>'
+        + '</tr>';
+    }).join('');
   }
 
   function switchAllCat(type, el) {
     document.querySelectorAll('.cat-content').forEach(c => c.classList.remove('active'));
     document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
-    var typeLabel = type === 'vote' ? '투표' : '내기';
-    buildAllView(typeLabel);
+    buildAllViewFromData(type);
     document.getElementById('cat-all-' + type).classList.add('active');
     el.classList.add('active');
+    location.hash = 'markets';
   }
 
   /* ── DB 질문 로드 & 렌더 ── */
@@ -1279,24 +1284,25 @@
       if (!res.ok) { console.error('질문 API 오류:', res.status); return; }
       var data = await res.json();
       var questions = data.questions || [];
-      // 기존 DB행 제거
-      document.querySelectorAll('.db-q-row').forEach(function(r) { r.remove(); });
-      // 전체 섹션 초기화
-      var allVoteTbody = document.getElementById('tbody-all-vote');
-      var allBetTbody  = document.getElementById('tbody-all-bet');
-      if (allVoteTbody) allVoteTbody.innerHTML = '';
-      if (allBetTbody)  allBetTbody.innerHTML  = '';
-      // 카테고리별 + 전체 섹션에 삽입
-      questions.forEach(function(q) {
-        var html = buildDbQuestionRow(q);
-        // 카테고리 섹션
-        var cat = q.category || 'etc';
-        var catTbody = document.querySelector('#cat-' + cat + ' tbody');
-        if (catTbody) catTbody.insertAdjacentHTML('afterbegin', html);
-        // 투표/내기 전체 섹션
-        if (q.type === 'vote' && allVoteTbody) allVoteTbody.insertAdjacentHTML('beforeend', html);
-        if (q.type === 'bet'  && allBetTbody)  allBetTbody.insertAdjacentHTML('beforeend', html);
+
+      // 캐시 저장 (최신순 정렬 보장)
+      _allQuestionsCache = questions.slice().sort(function(a,b) {
+        return new Date(b.created_at) - new Date(a.created_at);
       });
+
+      // 기존 DB행 전체 제거
+      document.querySelectorAll('.db-q-row').forEach(function(r) { r.remove(); });
+
+      // 카테고리별 섹션에만 삽입 (엄격히 해당 카테고리만)
+      var validCats = Object.keys(CAT_LABELS); // ['politics','sports','culture',...]
+      questions.forEach(function(q) {
+        var cat = q.category || 'etc';
+        // 유효한 영문 카테고리인지 확인, 아니면 etc로
+        if (!validCats.includes(cat)) cat = 'etc';
+        var catTbody = document.querySelector('#cat-' + cat + ' > .card > .table-wrap > table > tbody');
+        if (catTbody) catTbody.insertAdjacentHTML('afterbegin', buildDbQuestionRow(q));
+      });
+
       addSampleDeleteBtns();
     } catch(e) { console.error('질문 로드 실패:', e); }
   }
