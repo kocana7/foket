@@ -509,8 +509,9 @@ app.get('/api/admin/questions', adminMiddleware, async (req, res) => {
     if (status)   { where += ' AND q.status = ?';   params.push(status); }
 
     const [rows] = await db.execute(
-      `SELECT q.question_id, q.user_id, q.type, q.question, q.question_ko, q.category,
-              q.options, q.initial_prob, q.end_date, q.status, q.created_at,
+      `SELECT q.question_id, q.user_id, q.type, q.question, q.question_ko,
+              q.poster_nickname, q.category, q.options, q.initial_prob,
+              q.end_date, q.status, q.created_at,
               u.email, u.nickname, u.full_name,
               (SELECT COUNT(*) FROM Participations p WHERE p.question_id = q.question_id) AS participant_count
        FROM Questions q
@@ -659,7 +660,7 @@ async function initDb() {
       console.log('Participations UNIQUE 제약 제거 완료');
     }
 
-    // Questions 테이블 question_ko 컬럼 추가
+    // Questions 테이블 컬럼 추가
     const [qcols] = await db.execute(
       `SELECT column_name FROM information_schema.columns
        WHERE table_schema = DATABASE() AND table_name = 'Questions'`
@@ -668,6 +669,10 @@ async function initDb() {
     if (!qExisting.has('question_ko')) {
       await db.execute('ALTER TABLE Questions ADD COLUMN question_ko VARCHAR(500)');
       console.log('컬럼 추가: Questions.question_ko');
+    }
+    if (!qExisting.has('poster_nickname')) {
+      await db.execute('ALTER TABLE Questions ADD COLUMN poster_nickname VARCHAR(100)');
+      console.log('컬럼 추가: Questions.poster_nickname');
     }
 
     await db.execute(`
@@ -1036,8 +1041,8 @@ async function postBotQuestion() {
     const options = q.options ? JSON.stringify(q.options) : null;
     const question_ko = lang === 'ko' ? null : (QUESTION_KO_MAP[q.question] || null);
     await db.execute(
-      'INSERT INTO Questions (user_id, type, question, question_ko, category, options, initial_prob, end_date, status) VALUES (?,?,?,?,?,?,?,?,?)',
-      [_botUserId, q.type, q.question, question_ko, q.category, options, q.initial_prob || null, endDate, 'APPROVED']
+      'INSERT INTO Questions (user_id, type, question, question_ko, poster_nickname, category, options, initial_prob, end_date, status) VALUES (?,?,?,?,?,?,?,?,?,?)',
+      [_botUserId, q.type, q.question, question_ko, nick, q.category, options, q.initial_prob || null, endDate, 'APPROVED']
     );
     console.log(`[수퍼포켓 봇] [${lang}] "${nick}" 게시: [${q.category}] ${q.question.slice(0,40)}...`);
   } catch (err) {

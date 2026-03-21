@@ -1217,13 +1217,11 @@
         priceOrOptions = '<strong style="color:var(--blue)">' + (q.initial_prob || 50) + '%</strong>';
       }
       var endDate = q.end_date ? new Date(q.end_date).toLocaleDateString('ko-KR') : '-';
-      var submitter = q.nickname ? '@' + q.nickname : (q.email || '-');
-      var koLine = q.question_ko
-        ? '<br><span style="font-size:11px;color:var(--blue);font-weight:500">🇰🇷 ' + escHtml(q.question_ko) + '</span>'
-        : '';
+      var submitter = '@' + (q.poster_nickname || q.nickname || q.email || '-');
+      var displayQ = escHtml(q.question_ko || q.question);
       return '<tr class="db-q-row" data-qid="' + q.question_id + '" onclick="openQuestionDetail(' + q.question_id + ')" style="cursor:pointer">'
         + '<td style="font-size:12px;white-space:nowrap">' + catLabel + '</td>'
-        + '<td class="td-bold">' + escHtml(q.question) + koLine + '<br><span style="font-size:11px;color:var(--gray-400)">' + escHtml(submitter) + '</span></td>'
+        + '<td class="td-bold">' + displayQ + '<br><span style="font-size:11px;color:var(--gray-400)">' + escHtml(submitter) + '</span></td>'
         + '<td>' + priceOrOptions + '</td>'
         + buildParticipationCells(q)
         + '<td>' + endDate + '</td>'
@@ -1292,7 +1290,7 @@
       priceOrOptions = '<strong style="color:var(--blue)">' + (q.initial_prob || 50) + '%</strong>';
     }
     var endDate = q.end_date ? new Date(q.end_date).toLocaleDateString('ko-KR') : '-';
-    var submitter = q.nickname ? '@' + q.nickname : (q.email || '-');
+    var submitter = '@' + (q.poster_nickname || q.nickname || q.email || '-');
     var actionBtns = q.status === 'PENDING'
       ? '<div class="action-btns">'
         + '<button class="action-btn primary" onclick="event.stopPropagation();adminApproveQ(' + q.question_id + ')">승인</button>'
@@ -1300,12 +1298,10 @@
         + '<button class="action-btn danger" onclick="event.stopPropagation();confirmDeleteQ(' + q.question_id + ')">삭제</button>'
         + '</div>'
       : '<div class="action-btns"><button class="action-btn danger" onclick="event.stopPropagation();confirmDeleteQ(' + q.question_id + ')">삭제</button></div>';
-    var koLine2 = q.question_ko
-      ? '<br><span style="font-size:11px;color:var(--blue);font-weight:500">🇰🇷 ' + escHtml(q.question_ko) + '</span>'
-      : '';
+    var displayQ2 = escHtml(q.question_ko || q.question);
     return '<tr class="db-q-row" data-qid="' + q.question_id + '" onclick="openQuestionDetail(' + q.question_id + ')" style="cursor:pointer">'
       + '<td>' + typeTag + '</td>'
-      + '<td class="td-bold">' + escHtml(q.question) + koLine2 + '<br><span style="font-size:11px;color:var(--gray-400)">' + escHtml(submitter) + '</span></td>'
+      + '<td class="td-bold">' + displayQ2 + '<br><span style="font-size:11px;color:var(--gray-400)">' + escHtml(submitter) + '</span></td>'
       + '<td>' + priceOrOptions + '</td>'
       + buildParticipationCells(q)
       + '<td>' + endDate + '</td>'
@@ -1939,7 +1935,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!q) return;
     var catMap = { politics:'정치', sports:'스포츠', culture:'문화', economy:'경제', trading:'트레이딩', weather:'날씨', statement:'발언', science:'과학&기술', neighbor:'나의 이웃', etc:'기타' };
     var typeLabel = q.type === 'vote' ? '🗳️ 투표' : '🎯 내기';
-    var submitter = q.nickname ? '@' + q.nickname : (q.email || '-');
+    var submitter = '@' + (q.poster_nickname || q.nickname || q.email || '-');
     var endDate   = q.end_date ? new Date(q.end_date).toLocaleString('ko-KR') : '-';
     var statusText = q.status === 'APPROVED' ? '✅ 승인됨' : q.status === 'REJECTED' ? '❌ 반려됨' : '⏳ 승인대기';
 
@@ -1969,8 +1965,7 @@ document.addEventListener('DOMContentLoaded', () => {
       + '<span style="padding:4px 10px;background:var(--gray-100);color:var(--gray-600);border-radius:20px;font-size:13px">' + (catMap[q.category] || q.category || '-') + '</span>'
       + '<span style="padding:4px 10px;background:var(--gray-50);color:var(--gray-500);border-radius:20px;font-size:13px">' + statusText + '</span>'
       + '</div>'
-      + '<div style="font-size:17px;font-weight:700;color:var(--gray-900);line-height:1.5;margin-bottom:4px">' + escHtml(q.question) + '</div>'
-      + (q.question_ko ? '<div style="font-size:13px;color:var(--blue);font-weight:500;margin-bottom:12px">🇰🇷 ' + escHtml(q.question_ko) + '</div>' : '<div style="margin-bottom:12px"></div>')
+      + '<div style="font-size:17px;font-weight:700;color:var(--gray-900);line-height:1.5;margin-bottom:12px">' + escHtml(q.question_ko || q.question) + '</div>'
       + extraHtml
       + '<div style="margin-top:14px;font-size:13px;color:var(--gray-500);display:flex;flex-direction:column;gap:4px">'
       + '<div>등록자: <b>' + escHtml(submitter) + '</b></div>'
