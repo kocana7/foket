@@ -1800,13 +1800,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('qDetailModal').style.display = 'none';
   }
 
-  document.getElementById('qDetailModal').addEventListener('click', function(e) {
-    if (e.target === this) closeQuestionDetail();
-  });
+
 </script>
 
 <!-- 질문 상세 모달 -->
-<div id="qDetailModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9000;align-items:center;justify-content:center;">
+<div id="qDetailModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9000;align-items:center;justify-content:center;" onclick="if(event.target===this)closeQuestionDetail()">
   <div style="background:var(--white);border-radius:20px;padding:28px 24px;max-width:500px;width:92%;box-shadow:0 20px 60px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
       <div style="font-size:17px;font-weight:800;color:var(--gray-900)">질문 상세</div>
