@@ -760,6 +760,19 @@
         </div>
       </div>
 
+      <!-- ── 기타 ── -->
+      <div class="cat-content" id="cat-etc">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📦 기타</div>
+          </div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>유형</th><th>제목 / 질문</th><th>Yes 가격 / 선택지</th><th>참여</th><th>종료</th><th>상태</th><th>작업</th></tr></thead>
+            <tbody></tbody>
+          </table></div>
+        </div>
+      </div>
+
       <!-- ── 투표 전체 ── -->
       <div class="cat-content" id="cat-all-vote">
         <div class="card">
@@ -1233,17 +1246,26 @@
   async function loadAdminQuestions() {
     try {
       var res = await fetch(ADMIN_API + '/api/admin/questions', { headers: { 'x-admin-key': ADMIN_KEY } });
-      if (!res.ok) return;
+      if (!res.ok) { console.error('질문 API 오류:', res.status); return; }
       var data = await res.json();
       var questions = data.questions || [];
       // 기존 DB행 제거
       document.querySelectorAll('.db-q-row').forEach(function(r) { r.remove(); });
-      // 카테고리별로 해당 tbody 앞에 삽입
+      // 전체 섹션 초기화
+      var allVoteTbody = document.getElementById('tbody-all-vote');
+      var allBetTbody  = document.getElementById('tbody-all-bet');
+      if (allVoteTbody) allVoteTbody.innerHTML = '';
+      if (allBetTbody)  allBetTbody.innerHTML  = '';
+      // 카테고리별 + 전체 섹션에 삽입
       questions.forEach(function(q) {
+        var html = buildDbQuestionRow(q);
+        // 카테고리 섹션
         var cat = q.category || 'etc';
-        var tbody = document.querySelector('#cat-' + cat + ' tbody');
-        if (!tbody) return;
-        tbody.insertAdjacentHTML('afterbegin', buildDbQuestionRow(q));
+        var catTbody = document.querySelector('#cat-' + cat + ' tbody');
+        if (catTbody) catTbody.insertAdjacentHTML('afterbegin', html);
+        // 투표/내기 전체 섹션
+        if (q.type === 'vote' && allVoteTbody) allVoteTbody.insertAdjacentHTML('beforeend', html);
+        if (q.type === 'bet'  && allBetTbody)  allBetTbody.insertAdjacentHTML('beforeend', html);
       });
     } catch(e) { console.error('질문 로드 실패:', e); }
   }
