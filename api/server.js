@@ -512,13 +512,23 @@ const BOT_EMAIL = 'superfoket@foket.com';
 const BOT_FULLNAME = 'SuperFoket'; // 수퍼포켓
 
 const BOT_NICKNAMES = [
-  '달빛나그네','새벽별','파란하늘','바람의노래','은하수여행자','별빛소나타',
-  '봄비소리','노을지기','구름위산책','자정의시인','여명의빛','초록소풍',
-  '밤하늘탐험가','햇살조각','산너머봄','이슬맺힌풀','뭉게구름','저녁노을',
-  '새벽이슬','흐르는강물','고요한숲','달콤한꿈','작은별','푸른파도',
-  '바람타는사람','빛나는하루','은빛물결','조용한아침','따스한햇볕','꿈꾸는고래',
-  '별을모으는자','하늘길손','풀잎이슬','반짝이는밤','노래하는바람','수평선너머',
-  '흰구름여행','봄날의기억','청명한하늘','달그림자'
+  // 한국어
+  '달빛나그네','새벽별','바람의노래','은하수여행자','자정의시인','봄날의기억',
+  // 영어
+  'MidnightDrifter','StarChaser','DawnWhisper','NeonSage','CrimsonTide','LunarEcho',
+  'SilverLining','EmberGlow','VoidWalker','StormRider',
+  // 일본어
+  '夜明けの星','風の詩人','銀河の旅人','月の影','静かな森','夢見る鯨',
+  // 중국어
+  '星光旅人','晨曦之影','云端漫步','月下独行','风中低语',
+  // 스페인어
+  'LuzDelAlba','SombraLunar','VientoSur','EstrellaNoche','CieloProfundo',
+  // 프랑스어
+  'LueurDuSoir','OmbreDouce','VentLibre','ÉtoileFilante','AubeNaissante',
+  // 아랍어
+  'نجمةالفجر','ظلالقمر','رياحالليل','ضوءالنجوم','سماءالفجر',
+  // 독일어
+  'Nachtwandler','Silberlicht','Morgenröte','Sternenstaub','Windreiter'
 ];
 
 const BOT_QUESTIONS = [
