@@ -490,11 +490,11 @@
 
       <!-- 카테고리 탭 -->
       <div class="cat-tabs">
-        <button class="cat-tab all-vote" onclick="switchAllCat('vote',this)">🗳️ 투표전체</button>
+        <button class="cat-tab all-vote active" onclick="switchAllCat('vote',this)">🗳️ 투표전체</button>
         <button class="cat-tab all-bet" onclick="switchAllCat('bet',this)">💰 내기전체</button>
         <div class="cat-tab-divider"></div>
         <div class="cat-tab-wrap">
-          <button class="cat-tab active" onclick="switchCat('politics',this)">🗳️ 정치</button>
+          <button class="cat-tab" onclick="switchCat('politics',this)">🗳️ 정치</button>
           <div class="cat-dropdown"><div class="cat-dropdown-inner">
             <button class="cat-dropdown-item vote" onclick="switchCat('politics',this,'투표')">🗳️ 투표</button>
             <button class="cat-dropdown-item bet" onclick="switchCat('politics',this,'내기')">💰 내기</button>
@@ -566,7 +566,7 @@
       </div>
 
       <!-- ── 정치 ── -->
-      <div class="cat-content active" id="cat-politics">
+      <div class="cat-content" id="cat-politics">
         <div class="card">
           <div class="card-header">
             <div class="card-title">🗳️ 정치</div>
@@ -781,7 +781,7 @@
       </div>
 
       <!-- ── 투표 전체 ── -->
-      <div class="cat-content" id="cat-all-vote">
+      <div class="cat-content active" id="cat-all-vote">
         <div class="card">
           <div class="card-header">
             <div class="card-title">🗳️ 투표 전체</div>
@@ -1304,12 +1304,16 @@
         if (tbody) tbody.querySelectorAll('.db-q-row').forEach(function(r) { r.remove(); });
       });
 
-      // 카테고리별 섹션에 삽입
-      questions.forEach(function(q) {
-        var cat = q.category || 'etc';
-        if (!validCats.includes(cat)) cat = 'etc';
-        var catTbody = document.querySelector('#cat-' + cat + ' tbody');
-        if (catTbody) catTbody.insertAdjacentHTML('afterbegin', buildDbQuestionRow(q));
+      // 카테고리별 섹션에 삽입 (최신순 - _allQuestionsCache 기준)
+      validCats.forEach(function(cat) {
+        var tbody = document.querySelector('#cat-' + cat + ' tbody');
+        if (!tbody) return;
+        var html = _allQuestionsCache.filter(function(q) {
+          var qcat = q.category || 'etc';
+          if (!validCats.includes(qcat)) qcat = 'etc';
+          return qcat === cat;
+        }).map(buildDbQuestionRow).join('');
+        if (html) tbody.insertAdjacentHTML('afterbegin', html);
       });
 
       // 투표전체 / 내기전체 섹션도 항상 최신 데이터로 갱신
