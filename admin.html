@@ -556,6 +556,13 @@
             <button class="cat-dropdown-item bet" onclick="switchCat('neighbor',this,'내기')">💰 내기</button>
           </div></div>
         </div>
+        <div class="cat-tab-wrap">
+          <button class="cat-tab" onclick="switchCat('etc',this)">📦 기타</button>
+          <div class="cat-dropdown"><div class="cat-dropdown-inner">
+            <button class="cat-dropdown-item vote" onclick="switchCat('etc',this,'투표')">🗳️ 투표</button>
+            <button class="cat-dropdown-item bet" onclick="switchCat('etc',this,'내기')">💰 내기</button>
+          </div></div>
+        </div>
       </div>
 
       <!-- ── 정치 ── -->
@@ -1169,7 +1176,7 @@
   const CAT_LABELS = {
     politics:'🗳️ 정치', sports:'🏆 스포츠', culture:'🎭 문화',
     trading:'📈 트레이딩', weather:'🌡️ 날씨', economy:'💹 경제',
-    statement:'💬 발언', science:'🔬 과학&기술', neighbor:'🏘️ 나의 이웃'
+    statement:'💬 발언', science:'🔬 과학&기술', neighbor:'🏘️ 나의 이웃', etc:'📦 기타'
   };
 
   function buildAllView(typeLabel) {
