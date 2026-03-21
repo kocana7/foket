@@ -512,11 +512,13 @@ const BOT_EMAIL = 'superfoket@foket.com';
 const BOT_FULLNAME = 'SuperFoket'; // 수퍼포켓
 
 const BOT_NICKNAMES = [
-  '김민준','이서연','박지훈','최수아','정도현','강민서','윤지호','임채원',
-  '한예원','오승민','신지아','류현우','배서은','고태양','문소율','백지우',
-  '안현민','장유나','전민혁','조서진','차은호','황준서','김하늘','이준혁',
-  '박소연','정민재','강지우','윤서하','나라인','송재원','허다인','남궁민',
-  '엄지수','탁현우','피어나','도민서','구자현','위서진','변소율','석민채'
+  '달빛나그네','새벽별','파란하늘','바람의노래','은하수여행자','별빛소나타',
+  '봄비소리','노을지기','구름위산책','자정의시인','여명의빛','초록소풍',
+  '밤하늘탐험가','햇살조각','산너머봄','이슬맺힌풀','뭉게구름','저녁노을',
+  '새벽이슬','흐르는강물','고요한숲','달콤한꿈','작은별','푸른파도',
+  '바람타는사람','빛나는하루','은빛물결','조용한아침','따스한햇볕','꿈꾸는고래',
+  '별을모으는자','하늘길손','풀잎이슬','반짝이는밤','노래하는바람','수평선너머',
+  '흰구름여행','봄날의기억','청명한하늘','달그림자'
 ];
 
 const BOT_QUESTIONS = [
@@ -616,9 +618,9 @@ async function initBotUser() {
       _botUserId = result.insertId;
       console.log(`[수퍼포켓 봇] 계정 생성 완료 (user_id: ${_botUserId})`);
     }
-    // 봇 시작 시 바로 1개 게시 후 이후 매 시간마다 게시
+    // 봇 시작 시 바로 1개 게시 후 이후 매 10분마다 게시
     setTimeout(postBotQuestion, 5000);
-    setInterval(postBotQuestion, 60 * 60 * 1000);
+    setInterval(postBotQuestion, 10 * 60 * 1000);
   } catch (err) {
     console.error('[수퍼포켓 봇] 초기화 실패:', err.message);
   }
@@ -628,12 +630,16 @@ async function postBotQuestion() {
   if (!_botUserId) return;
   try {
     const db = await getPool();
-    // 아직 게시 안 한 질문 중 랜덤 선택 (중복 방지)
+    // 아직 게시 안 한 질문 중 카테고리 랜덤 선택 (중복 방지)
     const [posted] = await db.execute('SELECT question FROM Questions WHERE user_id = ?', [_botUserId]);
     const postedSet = new Set(posted.map(r => r.question));
-    const remaining = BOT_QUESTIONS.filter(q => !postedSet.has(q.question));
-    const pool = remaining.length > 0 ? remaining : BOT_QUESTIONS; // 전부 소진 시 재사용
-    const q = pool[Math.floor(Math.random() * pool.length)];
+    let remaining = BOT_QUESTIONS.filter(q => !postedSet.has(q.question));
+    if (remaining.length === 0) remaining = BOT_QUESTIONS; // 전부 소진 시 재사용
+    // 카테고리 목록에서 랜덤 카테고리 먼저 고른 뒤, 해당 카테고리 질문 중 랜덤 선택
+    const cats = [...new Set(remaining.map(q => q.category))];
+    const pickedCat = cats[Math.floor(Math.random() * cats.length)];
+    const catPool = remaining.filter(q => q.category === pickedCat);
+    const q = catPool[Math.floor(Math.random() * catPool.length)];
 
     // 랜덤 닉네임으로 변경
     const nick = BOT_NICKNAMES[Math.floor(Math.random() * BOT_NICKNAMES.length)];
