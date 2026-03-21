@@ -3702,15 +3702,15 @@ const CARD_DATA = {
 
       var byPart = function(a, b) { return (b.participant_count || 0) - (a.participant_count || 0); };
 
-      // ── Hot 이슈: 투표 TOP4 + 내기 TOP4 교차 (참여 많은 순) ──
+      // ── Hot 이슈: 투표 TOP4 + 내기 TOP4 (참여 많은 순) → 8개 랜덤 배치 ──
       var hotGrid = document.getElementById('marketGrid');
       if (hotGrid) {
         var topVotes = questions.filter(function(q) { return q.type === 'vote'; }).sort(byPart).slice(0, 4);
         var topBets  = questions.filter(function(q) { return q.type === 'bet';  }).sort(byPart).slice(0, 4);
-        var hotList  = [];
-        for (var i = 0; i < Math.max(topVotes.length, topBets.length); i++) {
-          if (topVotes[i]) hotList.push(topVotes[i]);
-          if (topBets[i])  hotList.push(topBets[i]);
+        var hotList  = topVotes.concat(topBets);
+        for (var hi = hotList.length - 1; hi > 0; hi--) {
+          var hj = Math.floor(Math.random() * (hi + 1));
+          var tmp = hotList[hi]; hotList[hi] = hotList[hj]; hotList[hj] = tmp;
         }
         hotGrid.insertAdjacentHTML('afterbegin', hotList.map(buildDbMainCard).join(''));
       }
