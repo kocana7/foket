@@ -1218,11 +1218,14 @@
       }
       var endDate = q.end_date ? new Date(q.end_date).toLocaleDateString('ko-KR') : '-';
       var submitter = q.nickname ? '@' + q.nickname : (q.email || '-');
+      var pc = parseInt(q.participant_count) || 0;
+      var pcCell = pc > 0 ? '<strong style="color:var(--blue)">' + pc + '</strong><span style="font-size:11px;color:var(--gray-400)"> 명</span>'
+                          : '<span style="color:var(--gray-300)">-</span>';
       return '<tr class="db-q-row" data-qid="' + q.question_id + '" onclick="openQuestionDetail(' + q.question_id + ')" style="cursor:pointer">'
         + '<td style="font-size:12px;white-space:nowrap">' + catLabel + '</td>'
         + '<td class="td-bold">' + escHtml(q.question) + '<br><span style="font-size:11px;color:var(--gray-400)">' + escHtml(submitter) + '</span></td>'
         + '<td>' + priceOrOptions + '</td>'
-        + '<td>-</td>'
+        + '<td>' + pcCell + '</td>'
         + '<td>' + endDate + '</td>'
         + '<td>' + statusBadge + '</td>'
         + '<td><div class="action-btns"><button class="action-btn danger" onclick="event.stopPropagation();confirmDeleteQ(' + q.question_id + ')">삭제</button></div></td>'
@@ -1267,11 +1270,15 @@
         + '<button class="action-btn danger" onclick="event.stopPropagation();confirmDeleteQ(' + q.question_id + ')">삭제</button>'
         + '</div>'
       : '<div class="action-btns"><button class="action-btn danger" onclick="event.stopPropagation();confirmDeleteQ(' + q.question_id + ')">삭제</button></div>';
+    var partCount = parseInt(q.participant_count) || 0;
+    var partBadge = partCount > 0
+      ? '<strong style="color:var(--blue)">' + partCount + '</strong><span style="font-size:11px;color:var(--gray-400)"> 명</span>'
+      : '<span style="color:var(--gray-300)">-</span>';
     return '<tr class="db-q-row" data-qid="' + q.question_id + '" onclick="openQuestionDetail(' + q.question_id + ')" style="cursor:pointer">'
       + '<td>' + typeTag + '</td>'
       + '<td class="td-bold">' + escHtml(q.question) + '<br><span style="font-size:11px;color:var(--gray-400)">' + escHtml(submitter) + '</span></td>'
       + '<td>' + priceOrOptions + '</td>'
-      + '<td>-</td>'
+      + '<td>' + partBadge + '</td>'
       + '<td>' + endDate + '</td>'
       + '<td>' + statusBadge + '</td>'
       + '<td>' + actionBtns + '</td>'

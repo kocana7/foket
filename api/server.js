@@ -436,7 +436,8 @@ app.get('/api/admin/questions', adminMiddleware, async (req, res) => {
     const [rows] = await db.execute(
       `SELECT q.question_id, q.user_id, q.type, q.question, q.category,
               q.options, q.initial_prob, q.end_date, q.status, q.created_at,
-              u.email, u.nickname, u.full_name
+              u.email, u.nickname, u.full_name,
+              (SELECT COUNT(*) FROM Participations p WHERE p.question_id = q.question_id) AS participant_count
        FROM Questions q
        LEFT JOIN Users u ON q.user_id = u.user_id
        ${where}
