@@ -1007,14 +1007,46 @@ async function initBotUser() {
       _botUserId = result.insertId;
       console.log(`[수퍼포켓 봇] 계정 생성 완료 (user_id: ${_botUserId})`);
     }
-    // 봇 질문 게시: 5초 후 첫 게시, 이후 매 10분마다 (8개 언어 랜덤, 해당 지역 질문)
-    setTimeout(postBotQuestion, 5000);
+    // 시작 시 BOT_LANG_DATA 전체 질문 일괄 등록
+    await seedAllBotQuestions();
+    // 봇 질문 게시: 이후 매 10분마다 신규 질문 1개 추가
     setInterval(postBotQuestion, 10 * 60 * 1000);
     // 봇 참여: 30초 후 첫 참여, 이후 매 7분마다 랜덤 투표/베팅
     setTimeout(botParticipate, 30 * 1000);
     setInterval(botParticipate, 7 * 60 * 1000);
   } catch (err) {
     console.error('[수퍼포켓 봇] 초기화 실패:', err.message);
+  }
+}
+
+async function seedAllBotQuestions() {
+  if (!_botUserId) return;
+  try {
+    const db = await getPool();
+    const [posted] = await db.execute('SELECT question FROM Questions WHERE user_id = ?', [_botUserId]);
+    const postedSet = new Set(posted.map(r => r.question));
+
+    let inserted = 0;
+    for (const [lang, langData] of Object.entries(BOT_LANG_DATA)) {
+      for (const q of langData.questions) {
+        if (postedSet.has(q.question)) continue;
+        const nick = genBotNick(lang);
+        await db.execute('UPDATE Users SET nickname = ? WHERE user_id = ?', [nick, _botUserId]);
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + (q.days || 30));
+        const options = q.options ? JSON.stringify(q.options) : null;
+        const question_ko = lang === 'ko' ? null : (QUESTION_KO_MAP[q.question] || null);
+        await db.execute(
+          'INSERT INTO Questions (user_id, type, question, question_ko, poster_nickname, category, options, initial_prob, end_date, status) VALUES (?,?,?,?,?,?,?,?,?,?)',
+          [_botUserId, q.type, q.question, question_ko, nick, q.category, options, q.initial_prob || null, endDate, 'APPROVED']
+        );
+        postedSet.add(q.question);
+        inserted++;
+      }
+    }
+    console.log(`[수퍼포켓 봇] 전체 질문 시드 완료: ${inserted}개 등록`);
+  } catch (err) {
+    console.error('[수퍼포켓 봇] 시드 실패:', err.message);
   }
 }
 
