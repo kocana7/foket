@@ -514,7 +514,18 @@ async function initDb() {
       }
     }
 
-    console.log('DB 초기화 완료 (Users, Questions 테이블 확인)');
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS Participations (
+        id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+        question_id BIGINT NOT NULL,
+        user_id     BIGINT NOT NULL,
+        choice      VARCHAR(500),
+        created_at  DATETIME DEFAULT NOW(),
+        UNIQUE KEY uq_user_question (user_id, question_id)
+      ) CHARACTER SET utf8mb4
+    `);
+
+    console.log('DB 초기화 완료 (Users, Questions, Participations 테이블 확인)');
   } catch (err) {
     console.error('DB 초기화 실패:', err.message);
   }
@@ -524,102 +535,157 @@ async function initDb() {
 const BOT_EMAIL = 'superfoket@foket.com';
 const BOT_FULLNAME = 'SuperFoket'; // 수퍼포켓
 
-const BOT_NICKNAMES = [
-  // 한국어
-  '달빛나그네','새벽별','바람의노래','은하수여행자','자정의시인','봄날의기억',
-  // 영어
-  'MidnightDrifter','StarChaser','DawnWhisper','NeonSage','CrimsonTide','LunarEcho',
-  'SilverLining','EmberGlow','VoidWalker','StormRider',
-  // 일본어
-  '夜明けの星','風の詩人','銀河の旅人','月の影','静かな森','夢見る鯨',
-  // 중국어
-  '星光旅人','晨曦之影','云端漫步','月下独行','风中低语',
-  // 스페인어
-  'LuzDelAlba','SombraLunar','VientoSur','EstrellaNoche','CieloProfundo',
-  // 프랑스어
-  'LueurDuSoir','OmbreDouce','VentLibre','ÉtoileFilante','AubeNaissante',
-  // 아랍어
-  'نجمةالفجر','ظلالقمر','رياحالليل','ضوءالنجوم','سماءالفجر',
-  // 독일어
-  'Nachtwandler','Silberlicht','Morgenröte','Sternenstaub','Windreiter'
-];
+// 언어별 닉네임 + 해당 언어로 작성된 질문 풀
+const BOT_LANG_DATA = {
 
-const BOT_QUESTIONS = [
-  // 정치
-  { type:'bet',  category:'politics', question:'이재명 대통령 국정 지지율이 2분기에 50%를 돌파할까요?', initial_prob:52, days:30 },
-  { type:'vote', category:'politics', question:'2026년 상반기 가장 중요한 정치 이슈는 무엇인가요?', options:['경제 정책','외교 안보','복지 확대','교육 개혁','환경 정책'], days:20 },
-  { type:'bet',  category:'politics', question:'한미 정상회담이 2026년 상반기 내에 열릴까요?', initial_prob:67, days:45 },
-  { type:'vote', category:'politics', question:'현 정부의 부동산 정책에 대한 평가는?', options:['매우 긍정적','긍정적','보통','부정적','매우 부정적'], days:14 },
-  { type:'bet',  category:'politics', question:'6·25 기념일 전 남북 대화 채널이 재개될까요?', initial_prob:31, days:60 },
-  { type:'vote', category:'politics', question:'가장 기대되는 2026년 하반기 정책 과제는?', options:['AI 산업 육성','주거 안정화','저출생 대책','기후 위기 대응','의료 개혁'], days:25 },
+  ko: {
+    nicknames: ['달빛나그네','새벽별','바람의노래','은하수여행자','자정의시인','봄날의기억'],
+    questions: [
+      { type:'bet',  category:'politics', question:'이재명 대통령 국정 지지율이 2분기에 50%를 돌파할까요?', initial_prob:52, days:30 },
+      { type:'vote', category:'politics', question:'2026년 상반기 가장 중요한 정치 이슈는?', options:['경제 정책','외교 안보','복지 확대','교육 개혁','환경 정책'], days:20 },
+      { type:'bet',  category:'politics', question:'6·25 기념일 전 남북 대화 채널이 재개될까요?', initial_prob:31, days:60 },
+      { type:'bet',  category:'sports', question:'손흥민이 2025-26 시즌 EPL에서 15골 이상 넣을까요?', initial_prob:58, days:60 },
+      { type:'vote', category:'sports', question:'2026 FIFA 월드컵 한국의 최종 성적은?', options:['16강','8강','4강','결승','우승'], days:90 },
+      { type:'bet',  category:'culture', question:'BTS가 2026년 완전체 컴백 앨범을 발표할까요?', initial_prob:71, days:60 },
+      { type:'vote', category:'culture', question:'2026년 최고의 K-팝 걸그룹은?', options:['블랙핑크','NewJeans','aespa','IVE','LE SSERAFIM'], days:30 },
+      { type:'bet',  category:'trading', question:'코스피 지수가 올해 2,800선을 회복할까요?', initial_prob:48, days:90 },
+      { type:'bet',  category:'trading', question:'삼성전자 주가가 연내 8만원을 돌파할까요?', initial_prob:41, days:120 },
+      { type:'bet',  category:'economy', question:'한국은행이 올해 기준금리를 추가 인하할까요?', initial_prob:66, days:45 },
+      { type:'vote', category:'economy', question:'2026년 서울 아파트 가격 전망은?', options:['10% 이상 상승','5~10% 상승','보합','5~10% 하락','10% 이상 하락'], days:30 },
+      { type:'bet',  category:'weather', question:'서울 2026년 7월 최고기온이 38도를 넘을까요?', initial_prob:63, days:90 },
+      { type:'bet',  category:'science', question:'삼성 갤럭시 S27이 온디바이스 AI로 주목받을까요?', initial_prob:68, days:60 },
+      { type:'vote', category:'science', question:'AI가 가장 먼저 대체할 직종은?', options:['콜센터 상담원','번역가','회계사','의료 진단','콘텐츠 제작'], days:25 },
+      { type:'vote', category:'neighbor', question:'우리 동네에 가장 필요한 편의시설은?', options:['카페·베이커리','공원·녹지','헬스장','도서관','어린이집'], days:14 },
+      { type:'bet',  category:'etc', question:'2026년 한국 출산율이 소폭 반등(0.8 이상)할까요?', initial_prob:34, days:60 },
+    ]
+  },
 
-  // 스포츠
-  { type:'bet',  category:'sports', question:'손흥민이 2025-26 시즌 EPL에서 15골 이상 넣을까요?', initial_prob:58, days:60 },
-  { type:'vote', category:'sports', question:'2026 FIFA 월드컵에서 한국의 최종 성적은?', options:['16강','8강','4강','결승','우승'], days:90 },
-  { type:'bet',  category:'sports', question:'KBO 리그 2026 시즌 정규리그 우승팀은 두산 베어스일까요?', initial_prob:22, days:120 },
-  { type:'vote', category:'sports', question:'2026 파리 올림픽 한국 금메달 예상 종목은?', options:['양궁','태권도','유도','펜싱','수영'], days:40 },
-  { type:'bet',  category:'sports', question:'류현진이 2026 KBO 시즌에서 10승 이상 거둘까요?', initial_prob:44, days:100 },
-  { type:'vote', category:'sports', question:'이번 달 가장 기대되는 스포츠 경기는?', options:['K리그','KBO','NBA 플레이오프','EPL 빅매치','UFC'], days:10 },
+  en: {
+    nicknames: ['MidnightDrifter','StarChaser','DawnWhisper','NeonSage','CrimsonTide','LunarEcho','SilverLining','EmberGlow','VoidWalker','StormRider'],
+    questions: [
+      { type:'bet',  category:'politics', question:'Will Trump impose additional tariffs on EU goods before end of 2026?', initial_prob:61, days:45 },
+      { type:'vote', category:'politics', question:'Who will be the biggest geopolitical story of 2026?', options:['US-China tensions','Russia-Ukraine','Middle East crisis','NATO expansion','AI governance'], days:30 },
+      { type:'bet',  category:'sports', question:'Will the Golden State Warriors make the NBA playoffs in 2026?', initial_prob:44, days:60 },
+      { type:'vote', category:'sports', question:'Who wins the 2026 FIFA World Cup?', options:['Brazil','France','England','Germany','Argentina'], days:90 },
+      { type:'bet',  category:'culture', question:'Will a Marvel film top the global box office in 2026?', initial_prob:67, days:60 },
+      { type:'vote', category:'culture', question:'Best streaming platform of 2026?', options:['Netflix','Disney+','Apple TV+','HBO Max','Amazon Prime'], days:20 },
+      { type:'bet',  category:'trading', question:'Will Bitcoin exceed $120,000 by end of 2026?', initial_prob:53, days:90 },
+      { type:'bet',  category:'trading', question:'Will the S&P 500 hit 6,000 points in 2026?', initial_prob:58, days:60 },
+      { type:'bet',  category:'economy', question:'Will the US Fed cut interest rates twice in 2026?', initial_prob:62, days:45 },
+      { type:'vote', category:'economy', question:'Biggest economic risk for the US in 2026?', options:['Inflation resurgence','Recession','Dollar weakening','Trade war','Tech bubble'], days:25 },
+      { type:'bet',  category:'science', question:'Will GPT-5 be publicly released in the first half of 2026?', initial_prob:64, days:40 },
+      { type:'vote', category:'science', question:'Which tech trend will dominate 2026?', options:['Generative AI','Quantum computing','Humanoid robots','Self-driving cars','Biotech'], days:20 },
+      { type:'bet',  category:'statement', question:'Will Elon Musk sell X (Twitter) in 2026?', initial_prob:18, days:90 },
+      { type:'vote', category:'statement', question:'Most controversial tech CEO statement of 2026?', options:['Elon Musk','Sam Altman','Jensen Huang','Mark Zuckerberg','Tim Cook'], days:15 },
+      { type:'bet',  category:'weather', question:'Will a Category 5 hurricane hit the US mainland in 2026?', initial_prob:35, days:120 },
+      { type:'vote', category:'etc', question:'Most used word of 2026?', options:['AI','Recession','Humanoid','Quantum','Autonomous'], days:30 },
+    ]
+  },
 
-  // 문화
-  { type:'bet',  category:'culture', question:'BTS가 2026년 완전체 컴백 앨범을 발표할까요?', initial_prob:71, days:60 },
-  { type:'vote', category:'culture', question:'올해 가장 기대되는 K-드라마 장르는?', options:['로맨스','스릴러','판타지','시대극','의학드라마'], days:20 },
-  { type:'bet',  category:'culture', question:'한국 영화가 2026 칸 영화제에서 수상할까요?', initial_prob:38, days:50 },
-  { type:'vote', category:'culture', question:'2026년 최고의 K-팝 걸그룹은?', options:['블랙핑크','NewJeans','aespa','IVE','LE SSERAFIM'], days:30 },
-  { type:'bet',  category:'culture', question:'넷플릭스 오리지널 한국 드라마가 글로벌 TOP 10에 진입할까요?', initial_prob:62, days:45 },
-  { type:'vote', category:'culture', question:'이번 여름 가장 기대되는 국내 영화는?', options:['액션 블록버스터','로맨스 코미디','공포 스릴러','애니메이션','다큐멘터리'], days:30 },
+  ja: {
+    nicknames: ['夜明けの星','風の詩人','銀河の旅人','月の影','静かな森','夢見る鯨'],
+    questions: [
+      { type:'bet',  category:'politics', question:'2026年の参議院選挙で自民党は過半数を維持できるでしょうか？', initial_prob:54, days:60 },
+      { type:'vote', category:'politics', question:'2026年の日本の最重要政治課題は？', options:['経済再生','少子化対策','安全保障','デジタル化','環境政策'], days:20 },
+      { type:'bet',  category:'sports', question:'大谷翔平が2026年のMLBシーズンで50本塁打以上を達成するでしょうか？', initial_prob:61, days:90 },
+      { type:'vote', category:'sports', question:'2026年のWBCで最も優勝候補の国は？', options:['日本','アメリカ','ドミニカ共和国','プエルトリコ','韓国'], days:40 },
+      { type:'bet',  category:'culture', question:'2026年に日本のアニメ映画が世界興行収入トップ10に入るでしょうか？', initial_prob:72, days:60 },
+      { type:'vote', category:'culture', question:'2026年最も注目される日本のエンタメは？', options:['アニメ','J-POP','ゲーム','映画','マンガ'], days:25 },
+      { type:'bet',  category:'economy', question:'日本銀行が2026年中に利上げを実施するでしょうか？', initial_prob:67, days:45 },
+      { type:'vote', category:'economy', question:'2026年の日本経済の最大リスクは？', options:['円安加速','インフレ長期化','少子化による労働力不足','中国経済の減速','エネルギー価格上昇'], days:30 },
+      { type:'bet',  category:'trading', question:'日経平均が2026年に45,000円を突破するでしょうか？', initial_prob:47, days:90 },
+      { type:'bet',  category:'science', question:'ソニーが2026年にAIロボット製品を一般向けに発売するでしょうか？', initial_prob:38, days:60 },
+      { type:'vote', category:'science', question:'2026年最もブレイクするテクノロジーは？', options:['生成AI','量子コンピュータ','自動運転','人型ロボット','宇宙旅行'], days:20 },
+      { type:'bet',  category:'weather', question:'2026年の夏、東京で40度以上の気温が記録されるでしょうか？', initial_prob:55, days:90 },
+      { type:'vote', category:'etc', question:'2026年最も流行る日本の食トレンドは？', options:['発酵食品','プラントベース','高級おにぎり','クラフトコーヒー','昆虫食'], days:20 },
+    ]
+  },
 
-  // 트레이딩
-  { type:'bet',  category:'trading', question:'비트코인이 2026년 2분기 안에 10만 달러를 재돌파할까요?', initial_prob:55, days:60 },
-  { type:'bet',  category:'trading', question:'코스피 지수가 올해 2,800선을 회복할까요?', initial_prob:48, days:90 },
-  { type:'vote', category:'trading', question:'2026년 가장 유망한 투자 자산은?', options:['AI 관련주','비트코인','부동산 리츠','금·원자재','채권'], days:30 },
-  { type:'bet',  category:'trading', question:'삼성전자 주가가 연내 8만원을 돌파할까요?', initial_prob:41, days:120 },
-  { type:'bet',  category:'trading', question:'이더리움이 4,000달러 이상을 유지할까요?', initial_prob:49, days:30 },
-  { type:'vote', category:'trading', question:'현재 가장 리스크가 높은 투자 자산은?', options:['알트코인','중국 주식','부동산','레버리지 ETF','스타트업 투자'], days:14 },
+  zh: {
+    nicknames: ['星光旅人','晨曦之影','云端漫步','月下独行','风中低语'],
+    questions: [
+      { type:'bet',  category:'politics', question:'中美关系在2026年下半年会出现重大缓和吗？', initial_prob:34, days:60 },
+      { type:'vote', category:'politics', question:'2026年最影响中国外交格局的因素是？', options:['台湾问题','南海争端','中美贸易战','一带一路','俄乌局势'], days:30 },
+      { type:'bet',  category:'trading', question:'上证指数2026年能否突破4000点？', initial_prob:42, days:90 },
+      { type:'vote', category:'trading', question:'2026年中国最具投资价值的板块是？', options:['人工智能','新能源','半导体','消费品','生物医药'], days:25 },
+      { type:'bet',  category:'economy', question:'中国2026年GDP增速能否达到5%以上？', initial_prob:56, days:60 },
+      { type:'vote', category:'economy', question:'2026年中国经济的最大挑战是？', options:['房地产危机','通货紧缩','人口老龄化','科技封锁','内需不足'], days:20 },
+      { type:'bet',  category:'science', question:'华为在2026年能否量产7nm以下芯片？', initial_prob:49, days:90 },
+      { type:'vote', category:'science', question:'2026年中国最突破性的科技成就会是？', options:['量子计算','人工智能','航天探月','核聚变','新能源汽车'], days:30 },
+      { type:'bet',  category:'sports', question:'中国男足能否在2026年世界杯小组赛出线？', initial_prob:28, days:80 },
+      { type:'vote', category:'culture', question:'2026年最火的中国文化现象是？', options:['国潮时尚','古装剧','华语流行音乐','短视频文化','传统非遗'], days:20 },
+      { type:'bet',  category:'weather', question:'2026年中国南方洪涝灾害损失会超过2024年吗？', initial_prob:44, days:120 },
+      { type:'vote', category:'etc', question:'2026年中国最热门的年轻人生活方式是？', options:['城市露营','骑行健身','咖啡文化','宠物经济','慢生活'], days:25 },
+    ]
+  },
 
-  // 날씨
-  { type:'bet',  category:'weather', question:'서울 2026년 7월 최고기온이 38도를 넘을까요?', initial_prob:63, days:90 },
-  { type:'vote', category:'weather', question:'올여름 최악의 자연재해 유형을 예상한다면?', options:['폭염','태풍','집중호우','가뭄','산불'], days:30 },
-  { type:'bet',  category:'weather', question:'올해 태풍이 한반도에 직접 상륙할까요?', initial_prob:57, days:120 },
-  { type:'vote', category:'weather', question:'이번 여름 체감 더위 수준은?', options:['역대급 폭염','평년보다 더움','평년 수준','평년보다 시원','선선한 여름'], days:20 },
-  { type:'bet',  category:'weather', question:'2026년 장마 기간이 30일 이상 이어질까요?', initial_prob:45, days:60 },
+  es: {
+    nicknames: ['LuzDelAlba','SombraLunar','VientoSur','EstrellaNoche','CieloProfundo'],
+    questions: [
+      { type:'bet',  category:'politics', question:'¿Ganará la izquierda las próximas elecciones en España en 2026?', initial_prob:46, days:60 },
+      { type:'vote', category:'politics', question:'¿Cuál es el mayor desafío político de América Latina en 2026?', options:['Corrupción','Inflación','Crimen organizado','Migración','Desigualdad'], days:30 },
+      { type:'bet',  category:'sports', question:'¿Ganará el Real Madrid la Champions League 2025-26?', initial_prob:33, days:60 },
+      { type:'vote', category:'sports', question:'¿Quién será el mejor jugador de la Liga Española en 2026?', options:['Mbappé','Vinicius Jr','Yamal','Bellingham','Pedri'], days:45 },
+      { type:'bet',  category:'culture', question:'¿Superará una serie en español a "La Casa de Papel" en Netflix en 2026?', initial_prob:41, days:60 },
+      { type:'vote', category:'culture', question:'¿Cuál es el mayor aporte cultural de España al mundo en 2026?', options:['Cine','Gastronomía','Música flamenco','Moda','Literatura'], days:20 },
+      { type:'bet',  category:'economy', question:'¿Bajará la inflación en España por debajo del 2% en 2026?', initial_prob:57, days:45 },
+      { type:'vote', category:'economy', question:'¿Cuál es el mayor riesgo económico para América Latina en 2026?', options:['Deuda pública','Devaluación','Proteccionismo de EEUU','Sequía','Desempleo juvenil'], days:30 },
+      { type:'bet',  category:'trading', question:'¿Superará el IBEX 35 los 13,000 puntos en 2026?', initial_prob:44, days:90 },
+      { type:'bet',  category:'weather', question:'¿Será 2026 el verano más caluroso registrado en España?', initial_prob:62, days:90 },
+      { type:'vote', category:'science', question:'¿Qué tecnología transformará más España en 2026?', options:['IA generativa','Vehículos eléctricos','Energía solar','Robots industriales','Biotecnología'], days:25 },
+    ]
+  },
 
-  // 경제
-  { type:'bet',  category:'economy', question:'2026년 한국 경제 성장률이 2.5%를 넘을까요?', initial_prob:53, days:60 },
-  { type:'vote', category:'economy', question:'2026년 한국 경제의 가장 큰 위협 요인은?', options:['고금리 지속','수출 부진','내수 침체','환율 불안','부동산 급락'], days:25 },
-  { type:'bet',  category:'economy', question:'한국은행이 올해 기준금리를 추가 인하할까요?', initial_prob:66, days:45 },
-  { type:'vote', category:'economy', question:'2026년 서울 아파트 가격 전망은?', options:['10% 이상 상승','5~10% 상승','보합','5~10% 하락','10% 이상 하락'], days:30 },
-  { type:'bet',  category:'economy', question:'원/달러 환율이 연내 1,300원 아래로 내려올까요?', initial_prob:39, days:90 },
+  fr: {
+    nicknames: ['LueurDuSoir','OmbreDouce','VentLibre','ÉtoileFilante','AubeNaissante'],
+    questions: [
+      { type:'bet',  category:'politics', question:'Macron terminera-t-il son mandat sans démission en 2026 ?', initial_prob:71, days:60 },
+      { type:'vote', category:'politics', question:'Quel est le plus grand défi politique de la France en 2026 ?', options:['Immigration','Réforme des retraites','Sécurité','Écologie','Pouvoir d\'achat'], days:25 },
+      { type:'bet',  category:'sports', question:'Le PSG remportera-t-il la Ligue des Champions 2025-26 ?', initial_prob:29, days:60 },
+      { type:'vote', category:'sports', question:'Qui sera le meilleur joueur de Ligue 1 en 2026 ?', options:['Mbappé','Dembélé','Neymar Jr','Thuram','Zaire-Emery'], days:40 },
+      { type:'bet',  category:'culture', question:'Un film français gagnera-t-il la Palme d\'Or à Cannes 2026 ?', initial_prob:38, days:50 },
+      { type:'vote', category:'culture', question:'Quelle tendance culturelle dominera la France en 2026 ?', options:['Cinéma d\'auteur','Musique électronique','Mode durable','Littérature engagée','Gastronomie verte'], days:20 },
+      { type:'bet',  category:'economy', question:'Le taux de chômage en France passera-t-il sous les 7% en 2026 ?', initial_prob:48, days:60 },
+      { type:'vote', category:'economy', question:'Quel secteur sera le moteur de l\'économie française en 2026 ?', options:['Tourisme','Aéronautique','IA et tech','Luxe','Énergie renouvelable'], days:30 },
+      { type:'bet',  category:'trading', question:'Le CAC 40 atteindra-t-il 9,000 points en 2026 ?', initial_prob:41, days:90 },
+      { type:'bet',  category:'science', question:'La France lancera-t-elle son premier satellite quantique en 2026 ?', initial_prob:36, days:90 },
+      { type:'vote', category:'weather', question:'Quelle catastrophe naturelle menace le plus la France en 2026 ?', options:['Sécheresse','Inondations','Canicule','Tempêtes','Incendies de forêt'], days:30 },
+    ]
+  },
 
-  // 발언
-  { type:'bet',  category:'statement', question:'일론 머스크가 X(트위터)를 2026년 내에 매각할까요?', initial_prob:19, days:90 },
-  { type:'vote', category:'statement', question:'트럼프 전 대통령 발언 중 가장 논란이 된 건?', options:['관세 발언','NATO 탈퇴론','우크라이나 발언','AI 규제 반대','이민 정책'], days:20 },
-  { type:'bet',  category:'statement', question:'오픈AI CEO 샘 알트만이 2026년 하반기에 한국을 방문할까요?', initial_prob:33, days:60 },
-  { type:'vote', category:'statement', question:'최근 가장 파장이 컸던 정치인 발언은?', options:['경제 관련 발언','외교 발언','안보 발언','복지 공약','환경 관련'], days:10 },
-  { type:'bet',  category:'statement', question:'젠슨 황 엔비디아 CEO가 올해 다시 한국을 찾을까요?', initial_prob:72, days:60 },
+  ar: {
+    nicknames: ['نجمةالفجر','ظلالقمر','رياحالليل','ضوءالنجوم','سماءالفجر'],
+    questions: [
+      { type:'bet',  category:'politics', question:'هل ستشهد منطقة الشرق الأوسط اتفاقية سلام جديدة في 2026؟', initial_prob:27, days:60 },
+      { type:'vote', category:'politics', question:'ما أكبر تحدٍّ سياسي يواجه العالم العربي في 2026؟', options:['الصراع في غزة','الأزمة اليمنية','الملف النووي الإيراني','الأزمة السودانية','التدخل الأجنبي'], days:30 },
+      { type:'bet',  category:'sports', question:'هل ستتأهل المنتخبات العربية لدور الثمانية في كأس العالم 2026؟', initial_prob:38, days:90 },
+      { type:'vote', category:'sports', question:'من سيكون أبرز لاعب عربي في 2026؟', options:['محمد صلاح','كريم بنزيمة','هاكيم زياش','رياض محرز','إبراهيم دياز'], days:40 },
+      { type:'bet',  category:'economy', question:'هل ستتجاوز أسعار النفط 100 دولار للبرميل في 2026؟', initial_prob:44, days:60 },
+      { type:'vote', category:'economy', question:'أي دولة خليجية ستحقق أعلى نمو اقتصادي في 2026؟', options:['المملكة العربية السعودية','الإمارات','قطر','الكويت','البحرين'], days:30 },
+      { type:'bet',  category:'trading', question:'هل ستطلق المملكة العربية السعودية عملتها الرقمية بحلول 2026؟', initial_prob:33, days:90 },
+      { type:'bet',  category:'science', question:'هل ستنجح مهمة الإمارات لاستكشاف حزام الكويكبات في 2026؟', initial_prob:61, days:90 },
+      { type:'vote', category:'culture', question:'ما أبرز ظاهرة ثقافية عربية في 2026؟', options:['الدراما الخليجية','الموسيقى العربية الحديثة','السينما المصرية','الرياضة الإلكترونية','الفنون التشكيلية'], days:25 },
+      { type:'bet',  category:'weather', question:'هل ستعاني منطقة الشرق الأوسط من موجات حر قياسية في صيف 2026؟', initial_prob:74, days:90 },
+    ]
+  },
 
-  // 과학
-  { type:'bet',  category:'science', question:'GPT-5가 2026년 상반기에 공식 출시될까요?', initial_prob:61, days:45 },
-  { type:'vote', category:'science', question:'2026년 가장 기대되는 기술 트렌드는?', options:['생성형 AI','양자 컴퓨팅','자율주행차','인간형 로봇','바이오테크'], days:20 },
-  { type:'bet',  category:'science', question:'삼성 갤럭시 S27이 온디바이스 AI로 주목받을까요?', initial_prob:68, days:60 },
-  { type:'vote', category:'science', question:'AI가 가장 먼저 대체할 직종은?', options:['콜센터 상담원','번역가','회계사','의료 진단','콘텐츠 제작'], days:25 },
-  { type:'bet',  category:'science', question:'SpaceX 스타십이 2026년 유인 달 궤도 비행에 성공할까요?', initial_prob:42, days:90 },
-  { type:'vote', category:'science', question:'한국 AI 경쟁력, 글로벌 몇 위권이라고 생각하나요?', options:['1~3위','4~5위','6~10위','11~20위','20위 이하'], days:20 },
-
-  // 나의 이웃
-  { type:'vote', category:'neighbor', question:'우리 동네에 가장 필요한 편의시설은?', options:['카페·베이커리','공원·녹지','헬스장','도서관','어린이집'], days:14 },
-  { type:'bet',  category:'neighbor', question:'우리 동네 아파트 단지에 스타벅스가 올해 입점할까요?', initial_prob:28, days:60 },
-  { type:'vote', category:'neighbor', question:'이번 주말 나들이 장소로 어디가 가장 좋을까요?', options:['한강공원','북악산 등산','코엑스 쇼핑','강남 맛집 투어','교외 드라이브'], days:5 },
-  { type:'bet',  category:'neighbor', question:'올여름 우리 동네 정전 사태가 발생할까요?', initial_prob:17, days:90 },
-  { type:'vote', category:'neighbor', question:'동네 주민이 가장 불편함을 느끼는 점은?', options:['주차 문제','쓰레기 무단투기','소음','치안','대중교통 부족'], days:10 },
-
-  // 기타
-  { type:'bet',  category:'etc', question:'2026년 한국 출산율이 소폭 반등(0.8 이상)할까요?', initial_prob:34, days:60 },
-  { type:'vote', category:'etc', question:'올해 가장 핫한 음식 트렌드는?', options:['마라탕·마라샹궈','헬시플레저 식단','무알콜 음료','한식 파인다이닝','비건 푸드'], days:20 },
-  { type:'bet',  category:'etc', question:'2026 항저우 아시안게임에서 한국이 종합 2위를 달성할까요?', initial_prob:47, days:80 },
-  { type:'vote', category:'etc', question:'2026년 가장 많이 쓰이는 신조어는?', options:['AI 관련 용어','경제 신조어','MZ 밈 단어','정치 은어','외래어 혼합'], days:30 },
-  { type:'bet',  category:'etc', question:'올해 국내 편의점 수가 6만 개를 돌파할까요?', initial_prob:58, days:90 },
-];
+  de: {
+    nicknames: ['Nachtwandler','Silberlicht','Morgenröte','Sternenstaub','Windreiter'],
+    questions: [
+      { type:'bet',  category:'politics', question:'Wird die CDU die Bundestagswahl 2026 mit absoluter Mehrheit gewinnen?', initial_prob:23, days:60 },
+      { type:'vote', category:'politics', question:'Was ist die größte politische Herausforderung Deutschlands 2026?', options:['Migration','Wirtschaftskrise','Energieversorgung','Sicherheitspolitik','Klimaschutz'], days:25 },
+      { type:'bet',  category:'sports', question:'Wird Bayern München die Champions League 2025-26 gewinnen?', initial_prob:22, days:60 },
+      { type:'vote', category:'sports', question:'Welcher Verein wird Deutscher Meister 2026?', options:['Bayern München','Borussia Dortmund','Bayer Leverkusen','RB Leipzig','Eintracht Frankfurt'], days:60 },
+      { type:'bet',  category:'economy', question:'Wird Deutschland 2026 die Rezession überwinden und positives BIP-Wachstum erzielen?', initial_prob:54, days:60 },
+      { type:'vote', category:'economy', question:'Was ist das größte Wirtschaftsrisiko für Deutschland in 2026?', options:['Energiepreise','Fachkräftemangel','Exportrückgang','Digitalisierungslücke','Staatsverschuldung'], days:30 },
+      { type:'bet',  category:'trading', question:'Wird der DAX 2026 die 22.000-Punkte-Marke überschreiten?', initial_prob:46, days:90 },
+      { type:'bet',  category:'science', question:'Wird ein deutsches Unternehmen 2026 einen kommerziellen Quantencomputer vorstellen?', initial_prob:31, days:90 },
+      { type:'vote', category:'science', question:'Welche Technologie wird Deutschland 2026 am stärksten prägen?', options:['Künstliche Intelligenz','Elektromobilität','Wasserstoffenergie','Robotik','Biotechnologie'], days:20 },
+      { type:'bet',  category:'weather', question:'Wird der Rhein 2026 erneut durch extreme Niedrigwasser Schifffahrtsprobleme verursachen?', initial_prob:48, days:90 },
+      { type:'vote', category:'culture', question:'Was wird 2026 den deutschen Kulturdiskurs dominieren?', options:['KI in der Kunst','Nachhaltige Mode','Streaming-Serien','Gaming-Kultur','Traditionelles Handwerk'], days:25 },
+    ]
+  },
+};
 
 let _botUserId = null;
 
@@ -644,6 +710,9 @@ async function initBotUser() {
     // 봇 시작 시 바로 1개 게시 후 이후 매 10분마다 게시
     setTimeout(postBotQuestion, 5000);
     setInterval(postBotQuestion, 10 * 60 * 1000);
+    // 봇 참여: 30초 후 첫 참여, 이후 매 7분마다 랜덤 투표/베팅
+    setTimeout(botParticipate, 30 * 1000);
+    setInterval(botParticipate, 7 * 60 * 1000);
   } catch (err) {
     console.error('[수퍼포켓 봇] 초기화 실패:', err.message);
   }
@@ -653,22 +722,24 @@ async function postBotQuestion() {
   if (!_botUserId) return;
   try {
     const db = await getPool();
-    // 아직 게시 안 한 질문 중 카테고리 랜덤 선택 (중복 방지)
+    // 랜덤 언어 선택
+    const langs = Object.keys(BOT_LANG_DATA);
+    const lang = langs[Math.floor(Math.random() * langs.length)];
+    const langData = BOT_LANG_DATA[lang];
+
+    // 해당 언어 닉네임 랜덤 선택
+    const nick = langData.nicknames[Math.floor(Math.random() * langData.nicknames.length)];
+
+    // 해당 언어 질문 중 중복 방지 후 랜덤 선택
     const [posted] = await db.execute('SELECT question FROM Questions WHERE user_id = ?', [_botUserId]);
     const postedSet = new Set(posted.map(r => r.question));
-    let remaining = BOT_QUESTIONS.filter(q => !postedSet.has(q.question));
-    if (remaining.length === 0) remaining = BOT_QUESTIONS; // 전부 소진 시 재사용
-    // 카테고리 목록에서 랜덤 카테고리 먼저 고른 뒤, 해당 카테고리 질문 중 랜덤 선택
-    const cats = [...new Set(remaining.map(q => q.category))];
-    const pickedCat = cats[Math.floor(Math.random() * cats.length)];
-    const catPool = remaining.filter(q => q.category === pickedCat);
-    const q = catPool[Math.floor(Math.random() * catPool.length)];
+    let pool = langData.questions.filter(q => !postedSet.has(q.question));
+    if (pool.length === 0) pool = langData.questions; // 전부 소진 시 재사용
 
-    // 랜덤 닉네임으로 변경
-    const nick = BOT_NICKNAMES[Math.floor(Math.random() * BOT_NICKNAMES.length)];
+    const q = pool[Math.floor(Math.random() * pool.length)];
+
+    // 닉네임 변경 후 질문 등록 (자동 승인)
     await db.execute('UPDATE Users SET nickname = ? WHERE user_id = ?', [nick, _botUserId]);
-
-    // 질문 등록 (자동 승인)
     const endDate = new Date();
     endDate.setDate(endDate.getDate() + (q.days || 30));
     const options = q.options ? JSON.stringify(q.options) : null;
@@ -676,9 +747,48 @@ async function postBotQuestion() {
       'INSERT INTO Questions (user_id, type, question, category, options, initial_prob, end_date, status) VALUES (?,?,?,?,?,?,?,?)',
       [_botUserId, q.type, q.question, q.category, options, q.initial_prob || null, endDate, 'APPROVED']
     );
-    console.log(`[수퍼포켓 봇] "${nick}" 으로 게시: [${q.category}] ${q.question.slice(0,40)}...`);
+    console.log(`[수퍼포켓 봇] [${lang}] "${nick}" 게시: [${q.category}] ${q.question.slice(0,40)}...`);
   } catch (err) {
     console.error('[수퍼포켓 봇] 게시 실패:', err.message);
+  }
+}
+
+async function botParticipate() {
+  if (!_botUserId) return;
+  try {
+    const db = await getPool();
+    // 아직 참여 안 한 승인된 질문 목록
+    const [questions] = await db.execute(`
+      SELECT q.question_id, q.type, q.options
+      FROM Questions q
+      WHERE q.status = 'APPROVED'
+        AND q.end_date > NOW()
+        AND q.question_id NOT IN (
+          SELECT question_id FROM Participations WHERE user_id = ?
+        )
+      ORDER BY RAND()
+      LIMIT 5
+    `, [_botUserId]);
+
+    for (const q of questions) {
+      let choice;
+      if (q.type === 'vote') {
+        let opts;
+        try { opts = JSON.parse(q.options); } catch { opts = null; }
+        if (!opts || opts.length === 0) continue;
+        choice = opts[Math.floor(Math.random() * opts.length)];
+      } else {
+        choice = Math.random() < 0.5 ? 'YES' : 'NO';
+      }
+      await db.execute(
+        'INSERT IGNORE INTO Participations (question_id, user_id, choice) VALUES (?,?,?)',
+        [q.question_id, _botUserId, choice]
+      );
+    }
+    if (questions.length > 0)
+      console.log(`[수퍼포켓 봇] ${questions.length}개 질문에 참여 완료`);
+  } catch (err) {
+    console.error('[수퍼포켓 봇] 참여 실패:', err.message);
   }
 }
 
