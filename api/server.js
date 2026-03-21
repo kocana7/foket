@@ -246,19 +246,20 @@ app.get('/api/admin/users', adminMiddleware, async (req, res) => {
     if (status && status !== 'all') { where += ' AND u.status = ?'; params.push(status); }
     if (grade  && grade  !== 'all') { where += ' AND u.grade = ?';  params.push(grade); }
 
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const lim = parseInt(limit) || 50;
+    const offset = (parseInt(page) - 1) * lim;
     const [rows] = await db.execute(
       `SELECT u.user_id, u.email, u.full_name, u.nickname, u.grade, u.balance,
               u.kyc_status, u.status, u.created_at, u.last_seen_at
        FROM Users u ${where}
-       ORDER BY u.created_at DESC LIMIT ? OFFSET ?`,
-      [...params, parseInt(limit), offset]
+       ORDER BY u.created_at DESC LIMIT ${lim} OFFSET ${offset}`,
+      params
     );
 
     res.json({ users: rows, total: rows.length });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: '서버 오류' });
+    console.error('[admin/users]', err.code, err.message);
+    res.status(500).json({ error: err.message });
   }
 });
 
