@@ -3625,15 +3625,19 @@ const CARD_DATA = {
   function shuffleSections() {
     var ids = ['politics','sports','culture','trading','weather','economy','statement','science','neighbor','etc'];
     var sections = ids.map(function(id) { return document.getElementById(id); }).filter(Boolean);
+    if (!sections.length) return;
     // Fisher-Yates 셔플
     for (var i = sections.length - 1; i > 0; i--) {
       var j = Math.floor(Math.random() * (i + 1));
       var tmp = sections[i]; sections[i] = sections[j]; sections[j] = tmp;
     }
-    // 기준점: Hot 이슈 섹션 다음에 순서대로 재삽입
-    var anchor = document.getElementById('markets');
-    if (!anchor) return;
-    sections.forEach(function(sec) { anchor.parentNode.insertBefore(sec, anchor.nextSibling); anchor = sec; });
+    // how-it-works 앞에 셔플된 순서대로 삽입 (배경색 교차 유지)
+    var hiw = document.getElementById('how-it-works');
+    var parent = hiw ? hiw.parentNode : sections[0].parentNode;
+    sections.forEach(function(sec, idx) {
+      sec.style.background = idx % 2 === 0 ? '' : 'var(--gray-50)';
+      hiw ? parent.insertBefore(sec, hiw) : parent.appendChild(sec);
+    });
   }
 
   /* ── DB 카드 섹션별 로드 ── */
