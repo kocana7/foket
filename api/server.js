@@ -416,8 +416,8 @@ app.get('/api/questions', async (req, res) => {
 
   try {
     const db = await getPool();
-    let where = "WHERE q.status = 'APPROVED'";
-    const params = [];
+    let where = "WHERE q.status = 'APPROVED' AND u.email != ?";
+    const params = [BOT_EMAIL_CONST];
     if (category) { where += ' AND q.category = ?'; params.push(category); }
     const [rows] = await db.execute(
       `SELECT q.question_id, q.user_id, q.type, q.question, q.category,
@@ -1003,9 +1003,12 @@ async function initBotUser() {
       _botUserId = result.insertId;
       console.log(`[수퍼포켓 봇] 계정 생성 완료 (user_id: ${_botUserId})`);
     }
-    // 봇 시작 시 바로 1개 게시 후 이후 매 10분마다 게시
-    setTimeout(postBotQuestion, 5000);
-    setInterval(postBotQuestion, 10 * 60 * 1000);
+    // 기존 봇 질문 삭제 (일회성 정리)
+    if (_botUserId) {
+      const [delResult] = await db.execute('DELETE FROM Questions WHERE user_id = ?', [_botUserId]);
+      if (delResult.affectedRows > 0) console.log(`[수퍼포켓 봇] 기존 봇 질문 ${delResult.affectedRows}개 삭제 완료`);
+    }
+    // 봇 질문 게시 비활성화 (실제 사용자 질문만 노출)
     // 봇 참여: 30초 후 첫 참여, 이후 매 7분마다 랜덤 투표/베팅
     setTimeout(botParticipate, 30 * 1000);
     setInterval(botParticipate, 7 * 60 * 1000);
