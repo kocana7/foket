@@ -507,9 +507,9 @@ async function initDb() {
   }
 }
 
-// ── 슈퍼포켓 봇 ───────────────────────────────────────────
+// ── 수퍼포켓 봇 ───────────────────────────────────────────
 const BOT_EMAIL = 'superfoket@foket.com';
-const BOT_FULLNAME = 'SuperFoket';
+const BOT_FULLNAME = 'SuperFoket'; // 수퍼포켓
 
 const BOT_NICKNAMES = [
   '김민준','이서연','박지훈','최수아','정도현','강민서','윤지호','임채원',
@@ -604,21 +604,23 @@ async function initBotUser() {
     const [rows] = await db.execute('SELECT user_id FROM Users WHERE email = ?', [BOT_EMAIL]);
     if (rows.length > 0) {
       _botUserId = rows[0].user_id;
-      console.log(`[슈퍼포켓 봇] 기존 계정 확인 (user_id: ${_botUserId})`);
+      // 기존 계정 닉네임이 구버전(슈퍼포켓)이면 수퍼포켓으로 업데이트
+      await db.execute("UPDATE Users SET full_name=?, nickname=? WHERE user_id=? AND nickname='슈퍼포켓'", [BOT_FULLNAME, '수퍼포켓', _botUserId]);
+      console.log(`[수퍼포켓 봇] 기존 계정 확인 (user_id: ${_botUserId})`);
     } else {
       const hash = await bcrypt.hash('SuperFoket2026!', 12);
       const [result] = await db.execute(
         'INSERT INTO Users (email, password_hash, full_name, nickname, kyc_status, status) VALUES (?, ?, ?, ?, ?, ?)',
-        [BOT_EMAIL, hash, BOT_FULLNAME, '슈퍼포켓', 'VERIFIED', 'ACTIVE']
+        [BOT_EMAIL, hash, BOT_FULLNAME, '수퍼포켓', 'VERIFIED', 'ACTIVE']
       );
       _botUserId = result.insertId;
-      console.log(`[슈퍼포켓 봇] 계정 생성 완료 (user_id: ${_botUserId})`);
+      console.log(`[수퍼포켓 봇] 계정 생성 완료 (user_id: ${_botUserId})`);
     }
     // 봇 시작 시 바로 1개 게시 후 이후 매 시간마다 게시
     setTimeout(postBotQuestion, 5000);
     setInterval(postBotQuestion, 60 * 60 * 1000);
   } catch (err) {
-    console.error('[슈퍼포켓 봇] 초기화 실패:', err.message);
+    console.error('[수퍼포켓 봇] 초기화 실패:', err.message);
   }
 }
 
@@ -645,9 +647,9 @@ async function postBotQuestion() {
       'INSERT INTO Questions (user_id, type, question, category, options, initial_prob, end_date, status) VALUES (?,?,?,?,?,?,?,?)',
       [_botUserId, q.type, q.question, q.category, options, q.initial_prob || null, endDate, 'APPROVED']
     );
-    console.log(`[슈퍼포켓 봇] "${nick}" 으로 게시: [${q.category}] ${q.question.slice(0,40)}...`);
+    console.log(`[수퍼포켓 봇] "${nick}" 으로 게시: [${q.category}] ${q.question.slice(0,40)}...`);
   } catch (err) {
-    console.error('[슈퍼포켓 봇] 게시 실패:', err.message);
+    console.error('[수퍼포켓 봇] 게시 실패:', err.message);
   }
 }
 
