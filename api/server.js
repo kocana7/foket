@@ -444,6 +444,23 @@ app.get('/api/admin/questions', adminMiddleware, async (req, res) => {
        ORDER BY q.created_at DESC`,
       params
     );
+
+    // choices 집계 (question_id, choice, count)
+    if (rows.length > 0) {
+      const ids = rows.map(r => r.question_id);
+      const placeholders = ids.map(() => '?').join(',');
+      const [choiceRows] = await db.execute(
+        `SELECT question_id, choice, COUNT(*) AS cnt FROM Participations WHERE question_id IN (${placeholders}) GROUP BY question_id, choice`,
+        ids
+      );
+      const choiceMap = {};
+      choiceRows.forEach(r => {
+        if (!choiceMap[r.question_id]) choiceMap[r.question_id] = {};
+        choiceMap[r.question_id][r.choice] = Number(r.cnt);
+      });
+      rows.forEach(r => { r.choices = choiceMap[r.question_id] || {}; });
+    }
+
     res.json({ questions: rows });
   } catch (err) {
     console.error('[admin/questions GET]', err.message);
@@ -795,9 +812,8 @@ async function postBotQuestion() {
   if (!_botUserId) return;
   try {
     const db = await getPool();
-    // 랜덤 언어 선택
-    const langs = Object.keys(BOT_LANG_DATA);
-    const lang = langs[Math.floor(Math.random() * langs.length)];
+    // 한국어만 사용
+    const lang = 'ko';
     const langData = BOT_LANG_DATA[lang];
 
     // 해당 언어 닉네임 랜덤 생성 (20,000 조합 풀)
