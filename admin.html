@@ -1184,6 +1184,12 @@
         if (!tag || tag.textContent.trim() !== typeLabel) return;
         // build new row: skip type-tag cell, prepend category cell, keep rest
         var tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        var qid = row.getAttribute('data-qid');
+        if (qid) {
+          tr.setAttribute('data-qid', qid);
+          tr.setAttribute('onclick', 'openQuestionDetail(' + qid + ')');
+        }
         var catTd = document.createElement('td');
         catTd.textContent = CAT_LABELS[catId];
         catTd.style.cssText = 'font-size:12px;white-space:nowrap';
