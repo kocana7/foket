@@ -259,7 +259,7 @@ app.get('/api/admin/users', adminMiddleware, async (req, res) => {
     res.json({ users: rows, total: rows.length });
   } catch (err) {
     console.error('[admin/users]', err.code, err.message);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: '서버 오류' });
   }
 });
 
