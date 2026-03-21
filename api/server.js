@@ -328,6 +328,31 @@ app.post('/api/heartbeat', authMiddleware, async (req, res) => {
   }
 });
 
+// ── 공개 질문 목록 (승인된 질문만) ───────────────────────
+app.get('/api/questions', async (req, res) => {
+  const { category } = req.query;
+  try {
+    const db = await getPool();
+    let where = "WHERE q.status = 'APPROVED'";
+    const params = [];
+    if (category) { where += ' AND q.category = ?'; params.push(category); }
+    const [rows] = await db.execute(
+      `SELECT q.question_id, q.type, q.question, q.category,
+              q.options, q.initial_prob, q.end_date, q.created_at,
+              u.nickname
+       FROM Questions q
+       LEFT JOIN Users u ON q.user_id = u.user_id
+       ${where}
+       ORDER BY q.created_at DESC`,
+      params
+    );
+    res.json({ questions: rows });
+  } catch (err) {
+    console.error('[questions GET]', err.message);
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
 // ── 질문 등록 ─────────────────────────────────────────────
 app.post('/api/questions', authMiddleware, async (req, res) => {
   const { type, question, category, options, initial_prob, end_date } = req.body;
@@ -482,11 +507,156 @@ async function initDb() {
   }
 }
 
+// ── 슈퍼포켓 봇 ───────────────────────────────────────────
+const BOT_EMAIL = 'superfoket@foket.com';
+const BOT_FULLNAME = 'SuperFoket';
+
+const BOT_NICKNAMES = [
+  '김민준','이서연','박지훈','최수아','정도현','강민서','윤지호','임채원',
+  '한예원','오승민','신지아','류현우','배서은','고태양','문소율','백지우',
+  '안현민','장유나','전민혁','조서진','차은호','황준서','김하늘','이준혁',
+  '박소연','정민재','강지우','윤서하','나라인','송재원','허다인','남궁민',
+  '엄지수','탁현우','피어나','도민서','구자현','위서진','변소율','석민채'
+];
+
+const BOT_QUESTIONS = [
+  // 정치
+  { type:'bet',  category:'politics', question:'이재명 대통령 국정 지지율이 2분기에 50%를 돌파할까요?', initial_prob:52, days:30 },
+  { type:'vote', category:'politics', question:'2026년 상반기 가장 중요한 정치 이슈는 무엇인가요?', options:['경제 정책','외교 안보','복지 확대','교육 개혁','환경 정책'], days:20 },
+  { type:'bet',  category:'politics', question:'한미 정상회담이 2026년 상반기 내에 열릴까요?', initial_prob:67, days:45 },
+  { type:'vote', category:'politics', question:'현 정부의 부동산 정책에 대한 평가는?', options:['매우 긍정적','긍정적','보통','부정적','매우 부정적'], days:14 },
+  { type:'bet',  category:'politics', question:'6·25 기념일 전 남북 대화 채널이 재개될까요?', initial_prob:31, days:60 },
+  { type:'vote', category:'politics', question:'가장 기대되는 2026년 하반기 정책 과제는?', options:['AI 산업 육성','주거 안정화','저출생 대책','기후 위기 대응','의료 개혁'], days:25 },
+
+  // 스포츠
+  { type:'bet',  category:'sports', question:'손흥민이 2025-26 시즌 EPL에서 15골 이상 넣을까요?', initial_prob:58, days:60 },
+  { type:'vote', category:'sports', question:'2026 FIFA 월드컵에서 한국의 최종 성적은?', options:['16강','8강','4강','결승','우승'], days:90 },
+  { type:'bet',  category:'sports', question:'KBO 리그 2026 시즌 정규리그 우승팀은 두산 베어스일까요?', initial_prob:22, days:120 },
+  { type:'vote', category:'sports', question:'2026 파리 올림픽 한국 금메달 예상 종목은?', options:['양궁','태권도','유도','펜싱','수영'], days:40 },
+  { type:'bet',  category:'sports', question:'류현진이 2026 KBO 시즌에서 10승 이상 거둘까요?', initial_prob:44, days:100 },
+  { type:'vote', category:'sports', question:'이번 달 가장 기대되는 스포츠 경기는?', options:['K리그','KBO','NBA 플레이오프','EPL 빅매치','UFC'], days:10 },
+
+  // 문화
+  { type:'bet',  category:'culture', question:'BTS가 2026년 완전체 컴백 앨범을 발표할까요?', initial_prob:71, days:60 },
+  { type:'vote', category:'culture', question:'올해 가장 기대되는 K-드라마 장르는?', options:['로맨스','스릴러','판타지','시대극','의학드라마'], days:20 },
+  { type:'bet',  category:'culture', question:'한국 영화가 2026 칸 영화제에서 수상할까요?', initial_prob:38, days:50 },
+  { type:'vote', category:'culture', question:'2026년 최고의 K-팝 걸그룹은?', options:['블랙핑크','NewJeans','aespa','IVE','LE SSERAFIM'], days:30 },
+  { type:'bet',  category:'culture', question:'넷플릭스 오리지널 한국 드라마가 글로벌 TOP 10에 진입할까요?', initial_prob:62, days:45 },
+  { type:'vote', category:'culture', question:'이번 여름 가장 기대되는 국내 영화는?', options:['액션 블록버스터','로맨스 코미디','공포 스릴러','애니메이션','다큐멘터리'], days:30 },
+
+  // 트레이딩
+  { type:'bet',  category:'trading', question:'비트코인이 2026년 2분기 안에 10만 달러를 재돌파할까요?', initial_prob:55, days:60 },
+  { type:'bet',  category:'trading', question:'코스피 지수가 올해 2,800선을 회복할까요?', initial_prob:48, days:90 },
+  { type:'vote', category:'trading', question:'2026년 가장 유망한 투자 자산은?', options:['AI 관련주','비트코인','부동산 리츠','금·원자재','채권'], days:30 },
+  { type:'bet',  category:'trading', question:'삼성전자 주가가 연내 8만원을 돌파할까요?', initial_prob:41, days:120 },
+  { type:'bet',  category:'trading', question:'이더리움이 4,000달러 이상을 유지할까요?', initial_prob:49, days:30 },
+  { type:'vote', category:'trading', question:'현재 가장 리스크가 높은 투자 자산은?', options:['알트코인','중국 주식','부동산','레버리지 ETF','스타트업 투자'], days:14 },
+
+  // 날씨
+  { type:'bet',  category:'weather', question:'서울 2026년 7월 최고기온이 38도를 넘을까요?', initial_prob:63, days:90 },
+  { type:'vote', category:'weather', question:'올여름 최악의 자연재해 유형을 예상한다면?', options:['폭염','태풍','집중호우','가뭄','산불'], days:30 },
+  { type:'bet',  category:'weather', question:'올해 태풍이 한반도에 직접 상륙할까요?', initial_prob:57, days:120 },
+  { type:'vote', category:'weather', question:'이번 여름 체감 더위 수준은?', options:['역대급 폭염','평년보다 더움','평년 수준','평년보다 시원','선선한 여름'], days:20 },
+  { type:'bet',  category:'weather', question:'2026년 장마 기간이 30일 이상 이어질까요?', initial_prob:45, days:60 },
+
+  // 경제
+  { type:'bet',  category:'economy', question:'2026년 한국 경제 성장률이 2.5%를 넘을까요?', initial_prob:53, days:60 },
+  { type:'vote', category:'economy', question:'2026년 한국 경제의 가장 큰 위협 요인은?', options:['고금리 지속','수출 부진','내수 침체','환율 불안','부동산 급락'], days:25 },
+  { type:'bet',  category:'economy', question:'한국은행이 올해 기준금리를 추가 인하할까요?', initial_prob:66, days:45 },
+  { type:'vote', category:'economy', question:'2026년 서울 아파트 가격 전망은?', options:['10% 이상 상승','5~10% 상승','보합','5~10% 하락','10% 이상 하락'], days:30 },
+  { type:'bet',  category:'economy', question:'원/달러 환율이 연내 1,300원 아래로 내려올까요?', initial_prob:39, days:90 },
+
+  // 발언
+  { type:'bet',  category:'statement', question:'일론 머스크가 X(트위터)를 2026년 내에 매각할까요?', initial_prob:19, days:90 },
+  { type:'vote', category:'statement', question:'트럼프 전 대통령 발언 중 가장 논란이 된 건?', options:['관세 발언','NATO 탈퇴론','우크라이나 발언','AI 규제 반대','이민 정책'], days:20 },
+  { type:'bet',  category:'statement', question:'오픈AI CEO 샘 알트만이 2026년 하반기에 한국을 방문할까요?', initial_prob:33, days:60 },
+  { type:'vote', category:'statement', question:'최근 가장 파장이 컸던 정치인 발언은?', options:['경제 관련 발언','외교 발언','안보 발언','복지 공약','환경 관련'], days:10 },
+  { type:'bet',  category:'statement', question:'젠슨 황 엔비디아 CEO가 올해 다시 한국을 찾을까요?', initial_prob:72, days:60 },
+
+  // 과학
+  { type:'bet',  category:'science', question:'GPT-5가 2026년 상반기에 공식 출시될까요?', initial_prob:61, days:45 },
+  { type:'vote', category:'science', question:'2026년 가장 기대되는 기술 트렌드는?', options:['생성형 AI','양자 컴퓨팅','자율주행차','인간형 로봇','바이오테크'], days:20 },
+  { type:'bet',  category:'science', question:'삼성 갤럭시 S27이 온디바이스 AI로 주목받을까요?', initial_prob:68, days:60 },
+  { type:'vote', category:'science', question:'AI가 가장 먼저 대체할 직종은?', options:['콜센터 상담원','번역가','회계사','의료 진단','콘텐츠 제작'], days:25 },
+  { type:'bet',  category:'science', question:'SpaceX 스타십이 2026년 유인 달 궤도 비행에 성공할까요?', initial_prob:42, days:90 },
+  { type:'vote', category:'science', question:'한국 AI 경쟁력, 글로벌 몇 위권이라고 생각하나요?', options:['1~3위','4~5위','6~10위','11~20위','20위 이하'], days:20 },
+
+  // 나의 이웃
+  { type:'vote', category:'neighbor', question:'우리 동네에 가장 필요한 편의시설은?', options:['카페·베이커리','공원·녹지','헬스장','도서관','어린이집'], days:14 },
+  { type:'bet',  category:'neighbor', question:'우리 동네 아파트 단지에 스타벅스가 올해 입점할까요?', initial_prob:28, days:60 },
+  { type:'vote', category:'neighbor', question:'이번 주말 나들이 장소로 어디가 가장 좋을까요?', options:['한강공원','북악산 등산','코엑스 쇼핑','강남 맛집 투어','교외 드라이브'], days:5 },
+  { type:'bet',  category:'neighbor', question:'올여름 우리 동네 정전 사태가 발생할까요?', initial_prob:17, days:90 },
+  { type:'vote', category:'neighbor', question:'동네 주민이 가장 불편함을 느끼는 점은?', options:['주차 문제','쓰레기 무단투기','소음','치안','대중교통 부족'], days:10 },
+
+  // 기타
+  { type:'bet',  category:'etc', question:'2026년 한국 출산율이 소폭 반등(0.8 이상)할까요?', initial_prob:34, days:60 },
+  { type:'vote', category:'etc', question:'올해 가장 핫한 음식 트렌드는?', options:['마라탕·마라샹궈','헬시플레저 식단','무알콜 음료','한식 파인다이닝','비건 푸드'], days:20 },
+  { type:'bet',  category:'etc', question:'2026 항저우 아시안게임에서 한국이 종합 2위를 달성할까요?', initial_prob:47, days:80 },
+  { type:'vote', category:'etc', question:'2026년 가장 많이 쓰이는 신조어는?', options:['AI 관련 용어','경제 신조어','MZ 밈 단어','정치 은어','외래어 혼합'], days:30 },
+  { type:'bet',  category:'etc', question:'올해 국내 편의점 수가 6만 개를 돌파할까요?', initial_prob:58, days:90 },
+];
+
+let _botUserId = null;
+
+async function initBotUser() {
+  try {
+    const db = await getPool();
+    const [rows] = await db.execute('SELECT user_id FROM Users WHERE email = ?', [BOT_EMAIL]);
+    if (rows.length > 0) {
+      _botUserId = rows[0].user_id;
+      console.log(`[슈퍼포켓 봇] 기존 계정 확인 (user_id: ${_botUserId})`);
+    } else {
+      const hash = await bcrypt.hash('SuperFoket2026!', 12);
+      const [result] = await db.execute(
+        'INSERT INTO Users (email, password_hash, full_name, nickname, kyc_status, status) VALUES (?, ?, ?, ?, ?, ?)',
+        [BOT_EMAIL, hash, BOT_FULLNAME, '슈퍼포켓', 'VERIFIED', 'ACTIVE']
+      );
+      _botUserId = result.insertId;
+      console.log(`[슈퍼포켓 봇] 계정 생성 완료 (user_id: ${_botUserId})`);
+    }
+    // 봇 시작 시 바로 1개 게시 후 이후 매 시간마다 게시
+    setTimeout(postBotQuestion, 5000);
+    setInterval(postBotQuestion, 60 * 60 * 1000);
+  } catch (err) {
+    console.error('[슈퍼포켓 봇] 초기화 실패:', err.message);
+  }
+}
+
+async function postBotQuestion() {
+  if (!_botUserId) return;
+  try {
+    const db = await getPool();
+    // 아직 게시 안 한 질문 중 랜덤 선택 (중복 방지)
+    const [posted] = await db.execute('SELECT question FROM Questions WHERE user_id = ?', [_botUserId]);
+    const postedSet = new Set(posted.map(r => r.question));
+    const remaining = BOT_QUESTIONS.filter(q => !postedSet.has(q.question));
+    const pool = remaining.length > 0 ? remaining : BOT_QUESTIONS; // 전부 소진 시 재사용
+    const q = pool[Math.floor(Math.random() * pool.length)];
+
+    // 랜덤 닉네임으로 변경
+    const nick = BOT_NICKNAMES[Math.floor(Math.random() * BOT_NICKNAMES.length)];
+    await db.execute('UPDATE Users SET nickname = ? WHERE user_id = ?', [nick, _botUserId]);
+
+    // 질문 등록 (자동 승인)
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() + (q.days || 30));
+    const options = q.options ? JSON.stringify(q.options) : null;
+    await db.execute(
+      'INSERT INTO Questions (user_id, type, question, category, options, initial_prob, end_date, status) VALUES (?,?,?,?,?,?,?,?)',
+      [_botUserId, q.type, q.question, q.category, options, q.initial_prob || null, endDate, 'APPROVED']
+    );
+    console.log(`[슈퍼포켓 봇] "${nick}" 으로 게시: [${q.category}] ${q.question.slice(0,40)}...`);
+  } catch (err) {
+    console.error('[슈퍼포켓 봇] 게시 실패:', err.message);
+  }
+}
+
 // ── 서버 시작 ─────────────────────────────────────────────
 pool.getConnection()
   .then(async (conn) => {
     conn.release();
     await initDb();
+    await initBotUser();
     app.listen(PORT, () => console.log(`Foket API 서버 실행 중: http://localhost:${PORT}`));
   })
   .catch(err => {
