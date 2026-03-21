@@ -3691,6 +3691,8 @@ const CARD_DATA = {
       + '</div>';
   }
 
+  var EMPTY_MSG = '<div style="grid-column:1/-1;text-align:center;padding:48px 0;color:var(--gray-400);font-size:15px">등록된 질문이 없습니다. 첫 번째 질문을 등록해보세요!</div>';
+
   async function loadSectionCards() {
     try {
       var token = localStorage.getItem('foket-token');
@@ -3698,36 +3700,60 @@ const CARD_DATA = {
       var res = await fetch('/api/questions', fetchOpts);
       var data = await res.json();
       var questions = data.questions || [];
-      if (!questions.length) return;
 
       var byPart = function(a, b) { return (b.participant_count || 0) - (a.participant_count || 0); };
 
-      // ── Hot 이슈: 투표 TOP4 + 내기 TOP4 (참여 많은 순) → 8개 랜덤 배치 ──
+      // ── Hot 이슈: 전체 섹션에서 투표 TOP4 + 내기 TOP4 → 8개 랜덤 배치 ──
       var hotGrid = document.getElementById('marketGrid');
       if (hotGrid) {
-        var topVotes = questions.filter(function(q) { return q.type === 'vote'; }).sort(byPart).slice(0, 4);
-        var topBets  = questions.filter(function(q) { return q.type === 'bet';  }).sort(byPart).slice(0, 4);
-        var hotList  = topVotes.concat(topBets);
-        for (var hi = hotList.length - 1; hi > 0; hi--) {
-          var hj = Math.floor(Math.random() * (hi + 1));
-          var tmp = hotList[hi]; hotList[hi] = hotList[hj]; hotList[hj] = tmp;
+        hotGrid.innerHTML = '';
+        if (questions.length) {
+          var topVotes = questions.filter(function(q) { return q.type === 'vote'; }).sort(byPart).slice(0, 4);
+          var topBets  = questions.filter(function(q) { return q.type === 'bet';  }).sort(byPart).slice(0, 4);
+          var hotList  = topVotes.concat(topBets);
+          for (var hi = hotList.length - 1; hi > 0; hi--) {
+            var hj = Math.floor(Math.random() * (hi + 1));
+            var tmp = hotList[hi]; hotList[hi] = hotList[hj]; hotList[hj] = tmp;
+          }
+          hotGrid.innerHTML = hotList.map(buildDbMainCard).join('');
+        } else {
+          hotGrid.innerHTML = EMPTY_MSG;
         }
-        hotGrid.insertAdjacentHTML('afterbegin', hotList.map(buildDbMainCard).join(''));
       }
 
-      // ── 카테고리 섹션: 내 질문 우선 → 참여 많은 순 ──
+      // ── 카테고리 섹션: 8개씩 (내 질문 1순위 → 남은 절반 투표수 순 → 나머지 절반 내기참여 순) ──
       var SECTIONS = ['politics','sports','culture','trading','weather','economy','statement','science','neighbor','etc'];
+      var TOTAL = 8;
       SECTIONS.forEach(function(cat) {
         var grid = document.getElementById('grid-' + cat) || (cat === 'etc' ? document.getElementById('etc-grid') : null);
         if (!grid) return;
+        grid.innerHTML = '';
+
         var catQ = questions.filter(function(q) { return (q.category || 'etc') === cat; });
-        if (!catQ.length) return;
-        catQ.sort(function(a, b) {
-          if (a.is_mine && !b.is_mine) return -1;
-          if (!a.is_mine && b.is_mine) return 1;
-          return byPart(a, b);
-        });
-        grid.insertAdjacentHTML('afterbegin', catQ.slice(0, 4).map(buildDbMainCard).join(''));
+        if (!catQ.length) { grid.innerHTML = EMPTY_MSG; return; }
+
+        // 1순위: 내 질문
+        var myQ = catQ.filter(function(q) { return q.is_mine; }).sort(byPart);
+        var usedIds = {};
+        myQ.forEach(function(q) { usedIds[q.question_id] = true; });
+
+        var remaining = Math.max(0, TOTAL - myQ.length);
+        var halfVote = Math.ceil(remaining / 2);
+        var halfBet  = Math.floor(remaining / 2);
+
+        // 투표수 많은 순 (내 질문 제외)
+        var topVotesCat = catQ
+          .filter(function(q) { return q.type === 'vote' && !usedIds[q.question_id]; })
+          .sort(byPart).slice(0, halfVote);
+        topVotesCat.forEach(function(q) { usedIds[q.question_id] = true; });
+
+        // 내기참여 많은 순 (내 질문·투표 선택 제외)
+        var topBetsCat = catQ
+          .filter(function(q) { return q.type === 'bet' && !usedIds[q.question_id]; })
+          .sort(byPart).slice(0, halfBet);
+
+        var finalList = myQ.concat(topVotesCat).concat(topBetsCat).slice(0, TOTAL);
+        grid.innerHTML = finalList.map(buildDbMainCard).join('');
       });
     } catch(e) {
       console.error('[loadSectionCards]', e);
