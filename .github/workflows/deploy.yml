@@ -11,19 +11,15 @@ jobs:
 
     steps:
       - name: 코드 최신화
-        shell: bash
-        run: git -C /mnt/c/foket pull origin main
+        uses: actions/checkout@v4
 
       - name: 패키지 설치 (변경 시)
-        shell: bash
-        run: |
-          cd /mnt/c/foket/api
-          npm install --production
+        working-directory: ${{ github.workspace }}/api
+        run: npm install --production
 
       - name: API 서버 재시작 (PM2)
-        shell: bash
         run: |
-          pm2 restart foket-api || pm2 start /mnt/c/foket/api/server.js --name foket-api --log /mnt/c/foket/api/server.log
+          pm2 restart foket-api || pm2 start "${{ github.workspace }}/api/server.js" --name foket-api
           pm2 save
           echo "로컬 배포 완료"
 
