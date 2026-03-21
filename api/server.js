@@ -332,13 +332,20 @@ app.post('/api/heartbeat', authMiddleware, async (req, res) => {
 // ── 공개 질문 목록 (승인된 질문만) ───────────────────────
 app.get('/api/questions', async (req, res) => {
   const { category } = req.query;
+  // 선택적 인증: 로그인 회원이면 자신의 질문에 is_mine 플래그 부여
+  let currentUserId = null;
+  try {
+    const hdr = req.headers['authorization'];
+    if (hdr) currentUserId = String(jwt.verify(hdr.replace('Bearer ', ''), JWT_SECRET).userId);
+  } catch { /* 미로그인 또는 만료 토큰 → 무시 */ }
+
   try {
     const db = await getPool();
     let where = "WHERE q.status = 'APPROVED'";
     const params = [];
     if (category) { where += ' AND q.category = ?'; params.push(category); }
     const [rows] = await db.execute(
-      `SELECT q.question_id, q.type, q.question, q.category,
+      `SELECT q.question_id, q.user_id, q.type, q.question, q.category,
               q.options, q.initial_prob, q.end_date, q.created_at,
               u.nickname,
               (SELECT COUNT(*) FROM Participations p WHERE p.question_id = q.question_id) AS participant_count
@@ -363,9 +370,12 @@ app.get('/api/questions', async (req, res) => {
         if (!choiceMap[c.question_id]) choiceMap[c.question_id] = {};
         choiceMap[c.question_id][c.choice] = Number(c.cnt);
       });
-      rows.forEach(r => { r.choices = choiceMap[r.question_id] || {}; });
+      rows.forEach(r => {
+        r.choices = choiceMap[r.question_id] || {};
+        r.is_mine = currentUserId ? String(r.user_id) === currentUserId : false;
+      });
     } else {
-      rows.forEach(r => { r.choices = {}; });
+      rows.forEach(r => { r.choices = {}; r.is_mine = false; });
     }
     res.json({ questions: rows });
   } catch (err) {

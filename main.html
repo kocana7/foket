@@ -3738,33 +3738,41 @@ const CARD_DATA = {
 
   async function loadSectionCards() {
     try {
-      var res = await fetch('/api/questions');
+      var token = localStorage.getItem('foket-token');
+      var fetchOpts = token ? { headers: { 'Authorization': 'Bearer ' + token } } : {};
+      var res = await fetch('/api/questions', fetchOpts);
       var data = await res.json();
       var questions = data.questions || [];
       if (!questions.length) return;
 
-      // 카테고리별 그룹화 (최신순 최대 4개)
-      var grouped = {};
-      questions.forEach(function(q) {
-        var cat = q.category || 'etc';
-        if (!grouped[cat]) grouped[cat] = [];
-        if (grouped[cat].length < 4) grouped[cat].push(q);
-      });
+      var byPart = function(a, b) { return (b.participant_count || 0) - (a.participant_count || 0); };
 
-      // Hot 이슈 섹션: 전체에서 최신 4개
+      // ── Hot 이슈: 투표 TOP4 + 내기 TOP4 교차 (참여 많은 순) ──
       var hotGrid = document.getElementById('marketGrid');
       if (hotGrid) {
-        var hotCards = questions.slice(0, 4).map(buildDbMainCard).join('');
-        hotGrid.insertAdjacentHTML('afterbegin', hotCards);
+        var topVotes = questions.filter(function(q) { return q.type === 'vote'; }).sort(byPart).slice(0, 4);
+        var topBets  = questions.filter(function(q) { return q.type === 'bet';  }).sort(byPart).slice(0, 4);
+        var hotList  = [];
+        for (var i = 0; i < Math.max(topVotes.length, topBets.length); i++) {
+          if (topVotes[i]) hotList.push(topVotes[i]);
+          if (topBets[i])  hotList.push(topBets[i]);
+        }
+        hotGrid.insertAdjacentHTML('afterbegin', hotList.map(buildDbMainCard).join(''));
       }
 
-      // 카테고리별 섹션
-      var sections = ['politics','sports','culture','trading','weather','economy','statement','science','neighbor','etc'];
-      sections.forEach(function(cat) {
+      // ── 카테고리 섹션: 내 질문 우선 → 참여 많은 순 ──
+      var SECTIONS = ['politics','sports','culture','trading','weather','economy','statement','science','neighbor','etc'];
+      SECTIONS.forEach(function(cat) {
         var grid = document.getElementById('grid-' + cat) || (cat === 'etc' ? document.getElementById('etc-grid') : null);
-        if (!grid || !grouped[cat]) return;
-        var html = grouped[cat].map(buildDbMainCard).join('');
-        grid.insertAdjacentHTML('afterbegin', html);
+        if (!grid) return;
+        var catQ = questions.filter(function(q) { return (q.category || 'etc') === cat; });
+        if (!catQ.length) return;
+        catQ.sort(function(a, b) {
+          if (a.is_mine && !b.is_mine) return -1;
+          if (!a.is_mine && b.is_mine) return 1;
+          return byPart(a, b);
+        });
+        grid.insertAdjacentHTML('afterbegin', catQ.slice(0, 4).map(buildDbMainCard).join(''));
       });
     } catch(e) {
       console.error('[loadSectionCards]', e);
