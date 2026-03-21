@@ -671,7 +671,7 @@
       <div class="section-title" data-i18n="section.politics">정치</div>
       <a class="section-link" href="#" onclick="openViewAll('politics','정치');return false;">전체보기 →</a>
     </div>
-    <div class="market-grid">
+    <div class="market-grid" id="grid-politics">
       <div class="market-card" data-card-id="politics-1" onclick="openTrade('이재명 대통령 지지율이 2026년 상반기 50%를 넘을까요?', 58)">
         <div class="market-card-top">
           <div class="market-icon">🗳️</div>
@@ -819,7 +819,7 @@
       <div class="section-title" data-i18n="section.sports2">스포츠</div>
       <a class="section-link" href="#" onclick="openViewAll('sports','스포츠');return false;">전체보기 →</a>
     </div>
-    <div class="market-grid">
+    <div class="market-grid" id="grid-sports">
       <div class="market-card" data-card-id="sports-1" onclick="openTrade('손흥민이 2025-26 시즌 20골 이상을 기록할까요?', 55)">
         <div class="market-card-top">
           <div class="market-icon">⚽</div>
@@ -967,7 +967,7 @@
       <div class="section-title" data-i18n="section.culture">문화</div>
       <a class="section-link" href="#" onclick="openViewAll('culture','문화');return false;">전체보기 →</a>
     </div>
-    <div class="market-grid">
+    <div class="market-grid" id="grid-culture">
       <div class="market-card" data-card-id="culture-1" onclick="openTrade('BTS가 2026년 완전체 컴백을 할까요?', 68)">
         <div class="market-card-top">
           <div class="market-icon">🎵</div>
@@ -1115,7 +1115,7 @@
       <div class="section-title" data-i18n="section.trading">트레이딩</div>
       <a class="section-link" href="#" onclick="openViewAll('trading','트레이딩');return false;">전체보기 →</a>
     </div>
-    <div class="market-grid">
+    <div class="market-grid" id="grid-trading">
       <div class="market-card" data-card-id="trading-1" onclick="openTrade('비트코인이 2026년 상반기 10만 달러를 돌파할까요?', 53)">
         <div class="market-card-top">
           <div class="market-icon">₿</div>
@@ -1263,7 +1263,7 @@
       <div class="section-title" data-i18n="section.weather">날씨</div>
       <a class="section-link" href="#" onclick="openViewAll('weather','날씨');return false;">전체보기 →</a>
     </div>
-    <div class="market-grid">
+    <div class="market-grid" id="grid-weather">
       <div class="market-card" data-card-id="weather-1" onclick="openTrade('서울 2026년 여름 최고기온이 40도를 넘을까요?', 63)">
         <div class="market-card-top">
           <div class="market-icon">☀️</div>
@@ -1411,7 +1411,7 @@
       <div class="section-title" data-i18n="section.economy">경제</div>
       <a class="section-link" href="#" onclick="openViewAll('economy','경제');return false;">전체보기 →</a>
     </div>
-    <div class="market-grid">
+    <div class="market-grid" id="grid-economy">
       <div class="market-card" data-card-id="economy-1" onclick="openTrade('한국 2026년 GDP 성장률이 3%를 넘을까요?', 59)">
         <div class="market-card-top">
           <div class="market-icon">📊</div>
@@ -1559,7 +1559,7 @@
       <div class="section-title" data-i18n="section.statement">발언</div>
       <a class="section-link" href="#" onclick="openViewAll('statement','발언');return false;">전체보기 →</a>
     </div>
-    <div class="market-grid">
+    <div class="market-grid" id="grid-statement">
       <div class="market-card" data-card-id="statement-1" onclick="openTrade('일론 머스크가 2026년 X(트위터) 매각 의사를 밝힐까요?', 21)">
         <div class="market-card-top">
           <div class="market-icon">💬</div>
@@ -1707,7 +1707,7 @@
       <div class="section-title" data-i18n="section.science">과학 &amp; 기술</div>
       <a class="section-link" href="#" onclick="openViewAll('science','과학 &amp; 기술');return false;">전체보기 →</a>
     </div>
-    <div class="market-grid">
+    <div class="market-grid" id="grid-science">
       <div class="market-card" data-card-id="science-1" onclick="openTrade('GPT-5가 2026년 상반기에 출시될까요?', 63)">
         <div class="market-card-top">
           <div class="market-icon">🤖</div>
@@ -1855,7 +1855,7 @@
       <div class="section-title" data-i18n="section.neighbor">나의 이웃</div>
       <a class="section-link" href="#" onclick="openViewAll('neighbor','나의 이웃');return false;">전체보기 →</a>
     </div>
-    <div class="market-grid">
+    <div class="market-grid" id="grid-neighbor">
       <div class="market-card" data-card-id="neighbor-1" onclick="openTrade('우리 동네에 2026년 스타벅스가 새로 오픈할까요?', 52)">
         <div class="market-card-top">
           <div class="market-icon">🏘️</div>
@@ -3619,7 +3619,77 @@ const CARD_DATA = {
   });
 
   // Init language on load
-  document.addEventListener('DOMContentLoaded', () => setLang(currentLang));
+  document.addEventListener('DOMContentLoaded', () => { setLang(currentLang); loadSectionCards(); });
+
+  /* ── DB 카드 섹션별 로드 ── */
+  var CAT_ICONS = {
+    politics:'🗳️', sports:'⚽', culture:'🎬', trading:'📈',
+    weather:'☀️', economy:'💰', statement:'💬', science:'🔬',
+    neighbor:'🏘️', etc:'📌'
+  };
+  var CAT_NAMES = {
+    politics:'정치', sports:'스포츠', culture:'문화', trading:'트레이딩',
+    weather:'날씨', economy:'경제', statement:'발언', science:'과학&기술',
+    neighbor:'나의 이웃', etc:'기타'
+  };
+
+  function buildDbMainCard(q) {
+    var prob = Math.min(100, Math.max(0, parseInt(q.initial_prob) || 50));
+    var pctNo = 100 - prob;
+    var icon = CAT_ICONS[q.category] || '📋';
+    var catLabel = CAT_NAMES[q.category] || q.category || '';
+    var typeLabel = q.type === 'vote' ? '투표' : '내기';
+    var qText = (q.question || '').replace(/'/g, '&#39;');
+    return '<div class="market-card db-main-card" data-cat="' + (q.category||'') + '" onclick="openTrade(\'' + qText.replace(/\\/g,'\\\\') + '\',' + prob + ')">'
+      + '<div class="market-card-top">'
+      + '<div class="market-icon">' + icon + '</div>'
+      + '<div class="market-meta">'
+      + '<div class="market-category">' + catLabel + ' · ' + typeLabel + '</div>'
+      + '<div class="market-question">' + (q.question || '') + '</div>'
+      + '</div></div>'
+      + '<div class="market-prob-bar"><div class="market-prob-fill" style="width:' + prob + '%"></div></div>'
+      + '<div class="market-card-bottom">'
+      + '<div class="market-chance"><div class="market-chance-val">' + prob + '<b class="fcur">F</b></div><div class="market-chance-label">Yes chance</div></div>'
+      + '<div><div class="market-btns">'
+      + '<button class="btn-yes" data-pct="' + prob + '">Yes ' + prob + '<b class="fcur">F</b></button>'
+      + '<button class="btn-no" data-pct="' + pctNo + '">No ' + pctNo + '<b class="fcur">F</b></button>'
+      + '</div></div></div></div>';
+  }
+
+  async function loadSectionCards() {
+    try {
+      var res = await fetch('/api/questions');
+      var data = await res.json();
+      var questions = data.questions || [];
+      if (!questions.length) return;
+
+      // 카테고리별 그룹화 (최신순 최대 4개)
+      var grouped = {};
+      questions.forEach(function(q) {
+        var cat = q.category || 'etc';
+        if (!grouped[cat]) grouped[cat] = [];
+        if (grouped[cat].length < 4) grouped[cat].push(q);
+      });
+
+      // Hot 이슈 섹션: 전체에서 최신 4개
+      var hotGrid = document.getElementById('marketGrid');
+      if (hotGrid) {
+        var hotCards = questions.slice(0, 4).map(buildDbMainCard).join('');
+        hotGrid.insertAdjacentHTML('afterbegin', hotCards);
+      }
+
+      // 카테고리별 섹션
+      var sections = ['politics','sports','culture','trading','weather','economy','statement','science','neighbor','etc'];
+      sections.forEach(function(cat) {
+        var grid = document.getElementById('grid-' + cat) || (cat === 'etc' ? document.getElementById('etc-grid') : null);
+        if (!grid || !grouped[cat]) return;
+        var html = grouped[cat].map(buildDbMainCard).join('');
+        grid.insertAdjacentHTML('afterbegin', html);
+      });
+    } catch(e) {
+      console.error('[loadSectionCards]', e);
+    }
+  }
 
   /* ── Category filter ── */
   function filterCat(el, cat) {
