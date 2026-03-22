@@ -733,7 +733,7 @@ app.post('/api/admin/questions/:id/settle', adminMiddleware, async (req, res) =>
       [winning, posterFee, adminFee, qId]
     );
 
-    res.json({ ok: true, winning, loserPool, adminFee, posterFee, winnerDistribution, winnerCount: winners.length, payouts });
+    res.json({ ok: true, winning, loserPool, adminFee, posterFee, winnerDistribution, winnerCount: winnerRows.length, payouts });
   } catch (err) {
     console.error('[settle]', err.message);
     res.status(500).json({ error: '서버 오류: ' + err.message });
