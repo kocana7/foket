@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FAQ - Foket</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue: #334BFA; --gray-50: #F9FAFB; --gray-100: #F2F4F7; --gray-200: #EAECF0;
+      --gray-400: #98A2B3; --gray-600: #475467; --gray-800: #1D2939; --gray-900: #101828;
+      --white: #FFFFFF; --font: 'Noto Sans KR', sans-serif;
+    }
+    body { font-family: var(--font); background: var(--gray-50); color: var(--gray-900); min-height: 100vh; }
+
+    /* 네비게이션 */
+    .navbar { background: var(--white); border-bottom: 1px solid var(--gray-200); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .nav-logo { font-size: 17px; font-weight: 900; letter-spacing: -0.5px; color: var(--blue); text-decoration: none; }
+    .nav-back { font-size: 13px; font-weight: 600; color: var(--gray-600); text-decoration: none; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--gray-200); background: var(--white); cursor: pointer; transition: background 0.15s; }
+    .nav-back:hover { background: var(--gray-100); }
+
+    /* 헤더 */
+    .faq-hero { text-align: center; padding: 60px 24px 40px; background: linear-gradient(135deg, #eef0ff 0%, #f9fafb 100%); }
+    .faq-hero h1 { font-size: 32px; font-weight: 800; color: var(--gray-900); margin-bottom: 12px; }
+    .faq-hero p { font-size: 15px; color: var(--gray-600); max-width: 480px; margin: 0 auto; line-height: 1.7; }
+
+    /* FAQ 리스트 */
+    .faq-wrap { max-width: 720px; margin: 0 auto; padding: 40px 24px 80px; }
+    .faq-loading { text-align: center; padding: 60px; color: var(--gray-400); font-size: 14px; }
+    .faq-empty { text-align: center; padding: 60px; color: var(--gray-400); font-size: 14px; }
+
+    .faq-item { background: var(--white); border: 1px solid var(--gray-200); border-radius: 14px; margin-bottom: 10px; overflow: hidden; transition: box-shadow 0.15s; }
+    .faq-item:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+    .faq-item.open { box-shadow: 0 4px 20px rgba(51,75,250,0.08); border-color: #c7d0fd; }
+
+    .faq-q { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 22px; cursor: pointer; user-select: none; }
+    .faq-q-text { font-size: 15px; font-weight: 600; color: var(--gray-900); line-height: 1.5; }
+    .faq-icon { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--gray-100); display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--gray-600); transition: transform 0.2s, background 0.15s; }
+    .faq-item.open .faq-icon { transform: rotate(45deg); background: var(--blue); color: var(--white); }
+
+    .faq-a { display: none; padding: 0 22px 20px; font-size: 14px; color: var(--gray-600); line-height: 1.8; border-top: 1px solid var(--gray-100); padding-top: 16px; }
+    .faq-item.open .faq-a { display: block; }
+
+    /* 문의 배너 */
+    .contact-banner { max-width: 720px; margin: 0 auto 60px; padding: 0 24px; }
+    .contact-box { background: linear-gradient(135deg, #334BFA 0%, #6366f1 100%); border-radius: 16px; padding: 28px 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .contact-text h3 { font-size: 17px; font-weight: 700; color: white; margin-bottom: 4px; }
+    .contact-text p { font-size: 13px; color: rgba(255,255,255,0.8); }
+    .contact-btn { padding: 10px 22px; background: white; color: var(--blue); border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: none; white-space: nowrap; }
+    .contact-btn:hover { background: #f0f0ff; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/" class="nav-logo">FOKET.COM</a>
+  <a href="/" class="nav-back">← 메인으로</a>
+</nav>
+
+<div class="faq-hero">
+  <h1>자주 묻는 질문</h1>
+  <p>Foket 서비스 이용에 관해 궁금하신 점을 확인해보세요.</p>
+</div>
+
+<div class="faq-wrap">
+  <div id="faqList" class="faq-loading">불러오는 중...</div>
+</div>
+
+<div class="contact-banner">
+  <div class="contact-box">
+    <div class="contact-text">
+      <h3>원하는 답변을 찾지 못하셨나요?</h3>
+      <p>추가 문의사항은 언제든지 문의해주세요.</p>
+    </div>
+    <a href="mailto:support@foket.com" class="contact-btn">문의하기</a>
+  </div>
+</div>
+
+<script>
+  async function loadFaq() {
+    try {
+      const res = await fetch('/api/faq');
+      const data = await res.json();
+      const list = document.getElementById('faqList');
+      if (!data.faq || !data.faq.length) {
+        list.className = 'faq-empty';
+        list.textContent = '등록된 FAQ가 없습니다.';
+        return;
+      }
+      list.className = '';
+      list.innerHTML = data.faq.map((f, i) =>
+        `<div class="faq-item" id="faq-${f.id}">
+          <div class="faq-q" onclick="toggleFaq(${f.id})">
+            <span class="faq-q-text">Q. ${escHtml(f.question)}</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-a">${escHtml(f.answer).replace(/\n/g, '<br>')}</div>
+        </div>`
+      ).join('');
+    } catch(e) {
+      document.getElementById('faqList').textContent = '데이터를 불러올 수 없습니다.';
+    }
+  }
+
+  function toggleFaq(id) {
+    const el = document.getElementById('faq-' + id);
+    const isOpen = el.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(function(x) { x.classList.remove('open'); });
+    if (!isOpen) el.classList.add('open');
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  loadFaq();
+</script>
+</body>
+</html>

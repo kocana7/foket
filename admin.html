@@ -266,6 +266,10 @@
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
       설정
     </button>
+    <button class="sidebar-link" onclick="showPage('faq', this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      FAQ
+    </button>
   </div>
 
   <div class="sidebar-footer">
@@ -1070,6 +1074,43 @@
     </div>
 
   </div>
+
+    <!-- FAQ 관리 -->
+    <div class="page" id="page-faq">
+      <div class="page-header">
+        <div><h1>FAQ 관리</h1><p>자주 묻는 질문을 등록·수정·삭제합니다</p></div>
+      </div>
+      <div class="page-content">
+        <div class="card" style="max-width:680px">
+          <div class="card-header">
+            <div class="card-title">새 FAQ 등록</div>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <div class="form-label">질문</div>
+              <input id="faqNewQ" class="form-input" type="text" placeholder="자주 묻는 질문을 입력하세요" style="width:100%" />
+            </div>
+            <div class="form-group">
+              <div class="form-label">답변</div>
+              <textarea id="faqNewA" class="form-input" rows="4" placeholder="답변 내용을 입력하세요" style="width:100%;resize:vertical"></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="submitFaq()">FAQ 등록</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <div class="card-header">
+            <div class="card-title">등록된 FAQ 목록</div>
+            <button class="btn btn-ghost btn-sm" onclick="loadFaqAdmin()">새로고침</button>
+          </div>
+          <div id="faqAdminList" style="padding:16px">
+            <div style="text-align:center;color:var(--gray-400);padding:24px">불러오는 중...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </main>
 
 <!-- 모달 -->
@@ -1194,10 +1235,11 @@
       var btn = document.querySelector('.sidebar-link[onclick*="showPage(\'' + id + '\'"]');
       if (btn) btn.classList.add('active');
     }
-    const titles = { dashboard:'대시보드', analytics:'분석', markets:'질문', users:'회원', trades:'거래', payouts:'출금', compliance:'컴플라이언스', reports:'보고서', settings:'설정' };
+    const titles = { dashboard:'대시보드', analytics:'분석', markets:'질문', users:'회원', trades:'거래', payouts:'출금', compliance:'컴플라이언스', reports:'보고서', settings:'설정', faq:'FAQ 관리' };
     document.getElementById('topbarTitle').textContent = titles[id] || id;
     if (id === 'markets') loadAdminQuestions();
     if (id === 'settings') loadSettleConfig();
+    if (id === 'faq') loadFaqAdmin();
     location.hash = id;
   }
 
@@ -2385,6 +2427,99 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 
 <script>
+/* ── FAQ 관리 ── */
+var _faqData = [];
+var _faqEditId = null;
+
+async function loadFaqAdmin() {
+  var container = document.getElementById('faqAdminList');
+  container.innerHTML = '<div style="text-align:center;color:var(--gray-400);padding:24px">불러오는 중...</div>';
+  try {
+    var res = await fetch(ADMIN_API + '/api/faq');
+    var data = await res.json();
+    _faqData = data.faq || [];
+    if (!_faqData.length) {
+      container.innerHTML = '<div style="text-align:center;color:var(--gray-400);padding:32px">등록된 FAQ가 없습니다.</div>';
+      return;
+    }
+    container.innerHTML = _faqData.map(function(f) {
+      return '<div style="border:1px solid var(--gray-200);border-radius:12px;padding:16px;margin-bottom:10px" id="faq-row-' + f.id + '">'
+        + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">'
+        + '<div style="flex:1">'
+        + '<div style="font-weight:700;font-size:14px;color:var(--gray-900);margin-bottom:4px">Q. ' + escHtml(f.question) + '</div>'
+        + '<div style="font-size:13px;color:var(--gray-600);line-height:1.7;white-space:pre-wrap">' + escHtml(f.answer) + '</div>'
+        + '</div>'
+        + '<div style="display:flex;gap:6px;flex-shrink:0">'
+        + '<button class="action-btn primary" onclick="openFaqEdit(' + f.id + ')">수정</button>'
+        + '<button class="action-btn danger" onclick="deleteFaq(' + f.id + ')">삭제</button>'
+        + '</div></div>'
+        + '<div id="faq-edit-' + f.id + '" style="display:none;margin-top:12px;border-top:1px solid var(--gray-100);padding-top:12px">'
+        + '<div class="form-group"><div class="form-label">질문</div><input id="faqEditQ-' + f.id + '" class="form-input" type="text" value="' + escHtml(f.question) + '" style="width:100%" /></div>'
+        + '<div class="form-group"><div class="form-label">답변</div><textarea id="faqEditA-' + f.id + '" class="form-input" rows="4" style="width:100%;resize:vertical">' + escHtml(f.answer) + '</textarea></div>'
+        + '<div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" onclick="saveFaqEdit(' + f.id + ')">저장</button><button class="btn btn-ghost btn-sm" onclick="closeFaqEdit(' + f.id + ')">취소</button></div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  } catch(e) {
+    container.innerHTML = '<div style="text-align:center;color:var(--red);padding:24px">데이터 로드 실패</div>';
+  }
+}
+
+function openFaqEdit(id) {
+  document.querySelectorAll('[id^="faq-edit-"]').forEach(function(el) { el.style.display = 'none'; });
+  document.getElementById('faq-edit-' + id).style.display = '';
+}
+function closeFaqEdit(id) { document.getElementById('faq-edit-' + id).style.display = 'none'; }
+
+async function submitFaq() {
+  var q = document.getElementById('faqNewQ').value.trim();
+  var a = document.getElementById('faqNewA').value.trim();
+  if (!q || !a) { showToast('질문과 답변을 모두 입력하세요'); return; }
+  try {
+    var res = await fetch(ADMIN_API + '/api/admin/faq', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
+      body: JSON.stringify({ question: q, answer: a })
+    });
+    var data = await res.json();
+    if (data.ok) {
+      document.getElementById('faqNewQ').value = '';
+      document.getElementById('faqNewA').value = '';
+      showToast('FAQ가 등록되었습니다');
+      loadFaqAdmin();
+    } else { showToast('등록 실패: ' + (data.error || '')); }
+  } catch(e) { showToast('오류: ' + e.message); }
+}
+
+async function saveFaqEdit(id) {
+  var q = document.getElementById('faqEditQ-' + id).value.trim();
+  var a = document.getElementById('faqEditA-' + id).value.trim();
+  if (!q || !a) { showToast('질문과 답변을 모두 입력하세요'); return; }
+  try {
+    var res = await fetch(ADMIN_API + '/api/admin/faq/' + id, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
+      body: JSON.stringify({ question: q, answer: a })
+    });
+    var data = await res.json();
+    if (data.ok) { showToast('수정 완료'); loadFaqAdmin(); }
+    else { showToast('수정 실패: ' + (data.error || '')); }
+  } catch(e) { showToast('오류: ' + e.message); }
+}
+
+async function deleteFaq(id) {
+  if (!confirm('이 FAQ를 삭제하시겠습니까?')) return;
+  try {
+    var res = await fetch(ADMIN_API + '/api/admin/faq/' + id, {
+      method: 'DELETE',
+      headers: { 'x-admin-key': ADMIN_KEY }
+    });
+    var data = await res.json();
+    if (data.ok) { showToast('삭제되었습니다'); loadFaqAdmin(); }
+    else { showToast('삭제 실패'); }
+  } catch(e) { showToast('오류: ' + e.message); }
+}
+
 function closeUserDetail() { document.getElementById('userDetailModal').style.display = 'none'; }
 
 function switchUdTab(n) {

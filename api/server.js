@@ -515,6 +515,64 @@ app.post('/api/heartbeat', authMiddleware, async (req, res) => {
   }
 });
 
+// ── 공개: FAQ 목록 ─────────────────────────────────────────
+app.get('/api/faq', async (req, res) => {
+  try {
+    const db = await getPool();
+    const [rows] = await db.execute('SELECT id, question, answer, order_num FROM FAQ ORDER BY order_num ASC, id ASC');
+    res.json({ faq: rows });
+  } catch (err) {
+    console.error('[faq GET]', err.message);
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
+// ── 관리자: FAQ 생성 ────────────────────────────────────────
+app.post('/api/admin/faq', adminMiddleware, async (req, res) => {
+  const { question, answer } = req.body;
+  if (!question || !answer) return res.status(400).json({ error: '질문과 답변을 입력하세요' });
+  try {
+    const db = await getPool();
+    const [r] = await db.execute('INSERT INTO FAQ (question, answer) VALUES (?,?)', [question, answer]);
+    res.json({ ok: true, id: r.insertId });
+  } catch (err) {
+    console.error('[faq POST]', err.message);
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
+// ── 관리자: FAQ 수정 ────────────────────────────────────────
+app.patch('/api/admin/faq/:id', adminMiddleware, async (req, res) => {
+  const { question, answer, order_num } = req.body;
+  try {
+    const db = await getPool();
+    const fields = [];
+    const vals = [];
+    if (question   !== undefined) { fields.push('question = ?');   vals.push(question); }
+    if (answer     !== undefined) { fields.push('answer = ?');     vals.push(answer); }
+    if (order_num  !== undefined) { fields.push('order_num = ?');  vals.push(order_num); }
+    if (!fields.length) return res.status(400).json({ error: '수정할 항목 없음' });
+    vals.push(req.params.id);
+    await db.execute(`UPDATE FAQ SET ${fields.join(', ')} WHERE id = ?`, vals);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[faq PATCH]', err.message);
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
+// ── 관리자: FAQ 삭제 ────────────────────────────────────────
+app.delete('/api/admin/faq/:id', adminMiddleware, async (req, res) => {
+  try {
+    const db = await getPool();
+    await db.execute('DELETE FROM FAQ WHERE id = ?', [req.params.id]);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[faq DELETE]', err.message);
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
 // ── 공개 질문 목록 (승인된 질문만) ───────────────────────
 app.get('/api/questions', async (req, res) => {
   const { category } = req.query;
@@ -1074,6 +1132,14 @@ async function initDb() {
       await db.execute('ALTER TABLE Questions ADD COLUMN options_ko LONGTEXT');
       console.log('컬럼 추가: Questions.options_ko');
     }
+    // FAQ 테이블
+    await db.execute(`CREATE TABLE IF NOT EXISTS FAQ (
+      id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+      question   TEXT NOT NULL,
+      answer     TEXT NOT NULL,
+      order_num  INT DEFAULT 0,
+      created_at DATETIME DEFAULT NOW()
+    ) CHARACTER SET utf8mb4`);
     if (!qExisting.has('settle_winner')) {
       await db.execute("ALTER TABLE Questions ADD COLUMN settle_winner VARCHAR(10) DEFAULT NULL");
       console.log('컬럼 추가: Questions.settle_winner');
