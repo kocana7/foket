@@ -2134,9 +2134,9 @@ document.addEventListener('DOMContentLoaded', () => {
       body.options = document.getElementById('editQOpts').value.split('\n').map(function(s){ return s.trim(); }).filter(Boolean);
     }
     try {
-      var res = await fetch('/api/admin/questions/' + _editQTargetId, {
+      var res = await fetch(ADMIN_API + '/api/admin/questions/' + _editQTargetId, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
         body: JSON.stringify(body)
       });
       var data = await res.json();
