@@ -824,6 +824,44 @@ app.patch('/api/admin/settle-config', adminMiddleware, async (req, res) => {
   } catch (err) { res.status(500).json({ error: '서버 오류' }); }
 });
 
+// ── 질문 차트 데이터 (날짜별 YES% 추이) ──────────────────────
+app.get('/api/charts', async (req, res) => {
+  try {
+    const ids = (req.query.ids || '').split(',').map(Number).filter(Boolean);
+    if (!ids.length) return res.json({});
+    const db = await getPool();
+    const placeholders = ids.map(() => '?').join(',');
+    const [rows] = await db.execute(
+      `SELECT question_id, DATE(created_at) AS day, choice, COUNT(*) AS cnt
+       FROM Participations WHERE question_id IN (${placeholders})
+       GROUP BY question_id, day, choice ORDER BY question_id, day`,
+      ids
+    );
+    // 질문별 날짜별 집계
+    const dayMap = {};
+    rows.forEach(r => {
+      const qid = r.question_id;
+      const day = String(r.day).slice(0, 10);
+      if (!dayMap[qid]) dayMap[qid] = {};
+      if (!dayMap[qid][day]) dayMap[qid][day] = {};
+      dayMap[qid][day][r.choice] = Number(r.cnt);
+    });
+    // 누적 YES% 시계열
+    const charts = {};
+    ids.forEach(qid => {
+      const dm = dayMap[qid] || {};
+      const days = Object.keys(dm).sort();
+      let cumYes = 0, cumTotal = 0;
+      charts[qid] = days.map(d => {
+        cumYes   += dm[d]['YES'] || 0;
+        cumTotal += Object.values(dm[d]).reduce((a, b) => a + b, 0);
+        return cumTotal > 0 ? Math.round(cumYes / cumTotal * 100) : 50;
+      });
+    });
+    res.json(charts);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // ── 공개 설정 ─────────────────────────────────────────────
 app.get('/api/public-config', (req, res) => {
   res.json({ googleClientId: GOOGLE_CLIENT_ID || '' });

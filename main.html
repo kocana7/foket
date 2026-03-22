@@ -197,6 +197,8 @@
     /* ─── 참여 통계 ─── */
     .part-count { font-size: 11px; color: var(--gray-400); font-weight: 500; margin-top: 2px; }
     .bet-stats { display: flex; gap: 10px; align-items: flex-start; width: 100%; flex-direction: column; }
+    .card-sparkline { width: 100%; height: 56px; margin-top: 8px; border-radius: 8px; overflow: hidden; }
+    .card-sparkline svg { display: block; width: 100%; height: 100%; }
     .bet-stat-row { display: flex; align-items: center; gap: 8px; width: 100%; }
     .bet-stat-bar-wrap { flex: 1; background: var(--gray-100); border-radius: 4px; height: 6px; overflow: hidden; }
     .bet-stat-bar-yes { height: 100%; border-radius: 4px; background: var(--green); transition: width 0.4s; }
@@ -2406,7 +2408,7 @@ const CARD_DATA = {
     }
 
     var cardDisplayQ = (currentLang === 'ko') ? (q.question_ko || q.question || '') : (q.question || '');
-    return '<div class="market-card db-main-card" data-cat="' + (q.category||'') + '" onclick="openTrade(' + q.question_id + ',' + (parseInt(q.initial_prob)||50) + ')">'
+    return '<div class="market-card db-main-card" data-cat="' + (q.category||'') + '" data-qid="' + q.question_id + '" onclick="openTrade(' + q.question_id + ',' + (parseInt(q.initial_prob)||50) + ')">'
       + '<div class="market-card-top">'
       + '<div class="market-icon">' + icon + '</div>'
       + '<div class="market-meta">'
@@ -2414,10 +2416,59 @@ const CARD_DATA = {
       + '<div class="market-question">' + cardDisplayQ.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>'
       + '</div></div>'
       + statsHtml
+      + '<div class="card-sparkline" id="sparkline-' + q.question_id + '"></div>'
       + '</div>';
   }
 
   var EMPTY_MSG = '<div style="grid-column:1/-1;text-align:center;padding:48px 0;color:var(--gray-400);font-size:15px">등록된 질문이 없습니다. 첫 번째 질문을 등록해보세요!</div>';
+
+  function drawSparkline(el, points, color) {
+    if (!el || !points || points.length < 2) return;
+    var W = 400, H = 56, pad = 6;
+    var min = Math.min.apply(null, points);
+    var max = Math.max.apply(null, points);
+    var range = max - min || 10;
+    var xStep = (W - pad * 2) / (points.length - 1);
+    var coords = points.map(function(v, i) {
+      return [(pad + i * xStep).toFixed(1), (H - pad - (v - min) / range * (H - pad * 2)).toFixed(1)];
+    });
+    var linePath = coords.map(function(c, i) { return (i === 0 ? 'M' : 'L') + c[0] + ',' + c[1]; }).join(' ');
+    var areaPath = linePath + ' L' + coords[coords.length-1][0] + ',' + (H-pad) + ' L' + pad + ',' + (H-pad) + ' Z';
+    var gid = 'sg' + el.id;
+    el.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">'
+      + '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1">'
+      + '<stop offset="0%" stop-color="' + color + '" stop-opacity="0.25"/>'
+      + '<stop offset="100%" stop-color="' + color + '" stop-opacity="0.0"/>'
+      + '</linearGradient></defs>'
+      + '<path d="' + areaPath + '" fill="url(#' + gid + ')"/>'
+      + '<path d="' + linePath + '" fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'
+      // 마지막 점 강조
+      + '<circle cx="' + coords[coords.length-1][0] + '" cy="' + coords[coords.length-1][1] + '" r="3.5" fill="' + color + '"/>'
+      + '</svg>';
+  }
+
+  function loadHotCharts(ids) {
+    if (!ids || !ids.length) return;
+    fetch('/api/charts?ids=' + ids.join(','))
+      .then(function(r) { return r.json(); })
+      .then(function(charts) {
+        ids.forEach(function(qid) {
+          var el = document.getElementById('sparkline-' + qid);
+          if (!el) return;
+          var points = charts[qid];
+          var q = _questionsById[qid];
+          var color = (q && q.type === 'vote') ? '#6D28D9' : '#16a34a';
+          if (points && points.length >= 2) {
+            drawSparkline(el, points, color);
+          } else {
+            // 참여 없으면 초기확률 기준 플랫 라인
+            var prob = q ? (parseInt(q.initial_prob) || 50) : 50;
+            drawSparkline(el, [prob, prob], color);
+            el.style.opacity = '0.35';
+          }
+        });
+      }).catch(function() {});
+  }
 
   async function loadSectionCards() {
     try {
@@ -2443,6 +2494,7 @@ const CARD_DATA = {
             var tmp = hotList[hi]; hotList[hi] = hotList[hj]; hotList[hj] = tmp;
           }
           hotGrid.innerHTML = hotList.map(buildDbMainCard).join('');
+          loadHotCharts(hotList.map(function(q){ return q.question_id; }));
         } else {
           hotGrid.innerHTML = EMPTY_MSG;
         }
