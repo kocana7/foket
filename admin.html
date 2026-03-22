@@ -1472,7 +1472,7 @@
     document.getElementById('settleCancelInfo').innerHTML =
       '정산 결과: <b>' + winner + ' 승리</b><br>'
       + '게시자 지급: <b>' + posterFee.toFixed(0) + 'F</b> 회수 &nbsp;|&nbsp; 관리자 수수료: <b>' + adminFee.toFixed(0) + 'F</b> (복구 불가)<br>'
-      + '<span style="color:#d97706;font-size:12px">⚠ 승자 수익 회수, 패자 베팅 환불, 게시자 수수료 회수가 진행됩니다.</span>';
+      + '<span style="color:#d97706;font-size:12px">⚠ 승자 수익 회수 및 게시자 수수료 회수가 진행됩니다. 패자 베팅금은 총 베팅 풀에 유지됩니다.</span>';
     document.getElementById('settleCancelConfirmBtn').disabled = false;
     document.getElementById('settleCancelConfirmBtn').textContent = '정산 취소 확인';
     document.getElementById('settleCancelModal').style.display = 'flex';
@@ -1496,7 +1496,7 @@
       var data = await res.json();
       if (!res.ok) { showToast('취소 실패: ' + (data.error || '오류')); btn.disabled = false; btn.textContent = '정산 취소 확인'; return; }
       closeSettleCancelModal();
-      showToast('정산 취소 완료! 승자 ' + data.winnersReverted + '명 회수, 패자 ' + data.losersRefunded + '명 환불');
+      showToast('정산 취소 완료! 승자 ' + data.winnersReverted + '명 포인트 회수, 패자 베팅금은 풀 유지');
       loadAdminQuestions();
     } catch(e) { showToast('오류: ' + e.message); btn.disabled = false; btn.textContent = '정산 취소 확인'; }
   }

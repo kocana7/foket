@@ -741,7 +741,7 @@ app.post('/api/admin/questions/:id/settle-cancel', adminMiddleware, async (req, 
     const posterId   = qRows[0].user_id;
     const posterFee  = parseFloat(qRows[0].settle_poster_fee) || 0;
 
-    // 승자: payout 회수
+    // 승자: 받은 payout(원금+수익) 회수
     const [winners] = await db.execute(
       "SELECT user_id, SUM(payout) AS total_payout FROM Participations WHERE question_id=? AND settle_result='WIN' GROUP BY user_id",
       [qId]
@@ -751,15 +751,7 @@ app.post('/api/admin/questions/:id/settle-cancel', adminMiddleware, async (req, 
       if (take > 0) await db.execute('UPDATE Users SET balance = GREATEST(0, balance - ?) WHERE user_id = ?', [take, w.user_id]);
     }
 
-    // 패자: 베팅금 환불
-    const [losers] = await db.execute(
-      "SELECT user_id, SUM(amount) AS total_bet FROM Participations WHERE question_id=? AND settle_result='LOSE' GROUP BY user_id",
-      [qId]
-    );
-    for (const l of losers) {
-      const refund = parseFloat(l.total_bet) || 0;
-      if (refund > 0) await db.execute('UPDATE Users SET balance = balance + ? WHERE user_id = ?', [refund, l.user_id]);
-    }
+    // 패자: 베팅금은 총 베팅 풀에 묶어두므로 환불 없음
 
     // 게시자: 수수료 회수
     if (posterFee > 0 && posterId) {
@@ -775,7 +767,7 @@ app.post('/api/admin/questions/:id/settle-cancel', adminMiddleware, async (req, 
       [qId]
     );
 
-    res.json({ ok: true, winnersReverted: winners.length, losersRefunded: losers.length, posterFeeReverted: posterFee });
+    res.json({ ok: true, winnersReverted: winners.length, posterFeeReverted: posterFee });
   } catch (err) {
     console.error('[settle-cancel]', err.message);
     res.status(500).json({ error: '서버 오류: ' + err.message });
