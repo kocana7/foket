@@ -695,25 +695,31 @@ app.post('/api/admin/questions/:id/settle', adminMiddleware, async (req, res) =>
       await db.execute('UPDATE Users SET balance = balance + ? WHERE user_id = ?', [posterFee, posterId]);
     }
 
-    // 승리자 목록 (유저별 베팅 합계)
-    const [winners] = await db.execute(
-      'SELECT user_id, SUM(amount) AS bet FROM Participations WHERE question_id = ? AND choice = ? GROUP BY user_id',
+    // 승리자 목록 - 개별 참여 행별로 조회 (payout을 행별 비례로 저장)
+    const [winnerRows] = await db.execute(
+      'SELECT id, user_id, amount FROM Participations WHERE question_id = ? AND choice = ?',
       [qId, winning]
     );
-    const winnerTotal = winners.reduce((s, w) => s + parseFloat(w.bet), 0);
+    const winnerTotal = winnerRows.reduce((s, w) => s + parseFloat(w.amount), 0);
 
+    // 유저별 지급 합계 (balance 업데이트용)
+    const userPayoutMap = {};
     const payouts = [];
-    for (const w of winners) {
-      const bet      = parseFloat(w.bet);
+    for (const w of winnerRows) {
+      const bet      = parseFloat(w.amount);
       const winnings = winnerTotal > 0 ? Math.floor((bet / winnerTotal) * winnerDistribution) : 0;
-      const payout   = bet + winnings; // 원금 + 배당
-      await db.execute('UPDATE Users SET balance = balance + ? WHERE user_id = ?', [payout, w.user_id]);
-      // 참여 기록에 결과 저장
+      const payout   = bet + winnings; // 원금 + 배당 (행별)
+      // 개별 행에 행별 payout 저장
       await db.execute(
-        "UPDATE Participations SET payout = ?, settle_result = 'WIN' WHERE question_id = ? AND user_id = ? AND choice = ?",
-        [payout, qId, w.user_id, winning]
+        "UPDATE Participations SET payout = ?, settle_result = 'WIN' WHERE id = ?",
+        [payout, w.id]
       );
+      userPayoutMap[w.user_id] = (userPayoutMap[w.user_id] || 0) + payout;
       payouts.push({ user_id: w.user_id, bet, winnings, payout });
+    }
+    // 유저 balance 업데이트 (유저별 합산)
+    for (const [uid, total] of Object.entries(userPayoutMap)) {
+      await db.execute('UPDATE Users SET balance = balance + ? WHERE user_id = ?', [total, uid]);
     }
 
     // 패자 기록 업데이트
