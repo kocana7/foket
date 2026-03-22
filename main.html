@@ -2310,6 +2310,10 @@ const CARD_DATA = {
       translateAllCards(lang);
       translateTickerItems(lang);
     }
+    // 전체보기 링크 텍스트 업데이트
+    document.querySelectorAll('.section-link').forEach(function(el) {
+      el.textContent = ul('viewAll');
+    });
     // 카드 리빌드 (UI 라벨 언어 반영)
     loadSectionCards();
   }
@@ -2394,23 +2398,36 @@ const CARD_DATA = {
     neighbor:'나의 이웃', etc:'기타'
   };
 
+  // 카테고리명 다국어
+  var CAT_NAMES_LANG = {
+    ko: { politics:'정치', sports:'스포츠', culture:'문화', trading:'트레이딩', weather:'날씨', economy:'경제', statement:'발언', science:'과학&기술', neighbor:'나의 이웃', etc:'기타' },
+    en: { politics:'Politics', sports:'Sports', culture:'Culture', trading:'Trading', weather:'Weather', economy:'Economy', statement:'Statements', science:'Science & Tech', neighbor:'Neighbors', etc:'Other' },
+    ja: { politics:'政治', sports:'スポーツ', culture:'文化', trading:'取引', weather:'天気', economy:'経済', statement:'発言', science:'科学・技術', neighbor:'近所', etc:'その他' },
+    zh: { politics:'政治', sports:'体育', culture:'文化', trading:'交易', weather:'天气', economy:'经济', statement:'发言', science:'科技', neighbor:'邻里', etc:'其他' },
+    fr: { politics:'Politique', sports:'Sports', culture:'Culture', trading:'Trading', weather:'Météo', economy:'Économie', statement:'Déclarations', science:'Science', neighbor:'Voisinage', etc:'Autres' },
+    de: { politics:'Politik', sports:'Sport', culture:'Kultur', trading:'Handel', weather:'Wetter', economy:'Wirtschaft', statement:'Aussagen', science:'Wissenschaft', neighbor:'Nachbarn', etc:'Sonstiges' },
+    es: { politics:'Política', sports:'Deportes', culture:'Cultura', trading:'Trading', weather:'Clima', economy:'Economía', statement:'Declaraciones', science:'Ciencia', neighbor:'Vecinos', etc:'Otros' },
+    ru: { politics:'Политика', sports:'Спорт', culture:'Культура', trading:'Торговля', weather:'Погода', economy:'Экономика', statement:'Заявления', science:'Наука', neighbor:'Соседи', etc:'Прочее' },
+  };
+  function catName(cat) { return (CAT_NAMES_LANG[currentLang] || CAT_NAMES_LANG.ko)[cat] || cat; }
+
   // UI 라벨 다국어
   var UI_LABELS = {
-    ko: { bet:'내기', vote:'투표', participants:'명 참여', totalBet:'총 F 베팅', more:'개 더', deadline:'마감', betLabel:'베팅' },
-    en: { bet:'Bet', vote:'Vote', participants:' participants', totalBet:' F bet', more:' more', deadline:'Ends', betLabel:'Bet' },
-    ja: { bet:'賭け', vote:'投票', participants:'名参加', totalBet:'F ベット', more:'件以上', deadline:'締切', betLabel:'ベット' },
-    zh: { bet:'投注', vote:'投票', participants:'人参与', totalBet:'F 投注', more:'个更多', deadline:'截止', betLabel:'投注' },
-    fr: { bet:'Pari', vote:'Vote', participants:' participants', totalBet:' F pariés', more:' de plus', deadline:'Fin', betLabel:'Miser' },
-    de: { bet:'Wette', vote:'Abstimmung', participants:' Teilnehmer', totalBet:' F gesetzt', more:' mehr', deadline:'Ende', betLabel:'Wetten' },
-    es: { bet:'Apuesta', vote:'Voto', participants:' participantes', totalBet:' F apostados', more:' más', deadline:'Vence', betLabel:'Apostar' },
-    ru: { bet:'Ставка', vote:'Голос', participants:' участников', totalBet:' F ставок', more:' ещё', deadline:'Конец', betLabel:'Ставка' },
+    ko: { bet:'내기', vote:'투표', participants:'명 참여', totalBet:'총 F 베팅', more:'개 더', deadline:'마감', betLabel:'베팅', viewAll:'전체보기 →' },
+    en: { bet:'Bet', vote:'Vote', participants:' participants', totalBet:' F bet', more:' more', deadline:'Ends', betLabel:'Bet', viewAll:'View All →' },
+    ja: { bet:'賭け', vote:'投票', participants:'名参加', totalBet:'F ベット', more:'件以上', deadline:'締切', betLabel:'ベット', viewAll:'すべて見る →' },
+    zh: { bet:'投注', vote:'投票', participants:'人参与', totalBet:'F 投注', more:'个更多', deadline:'截止', betLabel:'投注', viewAll:'查看全部 →' },
+    fr: { bet:'Pari', vote:'Vote', participants:' participants', totalBet:' F pariés', more:' de plus', deadline:'Fin', betLabel:'Miser', viewAll:'Voir tout →' },
+    de: { bet:'Wette', vote:'Abstimmung', participants:' Teilnehmer', totalBet:' F gesetzt', more:' mehr', deadline:'Ende', betLabel:'Wetten', viewAll:'Alle →' },
+    es: { bet:'Apuesta', vote:'Voto', participants:' participantes', totalBet:' F apostados', more:' más', deadline:'Vence', betLabel:'Apostar', viewAll:'Ver todo →' },
+    ru: { bet:'Ставка', vote:'Голос', participants:' участников', totalBet:' F ставок', more:' ещё', deadline:'Конец', betLabel:'Ставка', viewAll:'Все →' },
   };
   function ul(key) { return (UI_LABELS[currentLang] || UI_LABELS.en)[key] || UI_LABELS.ko[key] || ''; }
 
   function buildDbMainCard(q) {
     _questionsById[q.question_id] = q;
     var icon = CAT_ICONS[q.category] || '📋';
-    var catLabel = CAT_NAMES[q.category] || q.category || '';
+    var catLabel = catName(q.category);
     var typeLabel = ul(q.type === 'vote' ? 'vote' : 'bet');
     var totalCount = parseInt(q.participant_count) || 0;
     var choices = q.choices || {};
