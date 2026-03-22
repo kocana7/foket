@@ -1080,29 +1080,36 @@ async function seedAllBotQuestions() {
   if (!_botUserId) return;
   try {
     const db = await getPool();
-    const [posted] = await db.execute('SELECT question FROM Questions WHERE user_id = ?', [_botUserId]);
-    const postedSet = new Set(posted.map(r => r.question));
+    const [posted] = await db.execute('SELECT question, options_ko FROM Questions WHERE user_id = ?', [_botUserId]);
+    const postedMap = new Map(posted.map(r => [r.question, r.options_ko]));
 
-    let inserted = 0;
+    let inserted = 0, updated = 0;
     for (const [lang, langData] of Object.entries(BOT_LANG_DATA)) {
       for (const q of langData.questions) {
-        if (postedSet.has(q.question)) continue;
+        const options_ko = q.options ? translateOptions(q.options, lang) : null;
+        if (postedMap.has(q.question)) {
+          // 기존 질문이지만 options_ko가 null이면 업데이트
+          if (!postedMap.get(q.question) && options_ko) {
+            await db.execute('UPDATE Questions SET options_ko = ? WHERE user_id = ? AND question = ?', [options_ko, _botUserId, q.question]);
+            updated++;
+          }
+          continue;
+        }
         const nick = genBotNick(lang);
         await db.execute('UPDATE Users SET nickname = ? WHERE user_id = ?', [nick, _botUserId]);
         const endDate = new Date();
         endDate.setDate(endDate.getDate() + (q.days || 30));
         const options = q.options ? JSON.stringify(q.options) : null;
         const question_ko = lang === 'ko' ? null : (QUESTION_KO_MAP[q.question] || null);
-        const options_ko = q.options ? translateOptions(q.options, lang) : null;
         await db.execute(
           'INSERT INTO Questions (user_id, type, question, question_ko, poster_nickname, category, options, options_ko, initial_prob, end_date, status) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
           [_botUserId, q.type, q.question, question_ko, nick, q.category, options, options_ko, q.initial_prob || null, endDate, 'APPROVED']
         );
-        postedSet.add(q.question);
+        postedMap.set(q.question, options_ko);
         inserted++;
       }
     }
-    console.log(`[수퍼포켓 봇] 전체 질문 시드 완료: ${inserted}개 등록`);
+    console.log(`[수퍼포켓 봇] 시드 완료: ${inserted}개 신규 등록, ${updated}개 선택지 번역 업데이트`);
   } catch (err) {
     console.error('[수퍼포켓 봇] 시드 실패:', err.message);
   }
