@@ -2332,7 +2332,6 @@ const CARD_DATA = {
     }
 
     var cardDisplayQ = (currentLang === 'ko') ? (q.question_ko || q.question || '') : (q.question || '');
-    var nicknameHtml = q.nickname ? '<div style="font-size:11px;color:var(--gray-400);margin-top:6px">@' + q.nickname + '</div>' : '';
     return '<div class="market-card db-main-card" data-cat="' + (q.category||'') + '" onclick="openTrade(' + q.question_id + ',' + (parseInt(q.initial_prob)||50) + ')">'
       + '<div class="market-card-top">'
       + '<div class="market-icon">' + icon + '</div>'
@@ -2341,7 +2340,6 @@ const CARD_DATA = {
       + '<div class="market-question">' + cardDisplayQ.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>'
       + '</div></div>'
       + statsHtml
-      + nicknameHtml
       + '</div>';
   }
 
