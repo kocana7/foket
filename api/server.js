@@ -463,7 +463,8 @@ app.get('/api/questions', async (req, res) => {
       `SELECT q.question_id, q.user_id, q.type, q.question, q.question_ko,
               q.category, q.options, q.options_ko, q.initial_prob, q.end_date, q.created_at,
               u.nickname,
-              (SELECT COUNT(*) FROM Participations p WHERE p.question_id = q.question_id) AS participant_count
+              (SELECT COUNT(*) FROM Participations p WHERE p.question_id = q.question_id) AS participant_count,
+              (SELECT COALESCE(SUM(p.amount),0) FROM Participations p WHERE p.question_id = q.question_id) AS total_bet
        FROM Questions q
        LEFT JOIN Users u ON q.user_id = u.user_id
        ${where}
@@ -553,7 +554,8 @@ app.get('/api/admin/questions', adminMiddleware, async (req, res) => {
               q.poster_nickname, q.category, q.options, q.options_ko, q.initial_prob,
               q.end_date, q.status, q.created_at,
               u.email, u.nickname, u.full_name,
-              (SELECT COUNT(*) FROM Participations p WHERE p.question_id = q.question_id) AS participant_count
+              (SELECT COUNT(*) FROM Participations p WHERE p.question_id = q.question_id) AS participant_count,
+              (SELECT COALESCE(SUM(p.amount),0) FROM Participations p WHERE p.question_id = q.question_id) AS total_bet
        FROM Questions q
        LEFT JOIN Users u ON q.user_id = u.user_id
        ${where}

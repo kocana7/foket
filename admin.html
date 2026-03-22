@@ -1258,8 +1258,10 @@
       if (q.type === 'bet') {
         var yes = choices['YES'] || 0;
         var no  = choices['NO']  || 0;
+        var tb = parseFloat(q.total_bet) || 0;
         detailCell = '<span style="font-size:12px">YES <b style="color:var(--green)">' + yes + '</b>명'
-                   + ' / NO <b style="color:var(--red)">' + no + '</b>명</span>';
+                   + ' / NO <b style="color:var(--red)">' + no + '</b>명</span>'
+                   + '<br><span style="font-size:11px;color:var(--blue);font-weight:700">🪙 총 ' + tb.toLocaleString() + 'F 베팅</span>';
       } else {
         try {
           var opts = JSON.parse(q.options || '[]');
