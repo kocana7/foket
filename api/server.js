@@ -289,7 +289,7 @@ app.get('/api/my-participations', authMiddleware, async (req, res) => {
   try {
     const db = await getPool();
     const [rows] = await db.execute(
-      `SELECT p.participation_id, p.question_id, p.choice, p.amount, p.created_at,
+      `SELECT p.id AS participation_id, p.question_id, p.choice, p.amount, p.created_at,
               q.type, q.question, q.question_ko, q.category, q.status AS q_status
        FROM Participations p
        JOIN Questions q ON p.question_id = q.question_id
