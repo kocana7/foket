@@ -971,7 +971,7 @@
     </div>
     <div class="trade-label" data-i18n="trade.amount">금액</div>
     <div class="trade-input-wrap">
-      <span class="dollar">$</span>
+      <span class="dollar">F</span>
       <input class="trade-input" id="tradeAmount" type="number" value="2" min="2" oninput="updateTrade()" />
     </div>
     <div class="trade-amounts">
@@ -2604,8 +2604,8 @@ const CARD_DATA = {
     const maxProfit = (contracts * (1 - pricePerContract)).toFixed(2);
     document.getElementById('tradePrice').innerHTML = price + '<b class="fcur">F</b>';
     document.getElementById('tradeContracts').textContent = contracts;
-    document.getElementById('tradeProfit').textContent = '$' + maxProfit;
-    document.getElementById('tradeCost').textContent = '$' + amount.toFixed(2);
+    document.getElementById('tradeProfit').textContent = maxProfit + 'F';
+    document.getElementById('tradeCost').textContent = amount.toFixed(0) + 'F';
   }
 
   async function confirmTrade() {
