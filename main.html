@@ -247,7 +247,7 @@
 
     /* ─── LIVE TICKER ─── */
     .ticker-wrap { overflow: hidden; background: var(--blue); padding: 10px 0; position: sticky; top: 64px; z-index: 999; }
-    .ticker { display: flex; animation: ticker 150s linear infinite; width: max-content; }
+    .ticker { display: flex; animation: ticker 300s linear infinite; width: max-content; }
     .ticker-item { display: flex; align-items: center; gap: 8px; padding: 0 24px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9); white-space: nowrap; }
     .ticker-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); }
     @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
@@ -2420,7 +2420,8 @@ const CARD_DATA = {
           .filter(function(q) { return q.end_date; })
           .sort(function(a, b) { return new Date(a.end_date) - new Date(b.end_date); });
         if (tickerQs.length) {
-          var items = tickerQs.map(function(q) {
+          var urgentTag = '<div class="ticker-item" style="color:#FFD700;font-weight:900;letter-spacing:1px"><span class="ticker-dot" style="background:#FFD700"></span>마감임박!!</div>';
+          var itemArr = tickerQs.map(function(q) {
             var title = (q.question_ko || q.question || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
             var prob = parseInt(q.initial_prob) || 50;
             var endStr = q.end_date ? q.end_date.slice(0,10) : '';
@@ -2428,7 +2429,14 @@ const CARD_DATA = {
               + title + ' <strong>' + prob + '%</strong>'
               + ' <span style="opacity:.7;font-weight:400;font-size:11px">마감 ' + endStr + '</span>'
               + '</div>';
-          }).join('');
+          });
+          // 2~4개 간격으로 랜덤하게 마감임박!! 삽입
+          var withUrgent = [];
+          itemArr.forEach(function(item, i) {
+            withUrgent.push(item);
+            if (i < itemArr.length - 1 && Math.random() < 0.4) withUrgent.push(urgentTag);
+          });
+          var items = withUrgent.join('');
           tickerEl.innerHTML = items + items;
         }
       }
