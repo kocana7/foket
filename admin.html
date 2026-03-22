@@ -1289,8 +1289,13 @@
         var yes = choices['YES'] || 0;
         var no  = choices['NO']  || 0;
         var tb = parseFloat(q.total_bet) || 0;
+        var ca = q.choice_amounts || {};
+        var yesAmt = parseFloat(ca['YES'] || 0);
+        var noAmt  = parseFloat(ca['NO']  || 0);
         detailCell = '<span style="font-size:12px">YES <b style="color:var(--green)">' + yes + '</b>명'
                    + ' / NO <b style="color:var(--red)">' + no + '</b>명</span>'
+                   + '<br><span style="font-size:11px;color:var(--green)">YES ' + yesAmt.toLocaleString() + 'F</span>'
+                   + ' <span style="font-size:11px;color:var(--red)">/ NO ' + noAmt.toLocaleString() + 'F</span>'
                    + '<br><span style="font-size:11px;color:var(--blue);font-weight:700">총 ' + tb.toLocaleString() + 'F 베팅</span>';
       } else {
         try {
