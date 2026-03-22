@@ -2112,7 +2112,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('editQProbWrap').style.display = 'none';
       document.getElementById('editQOptsWrap').style.display = '';
       try {
-        var opts = JSON.parse(q.options || '[]');
+        var opts = JSON.parse(q.options_ko || q.options || '[]');
         document.getElementById('editQOpts').value = opts.join('\n');
       } catch(e) { document.getElementById('editQOpts').value = ''; }
     }
