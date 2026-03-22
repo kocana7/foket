@@ -396,7 +396,7 @@ app.get('/api/admin/blocked-ips', adminMiddleware, async (req, res) => {
 // ── Heartbeat ─────────────────────────────────────────────
 // ── 투표/내기 참여 ───────────────────────────────────────
 app.post('/api/participate', authMiddleware, async (req, res) => {
-  const { question_id, choice } = req.body;
+  const { question_id, choice, amount } = req.body;
   if (!question_id || !choice) return res.status(400).json({ error: '필수 항목 누락' });
   try {
     const db = await getPool();
@@ -408,18 +408,18 @@ app.post('/api/participate', authMiddleware, async (req, res) => {
     if (q.status !== 'APPROVED') return res.status(400).json({ error: '참여할 수 없는 질문입니다' });
     if (q.end_date && new Date(q.end_date) < new Date()) return res.status(400).json({ error: '종료된 질문입니다' });
 
-    // 잔액 확인 (1F 필요)
+    // 차감 금액: 내기는 입력 금액(최소 2F), 투표는 1F
+    const cost = q.type === 'bet' ? Math.max(2, Math.floor(Number(amount) || 2)) : 1;
+
     const [userRows] = await db.execute('SELECT balance FROM Users WHERE user_id = ?', [req.user.userId]);
     if (!userRows.length) return res.status(404).json({ error: '회원 정보를 찾을 수 없습니다' });
-    if ((userRows[0].balance || 0) < 1)
-      return res.status(402).json({ error: '잔액이 부족합니다. 참여에는 1F가 필요합니다.' });
+    if ((userRows[0].balance || 0) < cost)
+      return res.status(402).json({ error: `잔액이 부족합니다. ${cost}F가 필요합니다.` });
 
-    // 1F 차감 + 참여 기록
-    await db.execute('UPDATE Users SET balance = balance - 1 WHERE user_id = ?', [req.user.userId]);
-    await db.execute('INSERT INTO Participations (question_id, user_id, choice) VALUES (?,?,?)',
-      [question_id, req.user.userId, choice]);
+    await db.execute('UPDATE Users SET balance = balance - ? WHERE user_id = ?', [cost, req.user.userId]);
+    await db.execute('INSERT INTO Participations (question_id, user_id, choice, amount) VALUES (?,?,?,?)',
+      [question_id, req.user.userId, choice, cost]);
 
-    // 최신 투표 현황 반환
     const [choiceRows] = await db.execute(
       'SELECT choice, COUNT(*) AS cnt FROM Participations WHERE question_id = ? GROUP BY choice', [question_id]
     );
@@ -427,7 +427,7 @@ app.post('/api/participate', authMiddleware, async (req, res) => {
     choiceRows.forEach(c => { choices[c.choice] = Number(c.cnt); });
 
     const [newUser] = await db.execute('SELECT balance FROM Users WHERE user_id = ?', [req.user.userId]);
-    res.json({ ok: true, choices, balance: newUser[0].balance });
+    res.json({ ok: true, choices, balance: newUser[0].balance, cost });
   } catch (err) {
     console.error('[participate POST]', err.message);
     res.status(500).json({ error: '서버 오류' });
@@ -698,6 +698,17 @@ async function initDb() {
     if (pidx.length > 0) {
       await db.execute('ALTER TABLE Participations DROP INDEX uq_user_question');
       console.log('Participations UNIQUE 제약 제거 완료');
+    }
+
+    // Participations 테이블 컬럼 추가
+    const [pcols] = await db.execute(
+      `SELECT column_name FROM information_schema.columns
+       WHERE table_schema = DATABASE() AND table_name = 'Participations'`
+    );
+    const pExisting = new Set(pcols.map(c => c.column_name || c.COLUMN_NAME));
+    if (!pExisting.has('amount')) {
+      await db.execute('ALTER TABLE Participations ADD COLUMN amount DECIMAL(18,2) DEFAULT 1');
+      console.log('컬럼 추가: Participations.amount');
     }
 
     // Questions 테이블 컬럼 추가

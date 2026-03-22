@@ -972,14 +972,14 @@
     <div class="trade-label" data-i18n="trade.amount">금액</div>
     <div class="trade-input-wrap">
       <span class="dollar">$</span>
-      <input class="trade-input" id="tradeAmount" type="number" value="10" min="1" oninput="updateTrade()" />
+      <input class="trade-input" id="tradeAmount" type="number" value="2" min="2" oninput="updateTrade()" />
     </div>
     <div class="trade-amounts">
-      <button class="trade-amt" onclick="setAmount(5)"><b class="fcur">F</b>5</button>
+      <button class="trade-amt" onclick="setAmount(2)"><b class="fcur">F</b>2</button>
       <button class="trade-amt" onclick="setAmount(10)"><b class="fcur">F</b>10</button>
-      <button class="trade-amt" onclick="setAmount(25)"><b class="fcur">F</b>25</button>
       <button class="trade-amt" onclick="setAmount(50)"><b class="fcur">F</b>50</button>
       <button class="trade-amt" onclick="setAmount(100)"><b class="fcur">F</b>100</button>
+      <button class="trade-amt" onclick="setAmount(500)"><b class="fcur">F</b>500</button>
     </div>
     <div class="trade-summary">
       <div class="trade-row"><span data-i18n="trade.price">계약당 가격</span><span id="tradePrice">67<b class="fcur">F</b></span></div>
@@ -2419,6 +2419,7 @@ const CARD_DATA = {
   /* ── Trade modal ── */
   let currentProb = 67;
   let currentSide = 'yes';
+  var _currentTradeId = null;
 
   var _questionsById = {};
   var _transCache = {};
@@ -2449,10 +2450,12 @@ const CARD_DATA = {
     // 투표 타입이면 투표 모달로 분기
     if (q && q.type === 'vote') { openVoteModal(q); return; }
 
+    _currentTradeId = questionId;
     currentProb = prob;
     currentSide = 'yes';
     document.getElementById('tradeYesBtn').className = 'trade-yes active';
     document.getElementById('tradeNoBtn').className = 'trade-no';
+    document.getElementById('tradeAmount').value = 2;
     document.getElementById('tradeModal').classList.add('open');
     updateTrade();
 
@@ -2605,10 +2608,31 @@ const CARD_DATA = {
     document.getElementById('tradeCost').textContent = '$' + amount.toFixed(2);
   }
 
-  function confirmTrade() {
-    closeTrade();
-    const t = T[currentLang] || T.ko;
-    showToast((t['trade.confirm'] || '거래 확인') + ' 🎉');
+  async function confirmTrade() {
+    var token = localStorage.getItem('foket-token');
+    if (!token) { showToast('로그인이 필요합니다'); return; }
+    var amount = Math.max(2, Math.floor(parseFloat(document.getElementById('tradeAmount').value) || 2));
+    var choice = currentSide === 'yes' ? 'YES' : 'NO';
+    var btn = document.querySelector('#tradeModal .btn-primary');
+    if (btn) { btn.disabled = true; btn.textContent = '처리 중...'; }
+    try {
+      var res = await fetch('/api/participate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ question_id: _currentTradeId, choice, amount })
+      });
+      var data = await res.json();
+      if (!res.ok) { showToast(data.error || '오류 발생'); }
+      else {
+        if (data.balance !== undefined) {
+          var balEl = document.getElementById('userBalance');
+          if (balEl) balEl.textContent = Number(data.balance).toFixed(0) + 'F';
+        }
+        showToast(amount + 'F 베팅 완료! (' + choice + ')');
+        setTimeout(closeTrade, 800);
+      }
+    } catch(e) { showToast('오류: ' + e.message); }
+    finally { if (btn) { btn.disabled = false; btn.textContent = '거래 확인 →'; } }
   }
 
   /* ── Toast ── */
