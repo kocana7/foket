@@ -663,6 +663,13 @@ app.post('/api/admin/questions/:id/settle', adminMiddleware, async (req, res) =>
     const posterId = qRows[0].user_id;
     const losing = winning === 'YES' ? 'NO' : 'YES';
 
+    // 설정된 비율 조회
+    const [cfgRows] = await db.execute("SELECT key_name, val FROM Settings WHERE key_name IN ('settle_admin_pct','settle_poster_pct')");
+    const cfgMap = {};
+    cfgRows.forEach(r => { cfgMap[r.key_name] = parseFloat(r.val); });
+    const adminPct  = (cfgMap['settle_admin_pct']  ?? 5) / 100;
+    const posterPct = (cfgMap['settle_poster_pct'] ?? 5) / 100;
+
     // 패자 총 베팅
     const [loserTot] = await db.execute(
       'SELECT COALESCE(SUM(amount),0) AS total FROM Participations WHERE question_id = ? AND choice = ?',
@@ -671,9 +678,9 @@ app.post('/api/admin/questions/:id/settle', adminMiddleware, async (req, res) =>
     const loserPool = parseFloat(loserTot[0].total) || 0;
 
     // 수수료 계산
-    const adminFee  = Math.floor(loserPool * 0.05);
-    const posterFee = Math.floor(loserPool * 0.05);
-    const winnerDistribution = loserPool - adminFee - posterFee; // 90%
+    const adminFee  = Math.floor(loserPool * adminPct);
+    const posterFee = Math.floor(loserPool * posterPct);
+    const winnerDistribution = loserPool - adminFee - posterFee;
 
     // 질문 등록자에게 5% 지급
     if (posterFee > 0 && posterId) {
@@ -726,6 +733,31 @@ app.delete('/api/admin/questions/:id', adminMiddleware, async (req, res) => {
     console.error('[admin/questions DELETE]', err.message);
     res.status(500).json({ error: '서버 오류' });
   }
+});
+
+// ── 관리자: 정산 비율 조회/저장 ──────────────────────────
+app.get('/api/admin/settle-config', adminMiddleware, async (req, res) => {
+  try {
+    const db = await getPool();
+    const [rows] = await db.execute("SELECT key_name, val FROM Settings WHERE key_name IN ('settle_admin_pct','settle_poster_pct')");
+    const cfg = {};
+    rows.forEach(r => { cfg[r.key_name] = parseFloat(r.val); });
+    res.json({ settle_admin_pct: cfg.settle_admin_pct ?? 5, settle_poster_pct: cfg.settle_poster_pct ?? 5 });
+  } catch (err) { res.status(500).json({ error: '서버 오류' }); }
+});
+
+app.patch('/api/admin/settle-config', adminMiddleware, async (req, res) => {
+  const { settle_admin_pct, settle_poster_pct } = req.body;
+  const adminPct  = parseFloat(settle_admin_pct);
+  const posterPct = parseFloat(settle_poster_pct);
+  if (isNaN(adminPct) || isNaN(posterPct) || adminPct < 0 || posterPct < 0 || adminPct + posterPct > 100)
+    return res.status(400).json({ error: '비율 값이 올바르지 않습니다 (합계 100% 이하)' });
+  try {
+    const db = await getPool();
+    await db.execute("INSERT INTO Settings (key_name, val) VALUES ('settle_admin_pct',?) ON DUPLICATE KEY UPDATE val=?, updated_at=NOW()", [adminPct, adminPct]);
+    await db.execute("INSERT INTO Settings (key_name, val) VALUES ('settle_poster_pct',?) ON DUPLICATE KEY UPDATE val=?, updated_at=NOW()", [posterPct, posterPct]);
+    res.json({ ok: true, settle_admin_pct: adminPct, settle_poster_pct: posterPct });
+  } catch (err) { res.status(500).json({ error: '서버 오류' }); }
 });
 
 // ── 공개 설정 ─────────────────────────────────────────────
@@ -806,6 +838,17 @@ async function initDb() {
         INDEX idx_user_question (user_id, question_id)
       ) CHARACTER SET utf8mb4
     `);
+
+    // Settings 테이블
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS Settings (
+        key_name  VARCHAR(100) PRIMARY KEY,
+        val       VARCHAR(500) NOT NULL,
+        updated_at DATETIME DEFAULT NOW()
+      ) CHARACTER SET utf8mb4
+    `);
+    // 기본 정산 비율 삽입
+    await db.execute(`INSERT IGNORE INTO Settings (key_name, val) VALUES ('settle_admin_pct','5'),('settle_poster_pct','5')`);
 
     // 기존 UNIQUE 제약 제거 (수퍼포켓 중복 참여 허용)
     const [pidx] = await db.execute(
