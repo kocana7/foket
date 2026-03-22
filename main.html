@@ -993,17 +993,13 @@
 
 <!-- VOTE MODAL -->
 <div class="modal-overlay" id="voteModal" onclick="closeVoteOutside(event)">
-  <div class="modal trade-modal" style="max-width:480px">
+  <div class="modal trade-modal" style="max-width:480px;max-height:85vh;overflow-y:auto">
     <button class="modal-close" onclick="closeVote()">✕</button>
     <h2 style="font-size:18px;margin-bottom:12px">📊 투표 참여</h2>
-    <div class="trade-question" id="voteQuestion" style="margin-bottom:16px"></div>
-    <div id="voteOptions" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px"></div>
-    <div id="voteResults" style="display:none;margin-bottom:16px">
-      <div style="font-size:13px;font-weight:600;color:var(--gray-500);margin-bottom:8px">현재 투표 현황</div>
-      <div id="voteResultBars" style="display:flex;flex-direction:column;gap:8px"></div>
-    </div>
+    <div class="trade-question" id="vmQuestion" style="margin-bottom:16px"></div>
+    <div id="vmOptions" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px"></div>
     <div style="font-size:12px;color:var(--gray-400);margin-bottom:14px">참여 시 <b>1F</b> 차감됩니다</div>
-    <button class="btn btn-primary btn-md" style="width:100%" id="voteConfirmBtn" onclick="confirmVote()">투표하기 →</button>
+    <button class="btn btn-primary btn-md" style="width:100%" id="vmConfirmBtn" onclick="confirmVote()">투표하기 →</button>
   </div>
 </div>
 
@@ -2483,7 +2479,7 @@ const CARD_DATA = {
     var rawText = q.question || '';
     var displayText = currentLang === 'ko' ? (q.question_ko || rawText)
                     : (currentLang !== 'ko' ? await translateIfNeeded(rawText, currentLang) : rawText);
-    document.getElementById('voteQuestion').textContent = displayText;
+    document.getElementById('vmQuestion').textContent = displayText;
 
     // 선택지 버튼 렌더
     var rawOpts = [];
@@ -2496,7 +2492,7 @@ const CARD_DATA = {
     var choices = q.choices || {};
     var total = Object.values(choices).reduce(function(a,b){return a+b;},0);
 
-    var optsEl = document.getElementById('voteOptions');
+    var optsEl = document.getElementById('vmOptions');
     optsEl.innerHTML = displayOpts.map(function(opt, idx) {
       var rawOpt = rawOpts[idx] || opt;
       var cnt = choices[rawOpt] || 0;
@@ -2511,17 +2507,16 @@ const CARD_DATA = {
         + '</div></div>';
     }).join('');
 
-    document.getElementById('voteResults').style.display = 'none';
-    document.getElementById('voteConfirmBtn').disabled = true;
-    document.getElementById('voteConfirmBtn').textContent = '선택지를 고르세요';
+    document.getElementById('vmConfirmBtn').disabled = true;
+    document.getElementById('vmConfirmBtn').textContent = '선택지를 고르세요';
     modal.classList.add('open');
   }
 
   function selectVoteOpt(el) {
-    document.querySelectorAll('.vote-opt-btn').forEach(function(b) { b.classList.remove('selected'); });
+    document.getElementById('vmOptions').querySelectorAll('.vote-opt-btn').forEach(function(b) { b.classList.remove('selected'); });
     el.classList.add('selected');
     _voteSelectedOpt = el.getAttribute('data-raw');
-    var btn = document.getElementById('voteConfirmBtn');
+    var btn = document.getElementById('vmConfirmBtn');
     btn.disabled = false;
     btn.textContent = '투표하기 →';
   }
@@ -2530,7 +2525,7 @@ const CARD_DATA = {
     if (!_voteSelectedOpt || !_voteCurrentQ) return;
     var token = localStorage.getItem('foket-token');
     if (!token) { showToast('로그인이 필요합니다'); return; }
-    var btn = document.getElementById('voteConfirmBtn');
+    var btn = document.getElementById('vmConfirmBtn');
     btn.disabled = true;
     btn.textContent = '처리 중...';
     try {
@@ -2557,7 +2552,7 @@ const CARD_DATA = {
         try { displayOpts = JSON.parse(_voteCurrentQ.options_ko); } catch(e) {}
       }
       var total = Object.values(data.choices).reduce(function(a,b){return a+b;},0);
-      var optsEl = document.getElementById('voteOptions');
+      var optsEl = document.getElementById('vmOptions');
       optsEl.innerHTML = displayOpts.map(function(opt, idx) {
         var rawOpt = rawOpts[idx] || opt;
         var cnt = data.choices[rawOpt] || 0;
