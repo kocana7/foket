@@ -322,7 +322,11 @@ app.get('/api/admin/users', adminMiddleware, async (req, res) => {
     const offset = (parseInt(page) - 1) * lim;
     const [rows] = await db.execute(
       `SELECT u.user_id, u.email, u.full_name, u.nickname, u.grade, u.balance,
-              u.kyc_status, u.status, u.created_at, u.last_seen_at, u.last_login_ip
+              u.kyc_status, u.status, u.created_at, u.last_seen_at, u.last_login_ip,
+              (SELECT COALESCE(SUM(p.amount),0) FROM Participations p WHERE p.user_id = u.user_id) +
+              (SELECT COALESCE(COUNT(*),0) FROM Questions qv WHERE qv.user_id = u.user_id AND qv.type = 'vote') +
+              (SELECT COALESCE(COUNT(*),0)*2 FROM Questions qb WHERE qb.user_id = u.user_id AND qb.type = 'bet')
+              AS total_traded
        FROM Users u ${where}
        ORDER BY u.created_at DESC LIMIT ${lim} OFFSET ${offset}`,
       params
@@ -331,6 +335,34 @@ app.get('/api/admin/users', adminMiddleware, async (req, res) => {
     res.json({ users: rows, total: rows.length });
   } catch (err) {
     console.error('[admin/users]', err.code, err.message);
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
+// ── 관리자: 회원 활동 내역 (질문 등록 + 투표/내기 참여) ──────
+app.get('/api/admin/users/:id/activity', adminMiddleware, async (req, res) => {
+  const userId = req.params.id;
+  try {
+    const db = await getPool();
+    const [questions] = await db.execute(
+      `SELECT question_id, type, question, question_ko, category, status, end_date, created_at
+       FROM Questions
+       WHERE user_id = ? AND (end_date IS NULL OR end_date >= DATE_SUB(NOW(), INTERVAL 30 DAY))
+       ORDER BY created_at DESC`,
+      [userId]
+    );
+    const [participations] = await db.execute(
+      `SELECT p.id, p.question_id, p.choice, p.amount, p.payout, p.settle_result, p.created_at,
+              q.question_ko, q.question, q.type, q.category, q.end_date, q.status AS q_status
+       FROM Participations p
+       JOIN Questions q ON p.question_id = q.question_id
+       WHERE p.user_id = ? AND (q.end_date IS NULL OR q.end_date >= DATE_SUB(NOW(), INTERVAL 30 DAY))
+       ORDER BY p.created_at DESC`,
+      [userId]
+    );
+    res.json({ questions, participations });
+  } catch (err) {
+    console.error('[admin/users/activity]', err.message);
     res.status(500).json({ error: '서버 오류' });
   }
 });
@@ -1447,6 +1479,20 @@ async function initBotUser() {
     // 봇 참여: 30초 후 첫 참여, 이후 매 5분마다 랜덤 투표/베팅
     setTimeout(botParticipate, 30 * 1000);
     setInterval(botParticipate, 5 * 60 * 1000);
+    // 만료 데이터 정리: 마감일 30일 경과한 참여 기록 삭제 (매일 실행)
+    async function cleanupExpiredParticipations() {
+      try {
+        const db = await getPool();
+        const [r] = await db.execute(
+          `DELETE p FROM Participations p
+           JOIN Questions q ON p.question_id = q.question_id
+           WHERE q.end_date < DATE_SUB(NOW(), INTERVAL 30 DAY)`
+        );
+        if (r.affectedRows > 0) console.log(`[정리] 만료 참여 데이터 ${r.affectedRows}건 삭제`);
+      } catch (e) { console.error('[cleanup]', e.message); }
+    }
+    setInterval(cleanupExpiredParticipations, 24 * 60 * 60 * 1000);
+    cleanupExpiredParticipations();
   } catch (err) {
     console.error('[수퍼포켓 봇] 초기화 실패:', err.message);
   }

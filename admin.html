@@ -875,7 +875,7 @@
       <div class="card">
         <div class="table-wrap">
           <table>
-            <thead><tr><th>회원</th><th>닉네임</th><th>계정 ID</th><th>잔액</th><th>총 거래금액</th><th>가입일</th><th>접속</th><th>상태</th><th>접속 IP</th><th>작업</th></tr></thead>
+            <thead><tr><th>회원</th><th>닉네임</th><th>계정 ID</th><th>잔액</th><th id="th-total-traded" onclick="sortUsersByTraded()" style="cursor:pointer;user-select:none;white-space:nowrap">총 거래금액<span id="sort-traded-icon"> ⇅</span></th><th>가입일</th><th>접속</th><th>상태</th><th>접속 IP</th><th>작업</th></tr></thead>
             <tbody id="usersTableBody">
               <tr><td colspan="10" style="text-align:center;color:var(--gray-400);padding:40px">로딩 중...</td></tr>
             </tbody>
@@ -1831,7 +1831,31 @@ async function loadUsers() {
     }
 
     users.forEach(u => { _usersCache[u.user_id] = u; });
-    tbody.innerHTML = users.map(u => {
+    _usersData = users;
+    _usersSortDir = 0;
+    renderUsersTable();
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:var(--red);padding:40px">API 서버에 연결할 수 없습니다</td></tr>`;
+  }
+}
+
+var _usersData = [];
+var _usersSortDir = 0; // 0=기본, 1=오름차순, -1=내림차순
+
+function sortUsersByTraded() {
+  _usersSortDir = _usersSortDir === 1 ? -1 : 1;
+  document.getElementById('sort-traded-icon').textContent = _usersSortDir === 1 ? ' ▲' : ' ▼';
+  renderUsersTable();
+}
+
+function renderUsersTable() {
+  const tbody = document.getElementById('usersTableBody');
+  if (!tbody) return;
+  var users = _usersData.slice();
+  if (_usersSortDir !== 0) {
+    users.sort((a, b) => ((parseFloat(a.total_traded)||0) - (parseFloat(b.total_traded)||0)) * _usersSortDir);
+  }
+  tbody.innerHTML = users.map(u => {
       const ini   = initials(u.full_name);
       const color = avatarColor(u.email);
       const bal   = u.balance ? `<b class="fcur">F</b>${Number(u.balance).toLocaleString()}` : '<b class="fcur">F</b>0';
@@ -1845,7 +1869,7 @@ async function loadUsers() {
           <td><div class="user-cell">
             <div class="u-avatar" style="background:${color}">${ini}</div>
             <div>
-              <div style="font-weight:600;font-size:13px">${u.full_name || '-'}</div>
+              <div style="font-weight:600;font-size:13px;cursor:pointer;color:var(--blue);text-decoration:underline" onclick="openUserDetail(${u.user_id})">${u.full_name || u.email || '-'}</div>
               <div style="font-size:11px;color:var(--gray-400)">${u.email}</div>
             </div>
           </div></td>
@@ -1873,9 +1897,6 @@ async function loadUsers() {
           </div></td>
         </tr>`;
     }).join('');
-  } catch(e) {
-    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:var(--red);padding:40px">API 서버에 연결할 수 없습니다</td></tr>`;
-  }
 }
 
 async function updateUserStatus(userId, status) {
@@ -2346,6 +2367,92 @@ document.addEventListener('DOMContentLoaded', () => {
     <div id="qDetailContent"></div>
   </div>
 </div>
+
+<!-- 회원 상세 모달 -->
+<div id="userDetailModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9200;align-items:center;justify-content:center;" onclick="if(event.target===this)closeUserDetail()">
+  <div style="background:var(--white);border-radius:20px;padding:28px 24px;max-width:700px;width:96%;box-shadow:0 20px 60px rgba(0,0,0,0.2);max-height:85vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div id="udTitle" style="font-size:17px;font-weight:800;color:var(--gray-900)"></div>
+      <button onclick="closeUserDetail()" style="width:32px;height:32px;border-radius:8px;border:none;background:var(--gray-100);font-size:18px;cursor:pointer">✕</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;border-bottom:1px solid var(--gray-100);padding-bottom:8px">
+      <button id="udTab1" onclick="switchUdTab(1)" style="padding:8px 18px;border-radius:10px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:#6366f1;color:white">등록 질문</button>
+      <button id="udTab2" onclick="switchUdTab(2)" style="padding:8px 18px;border-radius:10px;border:1px solid var(--gray-200);font-size:13px;font-weight:700;cursor:pointer;background:white;color:var(--gray-600)">투표/내기 현황</button>
+    </div>
+    <div id="udPanel1"></div>
+    <div id="udPanel2" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+function closeUserDetail() { document.getElementById('userDetailModal').style.display = 'none'; }
+
+function switchUdTab(n) {
+  document.getElementById('udPanel1').style.display = n === 1 ? '' : 'none';
+  document.getElementById('udPanel2').style.display = n === 2 ? '' : 'none';
+  document.getElementById('udTab1').style.cssText = n===1 ? 'padding:8px 18px;border-radius:10px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:#6366f1;color:white' : 'padding:8px 18px;border-radius:10px;border:1px solid var(--gray-200);font-size:13px;font-weight:700;cursor:pointer;background:white;color:var(--gray-600)';
+  document.getElementById('udTab2').style.cssText = n===2 ? 'padding:8px 18px;border-radius:10px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:#6366f1;color:white' : 'padding:8px 18px;border-radius:10px;border:1px solid var(--gray-200);font-size:13px;font-weight:700;cursor:pointer;background:white;color:var(--gray-600)';
+}
+
+async function openUserDetail(userId) {
+  var u = _usersCache[userId];
+  var name = u ? (u.full_name || u.email || '#' + userId) : '#' + userId;
+  document.getElementById('udTitle').textContent = name + ' 활동 내역';
+  document.getElementById('udPanel1').innerHTML = '<div style="text-align:center;padding:24px;color:var(--gray-400)">불러오는 중...</div>';
+  document.getElementById('udPanel2').innerHTML = '';
+  switchUdTab(1);
+  document.getElementById('userDetailModal').style.display = 'flex';
+
+  try {
+    var res = await fetch(ADMIN_API + '/api/admin/users/' + userId + '/activity', { headers: { 'x-admin-key': ADMIN_KEY } });
+    var data = await res.json();
+    var catMap = { politics:'정치', sports:'스포츠', culture:'문화', economy:'경제', trading:'트레이딩', weather:'날씨', statement:'발언', science:'과학&기술', neighbor:'나의 이웃', etc:'기타' };
+    var statusLabel = { APPROVED:'활성', PENDING:'승인대기', SETTLED:'정산완료', REJECTED:'거절됨' };
+
+    // 탭1: 등록 질문
+    if (!data.questions || !data.questions.length) {
+      document.getElementById('udPanel1').innerHTML = '<div style="text-align:center;padding:32px;color:var(--gray-400)">등록된 질문이 없습니다 (최근 30일)</div>';
+    } else {
+      document.getElementById('udPanel1').innerHTML = '<div style="font-size:12px;color:var(--gray-400);margin-bottom:8px">마감일 기준 최근 30일 데이터만 표시됩니다</div>'
+        + data.questions.map(function(q) {
+          var qText = escHtml(q.question_ko || q.question);
+          var end = q.end_date ? new Date(q.end_date).toLocaleDateString('ko-KR') : '-';
+          var st = statusLabel[q.status] || q.status;
+          var typeTag = q.type === 'vote' ? '<span style="background:#ede9fe;color:#7c3aed;padding:2px 7px;border-radius:6px;font-size:11px;font-weight:700">투표</span>' : '<span style="background:#fef3c7;color:#d97706;padding:2px 7px;border-radius:6px;font-size:11px;font-weight:700">내기</span>';
+          return '<div style="padding:12px;border:1px solid var(--gray-100);border-radius:10px;margin-bottom:8px">'
+            + '<div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">' + typeTag + ' <span style="font-size:11px;color:var(--gray-400)">' + (catMap[q.category]||q.category) + '</span><span style="margin-left:auto;font-size:11px;color:var(--gray-400)">마감 ' + end + ' · ' + st + '</span></div>'
+            + '<div style="font-size:13px;font-weight:600;color:var(--gray-900)">' + qText + '</div>'
+            + '</div>';
+        }).join('');
+    }
+
+    // 탭2: 투표/내기 현황
+    if (!data.participations || !data.participations.length) {
+      document.getElementById('udPanel2').innerHTML = '<div style="text-align:center;padding:32px;color:var(--gray-400)">참여 기록이 없습니다 (최근 30일)</div>';
+    } else {
+      document.getElementById('udPanel2').innerHTML = '<div style="font-size:12px;color:var(--gray-400);margin-bottom:8px">마감일 기준 최근 30일 데이터만 표시됩니다</div>'
+        + data.participations.map(function(p) {
+          var qText = escHtml(p.question_ko || p.question);
+          var typeTag = p.type === 'vote' ? '<span style="background:#ede9fe;color:#7c3aed;padding:2px 7px;border-radius:6px;font-size:11px;font-weight:700">투표</span>' : '<span style="background:#fef3c7;color:#d97706;padding:2px 7px;border-radius:6px;font-size:11px;font-weight:700">내기</span>';
+          var result = p.settle_result === 'WIN' ? '<span style="color:#16a34a;font-weight:700">WIN +' + (parseFloat(p.payout)||0).toFixed(0) + 'F</span>'
+                     : p.settle_result === 'LOSE' ? '<span style="color:#dc2626;font-weight:700">LOSE</span>'
+                     : '<span style="color:var(--gray-400)">진행중</span>';
+          var date = new Date(p.created_at).toLocaleDateString('ko-KR');
+          return '<div style="padding:12px;border:1px solid var(--gray-100);border-radius:10px;margin-bottom:8px">'
+            + '<div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">' + typeTag
+            + ' <b style="font-size:12px">' + escHtml(p.choice) + '</b>'
+            + ' <b class="fcur" style="font-size:12px">F</b><b style="font-size:12px">' + (parseFloat(p.amount)||0).toFixed(0) + '</b>'
+            + ' <span style="margin-left:auto;font-size:11px">' + result + '</span>'
+            + ' <span style="font-size:11px;color:var(--gray-400)">' + date + '</span></div>'
+            + '<div style="font-size:12px;color:var(--gray-600)">' + qText + '</div>'
+            + '</div>';
+        }).join('');
+    }
+  } catch(e) {
+    document.getElementById('udPanel1').innerHTML = '<div style="text-align:center;padding:24px;color:var(--red)">데이터 로드 실패</div>';
+  }
+}
+</script>
 
 </body>
 </html>
