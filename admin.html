@@ -1306,7 +1306,10 @@
 
   function buildDbQuestionRow(q) {
     _qDetailMap[q.question_id] = q;
-    var statusBadge = q.status === 'APPROVED' ? '<span class="badge badge-green">● 활성</span>'
+    var statusBadge = q.status === 'APPROVED' && q.type === 'bet'
+                    ? '<button class="action-btn" style="background:#f59e0b;color:white;border-color:#f59e0b;padding:5px 12px;font-size:12px;font-weight:700;border-radius:8px;cursor:pointer" onclick="event.stopPropagation();openSettleModal(' + q.question_id + ')">정산</button>'
+                    : q.status === 'APPROVED'  ? '<span class="badge badge-green">● 활성</span>'
+                    : q.status === 'SETTLED'   ? '<span class="badge badge-blue">✓ 정산완료</span>'
                     : q.status === 'REJECTED'  ? '<span class="badge badge-red">⊘ 거절됨</span>'
                     : '<span class="badge badge-yellow">⏳ 승인대기</span>';
     var typeTag = q.type === 'vote'
@@ -1320,16 +1323,13 @@
     }
     var endDate = q.end_date ? new Date(q.end_date).toLocaleDateString('ko-KR') : '-';
     var submitter = '@' + (q.poster_nickname || q.nickname || q.email || '-');
-    var settleBtn = (q.type === 'bet' && q.status === 'APPROVED')
-      ? '<button class="action-btn" style="background:#f59e0b;color:white;border-color:#f59e0b" onclick="event.stopPropagation();openSettleModal(' + q.question_id + ')">정산</button>'
-      : '';
     var actionBtns = q.status === 'PENDING'
       ? '<div class="action-btns">'
         + '<button class="action-btn primary" onclick="event.stopPropagation();adminApproveQ(' + q.question_id + ')">승인</button>'
         + '<button class="action-btn danger" onclick="event.stopPropagation();adminRejectQ(' + q.question_id + ')">반려</button>'
         + '<button class="action-btn danger" onclick="event.stopPropagation();confirmDeleteQ(' + q.question_id + ')">삭제</button>'
         + '</div>'
-      : '<div class="action-btns">' + settleBtn + '<button class="action-btn danger" onclick="event.stopPropagation();confirmDeleteQ(' + q.question_id + ')">삭제</button></div>';
+      : '<div class="action-btns"><button class="action-btn danger" onclick="event.stopPropagation();confirmDeleteQ(' + q.question_id + ')">삭제</button></div>';
     var displayQ2 = escHtml(q.question_ko || q.question);
     return '<tr class="db-q-row" data-qid="' + q.question_id + '" onclick="openQuestionDetail(' + q.question_id + ')" style="cursor:pointer">'
       + '<td>' + typeTag + '</td>'
