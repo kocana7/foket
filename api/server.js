@@ -264,6 +264,45 @@ app.get('/api/me', authMiddleware, async (req, res) => {
   }
 });
 
+// ── 내가 올린 질문 ────────────────────────────────────────
+app.get('/api/my-questions', authMiddleware, async (req, res) => {
+  try {
+    const db = await getPool();
+    const [rows] = await db.execute(
+      `SELECT q.question_id, q.type, q.question, q.question_ko, q.category,
+              q.options, q.initial_prob, q.end_date, q.status, q.created_at,
+              (SELECT COUNT(*) FROM Participations p WHERE p.question_id = q.question_id) AS participant_count,
+              (SELECT COALESCE(SUM(p.amount),0) FROM Participations p WHERE p.question_id = q.question_id) AS total_bet
+       FROM Questions q
+       WHERE q.user_id = ?
+       ORDER BY q.created_at DESC`,
+      [req.user.userId]
+    );
+    res.json({ questions: rows });
+  } catch (err) {
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
+// ── 내가 참여한 내역 ──────────────────────────────────────
+app.get('/api/my-participations', authMiddleware, async (req, res) => {
+  try {
+    const db = await getPool();
+    const [rows] = await db.execute(
+      `SELECT p.participation_id, p.question_id, p.choice, p.amount, p.created_at,
+              q.type, q.question, q.question_ko, q.category, q.status AS q_status
+       FROM Participations p
+       JOIN Questions q ON p.question_id = q.question_id
+       WHERE p.user_id = ?
+       ORDER BY p.created_at DESC`,
+      [req.user.userId]
+    );
+    res.json({ participations: rows });
+  } catch (err) {
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
 // ── 관리자: 회원 목록 ─────────────────────────────────────
 app.get('/api/admin/users', adminMiddleware, async (req, res) => {
   const { q, status, grade, page = 1, limit = 50 } = req.query;

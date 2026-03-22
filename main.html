@@ -397,6 +397,22 @@
     .mp-body { padding:20px 28px 28px;display:flex;flex-direction:column;gap:18px; }
     .mp-card { background:white;border-radius:20px;padding:24px 28px;margin-bottom:18px;box-shadow:0 1px 6px rgba(0,0,0,0.06); }
     .mp-card-title { font-size:16px;font-weight:800;color:var(--gray-900);margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--gray-100); }
+    .my-act-tabs { display:flex;gap:8px;margin-bottom:16px; }
+    .my-act-tab { flex:1;padding:8px;border-radius:10px;border:1.5px solid var(--gray-200);background:white;font-size:13px;font-weight:700;cursor:pointer;color:var(--gray-500);transition:all .15s; }
+    .my-act-tab.active { border-color:var(--blue);background:var(--blue);color:white; }
+    .my-act-item { padding:12px 0;border-bottom:1px solid var(--gray-100);display:flex;flex-direction:column;gap:4px; }
+    .my-act-item:last-child { border-bottom:none; }
+    .my-act-q { font-size:13px;font-weight:600;color:var(--gray-900);line-height:1.4; }
+    .my-act-meta { font-size:12px;color:var(--gray-400);display:flex;gap:8px;flex-wrap:wrap; }
+    .my-act-badge { display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700; }
+    .my-act-badge.vote { background:#EEF0FF;color:#334BFA; }
+    .my-act-badge.bet  { background:#FEF3C7;color:#D97706; }
+    .my-act-badge.pending { background:#F3F4F6;color:#6B7280; }
+    .my-act-badge.approved { background:#D1FAE5;color:#065F46; }
+    .my-act-stat { display:flex;gap:16px;padding:12px 0;border-bottom:1px solid var(--gray-100); }
+    .my-act-stat-item { flex:1;text-align:center; }
+    .my-act-stat-num { font-size:20px;font-weight:800;color:var(--blue); }
+    .my-act-stat-label { font-size:11px;color:var(--gray-400);margin-top:2px; }
     .mp-info-row { display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray-50); }
     .mp-info-label { font-size:13px;color:var(--gray-400);font-weight:600; }
     .mp-info-value { font-size:14px;font-weight:700;color:var(--gray-900); }
@@ -857,6 +873,23 @@
         </div>
       </div>
 
+
+      <!-- 내 활동 카드 -->
+      <div class="mp-card">
+        <div class="mp-card-title">내 활동</div>
+        <!-- 통계 요약 -->
+        <div class="my-act-stat" id="myActStat">
+          <div class="my-act-stat-item"><div class="my-act-stat-num" id="myActQCnt">-</div><div class="my-act-stat-label">등록한 질문</div></div>
+          <div class="my-act-stat-item"><div class="my-act-stat-num" id="myActPCnt">-</div><div class="my-act-stat-label">참여한 예측</div></div>
+          <div class="my-act-stat-item"><div class="my-act-stat-num" id="myActSpent">-</div><div class="my-act-stat-label">사용 포인트(F)</div></div>
+        </div>
+        <!-- 탭 -->
+        <div class="my-act-tabs" style="margin-top:14px">
+          <button class="my-act-tab active" id="myActTabQ" onclick="myActSetTab('questions')">내가 올린 질문</button>
+          <button class="my-act-tab" id="myActTabP" onclick="myActSetTab('participations')">참여 내역</button>
+        </div>
+        <div id="myActList"><div style="text-align:center;padding:24px;color:var(--gray-400);font-size:13px">불러오는 중...</div></div>
+      </div>
 
       <!-- 질문 등록 카드 -->
       <div class="mp-card">
@@ -2907,6 +2940,86 @@ const CARD_DATA = {
       } catch {}
     } catch { showToast('정보를 불러오지 못했습니다.'); }
     replaceWithFSymbol();
+    loadMyActivity();
+  }
+
+  /* ── 내 활동 ── */
+  var _myActCurrentTab = 'questions';
+  var _myActQuestions = [];
+  var _myActParticipations = [];
+
+  async function loadMyActivity() {
+    var token = localStorage.getItem('foket-token');
+    if (!token) return;
+    var hdrs = { 'Authorization': 'Bearer ' + token };
+    try {
+      var [qRes, pRes] = await Promise.all([
+        fetch('/api/my-questions', { headers: hdrs }),
+        fetch('/api/my-participations', { headers: hdrs })
+      ]);
+      _myActQuestions = qRes.ok ? ((await qRes.json()).questions || []) : [];
+      _myActParticipations = pRes.ok ? ((await pRes.json()).participations || []) : [];
+
+      // 통계
+      var totalSpent = _myActParticipations.reduce(function(s, p) { return s + (parseFloat(p.amount) || 0); }, 0);
+      document.getElementById('myActQCnt').textContent = _myActQuestions.length;
+      document.getElementById('myActPCnt').textContent = _myActParticipations.length;
+      document.getElementById('myActSpent').textContent = totalSpent.toFixed(0);
+
+      myActSetTab(_myActCurrentTab);
+    } catch(e) { console.error(e); }
+  }
+
+  function myActSetTab(tab) {
+    _myActCurrentTab = tab;
+    document.getElementById('myActTabQ').className = 'my-act-tab' + (tab === 'questions' ? ' active' : '');
+    document.getElementById('myActTabP').className = 'my-act-tab' + (tab === 'participations' ? ' active' : '');
+    var listEl = document.getElementById('myActList');
+
+    if (tab === 'questions') {
+      if (!_myActQuestions.length) { listEl.innerHTML = '<div style="text-align:center;padding:24px;color:var(--gray-400);font-size:13px">등록한 질문이 없습니다.</div>'; return; }
+      listEl.innerHTML = _myActQuestions.map(function(q) {
+        var typeClass = q.type === 'vote' ? 'vote' : 'bet';
+        var typeLabel = q.type === 'vote' ? '투표' : '내기';
+        var statusClass = q.status === 'APPROVED' ? 'approved' : 'pending';
+        var statusLabel = q.status === 'APPROVED' ? '활성' : q.status === 'REJECTED' ? '반려' : '승인대기';
+        var displayQ = q.question_ko || q.question || '';
+        var endDate = q.end_date ? q.end_date.slice(0,10) : '';
+        var totalBet = parseFloat(q.total_bet) || 0;
+        return '<div class="my-act-item">'
+          + '<div style="display:flex;gap:6px;margin-bottom:4px">'
+          + '<span class="my-act-badge ' + typeClass + '">' + typeLabel + '</span>'
+          + '<span class="my-act-badge ' + statusClass + '">' + statusLabel + '</span>'
+          + '</div>'
+          + '<div class="my-act-q">' + displayQ.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>'
+          + '<div class="my-act-meta">'
+          + '<span>참여자 ' + (q.participant_count || 0) + '명</span>'
+          + (q.type === 'bet' ? '<span>총 베팅 ' + totalBet.toFixed(0) + 'F</span>' : '')
+          + (endDate ? '<span>마감 ' + endDate + '</span>' : '')
+          + '</div>'
+          + '</div>';
+      }).join('');
+    } else {
+      if (!_myActParticipations.length) { listEl.innerHTML = '<div style="text-align:center;padding:24px;color:var(--gray-400);font-size:13px">참여한 예측이 없습니다.</div>'; return; }
+      listEl.innerHTML = _myActParticipations.map(function(p) {
+        var typeClass = p.type === 'vote' ? 'vote' : 'bet';
+        var typeLabel = p.type === 'vote' ? '투표' : '내기';
+        var displayQ = p.question_ko || p.question || '';
+        var date = p.created_at ? p.created_at.slice(0,10) : '';
+        var amount = parseFloat(p.amount) || 0;
+        return '<div class="my-act-item">'
+          + '<div style="display:flex;gap:6px;margin-bottom:4px">'
+          + '<span class="my-act-badge ' + typeClass + '">' + typeLabel + '</span>'
+          + '</div>'
+          + '<div class="my-act-q">' + displayQ.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>'
+          + '<div class="my-act-meta">'
+          + '<span>선택: <b>' + (p.choice || '-') + '</b></span>'
+          + '<span>사용 <b style="color:var(--blue)">' + amount.toFixed(0) + 'F</b></span>'
+          + (date ? '<span>' + date + '</span>' : '')
+          + '</div>'
+          + '</div>';
+      }).join('');
+    }
   }
 
   function closeMyPage() {
