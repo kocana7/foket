@@ -640,6 +640,54 @@ app.patch('/api/admin/questions/:id/status', adminMiddleware, async (req, res) =
   }
 });
 
+// ── 관리자: 내기 정산 ─────────────────────────────────────
+// winning: 'YES' | 'NO'
+// 정산 방식: 승리 베터에게 (총 베팅 포인트 / 승리측 베팅 포인트) 배율로 지급
+app.post('/api/admin/questions/:id/settle', adminMiddleware, async (req, res) => {
+  const { winning } = req.body;
+  if (!['YES', 'NO'].includes(winning))
+    return res.status(400).json({ error: 'winning은 YES 또는 NO 여야 합니다' });
+  const qId = req.params.id;
+  try {
+    const db = await getPool();
+    const [qRows] = await db.execute(
+      "SELECT type, status FROM Questions WHERE question_id = ?", [qId]
+    );
+    if (!qRows.length) return res.status(404).json({ error: '질문 없음' });
+    if (qRows[0].type !== 'bet') return res.status(400).json({ error: '내기 질문만 정산 가능합니다' });
+
+    // 전체 베팅 합계
+    const [totRows] = await db.execute(
+      'SELECT COALESCE(SUM(amount),0) AS total FROM Participations WHERE question_id = ?', [qId]
+    );
+    const totalPool = parseFloat(totRows[0].total) || 0;
+
+    // 승리측 참여자 목록
+    const [winners] = await db.execute(
+      'SELECT user_id, SUM(amount) AS bet FROM Participations WHERE question_id = ? AND choice = ? GROUP BY user_id',
+      [qId, winning]
+    );
+
+    const winnerTotal = winners.reduce((s, w) => s + parseFloat(w.bet), 0);
+    let payouts = [];
+    if (winnerTotal > 0 && winners.length > 0) {
+      for (const w of winners) {
+        const payout = Math.floor((parseFloat(w.bet) / winnerTotal) * totalPool);
+        await db.execute('UPDATE Users SET balance = balance + ? WHERE user_id = ?', [payout, w.user_id]);
+        payouts.push({ user_id: w.user_id, payout });
+      }
+    }
+
+    // 질문 상태를 SETTLED 로 변경
+    await db.execute("UPDATE Questions SET status = 'SETTLED' WHERE question_id = ?", [qId]);
+
+    res.json({ ok: true, winning, totalPool, winnerCount: winners.length, payouts });
+  } catch (err) {
+    console.error('[settle]', err.message);
+    res.status(500).json({ error: '서버 오류: ' + err.message });
+  }
+});
+
 // ── 관리자: 질문 삭제 ─────────────────────────────────────
 app.delete('/api/admin/questions/:id', adminMiddleware, async (req, res) => {
   try {
