@@ -510,7 +510,7 @@ app.get('/api/admin/questions', adminMiddleware, async (req, res) => {
 
     const [rows] = await db.execute(
       `SELECT q.question_id, q.user_id, q.type, q.question, q.question_ko,
-              q.poster_nickname, q.category, q.options, q.initial_prob,
+              q.poster_nickname, q.category, q.options, q.options_ko, q.initial_prob,
               q.end_date, q.status, q.created_at,
               u.email, u.nickname, u.full_name,
               (SELECT COUNT(*) FROM Participations p WHERE p.question_id = q.question_id) AS participant_count
@@ -673,6 +673,10 @@ async function initDb() {
     if (!qExisting.has('poster_nickname')) {
       await db.execute('ALTER TABLE Questions ADD COLUMN poster_nickname VARCHAR(100)');
       console.log('컬럼 추가: Questions.poster_nickname');
+    }
+    if (!qExisting.has('options_ko')) {
+      await db.execute('ALTER TABLE Questions ADD COLUMN options_ko LONGTEXT');
+      console.log('컬럼 추가: Questions.options_ko');
     }
 
     await db.execute(`
@@ -945,6 +949,59 @@ const QUESTION_KO_MAP = {
   'Was wird 2026 den deutschen Kulturdiskurs dominieren?': '2026년 독일 문화 담론을 지배할 것은?',
 };
 
+// ── 외국어 선택지 → 한국어 번역 맵 ──────────────────────────────────
+const OPTIONS_KO_MAP = {
+  // English
+  'US-China tensions':'미중 갈등', 'Russia-Ukraine':'러시아-우크라이나', 'Middle East crisis':'중동 위기', 'NATO expansion':'NATO 확장', 'AI governance':'AI 거버넌스',
+  'Brazil':'브라질', 'France':'프랑스', 'England':'잉글랜드', 'Germany':'독일', 'Argentina':'아르헨티나',
+  'Inflation resurgence':'인플레이션 재발', 'Recession':'경기침체', 'Dollar weakening':'달러 약세', 'Trade war':'무역전쟁', 'Tech bubble':'기술 버블',
+  'Generative AI':'생성형 AI', 'Quantum computing':'양자 컴퓨팅', 'Humanoid robots':'휴머노이드 로봇', 'Self-driving cars':'자율주행차', 'Biotech':'바이오테크',
+  'AI':'AI', 'Humanoid':'휴머노이드', 'Quantum':'양자', 'Autonomous':'자율',
+  // Japanese
+  '経済再生':'경제 재생', '少子化対策':'저출산 대책', '安全保障':'안전보장', 'デジタル化':'디지털화', '環境政策':'환경 정책',
+  '日本':'일본', 'アメリカ':'미국', 'ドミニカ共和国':'도미니카 공화국', 'プエルトリコ':'푸에르토리코', '韓国':'한국',
+  'アニメ':'애니메이션', 'J-POP':'J-POP', 'ゲーム':'게임', '映画':'영화', 'マンガ':'만화',
+  '円安加速':'엔화 약세 가속', 'インフレ長期化':'인플레이션 장기화', '少子化による労働力不足':'저출산으로 인한 노동력 부족', '中国経済の減速':'중국 경제 둔화', 'エネルギー価格上昇':'에너지 가격 상승',
+  '生成AI':'생성형 AI', '量子コンピュータ':'양자 컴퓨터', '自動運転':'자율주행', '人型ロボット':'휴머노이드 로봇', '宇宙旅行':'우주여행',
+  '発酵食品':'발효 식품', 'プラントベース':'플랜트 베이스', '高級おにぎり':'고급 주먹밥', 'クラフトコーヒー':'크래프트 커피', '昆虫食':'곤충 음식',
+  // Chinese
+  '台湾问题':'대만 문제', '南海争端':'남중국해 분쟁', '中美贸易战':'미중 무역전쟁', '一带一路':'일대일로', '俄乌局势':'러시아-우크라이나 상황',
+  '人工智能':'인공지능', '新能源':'신에너지', '半导体':'반도체', '消费品':'소비재', '生物医药':'바이오의약',
+  '房地产危机':'부동산 위기', '通货紧缩':'디플레이션', '人口老龄化':'인구 고령화', '科技封锁':'기술 봉쇄', '内需不足':'내수 부족',
+  '量子计算':'양자 컴퓨팅', '航天探月':'우주 달 탐사', '核聚变':'핵융합', '新能源汽车':'신에너지 자동차',
+  '国潮时尚':'국조 패션', '古装剧':'사극 드라마', '华语流行音乐':'중국어권 팝음악', '短视频文化':'숏폼 문화', '传统非遗':'전통 무형문화재',
+  '城市露营':'도심 캠핑', '骑行健身':'자전거 운동', '咖啡文化':'커피 문화', '宠物经济':'반려동물 경제', '慢生活':'슬로 라이프',
+  // Spanish
+  'Corrupción':'부패', 'Inflación':'인플레이션', 'Crimen organizado':'조직 범죄', 'Migración':'이민', 'Desigualdad':'불평등',
+  'Cine':'영화', 'Gastronomía':'미식', 'Música flamenco':'플라멩코 음악', 'Moda':'패션', 'Literatura':'문학',
+  'Deuda pública':'공공부채', 'Devaluación':'평가절하', 'Proteccionismo de EEUU':'미국 보호무역주의', 'Sequía':'가뭄', 'Desempleo juvenil':'청년 실업',
+  'IA generativa':'생성형 AI', 'Vehículos eléctricos':'전기차', 'Energía solar':'태양에너지', 'Robots industriales':'산업용 로봇', 'Biotecnología':'바이오기술',
+  // French
+  'Immigration':'이민', 'Réforme des retraites':'연금 개혁', 'Sécurité':'치안', 'Écologie':'생태환경', "Pouvoir d'achat":'구매력',
+  "Cinéma d'auteur":'아트 시네마', 'Musique électronique':'일렉트로닉 음악', 'Mode durable':'지속가능 패션', 'Littérature engagée':'참여 문학', 'Gastronomie verte':'그린 미식',
+  'Tourisme':'관광', 'Aéronautique':'항공우주', 'IA et tech':'AI·테크', 'Luxe':'명품', 'Énergie renouvelable':'재생에너지',
+  'Sécheresse':'가뭄', 'Inondations':'홍수', 'Canicule':'폭염', 'Tempêtes':'폭풍', 'Incendies de forêt':'산불',
+  // Russian
+  'Экономика':'경제', 'Безопасность':'안보', 'Дипломатия':'외교', 'Технологии':'기술', 'Демография':'인구 문제',
+  'Энергетика':'에너지', 'Оборона':'방위', 'ИТ':'IT', 'Сельское хозяйство':'농업', 'Горнодобывающая':'광업',
+  'Санкции':'제재', 'Нефтяные цены':'원유 가격', 'Курс рубля':'루블 환율', 'Военные расходы':'군사 지출',
+  'Теннисист':'테니스 선수', 'Хоккеист':'하키 선수', 'Борец':'레슬러', 'Лёгкоатлет':'육상 선수', 'Боксёр':'복서',
+  'Кино':'영화', 'Музыка':'음악', 'Литература':'문학', 'Балет':'발레', 'Живопись':'회화',
+  'Цифровизация':'디지털화', 'Урбанизация':'도시화', 'Образование':'교육', 'Здравоохранение':'의료',
+  // German
+  'Migration':'이민', 'Wirtschaftskrise':'경제 위기', 'Energieversorgung':'에너지 공급', 'Sicherheitspolitik':'안보 정책', 'Klimaschutz':'기후 보호',
+  'Energiepreise':'에너지 가격', 'Fachkräftemangel':'전문인력 부족', 'Exportrückgang':'수출 감소', 'Digitalisierungslücke':'디지털화 격차', 'Staatsverschuldung':'국가 부채',
+  'Künstliche Intelligenz':'인공지능', 'Elektromobilität':'전기 모빌리티', 'Wasserstoffenergie':'수소에너지', 'Robotik':'로보틱스',
+  'KI in der Kunst':'AI와 예술', 'Nachhaltige Mode':'지속가능 패션', 'Streaming-Serien':'스트리밍 시리즈', 'Gaming-Kultur':'게이밍 문화', 'Traditionelles Handwerk':'전통 수공예',
+};
+
+function translateOptions(options, lang) {
+  if (!options || lang === 'ko') return null;
+  const translated = options.map(o => OPTIONS_KO_MAP[o] || o);
+  const hasTranslation = translated.some((t, i) => t !== options[i]);
+  return hasTranslation ? JSON.stringify(translated) : null;
+}
+
 // ── 수퍼포켓 봇 닉네임 풀 (언어별 100 × 200 = 20,000 조합) ───────────
 const BOT_NICK_PARTS = {
   ko: {
@@ -1036,9 +1093,10 @@ async function seedAllBotQuestions() {
         endDate.setDate(endDate.getDate() + (q.days || 30));
         const options = q.options ? JSON.stringify(q.options) : null;
         const question_ko = lang === 'ko' ? null : (QUESTION_KO_MAP[q.question] || null);
+        const options_ko = q.options ? translateOptions(q.options, lang) : null;
         await db.execute(
-          'INSERT INTO Questions (user_id, type, question, question_ko, poster_nickname, category, options, initial_prob, end_date, status) VALUES (?,?,?,?,?,?,?,?,?,?)',
-          [_botUserId, q.type, q.question, question_ko, nick, q.category, options, q.initial_prob || null, endDate, 'APPROVED']
+          'INSERT INTO Questions (user_id, type, question, question_ko, poster_nickname, category, options, options_ko, initial_prob, end_date, status) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+          [_botUserId, q.type, q.question, question_ko, nick, q.category, options, options_ko, q.initial_prob || null, endDate, 'APPROVED']
         );
         postedSet.add(q.question);
         inserted++;
@@ -1076,9 +1134,10 @@ async function postBotQuestion() {
     endDate.setDate(endDate.getDate() + (q.days || 30));
     const options = q.options ? JSON.stringify(q.options) : null;
     const question_ko = lang === 'ko' ? null : (QUESTION_KO_MAP[q.question] || null);
+    const options_ko = q.options ? translateOptions(q.options, lang) : null;
     await db.execute(
-      'INSERT INTO Questions (user_id, type, question, question_ko, poster_nickname, category, options, initial_prob, end_date, status) VALUES (?,?,?,?,?,?,?,?,?,?)',
-      [_botUserId, q.type, q.question, question_ko, nick, q.category, options, q.initial_prob || null, endDate, 'APPROVED']
+      'INSERT INTO Questions (user_id, type, question, question_ko, poster_nickname, category, options, options_ko, initial_prob, end_date, status) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+      [_botUserId, q.type, q.question, question_ko, nick, q.category, options, options_ko, q.initial_prob || null, endDate, 'APPROVED']
     );
     console.log(`[수퍼포켓 봇] [${lang}] "${nick}" 게시: [${q.category}] ${q.question.slice(0,40)}...`);
   } catch (err) {
