@@ -1419,11 +1419,11 @@ async function initBotUser() {
     }
     // 시작 시 BOT_LANG_DATA 전체 질문 일괄 등록
     await seedAllBotQuestions();
-    // 봇 질문 게시: 이후 매 10분마다 신규 질문 1개 추가
-    setInterval(postBotQuestion, 10 * 60 * 1000);
-    // 봇 참여: 30초 후 첫 참여, 이후 매 7분마다 랜덤 투표/베팅
+    // 봇 질문 게시: 매 1시간마다 신규 질문 1개
+    setInterval(postBotQuestion, 60 * 60 * 1000);
+    // 봇 참여: 30초 후 첫 참여, 이후 매 5분마다 랜덤 투표/베팅
     setTimeout(botParticipate, 30 * 1000);
-    setInterval(botParticipate, 7 * 60 * 1000);
+    setInterval(botParticipate, 5 * 60 * 1000);
   } catch (err) {
     console.error('[수퍼포켓 봇] 초기화 실패:', err.message);
   }
