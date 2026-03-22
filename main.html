@@ -2740,7 +2740,9 @@ const CARD_DATA = {
             + '<span class="part-count" style="display:block;margin-top:4px">👥 ' + totalCount + '명 참여</span>';
         }
 
-        return '<div class="va-card">'
+        _questionsById[q.question_id] = q;
+        var qProb = parseInt(q.initial_prob) || 50;
+        return '<div class="va-card" style="cursor:pointer" onclick="closeViewAll();openTrade(' + q.question_id + ',' + qProb + ')">'
           + '<div class="va-card-type" style="background:' + typeColor + '">' + typeLabel + '</div>'
           + '<div class="va-card-q">' + displayQ + '</div>'
           + statsHtml
