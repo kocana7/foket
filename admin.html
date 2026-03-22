@@ -2131,7 +2131,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (q.type === 'bet') {
       body.initial_prob = parseInt(document.getElementById('editQProb').value) || 50;
     } else {
-      body.options = document.getElementById('editQOpts').value.split('\n').map(function(s){ return s.trim(); }).filter(Boolean);
+      body.options_ko = document.getElementById('editQOpts').value.split('\n').map(function(s){ return s.trim(); }).filter(Boolean);
     }
     try {
       var res = await fetch(ADMIN_API + '/api/admin/questions/' + _editQTargetId, {

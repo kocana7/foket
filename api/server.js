@@ -801,13 +801,14 @@ app.delete('/api/admin/questions/:id', adminMiddleware, async (req, res) => {
 
 // ── 관리자: 질문 수정 ───────────────────────────────────────
 app.patch('/api/admin/questions/:id', adminMiddleware, async (req, res) => {
-  const { question_ko, options, initial_prob, end_date, category } = req.body;
+  const { question_ko, options, options_ko, initial_prob, end_date, category } = req.body;
   try {
     const db = await getPool();
     const fields = [];
     const vals = [];
     if (question_ko !== undefined) { fields.push('question_ko = ?'); vals.push(question_ko); }
     if (options !== undefined)     { fields.push('options = ?');     vals.push(JSON.stringify(options)); }
+    if (options_ko !== undefined)  { fields.push('options_ko = ?'); vals.push(JSON.stringify(options_ko)); }
     if (initial_prob !== undefined){ fields.push('initial_prob = ?');vals.push(initial_prob); }
     if (end_date !== undefined)    { fields.push('end_date = ?');    vals.push(end_date || null); }
     if (category !== undefined)    { fields.push('category = ?');    vals.push(category); }
