@@ -2300,13 +2300,18 @@ const CARD_DATA = {
     applyLanguage(lang);
     // 카드 질문도 선택 언어로 번역
     if (lang === 'ko') {
-      // 한국어: data-rawq 원문으로 복원
       document.querySelectorAll('.market-question[data-rawq]').forEach(function(el) {
         el.textContent = el.getAttribute('data-rawq');
       });
+      document.querySelectorAll('.ticker-item[data-rawq] .ticker-q-text').forEach(function(el) {
+        el.textContent = el.closest('[data-rawq]').getAttribute('data-rawq');
+      });
     } else {
       translateAllCards(lang);
+      translateTickerItems(lang);
     }
+    // 카드 리빌드 (UI 라벨 언어 반영)
+    loadSectionCards();
   }
 
   function toggleLangMenu() {
@@ -2389,11 +2394,24 @@ const CARD_DATA = {
     neighbor:'나의 이웃', etc:'기타'
   };
 
+  // UI 라벨 다국어
+  var UI_LABELS = {
+    ko: { bet:'내기', vote:'투표', participants:'명 참여', totalBet:'총 F 베팅', more:'개 더', deadline:'마감', betLabel:'베팅' },
+    en: { bet:'Bet', vote:'Vote', participants:' participants', totalBet:' F bet', more:' more', deadline:'Ends', betLabel:'Bet' },
+    ja: { bet:'賭け', vote:'投票', participants:'名参加', totalBet:'F ベット', more:'件以上', deadline:'締切', betLabel:'ベット' },
+    zh: { bet:'投注', vote:'投票', participants:'人参与', totalBet:'F 投注', more:'个更多', deadline:'截止', betLabel:'投注' },
+    fr: { bet:'Pari', vote:'Vote', participants:' participants', totalBet:' F pariés', more:' de plus', deadline:'Fin', betLabel:'Miser' },
+    de: { bet:'Wette', vote:'Abstimmung', participants:' Teilnehmer', totalBet:' F gesetzt', more:' mehr', deadline:'Ende', betLabel:'Wetten' },
+    es: { bet:'Apuesta', vote:'Voto', participants:' participantes', totalBet:' F apostados', more:' más', deadline:'Vence', betLabel:'Apostar' },
+    ru: { bet:'Ставка', vote:'Голос', participants:' участников', totalBet:' F ставок', more:' ещё', deadline:'Конец', betLabel:'Ставка' },
+  };
+  function ul(key) { return (UI_LABELS[currentLang] || UI_LABELS.en)[key] || UI_LABELS.ko[key] || ''; }
+
   function buildDbMainCard(q) {
     _questionsById[q.question_id] = q;
     var icon = CAT_ICONS[q.category] || '📋';
     var catLabel = CAT_NAMES[q.category] || q.category || '';
-    var typeLabel = q.type === 'vote' ? '투표' : '내기';
+    var typeLabel = ul(q.type === 'vote' ? 'vote' : 'bet');
     var totalCount = parseInt(q.participant_count) || 0;
     var choices = q.choices || {};
     var statsHtml = '';
@@ -2410,8 +2428,8 @@ const CARD_DATA = {
         + '<div class="bet-stat-row"><span class="bet-stat-yes">Yes ' + yesPct + '%</span><div class="bet-stat-bar-wrap"><div class="bet-stat-bar-yes" style="width:' + yesPct + '%"></div></div></div>'
         + '<div class="bet-stat-row"><span class="bet-stat-no">No ' + noPct + '%</span><div class="bet-stat-bar-wrap"><div class="bet-stat-bar-no" style="width:' + noPct + '%"></div></div></div>'
         + '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">'
-        + '<span class="part-count">👥 ' + totalCount + '명 참여</span>'
-        + '<span style="font-size:11px;color:var(--blue);font-weight:700">총 ' + totalBetAmt.toLocaleString() + 'F 베팅</span>'
+        + '<span class="part-count">👥 ' + totalCount + ul('participants') + '</span>'
+        + '<span style="font-size:11px;color:var(--blue);font-weight:700">' + totalBetAmt.toLocaleString() + ul('totalBet') + '</span>'
         + '</div>'
         + '</div>';
     } else {
@@ -2431,9 +2449,9 @@ const CARD_DATA = {
           + '<span class="vote-opt-pct">' + (voteTotal > 0 ? pct + '%' : '-') + '</span>'
           + '</div>';
       }).join('');
-      if (opts.length > 3) optsHtml += '<div class="vote-opt-more">+' + (opts.length - 3) + '개 더</div>';
+      if (opts.length > 3) optsHtml += '<div class="vote-opt-more">+' + (opts.length - 3) + ul('more') + '</div>';
       statsHtml = '<div class="vote-opts">' + optsHtml + '</div>'
-        + '<span class="part-count">👥 ' + totalCount + '명 참여</span>';
+        + '<span class="part-count">👥 ' + totalCount + ul('participants') + '</span>';
     }
 
     var rawKo = (q.question_ko || q.question || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -2585,14 +2603,17 @@ const CARD_DATA = {
           .filter(function(q) { return q.end_date; })
           .sort(function(a, b) { return new Date(a.end_date) - new Date(b.end_date); });
         if (tickerQs.length) {
-          var urgentTag = '<div class="ticker-item" style="color:#FFD700;font-weight:900;letter-spacing:1px"><span class="ticker-dot" style="background:#FFD700"></span>마감임박!!</div>';
+          var urgentLabel = currentLang === 'ko' ? '마감임박!!' : (UI_LABELS[currentLang] || UI_LABELS.en).deadline + '!!';
+          var urgentTag = '<div class="ticker-item" style="color:#FFD700;font-weight:900;letter-spacing:1px"><span class="ticker-dot" style="background:#FFD700"></span>' + urgentLabel + '</div>';
+          var deadlineLabel = ul('deadline');
           var itemArr = tickerQs.map(function(q) {
-            var title = (q.question_ko || q.question || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-            var prob = parseInt(q.initial_prob) || 50;
+            var rawKo = q.question_ko || q.question || '';
             var endStr = q.end_date ? q.end_date.slice(0,10) : '';
-            return '<div class="ticker-item"><span class="ticker-dot"></span>'
-              + title + ' <strong>' + prob + '%</strong>'
-              + ' <span style="opacity:.7;font-weight:400;font-size:11px">마감 ' + endStr + '</span>'
+            var prob = parseInt(q.initial_prob) || 50;
+            return '<div class="ticker-item" data-rawq="' + rawKo.replace(/"/g,'&quot;') + '"><span class="ticker-dot"></span>'
+              + '<span class="ticker-q-text">' + rawKo.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</span>'
+              + ' <strong>' + prob + '%</strong>'
+              + ' <span style="opacity:.7;font-weight:400;font-size:11px">' + deadlineLabel + ' ' + endStr + '</span>'
               + '</div>';
           });
           // 2~4개 간격으로 랜덤하게 마감임박!! 삽입
@@ -2603,6 +2624,8 @@ const CARD_DATA = {
           });
           var items = withUrgent.join('');
           tickerEl.innerHTML = items + items;
+          // 티커 질문 번역
+          translateTickerItems(currentLang);
         }
       }
       // 카드 렌더 완료 후 현재 언어로 번역
@@ -2681,7 +2704,23 @@ const CARD_DATA = {
         var translated = await translateIfNeeded(rawKo, lang);
         el.textContent = translated;
       } catch(e) {}
-      // 5개마다 잠깐 쉬어 rate limit 회피
+      if (i > 0 && i % 5 === 0) await new Promise(function(r) { setTimeout(r, 300); });
+    }
+  }
+
+  async function translateTickerItems(lang) {
+    if (lang === 'ko') return;
+    var els = Array.from(document.querySelectorAll('.ticker-item[data-rawq] .ticker-q-text'));
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      var rawKo = el.closest('[data-rawq]').getAttribute('data-rawq');
+      if (!rawKo) continue;
+      var key = lang + ':' + rawKo.slice(0, 120);
+      if (_transCache[key]) { el.textContent = _transCache[key]; continue; }
+      try {
+        var translated = await translateIfNeeded(rawKo, lang);
+        el.textContent = translated;
+      } catch(e) {}
       if (i > 0 && i % 5 === 0) await new Promise(function(r) { setTimeout(r, 300); });
     }
   }
