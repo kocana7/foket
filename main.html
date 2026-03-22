@@ -409,6 +409,8 @@
     .my-act-badge.bet  { background:#FEF3C7;color:#D97706; }
     .my-act-badge.pending { background:#F3F4F6;color:#6B7280; }
     .my-act-badge.approved { background:#D1FAE5;color:#065F46; }
+    .my-act-badge.settled { background:#DBEAFE;color:#1D4ED8; }
+    .my-act-badge.rejected { background:#FEE2E2;color:#991B1B; }
     .my-act-stat { display:flex;gap:16px;padding:12px 0;border-bottom:1px solid var(--gray-100); }
     .my-act-stat-item { flex:1;text-align:center; }
     .my-act-stat-num { font-size:20px;font-weight:800;color:var(--blue); }
@@ -2998,8 +3000,8 @@ const CARD_DATA = {
       listEl.innerHTML = _myActQuestions.map(function(q) {
         var typeClass = q.type === 'vote' ? 'vote' : 'bet';
         var typeLabel = q.type === 'vote' ? '투표' : '내기';
-        var statusClass = q.status === 'APPROVED' ? 'approved' : 'pending';
-        var statusLabel = q.status === 'APPROVED' ? '활성' : q.status === 'REJECTED' ? '반려' : '승인대기';
+        var statusClass = q.status === 'APPROVED' ? 'approved' : q.status === 'SETTLED' ? 'settled' : q.status === 'REJECTED' ? 'rejected' : 'pending';
+        var statusLabel = q.status === 'APPROVED' ? '활성' : q.status === 'SETTLED' ? '정산완료' : q.status === 'REJECTED' ? '반려' : '승인대기';
         var displayQ = q.question_ko || q.question || '';
         var endDate = q.end_date ? q.end_date.slice(0,10) : '';
         var totalBet = parseFloat(q.total_bet) || 0;
