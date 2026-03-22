@@ -2544,6 +2544,7 @@ const CARD_DATA = {
       if (data.balance !== undefined) {
         var balEl = document.getElementById('userBalance');
         if (balEl) balEl.textContent = Number(data.balance).toFixed(0) + 'F';
+        try { var u = JSON.parse(localStorage.getItem('foket-user') || '{}'); u.balance = data.balance; localStorage.setItem('foket-user', JSON.stringify(u)); } catch(e) {}
       }
 
       // 결과 업데이트
@@ -2600,11 +2601,15 @@ const CARD_DATA = {
     const amount = parseFloat(document.getElementById('tradeAmount').value) || 0;
     const prob = currentSide === 'yes' ? currentProb : (100 - currentProb);
 
-    // 내 포인트 (마이페이지 mpBalance 우선, 없으면 navbar userBalance)
-    var mpEl = document.getElementById('mpBalance');
-    var balEl = document.getElementById('userBalance');
-    var myBal = mpEl && mpEl.textContent.trim() ? parseFloat(mpEl.textContent) || 0
-              : balEl ? parseFloat(balEl.textContent.replace(/[^0-9.]/g,'')) || 0 : 0;
+    // 내 포인트: localStorage > mpBalance > userBalance 순으로 읽기
+    var myBal = 0;
+    try { myBal = parseFloat(JSON.parse(localStorage.getItem('foket-user') || '{}').balance) || 0; } catch(e) {}
+    if (!myBal) {
+      var mpEl = document.getElementById('mpBalance');
+      var balEl = document.getElementById('userBalance');
+      myBal = mpEl && mpEl.textContent.trim() ? parseFloat(mpEl.textContent.replace(/[^0-9.]/g,'')) || 0
+            : balEl ? parseFloat(balEl.textContent.replace(/[^0-9.]/g,'')) || 0 : 0;
+    }
     document.getElementById('tradeMyBalance').innerHTML = myBal.toFixed(0) + '<b class="fcur">F</b>';
 
     // 총 베팅 포인트 (이 질문의 누적 베팅)
@@ -2640,6 +2645,7 @@ const CARD_DATA = {
         if (data.balance !== undefined) {
           var balEl = document.getElementById('userBalance');
           if (balEl) balEl.textContent = Number(data.balance).toFixed(0) + 'F';
+          try { var u = JSON.parse(localStorage.getItem('foket-user') || '{}'); u.balance = data.balance; localStorage.setItem('foket-user', JSON.stringify(u)); } catch(e) {}
         }
         showToast(amount + 'F 베팅 완료! (' + choice + ')');
         setTimeout(closeTrade, 800);
