@@ -2278,6 +2278,15 @@ const CARD_DATA = {
     });
     document.getElementById('langDropdown').classList.remove('open');
     applyLanguage(lang);
+    // 카드 질문도 선택 언어로 번역
+    if (lang === 'ko') {
+      // 한국어: data-rawq 원문으로 복원
+      document.querySelectorAll('.market-question[data-rawq]').forEach(function(el) {
+        el.textContent = el.getAttribute('data-rawq');
+      });
+    } else {
+      translateAllCards(lang);
+    }
   }
 
   function toggleLangMenu() {
@@ -2407,13 +2416,13 @@ const CARD_DATA = {
         + '<span class="part-count">👥 ' + totalCount + '명 참여</span>';
     }
 
-    var cardDisplayQ = (currentLang === 'ko') ? (q.question_ko || q.question || '') : (q.question || '');
+    var rawKo = (q.question_ko || q.question || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     return '<div class="market-card db-main-card" data-cat="' + (q.category||'') + '" data-qid="' + q.question_id + '" onclick="openTrade(' + q.question_id + ',' + (parseInt(q.initial_prob)||50) + ')">'
       + '<div class="market-card-top">'
       + '<div class="market-icon">' + icon + '</div>'
       + '<div class="market-meta">'
       + '<div class="market-category">' + catLabel + ' · ' + typeLabel + '</div>'
-      + '<div class="market-question">' + cardDisplayQ.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>'
+      + '<div class="market-question" data-rawq="' + (q.question_ko || q.question || '').replace(/"/g,'&quot;') + '">' + rawKo + '</div>'
       + '</div></div>'
       + statsHtml
       + '<div class="card-sparkline" id="sparkline-' + q.question_id + '"></div>'
@@ -2576,6 +2585,8 @@ const CARD_DATA = {
           tickerEl.innerHTML = items + items;
         }
       }
+      // 카드 렌더 완료 후 현재 언어로 번역
+      translateAllCards(currentLang);
     } catch(e) {
       console.error('[loadSectionCards]', e);
     }
@@ -2621,7 +2632,6 @@ const CARD_DATA = {
 
   async function translateIfNeeded(text, targetLang) {
     if (!text || targetLang === 'ko') return text;
-    if (!/[\uAC00-\uD7AF\u3131-\u318E]/.test(text)) return text; // not Korean
     var key = targetLang + ':' + text.slice(0, 120);
     if (_transCache[key]) return _transCache[key];
     try {
@@ -2635,6 +2645,25 @@ const CARD_DATA = {
       }
     } catch(e) {}
     return text;
+  }
+
+  // 모든 카드 질문을 현재 언어로 번역
+  async function translateAllCards(lang) {
+    if (lang === 'ko') return;
+    var els = Array.from(document.querySelectorAll('.market-question[data-rawq]'));
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      var rawKo = el.getAttribute('data-rawq');
+      if (!rawKo) continue;
+      var key = lang + ':' + rawKo.slice(0, 120);
+      if (_transCache[key]) { el.textContent = _transCache[key]; continue; }
+      try {
+        var translated = await translateIfNeeded(rawKo, lang);
+        el.textContent = translated;
+      } catch(e) {}
+      // 5개마다 잠깐 쉬어 rate limit 회피
+      if (i > 0 && i % 5 === 0) await new Promise(function(r) { setTimeout(r, 300); });
+    }
   }
 
   async function openTrade(questionId, prob) {
