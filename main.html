@@ -506,6 +506,9 @@
   </div>
 </div>
 
+<!-- debug status -->
+<div id="_dbg_status" style="position:fixed;bottom:8px;left:8px;z-index:9999;background:#1D2939;color:#fff;font-size:12px;padding:4px 10px;border-radius:6px;opacity:0.85;pointer-events:none"></div>
+
 <!-- TRENDING MARKETS -->
 <section class="section" id="markets">
     <div class="section-header">
@@ -513,151 +516,6 @@
       <a class="section-link" href="#" onclick="openViewAll('','Hot 이슈');return false;">전체보기 →</a>
     </div>
     <div class="market-grid" id="marketGrid">
-
-      <div class="market-card" data-card-id="hot-1" data-cat="sports" onclick="openTrade('Will the Kansas City Chiefs win the Super Bowl?', 71)">
-        <div class="market-card-top">
-          <div class="market-icon">🏈</div>
-          <div class="market-meta">
-            <div class="market-category">NFL · Sports</div>
-            <div class="market-question">Will the Kansas City Chiefs win the Super Bowl?</div>
-          </div>
-        </div>
-        <div class="market-prob-bar"><div class="market-prob-fill" style="width:71%"></div></div>
-        <div class="market-card-bottom">
-          <div class="market-chance"><div class="market-chance-val">71<b class="fcur">F</b></div><div class="market-chance-label" data-i18n="card.yeschance">Yes chance</div></div>
-          <div>
-            <div class="market-vol" data-vol="2.1M" data-i18n="card.vol"><b class="fcur">F</b>2.1M Vol</div>
-            <div class="market-btns"><button class="btn-yes" data-i18n-btn="yes" data-pct="71">Yes 71<b class="fcur">F</b></button><button class="btn-no" data-i18n-btn="no" data-pct="29">No 29<b class="fcur">F</b></button></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="market-card" data-card-id="hot-2" data-cat="finance" onclick="openTrade('Will the S&P 500 close above 5,200 today?', 67)">
-        <div class="market-card-top">
-          <div class="market-icon">📈</div>
-          <div class="market-meta">
-            <div class="market-category">S&P 500 · Financials</div>
-            <div class="market-question">Will the S&P 500 close above 5,200 today?</div>
-          </div>
-        </div>
-        <div class="market-prob-bar"><div class="market-prob-fill" style="width:67%"></div></div>
-        <div class="market-card-bottom">
-          <div class="market-chance"><div class="market-chance-val">67<b class="fcur">F</b></div><div class="market-chance-label" data-i18n="card.yeschance">Yes chance</div></div>
-          <div>
-            <div class="market-vol" data-vol="4.7M" data-i18n="card.vol"><b class="fcur">F</b>4.7M Vol</div>
-            <div class="market-btns"><button class="btn-yes" data-i18n-btn="yes" data-pct="67">Yes 67<b class="fcur">F</b></button><button class="btn-no" data-i18n-btn="no" data-pct="33">No 33<b class="fcur">F</b></button></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="market-card" data-card-id="hot-3" data-cat="crypto" onclick="openTrade('Will Bitcoin exceed <b class="fcur">F</b>80,000 this week?', 52)">
-        <div class="market-card-top">
-          <div class="market-icon">₿</div>
-          <div class="market-meta">
-            <div class="market-category">Bitcoin · Crypto</div>
-            <div class="market-question">Will Bitcoin exceed <b class="fcur">F</b>80,000 this week?</div>
-          </div>
-        </div>
-        <div class="market-prob-bar"><div class="market-prob-fill" style="width:52%"></div></div>
-        <div class="market-card-bottom">
-          <div class="market-chance"><div class="market-chance-val">52<b class="fcur">F</b></div><div class="market-chance-label" data-i18n="card.yeschance">Yes chance</div></div>
-          <div>
-            <div class="market-vol" data-vol="6.3M" data-i18n="card.vol"><b class="fcur">F</b>6.3M Vol</div>
-            <div class="market-btns"><button class="btn-yes" data-i18n-btn="yes" data-pct="52">Yes 52<b class="fcur">F</b></button><button class="btn-no" data-i18n-btn="no" data-pct="48">No 48<b class="fcur">F</b></button></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="market-card" data-card-id="hot-4" data-cat="econ" onclick="openTrade('Will the Fed cut rates in March 2026?', 28)">
-        <div class="market-card-top">
-          <div class="market-icon">🏦</div>
-          <div class="market-meta">
-            <div class="market-category">Fed Rates · Economics</div>
-            <div class="market-question">Will the Fed cut rates in March 2026?</div>
-          </div>
-        </div>
-        <div class="market-prob-bar"><div class="market-prob-fill" style="width:28%; background:var(--red)"></div></div>
-        <div class="market-card-bottom">
-          <div class="market-chance"><div class="market-chance-val">28<b class="fcur">F</b></div><div class="market-chance-label" data-i18n="card.yeschance">Yes chance</div></div>
-          <div>
-            <div class="market-vol" data-vol="3.2M" data-i18n="card.vol"><b class="fcur">F</b>3.2M Vol</div>
-            <div class="market-btns"><button class="btn-yes" data-i18n-btn="yes" data-pct="28">Yes 28<b class="fcur">F</b></button><button class="btn-no" data-i18n-btn="no" data-pct="72">No 72<b class="fcur">F</b></button></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="market-card" data-card-id="hot-5" data-cat="politics" onclick="openTrade('Will Trump\\'s approval rating exceed 50% in March?', 44)">
-        <div class="market-card-top">
-          <div class="market-icon">🗳️</div>
-          <div class="market-meta">
-            <div class="market-category">Approval · Politics</div>
-            <div class="market-question">Will Trump's approval rating exceed 50% in March?</div>
-          </div>
-        </div>
-        <div class="market-prob-bar"><div class="market-prob-fill" style="width:44%"></div></div>
-        <div class="market-card-bottom">
-          <div class="market-chance"><div class="market-chance-val">44<b class="fcur">F</b></div><div class="market-chance-label" data-i18n="card.yeschance">Yes chance</div></div>
-          <div>
-            <div class="market-vol" data-vol="1.8M" data-i18n="card.vol"><b class="fcur">F</b>1.8M Vol</div>
-            <div class="market-btns"><button class="btn-yes" data-i18n-btn="yes" data-pct="44">Yes 44<b class="fcur">F</b></button><button class="btn-no" data-i18n-btn="no" data-pct="56">No 56<b class="fcur">F</b></button></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="market-card" data-card-id="hot-6" data-cat="climate" onclick="openTrade('Will average US temp exceed 60°F in March?', 79)">
-        <div class="market-card-top">
-          <div class="market-icon">🌡️</div>
-          <div class="market-meta">
-            <div class="market-category">Temperature · Climate</div>
-            <div class="market-question">Will average US temp exceed 60°F in March?</div>
-          </div>
-        </div>
-        <div class="market-prob-bar"><div class="market-prob-fill" style="width:79%"></div></div>
-        <div class="market-card-bottom">
-          <div class="market-chance"><div class="market-chance-val">79<b class="fcur">F</b></div><div class="market-chance-label" data-i18n="card.yeschance">Yes chance</div></div>
-          <div>
-            <div class="market-vol" data-vol="890K" data-i18n="card.vol"><b class="fcur">F</b>890K Vol</div>
-            <div class="market-btns"><button class="btn-yes" data-i18n-btn="yes" data-pct="79">Yes 79<b class="fcur">F</b></button><button class="btn-no" data-i18n-btn="no" data-pct="21">No 21<b class="fcur">F</b></button></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="market-card" data-card-id="hot-7" data-cat="finance" onclick="openTrade('Will Nasdaq 100 close up today?', 58)">
-        <div class="market-card-top">
-          <div class="market-icon">💹</div>
-          <div class="market-meta">
-            <div class="market-category">Nasdaq 100 · Financials</div>
-            <div class="market-question">Will Nasdaq 100 close up today?</div>
-          </div>
-        </div>
-        <div class="market-prob-bar"><div class="market-prob-fill" style="width:58%"></div></div>
-        <div class="market-card-bottom">
-          <div class="market-chance"><div class="market-chance-val">58<b class="fcur">F</b></div><div class="market-chance-label" data-i18n="card.yeschance">Yes chance</div></div>
-          <div>
-            <div class="market-vol" data-vol="3.4M" data-i18n="card.vol"><b class="fcur">F</b>3.4M Vol</div>
-            <div class="market-btns"><button class="btn-yes" data-i18n-btn="yes" data-pct="58">Yes 58<b class="fcur">F</b></button><button class="btn-no" data-i18n-btn="no" data-pct="42">No 42<b class="fcur">F</b></button></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="market-card" data-card-id="hot-8" data-cat="culture" onclick="openTrade('Will Taylor Swift win Album of the Year at Grammys?', 62)">
-        <div class="market-card-top">
-          <div class="market-icon">🎵</div>
-          <div class="market-meta">
-            <div class="market-category">Grammys · Culture</div>
-            <div class="market-question">Will Taylor Swift win Album of the Year at Grammys?</div>
-          </div>
-        </div>
-        <div class="market-prob-bar"><div class="market-prob-fill" style="width:62%"></div></div>
-        <div class="market-card-bottom">
-          <div class="market-chance"><div class="market-chance-val">62<b class="fcur">F</b></div><div class="market-chance-label" data-i18n="card.yeschance">Yes chance</div></div>
-          <div>
-            <div class="market-vol" data-vol="1.2M" data-i18n="card.vol"><b class="fcur">F</b>1.2M Vol</div>
-            <div class="market-btns"><button class="btn-yes" data-i18n-btn="yes" data-pct="62">Yes 62<b class="fcur">F</b></button><button class="btn-no" data-i18n-btn="no" data-pct="38">No 38<b class="fcur">F</b></button></div>
-          </div>
-        </div>
-      </div>
-
     </div>
 </section>
 
@@ -2471,12 +2329,16 @@ const CARD_DATA = {
   var EMPTY_MSG = '<div style="grid-column:1/-1;text-align:center;padding:48px 0;color:var(--gray-400);font-size:15px">등록된 질문이 없습니다. 첫 번째 질문을 등록해보세요!</div>';
 
   async function loadSectionCards() {
+    var _dbg = document.getElementById('_dbg_status');
+    if (_dbg) _dbg.textContent = '로딩 중...';
     try {
       var token = localStorage.getItem('foket-token');
       var fetchOpts = token ? { headers: { 'Authorization': 'Bearer ' + token } } : {};
       var res = await fetch('/api/questions', fetchOpts);
+      if (!res.ok) { if (_dbg) _dbg.textContent = 'API 오류: ' + res.status; return; }
       var data = await res.json();
       var questions = data.questions || [];
+      if (_dbg) _dbg.textContent = '질문 ' + questions.length + '개 로드됨';
 
       var byPart = function(a, b) { return (b.participant_count || 0) - (a.participant_count || 0); };
 
@@ -2517,6 +2379,7 @@ const CARD_DATA = {
       });
     } catch(e) {
       console.error('[loadSectionCards]', e);
+      if (_dbg) _dbg.textContent = '오류: ' + e.message;
     }
   }
 
