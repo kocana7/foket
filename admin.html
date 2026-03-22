@@ -787,7 +787,14 @@
             <div class="card-title">🗳️ 투표 전체</div>
           </div>
           <div class="table-wrap"><table>
-            <thead><tr><th>카테고리</th><th>제목 / 질문</th><th>선택지</th><th>참가자수</th><th>투표수 (선택지별)</th><th>종료</th><th>상태</th><th>작업</th></tr></thead>
+            <thead><tr>
+              <th>카테고리</th><th>제목 / 질문</th><th>선택지</th>
+              <th id="th-all-vote-participants" onclick="setSortAll('vote','participants')" style="cursor:pointer;user-select:none;white-space:nowrap">참가자수<span class="sort-icon"> ⇅</span></th>
+              <th id="th-all-vote-votes" onclick="setSortAll('vote','votes')" style="cursor:pointer;user-select:none;white-space:nowrap">투표수 (선택지별)<span class="sort-icon"> ⇅</span></th>
+              <th id="th-all-vote-end" onclick="setSortAll('vote','end')" style="cursor:pointer;user-select:none;white-space:nowrap">종료<span class="sort-icon"> ⇅</span></th>
+              <th id="th-all-vote-status" onclick="setSortAll('vote','status')" style="cursor:pointer;user-select:none;white-space:nowrap">상태<span class="sort-icon"> ⇅</span></th>
+              <th>작업</th>
+            </tr></thead>
             <tbody id="tbody-all-vote"></tbody>
           </table></div>
         </div>
@@ -800,7 +807,14 @@
             <div class="card-title">💰 내기 전체</div>
           </div>
           <div class="table-wrap"><table>
-            <thead><tr><th>카테고리</th><th>제목 / 질문</th><th>초기확률</th><th>참가자수</th><th>투표수 (YES / NO)</th><th>종료</th><th>상태</th><th>작업</th></tr></thead>
+            <thead><tr>
+              <th>카테고리</th><th>제목 / 질문</th><th>초기확률</th>
+              <th id="th-all-bet-participants" onclick="setSortAll('bet','participants')" style="cursor:pointer;user-select:none;white-space:nowrap">참가자수<span class="sort-icon"> ⇅</span></th>
+              <th id="th-all-bet-votes" onclick="setSortAll('bet','votes')" style="cursor:pointer;user-select:none;white-space:nowrap">투표수 (YES / NO)<span class="sort-icon"> ⇅</span></th>
+              <th id="th-all-bet-end" onclick="setSortAll('bet','end')" style="cursor:pointer;user-select:none;white-space:nowrap">종료<span class="sort-icon"> ⇅</span></th>
+              <th id="th-all-bet-status" onclick="setSortAll('bet','status')" style="cursor:pointer;user-select:none;white-space:nowrap">상태<span class="sort-icon"> ⇅</span></th>
+              <th>작업</th>
+            </tr></thead>
             <tbody id="tbody-all-bet"></tbody>
           </table></div>
         </div>
@@ -1222,6 +1236,20 @@
   };
 
   var _allQuestionsCache = [];
+  var _allSort = { vote: { field: null, dir: 1 }, bet: { field: null, dir: 1 } };
+
+  function setSortAll(type, field) {
+    var s = _allSort[type];
+    if (s.field === field) { s.dir *= -1; } else { s.field = field; s.dir = 1; }
+    buildAllViewFromData(type);
+    // 헤더 아이콘 갱신
+    var prefix = type === 'vote' ? 'th-all-vote-' : 'th-all-bet-';
+    ['participants','votes','end','status'].forEach(function(f) {
+      var el = document.getElementById(prefix + f);
+      if (!el) return;
+      el.querySelector('.sort-icon').textContent = s.field === f ? (s.dir === 1 ? ' ▲' : ' ▼') : ' ⇅';
+    });
+  }
 
   function buildAllViewFromData(type) {
     var tbodyId = type === 'vote' ? 'tbody-all-vote' : 'tbody-all-bet';
@@ -1231,6 +1259,20 @@
     if (!filtered.length) {
       tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--gray-400);padding:32px">등록된 질문이 없습니다.</td></tr>';
       return;
+    }
+    var s = _allSort[type];
+    if (s.field) {
+      filtered = filtered.slice().sort(function(a, b) {
+        var va, vb;
+        if (s.field === 'participants') { va = a.participant_count || 0; vb = b.participant_count || 0; }
+        else if (s.field === 'votes')   { va = a.total_bet || a.participant_count || 0; vb = b.total_bet || b.participant_count || 0; }
+        else if (s.field === 'end')     { va = a.end_date ? new Date(a.end_date).getTime() : 0; vb = b.end_date ? new Date(b.end_date).getTime() : 0; }
+        else if (s.field === 'status')  {
+          var order = { APPROVED:1, PENDING:2, SETTLED:3, REJECTED:4 };
+          va = order[a.status] || 9; vb = order[b.status] || 9;
+        }
+        return (va < vb ? -1 : va > vb ? 1 : 0) * s.dir;
+      });
     }
     tbody.innerHTML = filtered.map(function(q) {
       var catLabel = CAT_LABELS[q.category] || q.category || '기타';
