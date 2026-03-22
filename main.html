@@ -2600,9 +2600,11 @@ const CARD_DATA = {
     const amount = parseFloat(document.getElementById('tradeAmount').value) || 0;
     const prob = currentSide === 'yes' ? currentProb : (100 - currentProb);
 
-    // 내 포인트
+    // 내 포인트 (마이페이지 mpBalance 우선, 없으면 navbar userBalance)
+    var mpEl = document.getElementById('mpBalance');
     var balEl = document.getElementById('userBalance');
-    var myBal = balEl ? parseFloat(balEl.textContent.replace(/[^0-9.]/g,'')) || 0 : 0;
+    var myBal = mpEl && mpEl.textContent.trim() ? parseFloat(mpEl.textContent) || 0
+              : balEl ? parseFloat(balEl.textContent.replace(/[^0-9.]/g,'')) || 0 : 0;
     document.getElementById('tradeMyBalance').innerHTML = myBal.toFixed(0) + '<b class="fcur">F</b>';
 
     // 총 베팅 포인트 (이 질문의 누적 베팅)
