@@ -1161,13 +1161,13 @@
   }
 
   /* ── 새로고침 시 마지막 페이지 복원 ── */
-  (function restorePageFromHash() {
+  document.addEventListener('DOMContentLoaded', function() {
     var hash = location.hash.replace('#', '');
     var valid = ['dashboard','analytics','markets','users','trades','payouts','compliance','reports','settings'];
     if (hash && valid.includes(hash)) {
       showPage(hash, null);
     }
-  })();
+  });
 
   /* ── 카테고리 탭 드롭다운 (클릭 토글) ── */
   function closeAllDropdowns() {
@@ -1783,9 +1783,10 @@ window.showPage = function(id, el) {
   if (id === 'users') loadUsers();
 };
 
-// 페이지 로드 시 현재 페이지가 회원이면 바로 로드
+// 페이지 로드 시 현재 활성 페이지에 맞는 데이터 로드
 document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('page-users')?.classList.contains('active')) loadUsers();
+  if (document.getElementById('page-markets')?.classList.contains('active')) loadAdminQuestions();
 });
 // ─────────────────────────────────────────────────────────────────────────────
 
