@@ -799,6 +799,28 @@ app.delete('/api/admin/questions/:id', adminMiddleware, async (req, res) => {
   }
 });
 
+// ── 관리자: 질문 수정 ───────────────────────────────────────
+app.patch('/api/admin/questions/:id', adminMiddleware, async (req, res) => {
+  const { question_ko, options, initial_prob, end_date, category } = req.body;
+  try {
+    const db = await getPool();
+    const fields = [];
+    const vals = [];
+    if (question_ko !== undefined) { fields.push('question_ko = ?'); vals.push(question_ko); }
+    if (options !== undefined)     { fields.push('options = ?');     vals.push(JSON.stringify(options)); }
+    if (initial_prob !== undefined){ fields.push('initial_prob = ?');vals.push(initial_prob); }
+    if (end_date !== undefined)    { fields.push('end_date = ?');    vals.push(end_date || null); }
+    if (category !== undefined)    { fields.push('category = ?');    vals.push(category); }
+    if (!fields.length) return res.status(400).json({ error: '수정할 항목이 없습니다' });
+    vals.push(req.params.id);
+    await db.execute(`UPDATE Questions SET ${fields.join(', ')} WHERE question_id = ?`, vals);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[admin/questions PATCH]', err.message);
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
 // ── 관리자: 정산 비율 조회/저장 ──────────────────────────
 app.get('/api/admin/settle-config', adminMiddleware, async (req, res) => {
   try {

@@ -1256,7 +1256,10 @@
         + buildParticipationCells(q)
         + '<td>' + endDate + '</td>'
         + '<td>' + statusBadge + '</td>'
-        + '<td><div class="action-btns"><button class="action-btn danger" onclick="event.stopPropagation();confirmDeleteQ(' + q.question_id + ')">삭제</button></div></td>'
+        + '<td><div class="action-btns">'
+        + '<button class="action-btn" style="background:#6366f1;color:white;border-color:#6366f1" onclick="event.stopPropagation();openEditQModal(' + q.question_id + ')">수정</button>'
+        + '<button class="action-btn danger" onclick="event.stopPropagation();confirmDeleteQ(' + q.question_id + ')">삭제</button>'
+        + '</div></td>'
         + '</tr>';
     }).join('');
   }
@@ -1335,9 +1338,13 @@
       ? '<div class="action-btns">'
         + '<button class="action-btn primary" onclick="event.stopPropagation();adminApproveQ(' + q.question_id + ')">승인</button>'
         + '<button class="action-btn danger" onclick="event.stopPropagation();adminRejectQ(' + q.question_id + ')">반려</button>'
+        + '<button class="action-btn" style="background:#6366f1;color:white;border-color:#6366f1" onclick="event.stopPropagation();openEditQModal(' + q.question_id + ')">수정</button>'
         + '<button class="action-btn danger" onclick="event.stopPropagation();confirmDeleteQ(' + q.question_id + ')">삭제</button>'
         + '</div>'
-      : '<div class="action-btns"><button class="action-btn danger" onclick="event.stopPropagation();confirmDeleteQ(' + q.question_id + ')">삭제</button></div>';
+      : '<div class="action-btns">'
+        + '<button class="action-btn" style="background:#6366f1;color:white;border-color:#6366f1" onclick="event.stopPropagation();openEditQModal(' + q.question_id + ')">수정</button>'
+        + '<button class="action-btn danger" onclick="event.stopPropagation();confirmDeleteQ(' + q.question_id + ')">삭제</button>'
+        + '</div>';
     var displayQ2 = escHtml(q.question_ko || q.question);
     return '<tr class="db-q-row" data-qid="' + q.question_id + '" onclick="openQuestionDetail(' + q.question_id + ')" style="cursor:pointer">'
       + '<td>' + typeTag + '</td>'
@@ -2032,6 +2039,43 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 
 <!-- 질문 삭제 확인 모달 -->
+<!-- ── 질문 수정 모달 ── -->
+<div id="editQModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9100;align-items:center;justify-content:center;">
+  <div style="background:var(--white);border-radius:20px;padding:32px 28px;max-width:520px;width:94%;box-shadow:0 20px 60px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto">
+    <div style="font-size:17px;font-weight:800;color:var(--gray-900);margin-bottom:18px">질문 수정</div>
+    <div style="margin-bottom:14px">
+      <label style="font-size:12px;font-weight:700;color:var(--gray-600);display:block;margin-bottom:4px">질문 내용 (한국어)</label>
+      <textarea id="editQText" rows="3" style="width:100%;padding:10px;border:1.5px solid var(--gray-200);border-radius:10px;font-size:14px;font-family:var(--font);resize:vertical;box-sizing:border-box"></textarea>
+    </div>
+    <div id="editQProbWrap" style="margin-bottom:14px">
+      <label style="font-size:12px;font-weight:700;color:var(--gray-600);display:block;margin-bottom:4px">초기 확률 (%)</label>
+      <input type="number" id="editQProb" min="1" max="99" style="width:100px;padding:8px 10px;border:1.5px solid var(--gray-200);border-radius:10px;font-size:14px;font-family:var(--font)">
+    </div>
+    <div id="editQOptsWrap" style="margin-bottom:14px;display:none">
+      <label style="font-size:12px;font-weight:700;color:var(--gray-600);display:block;margin-bottom:4px">선택지 (줄바꿈으로 구분)</label>
+      <textarea id="editQOpts" rows="4" style="width:100%;padding:10px;border:1.5px solid var(--gray-200);border-radius:10px;font-size:14px;font-family:var(--font);resize:vertical;box-sizing:border-box"></textarea>
+    </div>
+    <div style="display:flex;gap:12px;margin-bottom:14px">
+      <div style="flex:1">
+        <label style="font-size:12px;font-weight:700;color:var(--gray-600);display:block;margin-bottom:4px">카테고리</label>
+        <select id="editQCat" style="width:100%;padding:8px 10px;border:1.5px solid var(--gray-200);border-radius:10px;font-size:13px;font-family:var(--font)">
+          <option value="politics">정치</option><option value="sports">스포츠</option><option value="culture">문화</option>
+          <option value="trading">트레이딩</option><option value="weather">날씨</option><option value="economy">경제</option>
+          <option value="statement">발언</option><option value="science">과학&기술</option><option value="neighbor">나의이웃</option><option value="etc">기타</option>
+        </select>
+      </div>
+      <div style="flex:1">
+        <label style="font-size:12px;font-weight:700;color:var(--gray-600);display:block;margin-bottom:4px">마감일</label>
+        <input type="date" id="editQEndDate" style="width:100%;padding:8px 10px;border:1.5px solid var(--gray-200);border-radius:10px;font-size:13px;font-family:var(--font);box-sizing:border-box">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button onclick="closeEditQModal()" style="flex:1;padding:11px;border-radius:12px;border:1px solid var(--gray-300);background:var(--white);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font)">취소</button>
+      <button onclick="saveEditQ()" style="flex:1;padding:11px;border-radius:12px;border:none;background:#6366f1;color:white;font-size:14px;font-weight:800;cursor:pointer;font-family:var(--font)">저장</button>
+    </div>
+  </div>
+</div>
+
 <div id="deleteQModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9100;align-items:center;justify-content:center;">
   <div style="background:var(--white);border-radius:20px;padding:32px 28px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
     <div style="width:48px;height:48px;border-radius:14px;background:var(--red-bg);display:flex;align-items:center;justify-content:center;margin-bottom:16px">
@@ -2050,6 +2094,61 @@ document.addEventListener('DOMContentLoaded', () => {
 <script>
   let _usersCache = {};
   let _editTargetId = null;
+
+  /* ── 질문 수정 모달 ── */
+  var _editQTargetId = null;
+  function openEditQModal(id) {
+    var q = _qDetailMap[id];
+    if (!q) return;
+    _editQTargetId = id;
+    document.getElementById('editQText').value = q.question_ko || q.question || '';
+    document.getElementById('editQCat').value = q.category || 'etc';
+    document.getElementById('editQEndDate').value = q.end_date ? q.end_date.slice(0,10) : '';
+    if (q.type === 'bet') {
+      document.getElementById('editQProbWrap').style.display = '';
+      document.getElementById('editQOptsWrap').style.display = 'none';
+      document.getElementById('editQProb').value = q.initial_prob || 50;
+    } else {
+      document.getElementById('editQProbWrap').style.display = 'none';
+      document.getElementById('editQOptsWrap').style.display = '';
+      try {
+        var opts = JSON.parse(q.options || '[]');
+        document.getElementById('editQOpts').value = opts.join('\n');
+      } catch(e) { document.getElementById('editQOpts').value = ''; }
+    }
+    document.getElementById('editQModal').style.display = 'flex';
+  }
+  function closeEditQModal() { document.getElementById('editQModal').style.display = 'none'; }
+  async function saveEditQ() {
+    var q = _qDetailMap[_editQTargetId];
+    if (!q) return;
+    var token = localStorage.getItem('foket-admin-token') || localStorage.getItem('foket-token') || '';
+    var body = {
+      question_ko: document.getElementById('editQText').value.trim(),
+      category: document.getElementById('editQCat').value,
+      end_date: document.getElementById('editQEndDate').value || null
+    };
+    if (q.type === 'bet') {
+      body.initial_prob = parseInt(document.getElementById('editQProb').value) || 50;
+    } else {
+      body.options = document.getElementById('editQOpts').value.split('\n').map(function(s){ return s.trim(); }).filter(Boolean);
+    }
+    try {
+      var res = await fetch('/api/admin/questions/' + _editQTargetId, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify(body)
+      });
+      var data = await res.json();
+      if (data.ok) {
+        closeEditQModal();
+        loadAdminQuestions();
+        showToast('수정이 완료되었습니다', 'success');
+      } else {
+        alert('수정 실패: ' + (data.error || ''));
+      }
+    } catch(e) { alert('오류: ' + e.message); }
+  }
 
   function openEditModal(userId) {
     const u = _usersCache[userId];
