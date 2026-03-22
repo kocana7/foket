@@ -1015,8 +1015,10 @@
     </div>
     <div class="trade-summary">
       <div class="trade-row"><span>내 포인트</span><span id="tradeMyBalance" style="font-weight:600">-</span></div>
+      <div class="trade-row"><span style="color:var(--green)">예(YES) 총 베팅</span><span id="tradeYesBet">-</span></div>
+      <div class="trade-row"><span style="color:var(--red)">아니오(NO) 총 베팅</span><span id="tradeNoBet">-</span></div>
       <div class="trade-row"><span>총 베팅 포인트</span><span id="tradeTotalBet">-</span></div>
-      <div class="trade-row"><span>적중시 예상수익</span><span id="tradeProfit" style="color:var(--green)">-</span></div>
+      <div class="trade-row"><span>적중시 예상 획득 포인트</span><span id="tradeProfit" style="color:var(--green)">-</span></div>
       <div class="trade-row" style="font-weight:700"><span>베팅 후 잔여 포인트</span><span id="tradeCost">-</span></div>
     </div>
     <button class="btn btn-primary btn-md" style="width:100%" onclick="confirmTrade()">베팅 확인 →</button>
@@ -2458,6 +2460,10 @@ const CARD_DATA = {
   var _currentTradeId = null;
 
   var _questionsById = {};
+  var _settleAdminPct = 5;
+  var _settlePosterPct = 5;
+  // 정산 비율 API에서 로드
+  fetch('/api/settle-rates').then(r=>r.json()).then(d=>{ if(d.admin_pct!=null) _settleAdminPct=d.admin_pct; if(d.poster_pct!=null) _settlePosterPct=d.poster_pct; }).catch(()=>{});
   var _transCache = {};
   try { _transCache = JSON.parse(localStorage.getItem('foket-trans-cache') || '{}'); } catch(e) {}
 
@@ -2648,14 +2654,26 @@ const CARD_DATA = {
     }
     document.getElementById('tradeMyBalance').innerHTML = myBal.toFixed(0) + '<b class="fcur">F</b>';
 
-    // 총 베팅 포인트 (이 질문의 누적 베팅)
+    // YES / NO 별 베팅 금액 (내 베팅 포함)
     var q = _questionsById[_currentTradeId];
-    var totalBet = q ? (parseFloat(q.total_bet) || 0) : 0;
-    document.getElementById('tradeTotalBet').innerHTML = (totalBet + amount).toFixed(0) + '<b class="fcur">F</b>';
+    var ca = q ? (q.choice_amounts || {}) : {};
+    var yesBetBase = parseFloat(ca['YES'] || 0);
+    var noBetBase  = parseFloat(ca['NO']  || 0);
+    var myYes = currentSide === 'yes' ? yesBetBase + amount : yesBetBase;
+    var myNo  = currentSide === 'no'  ? noBetBase  + amount : noBetBase;
+    document.getElementById('tradeYesBet').innerHTML = myYes.toFixed(0) + '<b class="fcur">F</b>';
+    document.getElementById('tradeNoBet').innerHTML  = myNo.toFixed(0)  + '<b class="fcur">F</b>';
 
-    // 적중시 예상수익: amount / (prob/100) - amount
-    var profit = prob > 0 ? (amount / (prob / 100) - amount) : 0;
-    document.getElementById('tradeProfit').innerHTML = '+' + profit.toFixed(1) + '<b class="fcur">F</b>';
+    // 총 베팅 포인트
+    var totalBet = myYes + myNo;
+    document.getElementById('tradeTotalBet').innerHTML = totalBet.toFixed(0) + '<b class="fcur">F</b>';
+
+    // 적중시 예상 획득 포인트 (수수료 제외 배당)
+    var loserPool   = currentSide === 'yes' ? myNo : myYes;
+    var mySideTotal = currentSide === 'yes' ? myYes : myNo;
+    var winnerPct   = 1 - (_settleAdminPct + _settlePosterPct) / 100;
+    var winnings    = mySideTotal > 0 ? Math.floor((amount / mySideTotal) * loserPool * winnerPct) : 0;
+    document.getElementById('tradeProfit').innerHTML = '+' + winnings.toFixed(0) + '<b class="fcur">F</b>';
 
     // 베팅 후 잔여 포인트
     var remaining = myBal - amount;

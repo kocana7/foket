@@ -515,17 +515,21 @@ app.get('/api/questions', async (req, res) => {
       const qIds = rows.map(r => r.question_id);
       const placeholders = qIds.map(() => '?').join(',');
       const [choices] = await db.execute(
-        `SELECT question_id, choice, COUNT(*) AS cnt
+        `SELECT question_id, choice, COUNT(*) AS cnt, COALESCE(SUM(amount),0) AS total_amount
          FROM Participations WHERE question_id IN (${placeholders})
          GROUP BY question_id, choice`,
         qIds
       );
       const choiceMap = {};
+      const amountMap = {};
       choices.forEach(c => {
         if (!choiceMap[c.question_id]) choiceMap[c.question_id] = {};
+        if (!amountMap[c.question_id]) amountMap[c.question_id] = {};
         choiceMap[c.question_id][c.choice] = Number(c.cnt);
+        amountMap[c.question_id][c.choice] = Number(c.total_amount);
       });
       rows.forEach(r => {
+        r.choice_amounts = amountMap[r.question_id] || {};
         r.choices = choiceMap[r.question_id] || {};
         r.is_mine = currentUserId ? String(r.user_id) === currentUserId : false;
       });
@@ -608,15 +612,18 @@ app.get('/api/admin/questions', adminMiddleware, async (req, res) => {
       const ids = rows.map(r => r.question_id);
       const placeholders = ids.map(() => '?').join(',');
       const [choiceRows] = await db.execute(
-        `SELECT question_id, choice, COUNT(*) AS cnt FROM Participations WHERE question_id IN (${placeholders}) GROUP BY question_id, choice`,
+        `SELECT question_id, choice, COUNT(*) AS cnt, COALESCE(SUM(amount),0) AS total_amount FROM Participations WHERE question_id IN (${placeholders}) GROUP BY question_id, choice`,
         ids
       );
       const choiceMap = {};
+      const amountMap2 = {};
       choiceRows.forEach(r => {
         if (!choiceMap[r.question_id]) choiceMap[r.question_id] = {};
+        if (!amountMap2[r.question_id]) amountMap2[r.question_id] = {};
         choiceMap[r.question_id][r.choice] = Number(r.cnt);
+        amountMap2[r.question_id][r.choice] = Number(r.total_amount);
       });
-      rows.forEach(r => { r.choices = choiceMap[r.question_id] || {}; });
+      rows.forEach(r => { r.choices = choiceMap[r.question_id] || {}; r.choice_amounts = amountMap2[r.question_id] || {}; });
     }
 
     res.json({ questions: rows });
@@ -814,6 +821,17 @@ app.patch('/api/admin/settle-config', adminMiddleware, async (req, res) => {
 // ── 공개 설정 ─────────────────────────────────────────────
 app.get('/api/public-config', (req, res) => {
   res.json({ googleClientId: GOOGLE_CLIENT_ID || '' });
+});
+
+// ── 공개: 정산 수수료율 ────────────────────────────────────
+app.get('/api/settle-rates', async (req, res) => {
+  try {
+    const db = await getPool();
+    const [rows] = await db.execute("SELECT key_name, val FROM Settings WHERE key_name IN ('settle_admin_pct','settle_poster_pct')");
+    const cfg = {};
+    rows.forEach(r => { cfg[r.key_name] = parseFloat(r.val); });
+    res.json({ admin_pct: cfg.settle_admin_pct ?? 5, poster_pct: cfg.settle_poster_pct ?? 5 });
+  } catch { res.json({ admin_pct: 5, poster_pct: 5 }); }
 });
 
 // ── DB 초기화 (테이블 없으면 생성, 컬럼 누락 시 추가) ────
