@@ -75,6 +75,19 @@
     .nav-link svg { width: 14px; height: 14px; }
     .nav-spacer { flex: 0; }
     .nav-actions { display: flex; align-items: center; gap: 10px; }
+    .nav-search-wrap { position: relative; display: flex; align-items: center; }
+    .nav-search-input { height: 34px; padding: 0 12px 0 34px; border: 1.5px solid var(--gray-200); border-radius: 20px; font-size: 13px; width: 180px; outline: none; transition: border-color .2s, width .2s; background: var(--gray-50); }
+    .nav-search-input:focus { border-color: var(--blue); width: 240px; background: white; }
+    .nav-search-icon { position: absolute; left: 10px; color: var(--gray-400); pointer-events: none; }
+    .nav-search-results { position: absolute; top: calc(100% + 6px); left: 0; width: 320px; background: white; border: 1px solid var(--gray-200); border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.12); z-index: 2000; max-height: 360px; overflow-y: auto; display: none; }
+    .nav-search-results.open { display: block; }
+    .nav-search-item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--gray-100); font-size: 13px; }
+    .nav-search-item:last-child { border-bottom: none; }
+    .nav-search-item:hover { background: var(--gray-50); }
+    .nav-search-item .sr-type { font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 6px; margin-right: 6px; }
+    .nav-search-item .sr-type.vote { background:#EDE9FE;color:#6D28D9; }
+    .nav-search-item .sr-type.bet  { background:#FEF3C7;color:#92400E; }
+    .nav-search-empty { padding: 16px; text-align: center; color: var(--gray-400); font-size: 13px; }
     .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; border: none; text-decoration: none; white-space: nowrap; }
     .btn-sm { padding: 8px 16px; font-size: 13px; }
     .btn-md { padding: 10px 20px; }
@@ -472,6 +485,11 @@
     </div>
     <div class="nav-spacer"></div>
     <div class="nav-actions">
+      <div class="nav-search-wrap" id="navSearchWrap">
+        <input type="text" id="navSearchInput" class="nav-search-input" placeholder="질문 검색..." oninput="onNavSearch(this.value)" onkeydown="if(event.key==='Escape'){closeNavSearch()}" autocomplete="off">
+        <svg class="nav-search-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+        <div class="nav-search-results" id="navSearchResults"></div>
+      </div>
       <div class="lang-selector" id="langSelector">
         <button class="lang-btn" id="langBtn" onclick="toggleLangMenu()">
           <span id="langFlag">🇰🇷</span>
@@ -2264,11 +2282,46 @@ const CARD_DATA = {
     document.getElementById('langDropdown').classList.toggle('open');
   }
 
+  /* ── 검색 ── */
+  function onNavSearch(val) {
+    var resultsEl = document.getElementById('navSearchResults');
+    if (!val.trim()) { resultsEl.classList.remove('open'); return; }
+    var kw = val.trim().toLowerCase();
+    var matched = Object.values(_questionsById).filter(function(q) {
+      var text = (q.question_ko || q.question || '').toLowerCase();
+      return text.includes(kw);
+    }).slice(0, 15);
+    if (!matched.length) {
+      resultsEl.innerHTML = '<div class="nav-search-empty">검색 결과가 없습니다</div>';
+    } else {
+      resultsEl.innerHTML = matched.map(function(q) {
+        var title = (q.question_ko || q.question || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        var typeClass = q.type === 'vote' ? 'vote' : 'bet';
+        var typeLabel = q.type === 'vote' ? '투표' : '내기';
+        var prob = parseInt(q.initial_prob) || 50;
+        return '<div class="nav-search-item" onclick="closeNavSearch();openTrade(' + q.question_id + ',' + prob + ')">'
+          + '<span class="sr-type ' + typeClass + '">' + typeLabel + '</span>'
+          + title
+          + '</div>';
+      }).join('');
+    }
+    resultsEl.classList.add('open');
+  }
+
+  function closeNavSearch() {
+    document.getElementById('navSearchInput').value = '';
+    document.getElementById('navSearchResults').classList.remove('open');
+  }
+
   // Close dropdown on outside click
   document.addEventListener('click', e => {
     const sel = document.getElementById('langSelector');
     if (sel && !sel.contains(e.target)) {
       document.getElementById('langDropdown').classList.remove('open');
+    }
+    const sw = document.getElementById('navSearchWrap');
+    if (sw && !sw.contains(e.target)) {
+      document.getElementById('navSearchResults').classList.remove('open');
     }
   });
 
