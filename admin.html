@@ -1234,7 +1234,10 @@
     }
     tbody.innerHTML = filtered.map(function(q) {
       var catLabel = CAT_LABELS[q.category] || q.category || '기타';
-      var statusBadge = q.status === 'APPROVED' ? '<span class="badge badge-green">● 활성</span>'
+      var statusBadge = q.status === 'APPROVED' && q.type === 'bet'
+                      ? '<button class="action-btn" style="background:#f59e0b;color:white;border-color:#f59e0b;padding:5px 12px;font-size:12px;font-weight:700;border-radius:8px;cursor:pointer" onclick="event.stopPropagation();openSettleModal(' + q.question_id + ')">정산</button>'
+                      : q.status === 'APPROVED'  ? '<span class="badge badge-green">● 활성</span>'
+                      : q.status === 'SETTLED'   ? '<span class="badge badge-blue">✓ 정산완료</span>'
                       : q.status === 'REJECTED'  ? '<span class="badge badge-red">⊘ 거절됨</span>'
                       : '<span class="badge badge-yellow">⏳ 승인대기</span>';
       var priceOrOptions = '';
