@@ -879,7 +879,7 @@
         <!-- 통계 요약 -->
         <div class="my-act-stat" id="myActStat">
           <div class="my-act-stat-item"><div class="my-act-stat-num" id="myActQCnt">-</div><div class="my-act-stat-label">등록한 질문</div></div>
-          <div class="my-act-stat-item"><div class="my-act-stat-num" id="myActPCnt">-</div><div class="my-act-stat-label">참여한 예측</div></div>
+          <div class="my-act-stat-item"><div class="my-act-stat-num" id="myActPCnt">-</div><div class="my-act-stat-label">참여 내역</div></div>
           <div class="my-act-stat-item"><div class="my-act-stat-num" id="myActSpent">-</div><div class="my-act-stat-label">사용 포인트(F)</div></div>
         </div>
         <!-- 탭 -->
@@ -2999,7 +2999,7 @@ const CARD_DATA = {
           + '</div>';
       }).join('');
     } else {
-      if (!_myActParticipations.length) { listEl.innerHTML = '<div style="text-align:center;padding:24px;color:var(--gray-400);font-size:13px">참여한 예측이 없습니다.</div>'; return; }
+      if (!_myActParticipations.length) { listEl.innerHTML = '<div style="text-align:center;padding:24px;color:var(--gray-400);font-size:13px">참여한 내역이 없습니다.</div>'; return; }
       listEl.innerHTML = _myActParticipations.map(function(p) {
         var typeClass = p.type === 'vote' ? 'vote' : 'bet';
         var typeLabel = p.type === 'vote' ? '투표' : '내기';
