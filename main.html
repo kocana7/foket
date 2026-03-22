@@ -2570,8 +2570,8 @@ const CARD_DATA = {
 
       btn.textContent = '투표 완료! ✓';
       showToast('투표 완료! 1F 차감되었습니다');
-      // 캐시 업데이트
       if (_questionsById[_voteCurrentQ.question_id]) _questionsById[_voteCurrentQ.question_id].choices = data.choices;
+      setTimeout(closeVote, 1200);
     } catch(e) {
       showToast('오류: ' + e.message);
       btn.disabled = false; btn.textContent = '투표하기 →';
