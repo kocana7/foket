@@ -56,19 +56,23 @@
     .nav-logo svg { width: 32px; height: 32px; }
     .fcur { font-weight: 900; color: #334BFA; font-style: normal; font-size: 0.92em; }
     .nav-links {
-      display: flex; align-items: center; gap: 1px;
       flex: 1 1 0; min-width: 0;
-      overflow-x: auto; overflow-y: hidden;
-      scrollbar-width: none;
+      overflow: hidden;
+      position: relative;
     }
-    .nav-links::-webkit-scrollbar { display: none; }
+    .nav-links-inner {
+      display: flex; align-items: center; gap: 1px;
+      width: max-content;
+      animation: navroll 30s linear infinite;
+    }
+    .nav-links-inner:hover { animation-play-state: paused; }
+    @keyframes navroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
     .nav-link {
-      padding: 5px 7px; border-radius: 8px;
-      font-size: 12px; font-weight: 700; color: var(--gray-700);
+      padding: 5px 10px; border-radius: 8px;
+      font-size: 13px; font-weight: 700; color: var(--gray-700);
       text-decoration: none; white-space: nowrap;
       transition: background 0.15s, color 0.15s;
       display: flex; align-items: center; gap: 4px;
-      letter-spacing: -0.2px;
     }
     .nav-link:hover { background: var(--gray-900); color: var(--white); }
     .nav-link.active { color: var(--white); background: var(--blue); }
@@ -472,18 +476,34 @@
       <img src="logo.png" alt="FOKET.COM" style="height:36px;width:auto;display:block;" />
     </a>
     <div class="nav-links">
-      <a class="nav-link active" href="#"><span data-i18n="nav.home">홈</span></a>
-      <a class="nav-link" href="#hot"><span data-i18n="nav.hot">Hot 이슈</span></a>
-      <a class="nav-link" href="#politics"><span data-i18n="nav.politics">정치</span></a>
-      <a class="nav-link" href="#sports"><span data-i18n="nav.sports">스포츠</span></a>
-      <a class="nav-link" href="#culture"><span data-i18n="nav.culture">문화</span></a>
-      <a class="nav-link" href="#trading"><span data-i18n="nav.trading">트레이딩</span></a>
-      <a class="nav-link" href="#weather"><span data-i18n="nav.weather">날씨</span></a>
-      <a class="nav-link" href="#economy"><span data-i18n="nav.economy">경제</span></a>
-      <a class="nav-link" href="#statement"><span data-i18n="nav.statement">발언</span></a>
-      <a class="nav-link" href="#science"><span data-i18n="nav.science">과학 &amp; 기술</span></a>
-      <a class="nav-link" href="#neighbor"><span data-i18n="nav.neighbor">나의 이웃</span></a>
-      <a class="nav-link" href="#etc"><span>기타</span></a>
+      <div class="nav-links-inner">
+        <a class="nav-link active" href="#"><span data-i18n="nav.home">홈</span></a>
+        <a class="nav-link" href="#hot"><span data-i18n="nav.hot">Hot 이슈</span></a>
+        <a class="nav-link" href="#politics"><span data-i18n="nav.politics">정치</span></a>
+        <a class="nav-link" href="#sports"><span data-i18n="nav.sports">스포츠</span></a>
+        <a class="nav-link" href="#culture"><span data-i18n="nav.culture">문화</span></a>
+        <a class="nav-link" href="#trading"><span data-i18n="nav.trading">트레이딩</span></a>
+        <a class="nav-link" href="#weather"><span data-i18n="nav.weather">날씨</span></a>
+        <a class="nav-link" href="#economy"><span data-i18n="nav.economy">경제</span></a>
+        <a class="nav-link" href="#statement"><span data-i18n="nav.statement">발언</span></a>
+        <a class="nav-link" href="#science"><span data-i18n="nav.science">과학 &amp; 기술</span></a>
+        <a class="nav-link" href="#neighbor"><span data-i18n="nav.neighbor">나의 이웃</span></a>
+        <a class="nav-link" href="#etc"><span>기타</span></a>
+        <span style="display:inline-block;width:40px"></span>
+        <a class="nav-link" href="#"><span data-i18n="nav.home">홈</span></a>
+        <a class="nav-link" href="#hot"><span data-i18n="nav.hot">Hot 이슈</span></a>
+        <a class="nav-link" href="#politics"><span data-i18n="nav.politics">정치</span></a>
+        <a class="nav-link" href="#sports"><span data-i18n="nav.sports">스포츠</span></a>
+        <a class="nav-link" href="#culture"><span data-i18n="nav.culture">문화</span></a>
+        <a class="nav-link" href="#trading"><span data-i18n="nav.trading">트레이딩</span></a>
+        <a class="nav-link" href="#weather"><span data-i18n="nav.weather">날씨</span></a>
+        <a class="nav-link" href="#economy"><span data-i18n="nav.economy">경제</span></a>
+        <a class="nav-link" href="#statement"><span data-i18n="nav.statement">발언</span></a>
+        <a class="nav-link" href="#science"><span data-i18n="nav.science">과학 &amp; 기술</span></a>
+        <a class="nav-link" href="#neighbor"><span data-i18n="nav.neighbor">나의 이웃</span></a>
+        <a class="nav-link" href="#etc"><span>기타</span></a>
+        <span style="display:inline-block;width:40px"></span>
+      </div>
     </div>
     <div class="nav-spacer"></div>
     <div class="nav-actions">
