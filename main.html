@@ -2273,32 +2273,7 @@ const CARD_DATA = {
   });
 
   // Init language on load
-  document.addEventListener('DOMContentLoaded', () => { setLang(currentLang); shuffleSections(); loadSectionCards(); loadTicker(); });
-
-  function loadTicker() {
-    fetch('/api/questions')
-      .then(r => r.json())
-      .then(function(data) {
-        var qs = (data.questions || data || [])
-          .filter(function(q) { return q.status === 'APPROVED' && q.end_date; })
-          .sort(function(a, b) { return new Date(a.end_date) - new Date(b.end_date); });
-        if (!qs.length) return;
-        var items = qs.map(function(q) {
-          var title = (q.question_ko || q.question || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-          var prob = parseInt(q.initial_prob) || 50;
-          var endStr = q.end_date ? q.end_date.slice(0,10) : '';
-          return '<div class="ticker-item"><span class="ticker-dot"></span>'
-            + title
-            + ' <strong>' + prob + '%</strong>'
-            + ' <span style="opacity:.7;font-weight:400;font-size:11px">마감 ' + endStr + '</span>'
-            + '</div>';
-        }).join('');
-        // 루프를 위해 2번 반복
-        var el = document.getElementById('ticker');
-        if (el) el.innerHTML = items + items;
-      })
-      .catch(function() {});
-  }
+  document.addEventListener('DOMContentLoaded', () => { setLang(currentLang); shuffleSections(); loadSectionCards(); });
 
   /* ── 섹션 랜덤 순서 ── */
   function shuffleSections() {
@@ -2437,8 +2412,27 @@ const CARD_DATA = {
         var finalList = myQ.concat(others).slice(0, TOTAL);
         grid.innerHTML = finalList.map(buildDbMainCard).join('');
       });
+
+      // ── ticker: 마감 임박순 ──
+      var tickerEl = document.getElementById('ticker');
+      if (tickerEl) {
+        var tickerQs = questions
+          .filter(function(q) { return q.end_date; })
+          .sort(function(a, b) { return new Date(a.end_date) - new Date(b.end_date); });
+        if (tickerQs.length) {
+          var items = tickerQs.map(function(q) {
+            var title = (q.question_ko || q.question || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            var prob = parseInt(q.initial_prob) || 50;
+            var endStr = q.end_date ? q.end_date.slice(0,10) : '';
+            return '<div class="ticker-item"><span class="ticker-dot"></span>'
+              + title + ' <strong>' + prob + '%</strong>'
+              + ' <span style="opacity:.7;font-weight:400;font-size:11px">마감 ' + endStr + '</span>'
+              + '</div>';
+          }).join('');
+          tickerEl.innerHTML = items + items;
+        }
+      }
     } catch(e) {
-      console.error('[loadSectionCards]', e);
       console.error('[loadSectionCards]', e);
     }
   }
