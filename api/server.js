@@ -420,8 +420,8 @@ app.get('/api/questions', async (req, res) => {
     const params = [];
     if (category) { where += ' AND q.category = ?'; params.push(category); }
     const [rows] = await db.execute(
-      `SELECT q.question_id, q.user_id, q.type, q.question, q.category,
-              q.options, q.initial_prob, q.end_date, q.created_at,
+      `SELECT q.question_id, q.user_id, q.type, q.question, q.question_ko,
+              q.category, q.options, q.options_ko, q.initial_prob, q.end_date, q.created_at,
               u.nickname,
               (SELECT COUNT(*) FROM Participations p WHERE p.question_id = q.question_id) AS participant_count
        FROM Questions q

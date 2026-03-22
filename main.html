@@ -3864,6 +3864,8 @@ const CARD_DATA = {
         var choices = q.choices || {};
         var statsHtml = '';
 
+        var displayQ = q.question_ko || q.question || '';
+
         if (q.type === 'bet') {
           var yesCount = choices['YES'] || 0;
           var noCount  = choices['NO']  || 0;
@@ -3877,15 +3879,18 @@ const CARD_DATA = {
             + '<span class="part-count">👥 ' + totalCount + '명 참여</span></div>';
         } else {
           var opts = [];
-          try { opts = JSON.parse(q.options || '[]'); } catch(e) { opts = []; }
+          try { opts = JSON.parse(q.options_ko || q.options || '[]'); } catch(e) { opts = []; }
+          var rawOpts = [];
+          try { rawOpts = JSON.parse(q.options || '[]'); } catch(e) { rawOpts = opts; }
           var voteTotal = Object.values(choices).reduce(function(a, b) { return a + b; }, 0);
-          var topOpt = '';
+          var topRaw = '';
           var topCnt = 0;
-          Object.keys(choices).forEach(function(k) { if ((choices[k]||0) > topCnt) { topOpt = k; topCnt = choices[k]; } });
-          var optsHtml = opts.map(function(opt) {
-            var cnt = choices[opt] || 0;
+          rawOpts.forEach(function(k) { if ((choices[k]||0) > topCnt) { topRaw = k; topCnt = choices[k]; } });
+          var optsHtml = opts.map(function(opt, idx) {
+            var rawOpt = rawOpts[idx] || opt;
+            var cnt = choices[rawOpt] || 0;
             var pct = voteTotal > 0 ? Math.round(cnt / voteTotal * 100) : 0;
-            var isTop = opt === topOpt && voteTotal > 0;
+            var isTop = rawOpt === topRaw && voteTotal > 0;
             return '<div class="vote-opt-row">'
               + '<span class="vote-opt-label" title="' + opt + '" style="max-width:140px">' + opt + '</span>'
               + '<div class="vote-opt-bar-wrap"><div class="vote-opt-bar' + (isTop ? ' top' : '') + '" style="width:' + pct + '%"></div></div>'
@@ -3898,7 +3903,7 @@ const CARD_DATA = {
 
         return '<div class="va-card">'
           + '<div class="va-card-type" style="background:' + typeColor + '">' + typeLabel + '</div>'
-          + '<div class="va-card-q">' + (q.question || '') + '</div>'
+          + '<div class="va-card-q">' + displayQ + '</div>'
           + statsHtml
           + (q.nickname ? '<div class="va-card-meta" style="margin-top:6px">등록자: ' + q.nickname + (endDate ? ' · 마감: ' + endDate : '') + '</div>' : '')
           + '</div>';
