@@ -1237,7 +1237,7 @@
       var statusBadge = q.status === 'APPROVED' && q.type === 'bet'
                       ? '<button class="action-btn" style="background:#f59e0b;color:white;border-color:#f59e0b;padding:5px 12px;font-size:12px;font-weight:700;border-radius:8px;cursor:pointer" onclick="event.stopPropagation();openSettleModal(' + q.question_id + ')">정산</button>'
                       : q.status === 'APPROVED'  ? '<span class="badge badge-green">● 활성</span>'
-                      : q.status === 'SETTLED'   ? '<span class="badge badge-blue">✓ 정산완료</span>'
+                      : q.status === 'SETTLED'   ? '<button class="action-btn" style="background:#3b82f6;color:white;border-color:#3b82f6;padding:5px 12px;font-size:12px;font-weight:700;border-radius:8px;cursor:pointer" onclick="event.stopPropagation();openSettleCancelModal(' + q.question_id + ')">✓ 정산완료</button>'
                       : q.status === 'REJECTED'  ? '<span class="badge badge-red">⊘ 거절됨</span>'
                       : '<span class="badge badge-yellow">⏳ 승인대기</span>';
       var priceOrOptions = '';
@@ -1455,6 +1455,50 @@
     yBtn.style.cssText = 'flex:1;padding:14px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;transition:all .15s;border:2px solid ' + (side==='YES' ? '#16a34a;background:#dcfce7;color:#16a34a' : 'var(--gray-200);background:white;color:#16a34a');
     nBtn.style.cssText = 'flex:1;padding:14px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;transition:all .15s;border:2px solid ' + (side==='NO'  ? '#dc2626;background:#fee2e2;color:#dc2626' : 'var(--gray-200);background:white;color:#dc2626');
     document.getElementById('settleConfirmBtn').disabled = false;
+  }
+
+  /* ── 정산 취소 모달 ── */
+  var _settleCancelTargetId = null;
+
+  function openSettleCancelModal(id) {
+    var q = _qDetailMap[id];
+    if (!q) return;
+    _settleCancelTargetId = id;
+    var qText = q.question_ko || q.question || '';
+    document.getElementById('settleCancelQText').textContent = qText;
+    var winner = q.settle_winner || '?';
+    var posterFee = parseFloat(q.settle_poster_fee) || 0;
+    var adminFee  = parseFloat(q.settle_admin_fee)  || 0;
+    document.getElementById('settleCancelInfo').innerHTML =
+      '정산 결과: <b>' + winner + ' 승리</b><br>'
+      + '게시자 지급: <b>' + posterFee.toFixed(0) + 'F</b> 회수 &nbsp;|&nbsp; 관리자 수수료: <b>' + adminFee.toFixed(0) + 'F</b> (복구 불가)<br>'
+      + '<span style="color:#d97706;font-size:12px">⚠ 승자 수익 회수, 패자 베팅 환불, 게시자 수수료 회수가 진행됩니다.</span>';
+    document.getElementById('settleCancelConfirmBtn').disabled = false;
+    document.getElementById('settleCancelConfirmBtn').textContent = '정산 취소 확인';
+    document.getElementById('settleCancelModal').style.display = 'flex';
+  }
+
+  function closeSettleCancelModal() {
+    document.getElementById('settleCancelModal').style.display = 'none';
+    _settleCancelTargetId = null;
+  }
+
+  async function confirmSettleCancel() {
+    if (!_settleCancelTargetId) return;
+    var btn = document.getElementById('settleCancelConfirmBtn');
+    btn.disabled = true;
+    btn.textContent = '처리 중...';
+    try {
+      var res = await fetch(ADMIN_API + '/api/admin/questions/' + _settleCancelTargetId + '/settle-cancel', {
+        method: 'POST',
+        headers: { 'x-admin-key': ADMIN_KEY }
+      });
+      var data = await res.json();
+      if (!res.ok) { showToast('취소 실패: ' + (data.error || '오류')); btn.disabled = false; btn.textContent = '정산 취소 확인'; return; }
+      closeSettleCancelModal();
+      showToast('정산 취소 완료! 승자 ' + data.winnersReverted + '명 회수, 패자 ' + data.losersRefunded + '명 환불');
+      loadAdminQuestions();
+    } catch(e) { showToast('오류: ' + e.message); btn.disabled = false; btn.textContent = '정산 취소 확인'; }
   }
 
   /* ── 정산 비율 설정 ── */
@@ -1946,6 +1990,19 @@ document.addEventListener('DOMContentLoaded', () => {
     <div style="display:flex;gap:10px">
       <button onclick="closeDeleteModal()" style="flex:1;padding:11px;border-radius:12px;border:1px solid var(--gray-300);background:var(--white);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font)">취소</button>
       <button onclick="deleteUser()" style="flex:1;padding:11px;border-radius:12px;border:none;background:var(--red);color:var(--white);font-size:14px;font-weight:800;cursor:pointer;font-family:var(--font)">강제탈퇴 확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- 정산 취소 모달 -->
+<div id="settleCancelModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9100;align-items:center;justify-content:center;">
+  <div style="background:var(--white);border-radius:20px;padding:32px 28px;max-width:440px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+    <div style="font-size:17px;font-weight:800;color:var(--gray-900);margin-bottom:8px">정산 취소</div>
+    <div id="settleCancelQText" style="font-size:14px;font-weight:600;color:var(--gray-900);margin-bottom:12px;line-height:1.5"></div>
+    <div id="settleCancelInfo" style="font-size:13px;color:var(--gray-500);margin-bottom:20px;background:#FEF3C7;border-radius:10px;padding:12px;line-height:1.6"></div>
+    <div style="display:flex;gap:10px">
+      <button onclick="closeSettleCancelModal()" style="flex:1;padding:11px;border-radius:12px;border:1px solid var(--gray-300);background:var(--white);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font)">닫기</button>
+      <button id="settleCancelConfirmBtn" onclick="confirmSettleCancel()" style="flex:1;padding:11px;border-radius:12px;border:none;background:#dc2626;color:white;font-size:14px;font-weight:800;cursor:pointer;font-family:var(--font)">정산 취소 확인</button>
     </div>
   </div>
 </div>

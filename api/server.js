@@ -592,6 +592,7 @@ app.get('/api/admin/questions', adminMiddleware, async (req, res) => {
       `SELECT q.question_id, q.user_id, q.type, q.question, q.question_ko,
               q.poster_nickname, q.category, q.options, q.options_ko, q.initial_prob,
               q.end_date, q.status, q.created_at,
+              q.settle_winner, q.settle_poster_fee, q.settle_admin_fee,
               u.email, u.nickname, u.full_name,
               (SELECT COUNT(*) FROM Participations p WHERE p.question_id = q.question_id) AS participant_count,
               (SELECT COALESCE(SUM(p.amount),0) FROM Participations p WHERE p.question_id = q.question_id) AS total_bet
@@ -714,11 +715,69 @@ app.post('/api/admin/questions/:id/settle', adminMiddleware, async (req, res) =>
       [qId, losing]
     );
 
-    await db.execute("UPDATE Questions SET status = 'SETTLED' WHERE question_id = ?", [qId]);
+    await db.execute(
+      "UPDATE Questions SET status='SETTLED', settle_winner=?, settle_poster_fee=?, settle_admin_fee=? WHERE question_id=?",
+      [winning, posterFee, adminFee, qId]
+    );
 
     res.json({ ok: true, winning, loserPool, adminFee, posterFee, winnerDistribution, winnerCount: winners.length, payouts });
   } catch (err) {
     console.error('[settle]', err.message);
+    res.status(500).json({ error: '서버 오류: ' + err.message });
+  }
+});
+
+// ── 관리자: 정산 취소 ─────────────────────────────────────
+app.post('/api/admin/questions/:id/settle-cancel', adminMiddleware, async (req, res) => {
+  const qId = req.params.id;
+  try {
+    const db = await getPool();
+    const [qRows] = await db.execute(
+      'SELECT status, user_id, settle_winner, settle_poster_fee, settle_admin_fee FROM Questions WHERE question_id = ?', [qId]
+    );
+    if (!qRows.length) return res.status(404).json({ error: '질문 없음' });
+    if (qRows[0].status !== 'SETTLED') return res.status(400).json({ error: '정산된 질문이 아닙니다' });
+
+    const posterId   = qRows[0].user_id;
+    const posterFee  = parseFloat(qRows[0].settle_poster_fee) || 0;
+
+    // 승자: payout 회수
+    const [winners] = await db.execute(
+      "SELECT user_id, SUM(payout) AS total_payout FROM Participations WHERE question_id=? AND settle_result='WIN' GROUP BY user_id",
+      [qId]
+    );
+    for (const w of winners) {
+      const take = parseFloat(w.total_payout) || 0;
+      if (take > 0) await db.execute('UPDATE Users SET balance = GREATEST(0, balance - ?) WHERE user_id = ?', [take, w.user_id]);
+    }
+
+    // 패자: 베팅금 환불
+    const [losers] = await db.execute(
+      "SELECT user_id, SUM(amount) AS total_bet FROM Participations WHERE question_id=? AND settle_result='LOSE' GROUP BY user_id",
+      [qId]
+    );
+    for (const l of losers) {
+      const refund = parseFloat(l.total_bet) || 0;
+      if (refund > 0) await db.execute('UPDATE Users SET balance = balance + ? WHERE user_id = ?', [refund, l.user_id]);
+    }
+
+    // 게시자: 수수료 회수
+    if (posterFee > 0 && posterId) {
+      await db.execute('UPDATE Users SET balance = GREATEST(0, balance - ?) WHERE user_id = ?', [posterFee, posterId]);
+    }
+
+    // Participations 정산 기록 초기화
+    await db.execute("UPDATE Participations SET payout=NULL, settle_result=NULL WHERE question_id=?", [qId]);
+
+    // 질문 상태 복원
+    await db.execute(
+      "UPDATE Questions SET status='APPROVED', settle_winner=NULL, settle_poster_fee=NULL, settle_admin_fee=NULL WHERE question_id=?",
+      [qId]
+    );
+
+    res.json({ ok: true, winnersReverted: winners.length, losersRefunded: losers.length, posterFeeReverted: posterFee });
+  } catch (err) {
+    console.error('[settle-cancel]', err.message);
     res.status(500).json({ error: '서버 오류: ' + err.message });
   }
 });
@@ -896,6 +955,18 @@ async function initDb() {
     if (!qExisting.has('options_ko')) {
       await db.execute('ALTER TABLE Questions ADD COLUMN options_ko LONGTEXT');
       console.log('컬럼 추가: Questions.options_ko');
+    }
+    if (!qExisting.has('settle_winner')) {
+      await db.execute("ALTER TABLE Questions ADD COLUMN settle_winner VARCHAR(10) DEFAULT NULL");
+      console.log('컬럼 추가: Questions.settle_winner');
+    }
+    if (!qExisting.has('settle_poster_fee')) {
+      await db.execute("ALTER TABLE Questions ADD COLUMN settle_poster_fee DECIMAL(18,2) DEFAULT NULL");
+      console.log('컬럼 추가: Questions.settle_poster_fee');
+    }
+    if (!qExisting.has('settle_admin_fee')) {
+      await db.execute("ALTER TABLE Questions ADD COLUMN settle_admin_fee DECIMAL(18,2) DEFAULT NULL");
+      console.log('컬럼 추가: Questions.settle_admin_fee');
     }
 
     await db.execute(`
