@@ -1331,20 +1331,16 @@
     var detailCell = '<span style="color:var(--gray-300)">-</span>';
     if (pc > 0) {
       if (q.type === 'bet') {
-        var yes  = choices['YES']  || 0;
-        var no   = choices['NO']   || 0;
-        var draw = choices['DRAW'] || 0;
+        var yes = choices['YES'] || 0;
+        var no  = choices['NO']  || 0;
         var tb = parseFloat(q.total_bet) || 0;
         var ca = q.choice_amounts || {};
-        var yesAmt  = parseFloat(ca['YES']  || 0);
-        var noAmt   = parseFloat(ca['NO']   || 0);
-        var drawAmt = parseFloat(ca['DRAW'] || 0);
-        detailCell = '<span style="font-size:12px">YES <b style="color:var(--green)">' + yes + '</b>'
-                   + ' / NO <b style="color:var(--red)">' + no + '</b>'
-                   + (draw > 0 ? ' / 무 <b style="color:#7c3aed">' + draw + '</b>' : '') + '명</span>'
+        var yesAmt = parseFloat(ca['YES'] || 0);
+        var noAmt  = parseFloat(ca['NO']  || 0);
+        detailCell = '<span style="font-size:12px">YES <b style="color:var(--green)">' + yes + '</b>명'
+                   + ' / NO <b style="color:var(--red)">' + no + '</b>명</span>'
                    + '<br><span style="font-size:11px;color:var(--green)">YES ' + yesAmt.toLocaleString() + 'F</span>'
                    + ' <span style="font-size:11px;color:var(--red)">/ NO ' + noAmt.toLocaleString() + 'F</span>'
-                   + (draw > 0 ? ' <span style="font-size:11px;color:#7c3aed">/ 무 ' + drawAmt.toLocaleString() + 'F</span>' : '')
                    + '<br><span style="font-size:11px;color:var(--blue);font-weight:700">총 ' + tb.toLocaleString() + 'F 베팅</span>';
       } else {
         try {
@@ -1494,33 +1490,24 @@
     _settleWinning = null;
     var qText = q.question_ko || q.question || '';
     document.getElementById('settleQText').textContent = qText;
-    var yesCount  = (q.choices && q.choices['YES'])  || 0;
-    var noCount   = (q.choices && q.choices['NO'])   || 0;
-    var drawCount = (q.choices && q.choices['DRAW']) || 0;
-    var totalBet  = parseFloat(q.total_bet) || 0;
-    var isSports  = q.category === 'sports';
-    var infoHtml  = 'YES: <b>' + yesCount + '명</b> &nbsp;|&nbsp; NO: <b>' + noCount + '명</b>';
-    if (isSports) infoHtml += ' &nbsp;|&nbsp; 무승부: <b>' + drawCount + '명</b>';
-    infoHtml += ' &nbsp;|&nbsp; 총 베팅: <b>' + totalBet.toFixed(0) + 'F</b><br>'
+    var yesCount = (q.choices && q.choices['YES']) || 0;
+    var noCount  = (q.choices && q.choices['NO'])  || 0;
+    var totalBet = parseFloat(q.total_bet) || 0;
+    document.getElementById('settleInfo').innerHTML =
+      'YES 베팅: <b>' + yesCount + '명</b> &nbsp;|&nbsp; NO 베팅: <b>' + noCount + '명</b> &nbsp;|&nbsp; 총 베팅: <b>' + totalBet.toFixed(0) + 'F</b><br>'
       + '<span style="font-size:12px;color:#d97706">승리측 베터에게 총 베팅 포인트가 베팅 비율대로 분배됩니다.</span>';
-    document.getElementById('settleInfo').innerHTML = infoHtml;
-    document.getElementById('settleYesBtn').style.cssText  = 'flex:1;padding:14px;border-radius:12px;border:2px solid var(--gray-200);background:white;font-size:15px;font-weight:800;cursor:pointer;color:#16a34a;transition:all .15s';
-    document.getElementById('settleDrawBtn').style.cssText = 'flex:1;padding:14px;border-radius:12px;border:2px solid var(--gray-200);background:white;font-size:15px;font-weight:800;cursor:pointer;color:#7c3aed;transition:all .15s' + (isSports ? '' : ';display:none');
-    document.getElementById('settleNoBtn').style.cssText   = 'flex:1;padding:14px;border-radius:12px;border:2px solid var(--gray-200);background:white;font-size:15px;font-weight:800;cursor:pointer;color:#dc2626;transition:all .15s';
+    document.getElementById('settleYesBtn').style.cssText = 'flex:1;padding:14px;border-radius:12px;border:2px solid var(--gray-200);background:white;font-size:15px;font-weight:800;cursor:pointer;color:#16a34a;transition:all .15s';
+    document.getElementById('settleNoBtn').style.cssText  = 'flex:1;padding:14px;border-radius:12px;border:2px solid var(--gray-200);background:white;font-size:15px;font-weight:800;cursor:pointer;color:#dc2626;transition:all .15s';
     document.getElementById('settleConfirmBtn').disabled = true;
     document.getElementById('settleModal').style.display = 'flex';
   }
 
   function selectSettle(side) {
     _settleWinning = side;
-    var q = _qDetailMap[_settleTargetId];
-    var isSports = q && q.category === 'sports';
     var yBtn = document.getElementById('settleYesBtn');
-    var dBtn = document.getElementById('settleDrawBtn');
     var nBtn = document.getElementById('settleNoBtn');
-    yBtn.style.cssText = 'flex:1;padding:14px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;transition:all .15s;border:2px solid ' + (side==='YES'  ? '#16a34a;background:#dcfce7;color:#16a34a' : 'var(--gray-200);background:white;color:#16a34a');
-    dBtn.style.cssText = 'flex:1;padding:14px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;transition:all .15s;border:2px solid ' + (side==='DRAW' ? '#7c3aed;background:#ede9fe;color:#7c3aed' : 'var(--gray-200);background:white;color:#7c3aed') + (isSports ? '' : ';display:none');
-    nBtn.style.cssText = 'flex:1;padding:14px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;transition:all .15s;border:2px solid ' + (side==='NO'   ? '#dc2626;background:#fee2e2;color:#dc2626' : 'var(--gray-200);background:white;color:#dc2626');
+    yBtn.style.cssText = 'flex:1;padding:14px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;transition:all .15s;border:2px solid ' + (side==='YES' ? '#16a34a;background:#dcfce7;color:#16a34a' : 'var(--gray-200);background:white;color:#16a34a');
+    nBtn.style.cssText = 'flex:1;padding:14px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;transition:all .15s;border:2px solid ' + (side==='NO'  ? '#dc2626;background:#fee2e2;color:#dc2626' : 'var(--gray-200);background:white;color:#dc2626');
     document.getElementById('settleConfirmBtn').disabled = false;
   }
 
@@ -2083,9 +2070,8 @@ document.addEventListener('DOMContentLoaded', () => {
     <div id="settleInfo" style="font-size:13px;color:var(--gray-500);margin-bottom:16px;background:var(--gray-50);border-radius:10px;padding:12px"></div>
     <div style="font-size:13px;font-weight:700;color:var(--gray-700);margin-bottom:10px">승리 결과 선택</div>
     <div style="display:flex;gap:10px;margin-bottom:20px">
-      <button id="settleYesBtn"  onclick="selectSettle('YES')"  style="flex:1;padding:14px;border-radius:12px;border:2px solid var(--gray-200);background:white;font-size:15px;font-weight:800;cursor:pointer;color:#16a34a;transition:all .15s">YES 승리</button>
-      <button id="settleDrawBtn" onclick="selectSettle('DRAW')" style="display:none;flex:1;padding:14px;border-radius:12px;border:2px solid var(--gray-200);background:white;font-size:15px;font-weight:800;cursor:pointer;color:#7c3aed;transition:all .15s">무승부</button>
-      <button id="settleNoBtn"   onclick="selectSettle('NO')"   style="flex:1;padding:14px;border-radius:12px;border:2px solid var(--gray-200);background:white;font-size:15px;font-weight:800;cursor:pointer;color:#dc2626;transition:all .15s">NO 승리</button>
+      <button id="settleYesBtn" onclick="selectSettle('YES')" style="flex:1;padding:14px;border-radius:12px;border:2px solid var(--gray-200);background:white;font-size:15px;font-weight:800;cursor:pointer;color:#16a34a;transition:all .15s">YES 승리</button>
+      <button id="settleNoBtn"  onclick="selectSettle('NO')"  style="flex:1;padding:14px;border-radius:12px;border:2px solid var(--gray-200);background:white;font-size:15px;font-weight:800;cursor:pointer;color:#dc2626;transition:all .15s">NO 승리</button>
     </div>
     <div style="display:flex;gap:10px">
       <button onclick="closeSettleModal()" style="flex:1;padding:11px;border-radius:12px;border:1px solid var(--gray-300);background:var(--white);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font)">취소</button>
