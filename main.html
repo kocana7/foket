@@ -360,6 +360,8 @@
     }
     .trade-yes { background: var(--green-bg); color: var(--green); }
     .trade-yes.active, .trade-yes:hover { background: var(--green); color: var(--white); }
+    .trade-draw { background: #f5f3ff; color: #7c3aed; }
+    .trade-draw.active, .trade-draw:hover { background: #7c3aed; color: var(--white); }
     .trade-no { background: var(--red-bg); color: var(--red); }
     .trade-no.active, .trade-no:hover { background: var(--red); color: var(--white); }
     .trade-label { font-size: 12px; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
@@ -1026,6 +1028,7 @@
     <div class="trade-question" id="tradeQuestion"></div>
     <div class="trade-toggle">
       <button class="trade-yes active" id="tradeYesBtn" onclick="selectSide('yes')"><span data-i18n="trade.yes">✓ 예</span></button>
+      <button class="trade-draw" id="tradeDrawBtn" onclick="selectSide('draw')" style="display:none">🤝 무승부</button>
       <button class="trade-no" id="tradeNoBtn" onclick="selectSide('no')"><span data-i18n="trade.no">✗ 아니오</span></button>
     </div>
     <div class="trade-label">포인트</div>
@@ -1043,6 +1046,7 @@
     <div class="trade-summary">
       <div class="trade-row"><span>내 포인트</span><span id="tradeMyBalance" style="font-weight:600">-</span></div>
       <div class="trade-row"><span style="color:var(--green)">예(YES) 총 베팅</span><span id="tradeYesBet">-</span></div>
+      <div class="trade-row" id="tradeDrawRow" style="display:none"><span style="color:#7c3aed">무승부 총 베팅</span><span id="tradeDrawBet">-</span></div>
       <div class="trade-row"><span style="color:var(--red)">아니오(NO) 총 베팅</span><span id="tradeNoBet">-</span></div>
       <div class="trade-row"><span>총 베팅 포인트</span><span id="tradeTotalBet">-</span></div>
       <div class="trade-row"><span>적중시 예상 획득 포인트</span><span id="tradeProfit" style="color:var(--green)">-</span></div>
@@ -2752,6 +2756,10 @@ const CARD_DATA = {
     currentSide = 'yes';
     document.getElementById('tradeYesBtn').className = 'trade-yes active';
     document.getElementById('tradeNoBtn').className = 'trade-no';
+    document.getElementById('tradeDrawBtn').className = 'trade-draw';
+    var isSportsBet = q && q.category === 'sports';
+    document.getElementById('tradeDrawBtn').style.display = isSportsBet ? '' : 'none';
+    document.getElementById('tradeDrawRow').style.display = isSportsBet ? '' : 'none';
     document.getElementById('tradeAmount').value = 2;
     document.getElementById('tradeModal').classList.add('open');
     updateTrade();
@@ -2884,8 +2892,9 @@ const CARD_DATA = {
 
   function selectSide(side) {
     currentSide = side;
-    document.getElementById('tradeYesBtn').className = side === 'yes' ? 'trade-yes active' : 'trade-yes';
-    document.getElementById('tradeNoBtn').className = side === 'no' ? 'trade-no active' : 'trade-no';
+    document.getElementById('tradeYesBtn').className  = side === 'yes'  ? 'trade-yes active'  : 'trade-yes';
+    document.getElementById('tradeDrawBtn').className = side === 'draw' ? 'trade-draw active' : 'trade-draw';
+    document.getElementById('tradeNoBtn').className   = side === 'no'   ? 'trade-no active'   : 'trade-no';
     updateTrade();
   }
 
@@ -2909,25 +2918,30 @@ const CARD_DATA = {
     }
     document.getElementById('tradeMyBalance').innerHTML = myBal.toFixed(0) + '<b class="fcur">F</b>';
 
-    // YES / NO 별 베팅 금액 (내 베팅 포함)
+    // YES / DRAW / NO 별 베팅 금액 (내 베팅 포함)
     var q = _questionsById[_currentTradeId];
     var ca = q ? (q.choice_amounts || {}) : {};
-    var yesBetBase = parseFloat(ca['YES'] || 0);
-    var noBetBase  = parseFloat(ca['NO']  || 0);
-    var myYes = currentSide === 'yes' ? yesBetBase + amount : yesBetBase;
-    var myNo  = currentSide === 'no'  ? noBetBase  + amount : noBetBase;
-    document.getElementById('tradeYesBet').innerHTML = myYes.toFixed(0) + '<b class="fcur">F</b>';
-    document.getElementById('tradeNoBet').innerHTML  = myNo.toFixed(0)  + '<b class="fcur">F</b>';
+    var yesBetBase  = parseFloat(ca['YES']  || 0);
+    var drawBetBase = parseFloat(ca['DRAW'] || 0);
+    var noBetBase   = parseFloat(ca['NO']   || 0);
+    var myYes  = currentSide === 'yes'  ? yesBetBase  + amount : yesBetBase;
+    var myDraw = currentSide === 'draw' ? drawBetBase + amount : drawBetBase;
+    var myNo   = currentSide === 'no'   ? noBetBase   + amount : noBetBase;
+    document.getElementById('tradeYesBet').innerHTML  = myYes.toFixed(0)  + '<b class="fcur">F</b>';
+    document.getElementById('tradeDrawBet').innerHTML = myDraw.toFixed(0) + '<b class="fcur">F</b>';
+    document.getElementById('tradeNoBet').innerHTML   = myNo.toFixed(0)   + '<b class="fcur">F</b>';
 
     // 총 베팅 포인트
-    var totalBet = myYes + myNo;
+    var totalBet = myYes + myDraw + myNo;
     document.getElementById('tradeTotalBet').innerHTML = totalBet.toFixed(0) + '<b class="fcur">F</b>';
 
-    // 적중시 예상 획득 포인트 (수수료 제외 배당)
-    var loserPool   = currentSide === 'yes' ? myNo : myYes;
-    var mySideTotal = currentSide === 'yes' ? myYes : myNo;
-    var winnerPct   = 1 - (_settleAdminPct + _settlePosterPct) / 100;
-    var winnings    = mySideTotal > 0 ? Math.floor((amount / mySideTotal) * loserPool * winnerPct) : 0;
+    // 적중시 예상 획득 포인트 (패자 풀 = 나머지 두 선택지 합산)
+    var loserPool, mySideTotal;
+    if (currentSide === 'yes')       { loserPool = myDraw + myNo;  mySideTotal = myYes; }
+    else if (currentSide === 'draw') { loserPool = myYes  + myNo;  mySideTotal = myDraw; }
+    else                             { loserPool = myYes  + myDraw; mySideTotal = myNo; }
+    var winnerPct = 1 - (_settleAdminPct + _settlePosterPct) / 100;
+    var winnings  = mySideTotal > 0 ? Math.floor((amount / mySideTotal) * loserPool * winnerPct) : 0;
     document.getElementById('tradeProfit').innerHTML = '+' + winnings.toFixed(0) + '<b class="fcur">F</b>';
 
     // 베팅 후 잔여 포인트
@@ -2939,7 +2953,7 @@ const CARD_DATA = {
     var token = localStorage.getItem('foket-token');
     if (!token) { showToast('로그인이 필요합니다'); return; }
     var amount = Math.max(2, Math.floor(parseFloat(document.getElementById('tradeAmount').value) || 2));
-    var choice = currentSide === 'yes' ? 'YES' : 'NO';
+    var choice = currentSide === 'yes' ? 'YES' : currentSide === 'draw' ? 'DRAW' : 'NO';
     var btn = document.querySelector('#tradeModal .btn-primary');
     if (btn) { btn.disabled = true; btn.textContent = '처리 중...'; }
     try {

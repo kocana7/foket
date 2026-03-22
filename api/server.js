@@ -656,8 +656,8 @@ app.patch('/api/admin/questions/:id/status', adminMiddleware, async (req, res) =
 //   승리자 분배 90% → 각자 베팅 비율대로 + 원금 반환
 app.post('/api/admin/questions/:id/settle', adminMiddleware, async (req, res) => {
   const { winning } = req.body;
-  if (!['YES', 'NO'].includes(winning))
-    return res.status(400).json({ error: 'winning은 YES 또는 NO 여야 합니다' });
+  if (!['YES', 'NO', 'DRAW'].includes(winning))
+    return res.status(400).json({ error: 'winning은 YES, NO 또는 DRAW 여야 합니다' });
   const qId = req.params.id;
   try {
     const db = await getPool();
@@ -669,7 +669,7 @@ app.post('/api/admin/questions/:id/settle', adminMiddleware, async (req, res) =>
     if (qRows[0].status === 'SETTLED') return res.status(400).json({ error: '이미 정산된 질문입니다' });
 
     const posterId = qRows[0].user_id;
-    const losing = winning === 'YES' ? 'NO' : 'YES';
+    const losingChoices = ['YES', 'NO', 'DRAW'].filter(c => c !== winning);
 
     // 설정된 비율 조회
     const [cfgRows] = await db.execute("SELECT key_name, val FROM Settings WHERE key_name IN ('settle_admin_pct','settle_poster_pct')");
@@ -678,10 +678,10 @@ app.post('/api/admin/questions/:id/settle', adminMiddleware, async (req, res) =>
     const adminPct  = (cfgMap['settle_admin_pct']  ?? 5) / 100;
     const posterPct = (cfgMap['settle_poster_pct'] ?? 5) / 100;
 
-    // 패자 총 베팅
+    // 패자 총 베팅 (나머지 모든 선택지 합산)
     const [loserTot] = await db.execute(
-      'SELECT COALESCE(SUM(amount),0) AS total FROM Participations WHERE question_id = ? AND choice = ?',
-      [qId, losing]
+      `SELECT COALESCE(SUM(amount),0) AS total FROM Participations WHERE question_id = ? AND choice IN (${losingChoices.map(()=>'?').join(',')})`,
+      [qId, ...losingChoices]
     );
     const loserPool = parseFloat(loserTot[0].total) || 0;
 
@@ -690,12 +690,12 @@ app.post('/api/admin/questions/:id/settle', adminMiddleware, async (req, res) =>
     const posterFee = Math.floor(loserPool * posterPct);
     const winnerDistribution = loserPool - adminFee - posterFee;
 
-    // 질문 등록자에게 5% 지급
+    // 질문 등록자에게 수수료 지급
     if (posterFee > 0 && posterId) {
       await db.execute('UPDATE Users SET balance = balance + ? WHERE user_id = ?', [posterFee, posterId]);
     }
 
-    // 승리자 목록 - 개별 참여 행별로 조회 (payout을 행별 비례로 저장)
+    // 승리자 목록 - 개별 참여 행별로 조회
     const [winnerRows] = await db.execute(
       'SELECT id, user_id, amount FROM Participations WHERE question_id = ? AND choice = ?',
       [qId, winning]
@@ -708,8 +708,7 @@ app.post('/api/admin/questions/:id/settle', adminMiddleware, async (req, res) =>
     for (const w of winnerRows) {
       const bet      = parseFloat(w.amount);
       const winnings = winnerTotal > 0 ? Math.floor((bet / winnerTotal) * winnerDistribution) : 0;
-      const payout   = bet + winnings; // 원금 + 배당 (행별)
-      // 개별 행에 행별 payout 저장
+      const payout   = bet + winnings;
       await db.execute(
         "UPDATE Participations SET payout = ?, settle_result = 'WIN' WHERE id = ?",
         [payout, w.id]
@@ -717,23 +716,24 @@ app.post('/api/admin/questions/:id/settle', adminMiddleware, async (req, res) =>
       userPayoutMap[w.user_id] = (userPayoutMap[w.user_id] || 0) + payout;
       payouts.push({ user_id: w.user_id, bet, winnings, payout });
     }
-    // 유저 balance 업데이트 (유저별 합산)
     for (const [uid, total] of Object.entries(userPayoutMap)) {
       await db.execute('UPDATE Users SET balance = balance + ? WHERE user_id = ?', [total, uid]);
     }
 
-    // 패자 기록 업데이트
-    await db.execute(
-      "UPDATE Participations SET payout = 0, settle_result = 'LOSE' WHERE question_id = ? AND choice = ?",
-      [qId, losing]
-    );
+    // 패자 기록 업데이트 (나머지 모든 선택지)
+    for (const lc of losingChoices) {
+      await db.execute(
+        "UPDATE Participations SET payout = 0, settle_result = 'LOSE' WHERE question_id = ? AND choice = ?",
+        [qId, lc]
+      );
+    }
 
     await db.execute(
       "UPDATE Questions SET status='SETTLED', settle_winner=?, settle_poster_fee=?, settle_admin_fee=? WHERE question_id=?",
       [winning, posterFee, adminFee, qId]
     );
 
-    res.json({ ok: true, winning, loserPool, adminFee, posterFee, winnerDistribution, winnerCount: winners.length, payouts });
+    res.json({ ok: true, winning, loserPool, adminFee, posterFee, winnerDistribution, winnerCount: winnerRows.length, payouts });
   } catch (err) {
     console.error('[settle]', err.message);
     res.status(500).json({ error: '서버 오류: ' + err.message });
