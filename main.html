@@ -3638,10 +3638,10 @@ const CARD_DATA = {
   };
 
   function buildDbMainCard(q) {
+    _questionsById[q.question_id] = q;
     var icon = CAT_ICONS[q.category] || '📋';
     var catLabel = CAT_NAMES[q.category] || q.category || '';
     var typeLabel = q.type === 'vote' ? '투표' : '내기';
-    var qText = (q.question || '').replace(/'/g, '&#39;');
     var totalCount = parseInt(q.participant_count) || 0;
     var choices = q.choices || {};
     var statsHtml = '';
@@ -3680,12 +3680,13 @@ const CARD_DATA = {
         + '<span class="part-count">👥 ' + totalCount + '명 참여</span>';
     }
 
-    return '<div class="market-card db-main-card" data-cat="' + (q.category||'') + '" onclick="openTrade(\'' + qText.replace(/\\/g,'\\\\') + '\',' + (parseInt(q.initial_prob)||50) + ')">'
+    var cardDisplayQ = (currentLang === 'ko') ? (q.question_ko || q.question || '') : (q.question || '');
+    return '<div class="market-card db-main-card" data-cat="' + (q.category||'') + '" onclick="openTrade(' + q.question_id + ',' + (parseInt(q.initial_prob)||50) + ')">'
       + '<div class="market-card-top">'
       + '<div class="market-icon">' + icon + '</div>'
       + '<div class="market-meta">'
       + '<div class="market-category">' + catLabel + ' · ' + typeLabel + '</div>'
-      + '<div class="market-question">' + (q.question || '') + '</div>'
+      + '<div class="market-question">' + cardDisplayQ.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>'
       + '</div></div>'
       + statsHtml
       + '</div>';
@@ -3787,14 +3788,47 @@ const CARD_DATA = {
   let currentProb = 67;
   let currentSide = 'yes';
 
-  function openTrade(question, prob) {
+  var _questionsById = {};
+  var _transCache = {};
+  try { _transCache = JSON.parse(localStorage.getItem('foket-trans-cache') || '{}'); } catch(e) {}
+
+  var _LANG_PAIR_MAP = { ja:'ja', en:'en', zh:'zh-CN', fr:'fr', de:'de', es:'es', ru:'ru' };
+
+  async function translateIfNeeded(text, targetLang) {
+    if (!text || targetLang === 'ko') return text;
+    if (!/[\uAC00-\uD7AF\u3131-\u318E]/.test(text)) return text; // not Korean
+    var key = targetLang + ':' + text.slice(0, 120);
+    if (_transCache[key]) return _transCache[key];
+    try {
+      var pair = 'ko|' + (_LANG_PAIR_MAP[targetLang] || 'en');
+      var res = await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text) + '&langpair=' + pair);
+      var data = await res.json();
+      if (data.responseStatus === 200) {
+        _transCache[key] = data.responseData.translatedText;
+        try { localStorage.setItem('foket-trans-cache', JSON.stringify(_transCache)); } catch(e) {}
+        return _transCache[key];
+      }
+    } catch(e) {}
+    return text;
+  }
+
+  async function openTrade(questionId, prob) {
     currentProb = prob;
     currentSide = 'yes';
-    document.getElementById('tradeQuestion').textContent = question;
     document.getElementById('tradeYesBtn').className = 'trade-yes active';
     document.getElementById('tradeNoBtn').className = 'trade-no';
     document.getElementById('tradeModal').classList.add('open');
     updateTrade();
+
+    var q = _questionsById[questionId];
+    var rawText = q ? (q.question || '') : (questionId + '');
+    var displayText = rawText;
+    if (q && currentLang !== 'ko') {
+      displayText = await translateIfNeeded(rawText, currentLang);
+    } else if (q && currentLang === 'ko') {
+      displayText = q.question_ko || rawText;
+    }
+    document.getElementById('tradeQuestion').textContent = displayText;
   }
   function closeTrade() { document.getElementById('tradeModal').classList.remove('open'); }
   function closeTradeOutside(e) { if (e.target === document.getElementById('tradeModal')) closeTrade(); }
