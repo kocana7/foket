@@ -846,17 +846,26 @@ app.get('/api/charts', async (req, res) => {
       if (!dayMap[qid][day]) dayMap[qid][day] = {};
       dayMap[qid][day][r.choice] = Number(r.cnt);
     });
-    // 누적 YES% 시계열
+    // 선택지별 누적 % 시계열 반환 { qid: { choice: [pct, ...], ... } }
     const charts = {};
     ids.forEach(qid => {
       const dm = dayMap[qid] || {};
       const days = Object.keys(dm).sort();
-      let cumYes = 0, cumTotal = 0;
-      charts[qid] = days.map(d => {
-        cumYes   += dm[d]['YES'] || 0;
+      // 전체 선택지 목록
+      const allChoices = [...new Set(Object.values(dm).flatMap(d => Object.keys(d)))];
+      const cumMap = {};
+      allChoices.forEach(c => { cumMap[c] = 0; });
+      let cumTotal = 0;
+      const series = {}; // { choice: [pct per day] }
+      allChoices.forEach(c => { series[c] = []; });
+      days.forEach(d => {
+        allChoices.forEach(c => { cumMap[c] += dm[d][c] || 0; });
         cumTotal += Object.values(dm[d]).reduce((a, b) => a + b, 0);
-        return cumTotal > 0 ? Math.round(cumYes / cumTotal * 100) : 50;
+        allChoices.forEach(c => {
+          series[c].push(cumTotal > 0 ? Math.round(cumMap[c] / cumTotal * 100) : Math.round(100 / allChoices.length));
+        });
       });
+      charts[qid] = series;
     });
     res.json(charts);
   } catch (err) { res.status(500).json({ error: err.message }); }

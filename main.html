@@ -197,7 +197,7 @@
     /* ─── 참여 통계 ─── */
     .part-count { font-size: 11px; color: var(--gray-400); font-weight: 500; margin-top: 2px; }
     .bet-stats { display: flex; gap: 10px; align-items: flex-start; width: 100%; flex-direction: column; }
-    .card-sparkline { width: 100%; height: 56px; margin-top: 8px; border-radius: 8px; overflow: hidden; }
+    .card-sparkline { width: 100%; height: 64px; margin-top: 8px; border-radius: 8px; overflow: hidden; }
     .card-sparkline svg { display: block; width: 100%; height: 100%; }
     .bet-stat-row { display: flex; align-items: center; gap: 8px; width: 100%; }
     .bet-stat-bar-wrap { flex: 1; background: var(--gray-100); border-radius: 4px; height: 6px; overflow: hidden; }
@@ -2422,29 +2422,58 @@ const CARD_DATA = {
 
   var EMPTY_MSG = '<div style="grid-column:1/-1;text-align:center;padding:48px 0;color:var(--gray-400);font-size:15px">등록된 질문이 없습니다. 첫 번째 질문을 등록해보세요!</div>';
 
-  function drawSparkline(el, points, color) {
-    if (!el || !points || points.length < 2) return;
-    var W = 400, H = 56, pad = 6;
-    var min = Math.min.apply(null, points);
-    var max = Math.max.apply(null, points);
+  // 색상 팔레트: YES=초록, NO=빨강, 투표 선택지=보라/파랑/주황/청록...
+  var CHOICE_COLORS = { 'YES': '#16a34a', 'NO': '#dc2626' };
+  var VOTE_PALETTE  = ['#7C3AED','#2563EB','#EA580C','#0891B2','#BE185D','#65A30D'];
+
+  function drawMultiSparkline(el, series, labelMap) {
+    // series: { choice: [pct, ...] }
+    if (!el || !series) return;
+    var choices = Object.keys(series).filter(function(c) { return series[c] && series[c].length >= 1; });
+    if (!choices.length) return;
+
+    var W = 400, H = 64, pad = 6, legendH = 18;
+    var chartH = H - legendH;
+    // 전체 범위
+    var allVals = choices.reduce(function(arr, c) { return arr.concat(series[c]); }, []);
+    var min = Math.min.apply(null, allVals);
+    var max = Math.max.apply(null, allVals);
     var range = max - min || 10;
-    var xStep = (W - pad * 2) / (points.length - 1);
-    var coords = points.map(function(v, i) {
-      return [(pad + i * xStep).toFixed(1), (H - pad - (v - min) / range * (H - pad * 2)).toFixed(1)];
+    var maxLen = Math.max.apply(null, choices.map(function(c) { return series[c].length; }));
+    if (maxLen < 1) return;
+    var xStep = maxLen > 1 ? (W - pad * 2) / (maxLen - 1) : 0;
+
+    var svgLines = '';
+    var legendItems = '';
+    var isVote = !series['YES'] && !series['NO'];
+    choices.forEach(function(c, ci) {
+      var pts = series[c];
+      var color = CHOICE_COLORS[c] || VOTE_PALETTE[ci % VOTE_PALETTE.length];
+      var coords = pts.map(function(v, i) {
+        var x = maxLen > 1 ? pad + i * xStep : W / 2;
+        var y = chartH - pad - (v - min) / range * (chartH - pad * 2);
+        return [x.toFixed(1), y.toFixed(1)];
+      });
+      if (coords.length === 1) coords = [coords[0], coords[0]]; // 1점이면 플랫
+      var d = coords.map(function(c2, i) { return (i === 0 ? 'M' : 'L') + c2[0] + ',' + c2[1]; }).join(' ');
+      var lastX = coords[coords.length-1][0], lastY = coords[coords.length-1][1];
+      var lastPct = pts[pts.length-1];
+      var gid = 'sg' + el.id + ci;
+      svgLines += '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1">'
+        + '<stop offset="0%" stop-color="' + color + '" stop-opacity="0.18"/>'
+        + '<stop offset="100%" stop-color="' + color + '" stop-opacity="0"/>'
+        + '</linearGradient></defs>'
+        + '<path d="' + d + ' L' + lastX + ',' + (chartH-pad) + ' L' + pad + ',' + (chartH-pad) + ' Z" fill="url(#' + gid + ')"/>'
+        + '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+        + '<circle cx="' + lastX + '" cy="' + lastY + '" r="3" fill="' + color + '"/>';
+      var label = (labelMap && labelMap[c]) ? labelMap[c] : c;
+      if (label.length > 8) label = label.slice(0, 7) + '…';
+      legendItems += '<text x="' + (ci * (W / choices.length) + 4) + '" y="' + (H - 3) + '" fill="' + color + '" font-size="10" font-weight="700">'
+        + label + ' ' + lastPct + '%</text>';
     });
-    var linePath = coords.map(function(c, i) { return (i === 0 ? 'M' : 'L') + c[0] + ',' + c[1]; }).join(' ');
-    var areaPath = linePath + ' L' + coords[coords.length-1][0] + ',' + (H-pad) + ' L' + pad + ',' + (H-pad) + ' Z';
-    var gid = 'sg' + el.id;
-    el.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">'
-      + '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1">'
-      + '<stop offset="0%" stop-color="' + color + '" stop-opacity="0.25"/>'
-      + '<stop offset="100%" stop-color="' + color + '" stop-opacity="0.0"/>'
-      + '</linearGradient></defs>'
-      + '<path d="' + areaPath + '" fill="url(#' + gid + ')"/>'
-      + '<path d="' + linePath + '" fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'
-      // 마지막 점 강조
-      + '<circle cx="' + coords[coords.length-1][0] + '" cy="' + coords[coords.length-1][1] + '" r="3.5" fill="' + color + '"/>'
-      + '</svg>';
+
+    el.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" style="font-family:inherit">'
+      + svgLines + legendItems + '</svg>';
   }
 
   function loadHotCharts(ids) {
@@ -2455,16 +2484,18 @@ const CARD_DATA = {
         ids.forEach(function(qid) {
           var el = document.getElementById('sparkline-' + qid);
           if (!el) return;
-          var points = charts[qid];
+          var series = charts[qid]; // { choice: [pct,...] }
           var q = _questionsById[qid];
-          var color = (q && q.type === 'vote') ? '#6D28D9' : '#16a34a';
-          if (points && points.length >= 2) {
-            drawSparkline(el, points, color);
+          if (series && Object.keys(series).length) {
+            drawMultiSparkline(el, series, null);
           } else {
-            // 참여 없으면 초기확률 기준 플랫 라인
+            // 참여 없으면 초기확률 플랫 라인
             var prob = q ? (parseInt(q.initial_prob) || 50) : 50;
-            drawSparkline(el, [prob, prob], color);
-            el.style.opacity = '0.35';
+            var fakeSeries = q && q.type === 'bet'
+              ? { 'YES': [prob, prob], 'NO': [100-prob, 100-prob] }
+              : { 'YES': [50, 50] };
+            drawMultiSparkline(el, fakeSeries, null);
+            el.style.opacity = '0.3';
           }
         });
       }).catch(function() {});
