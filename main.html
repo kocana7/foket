@@ -2985,10 +2985,15 @@ const CARD_DATA = {
         var displayQ = q.question_ko || q.question || '';
         var endDate = q.end_date ? q.end_date.slice(0,10) : '';
         var totalBet = parseFloat(q.total_bet) || 0;
-        return '<div class="my-act-item">'
+        var clickable = q.status === 'APPROVED';
+        var qProb = parseInt(q.initial_prob) || 50;
+        var clickAttr = clickable ? ' style="cursor:pointer" onclick="closeMyPage();openTrade(' + q.question_id + ',' + qProb + ')"' : '';
+        _questionsById[q.question_id] = q;
+        return '<div class="my-act-item"' + clickAttr + '>'
           + '<div style="display:flex;gap:6px;margin-bottom:4px">'
           + '<span class="my-act-badge ' + typeClass + '">' + typeLabel + '</span>'
           + '<span class="my-act-badge ' + statusClass + '">' + statusLabel + '</span>'
+          + (clickable ? '<span style="font-size:11px;color:var(--blue);margin-left:auto">클릭하여 참여 →</span>' : '')
           + '</div>'
           + '<div class="my-act-q">' + displayQ.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>'
           + '<div class="my-act-meta">'
@@ -3006,9 +3011,16 @@ const CARD_DATA = {
         var displayQ = p.question_ko || p.question || '';
         var date = p.created_at ? p.created_at.slice(0,10) : '';
         var amount = parseFloat(p.amount) || 0;
-        return '<div class="my-act-item">'
+        var pClickable = p.q_status === 'APPROVED';
+        var pProb = 50;
+        var pClickAttr = pClickable ? ' style="cursor:pointer" onclick="closeMyPage();openTrade(' + p.question_id + ',' + pProb + ')"' : '';
+        if (pClickable && !_questionsById[p.question_id]) {
+          _questionsById[p.question_id] = { question_id: p.question_id, type: p.type, question: p.question, question_ko: p.question_ko, initial_prob: pProb };
+        }
+        return '<div class="my-act-item"' + pClickAttr + '>'
           + '<div style="display:flex;gap:6px;margin-bottom:4px">'
           + '<span class="my-act-badge ' + typeClass + '">' + typeLabel + '</span>'
+          + (pClickable ? '<span style="font-size:11px;color:var(--blue);margin-left:auto">다시 참여 →</span>' : '')
           + '</div>'
           + '<div class="my-act-q">' + displayQ.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>'
           + '<div class="my-act-meta">'
