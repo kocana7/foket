@@ -2239,7 +2239,11 @@ const CARD_DATA = {
   });
 
   // Init language on load
-  document.addEventListener('DOMContentLoaded', () => { setLang(currentLang); shuffleSections(); loadSectionCards(); });
+  document.addEventListener('DOMContentLoaded', () => {
+    try { setLang(currentLang); } catch(e) { alert('setLang 오류: ' + e.message); return; }
+    try { shuffleSections(); } catch(e) { alert('shuffleSections 오류: ' + e.message); return; }
+    loadSectionCards();
+  });
 
   /* ── 섹션 랜덤 순서 ── */
   function shuffleSections() {
@@ -2329,6 +2333,7 @@ const CARD_DATA = {
   var EMPTY_MSG = '<div style="grid-column:1/-1;text-align:center;padding:48px 0;color:var(--gray-400);font-size:15px">등록된 질문이 없습니다. 첫 번째 질문을 등록해보세요!</div>';
 
   async function loadSectionCards() {
+    alert('loadSectionCards 시작! URL: ' + location.href);
     var _dbg = document.getElementById('_dbg_status');
     function dbgShow(msg) { if (_dbg) { _dbg.textContent = msg; _dbg.style.display = 'block'; } }
     dbgShow('로딩 중... URL: ' + location.href);
