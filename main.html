@@ -506,9 +506,6 @@
   </div>
 </div>
 
-<!-- debug status -->
-<div id="_dbg_status" style="position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:9999;background:#ef4444;color:#fff;font-size:14px;font-weight:700;padding:8px 20px;border-radius:8px;pointer-events:none;min-width:260px;text-align:center;display:none"></div>
-
 <!-- TRENDING MARKETS -->
 <section class="section" id="markets">
     <div class="section-header">
@@ -2179,8 +2176,9 @@ const CARD_DATA = {
       }
     });
     // Special: hero h1 uses innerHTML (contains span + br)
-    if (t['hero.h1']) {
-      document.getElementById('heroH1').innerHTML = t['hero.h1'];
+    const heroH1 = document.getElementById('heroH1');
+    if (t['hero.h1'] && heroH1) {
+      heroH1.innerHTML = t['hero.h1'];
     }
     // Translate Yes/No buttons (preserve percentage number)
     document.querySelectorAll('[data-i18n-btn]').forEach(function(btn) {
@@ -2239,11 +2237,7 @@ const CARD_DATA = {
   });
 
   // Init language on load
-  document.addEventListener('DOMContentLoaded', () => {
-    try { setLang(currentLang); } catch(e) { alert('setLang 오류: ' + e.message); return; }
-    try { shuffleSections(); } catch(e) { alert('shuffleSections 오류: ' + e.message); return; }
-    loadSectionCards();
-  });
+  document.addEventListener('DOMContentLoaded', () => { setLang(currentLang); shuffleSections(); loadSectionCards(); });
 
   /* ── 섹션 랜덤 순서 ── */
   function shuffleSections() {
@@ -2333,18 +2327,13 @@ const CARD_DATA = {
   var EMPTY_MSG = '<div style="grid-column:1/-1;text-align:center;padding:48px 0;color:var(--gray-400);font-size:15px">등록된 질문이 없습니다. 첫 번째 질문을 등록해보세요!</div>';
 
   async function loadSectionCards() {
-    alert('loadSectionCards 시작! URL: ' + location.href);
-    var _dbg = document.getElementById('_dbg_status');
-    function dbgShow(msg) { if (_dbg) { _dbg.textContent = msg; _dbg.style.display = 'block'; } }
-    dbgShow('로딩 중... URL: ' + location.href);
     try {
       var token = localStorage.getItem('foket-token');
       var fetchOpts = token ? { headers: { 'Authorization': 'Bearer ' + token } } : {};
       var res = await fetch('/api/questions', fetchOpts);
-      if (!res.ok) { dbgShow('API 오류: ' + res.status); return; }
+      if (!res.ok) return;
       var data = await res.json();
       var questions = data.questions || [];
-      dbgShow('OK: 질문 ' + questions.length + '개');
 
       var byPart = function(a, b) { return (b.participant_count || 0) - (a.participant_count || 0); };
 
@@ -2385,7 +2374,7 @@ const CARD_DATA = {
       });
     } catch(e) {
       console.error('[loadSectionCards]', e);
-      dbgShow('오류: ' + e.message);
+      console.error('[loadSectionCards]', e);
     }
   }
 
