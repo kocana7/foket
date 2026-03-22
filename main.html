@@ -3013,9 +3013,14 @@ const CARD_DATA = {
           + '<div class="my-act-q">' + displayQ.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>'
           + '<div class="my-act-meta">'
           + '<span>선택: <b>' + (p.choice || '-') + '</b></span>'
-          + '<span>사용 <b style="color:var(--blue)">' + amount.toFixed(0) + 'F</b></span>'
+          + '<span>베팅 <b style="color:var(--blue)">' + amount.toFixed(0) + 'F</b></span>'
           + (date ? '<span>' + date + '</span>' : '')
           + '</div>'
+          + (p.settle_result === 'WIN'
+              ? '<div style="font-size:12px;margin-top:4px;color:#16a34a;font-weight:700">정산 완료 — 적중! +' + (parseFloat(p.payout)||0).toFixed(0) + 'F 지급</div>'
+              : p.settle_result === 'LOSE'
+              ? '<div style="font-size:12px;margin-top:4px;color:#dc2626;font-weight:700">정산 완료 — 미적중</div>'
+              : '')
           + '</div>';
       }).join('');
     }

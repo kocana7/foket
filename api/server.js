@@ -289,7 +289,7 @@ app.get('/api/my-participations', authMiddleware, async (req, res) => {
   try {
     const db = await getPool();
     const [rows] = await db.execute(
-      `SELECT p.id AS participation_id, p.question_id, p.choice, p.amount, p.created_at,
+      `SELECT p.id AS participation_id, p.question_id, p.choice, p.amount, p.payout, p.settle_result, p.created_at,
               q.type, q.question, q.question_ko, q.category, q.status AS q_status
        FROM Participations p
        JOIN Questions q ON p.question_id = q.question_id
@@ -641,8 +641,11 @@ app.patch('/api/admin/questions/:id/status', adminMiddleware, async (req, res) =
 });
 
 // ── 관리자: 내기 정산 ─────────────────────────────────────
-// winning: 'YES' | 'NO'
-// 정산 방식: 승리 베터에게 (총 베팅 포인트 / 승리측 베팅 포인트) 배율로 지급
+// 정산 방식:
+//   패자 풀 = 패자들의 총 베팅 합계
+//   관리자 수수료 5% (시스템 공제)
+//   질문 등록자 수수료 5%
+//   승리자 분배 90% → 각자 베팅 비율대로 + 원금 반환
 app.post('/api/admin/questions/:id/settle', adminMiddleware, async (req, res) => {
   const { winning } = req.body;
   if (!['YES', 'NO'].includes(winning))
@@ -651,37 +654,62 @@ app.post('/api/admin/questions/:id/settle', adminMiddleware, async (req, res) =>
   try {
     const db = await getPool();
     const [qRows] = await db.execute(
-      "SELECT type, status FROM Questions WHERE question_id = ?", [qId]
+      'SELECT type, status, user_id FROM Questions WHERE question_id = ?', [qId]
     );
     if (!qRows.length) return res.status(404).json({ error: '질문 없음' });
     if (qRows[0].type !== 'bet') return res.status(400).json({ error: '내기 질문만 정산 가능합니다' });
+    if (qRows[0].status === 'SETTLED') return res.status(400).json({ error: '이미 정산된 질문입니다' });
 
-    // 전체 베팅 합계
-    const [totRows] = await db.execute(
-      'SELECT COALESCE(SUM(amount),0) AS total FROM Participations WHERE question_id = ?', [qId]
+    const posterId = qRows[0].user_id;
+    const losing = winning === 'YES' ? 'NO' : 'YES';
+
+    // 패자 총 베팅
+    const [loserTot] = await db.execute(
+      'SELECT COALESCE(SUM(amount),0) AS total FROM Participations WHERE question_id = ? AND choice = ?',
+      [qId, losing]
     );
-    const totalPool = parseFloat(totRows[0].total) || 0;
+    const loserPool = parseFloat(loserTot[0].total) || 0;
 
-    // 승리측 참여자 목록
+    // 수수료 계산
+    const adminFee  = Math.floor(loserPool * 0.05);
+    const posterFee = Math.floor(loserPool * 0.05);
+    const winnerDistribution = loserPool - adminFee - posterFee; // 90%
+
+    // 질문 등록자에게 5% 지급
+    if (posterFee > 0 && posterId) {
+      await db.execute('UPDATE Users SET balance = balance + ? WHERE user_id = ?', [posterFee, posterId]);
+    }
+
+    // 승리자 목록 (유저별 베팅 합계)
     const [winners] = await db.execute(
       'SELECT user_id, SUM(amount) AS bet FROM Participations WHERE question_id = ? AND choice = ? GROUP BY user_id',
       [qId, winning]
     );
-
     const winnerTotal = winners.reduce((s, w) => s + parseFloat(w.bet), 0);
-    let payouts = [];
-    if (winnerTotal > 0 && winners.length > 0) {
-      for (const w of winners) {
-        const payout = Math.floor((parseFloat(w.bet) / winnerTotal) * totalPool);
-        await db.execute('UPDATE Users SET balance = balance + ? WHERE user_id = ?', [payout, w.user_id]);
-        payouts.push({ user_id: w.user_id, payout });
-      }
+
+    const payouts = [];
+    for (const w of winners) {
+      const bet      = parseFloat(w.bet);
+      const winnings = winnerTotal > 0 ? Math.floor((bet / winnerTotal) * winnerDistribution) : 0;
+      const payout   = bet + winnings; // 원금 + 배당
+      await db.execute('UPDATE Users SET balance = balance + ? WHERE user_id = ?', [payout, w.user_id]);
+      // 참여 기록에 결과 저장
+      await db.execute(
+        "UPDATE Participations SET payout = ?, settle_result = 'WIN' WHERE question_id = ? AND user_id = ? AND choice = ?",
+        [payout, qId, w.user_id, winning]
+      );
+      payouts.push({ user_id: w.user_id, bet, winnings, payout });
     }
 
-    // 질문 상태를 SETTLED 로 변경
+    // 패자 기록 업데이트
+    await db.execute(
+      "UPDATE Participations SET payout = 0, settle_result = 'LOSE' WHERE question_id = ? AND choice = ?",
+      [qId, losing]
+    );
+
     await db.execute("UPDATE Questions SET status = 'SETTLED' WHERE question_id = ?", [qId]);
 
-    res.json({ ok: true, winning, totalPool, winnerCount: winners.length, payouts });
+    res.json({ ok: true, winning, loserPool, adminFee, posterFee, winnerDistribution, winnerCount: winners.length, payouts });
   } catch (err) {
     console.error('[settle]', err.message);
     res.status(500).json({ error: '서버 오류: ' + err.message });
@@ -798,6 +826,14 @@ async function initDb() {
     if (!pExisting.has('amount')) {
       await db.execute('ALTER TABLE Participations ADD COLUMN amount DECIMAL(18,2) DEFAULT 1');
       console.log('컬럼 추가: Participations.amount');
+    }
+    if (!pExisting.has('payout')) {
+      await db.execute('ALTER TABLE Participations ADD COLUMN payout DECIMAL(18,2) DEFAULT NULL');
+      console.log('컬럼 추가: Participations.payout');
+    }
+    if (!pExisting.has('settle_result')) {
+      await db.execute("ALTER TABLE Participations ADD COLUMN settle_result VARCHAR(10) DEFAULT NULL COMMENT 'WIN/LOSE/null'");
+      console.log('컬럼 추가: Participations.settle_result');
     }
 
     // Questions 테이블 컬럼 추가
