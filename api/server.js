@@ -394,6 +394,46 @@ app.get('/api/admin/blocked-ips', adminMiddleware, async (req, res) => {
 });
 
 // ── Heartbeat ─────────────────────────────────────────────
+// ── 투표/내기 참여 ───────────────────────────────────────
+app.post('/api/participate', authMiddleware, async (req, res) => {
+  const { question_id, choice } = req.body;
+  if (!question_id || !choice) return res.status(400).json({ error: '필수 항목 누락' });
+  try {
+    const db = await getPool();
+    const [qRows] = await db.execute(
+      "SELECT type, options, status, end_date FROM Questions WHERE question_id = ?", [question_id]
+    );
+    if (!qRows.length) return res.status(404).json({ error: '질문을 찾을 수 없습니다' });
+    const q = qRows[0];
+    if (q.status !== 'APPROVED') return res.status(400).json({ error: '참여할 수 없는 질문입니다' });
+    if (q.end_date && new Date(q.end_date) < new Date()) return res.status(400).json({ error: '종료된 질문입니다' });
+
+    // 잔액 확인 (1F 필요)
+    const [userRows] = await db.execute('SELECT balance FROM Users WHERE user_id = ?', [req.user.userId]);
+    if (!userRows.length) return res.status(404).json({ error: '회원 정보를 찾을 수 없습니다' });
+    if ((userRows[0].balance || 0) < 1)
+      return res.status(402).json({ error: '잔액이 부족합니다. 참여에는 1F가 필요합니다.' });
+
+    // 1F 차감 + 참여 기록
+    await db.execute('UPDATE Users SET balance = balance - 1 WHERE user_id = ?', [req.user.userId]);
+    await db.execute('INSERT INTO Participations (question_id, user_id, choice) VALUES (?,?,?)',
+      [question_id, req.user.userId, choice]);
+
+    // 최신 투표 현황 반환
+    const [choiceRows] = await db.execute(
+      'SELECT choice, COUNT(*) AS cnt FROM Participations WHERE question_id = ? GROUP BY choice', [question_id]
+    );
+    const choices = {};
+    choiceRows.forEach(c => { choices[c.choice] = Number(c.cnt); });
+
+    const [newUser] = await db.execute('SELECT balance FROM Users WHERE user_id = ?', [req.user.userId]);
+    res.json({ ok: true, choices, balance: newUser[0].balance });
+  } catch (err) {
+    console.error('[participate POST]', err.message);
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
 app.post('/api/heartbeat', authMiddleware, async (req, res) => {
   try {
     const db = await getPool();

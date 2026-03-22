@@ -991,6 +991,22 @@
   </div>
 </div>
 
+<!-- VOTE MODAL -->
+<div class="modal-overlay" id="voteModal" onclick="closeVoteOutside(event)">
+  <div class="modal trade-modal" style="max-width:480px">
+    <button class="modal-close" onclick="closeVote()">✕</button>
+    <h2 style="font-size:18px;margin-bottom:12px">📊 투표 참여</h2>
+    <div class="trade-question" id="voteQuestion" style="margin-bottom:16px"></div>
+    <div id="voteOptions" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px"></div>
+    <div id="voteResults" style="display:none;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;color:var(--gray-500);margin-bottom:8px">현재 투표 현황</div>
+      <div id="voteResultBars" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+    <div style="font-size:12px;color:var(--gray-400);margin-bottom:14px">참여 시 <b>1F</b> 차감됩니다</div>
+    <button class="btn btn-primary btn-md" style="width:100%" id="voteConfirmBtn" onclick="confirmVote()">투표하기 →</button>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -1009,6 +1025,9 @@
 .va-card-type{display:inline-block;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:8px;}
 .va-card-q{font-size:15px;font-weight:600;color:#111;line-height:1.4;}
 .va-card-meta{font-size:12px;color:#9ca3af;margin-top:6px;}
+.vote-opt-btn{border:2px solid var(--gray-200);border-radius:12px;padding:12px 14px;cursor:pointer;transition:border-color .15s,background .15s;}
+.vote-opt-btn:hover{border-color:var(--blue);background:var(--blue-light);}
+.vote-opt-btn.selected{border-color:var(--blue);background:var(--blue-light);}
 </style>
 
 <script>
@@ -2430,6 +2449,10 @@ const CARD_DATA = {
   }
 
   async function openTrade(questionId, prob) {
+    var q = _questionsById[questionId];
+    // 투표 타입이면 투표 모달로 분기
+    if (q && q.type === 'vote') { openVoteModal(q); return; }
+
     currentProb = prob;
     currentSide = 'yes';
     document.getElementById('tradeYesBtn').className = 'trade-yes active';
@@ -2437,7 +2460,6 @@ const CARD_DATA = {
     document.getElementById('tradeModal').classList.add('open');
     updateTrade();
 
-    var q = _questionsById[questionId];
     var rawText = q ? (q.question || '') : (questionId + '');
     var displayText = rawText;
     if (q && currentLang !== 'ko') {
@@ -2449,6 +2471,120 @@ const CARD_DATA = {
   }
   function closeTrade() { document.getElementById('tradeModal').classList.remove('open'); }
   function closeTradeOutside(e) { if (e.target === document.getElementById('tradeModal')) closeTrade(); }
+
+  /* ── Vote modal ── */
+  var _voteCurrentQ = null;
+  var _voteSelectedOpt = null;
+
+  async function openVoteModal(q) {
+    _voteCurrentQ = q;
+    _voteSelectedOpt = null;
+    var modal = document.getElementById('voteModal');
+    var rawText = q.question || '';
+    var displayText = currentLang === 'ko' ? (q.question_ko || rawText)
+                    : (currentLang !== 'ko' ? await translateIfNeeded(rawText, currentLang) : rawText);
+    document.getElementById('voteQuestion').textContent = displayText;
+
+    // 선택지 버튼 렌더
+    var rawOpts = [];
+    try { rawOpts = JSON.parse(q.options || '[]'); } catch(e) { rawOpts = []; }
+    var displayOpts = rawOpts;
+    if (currentLang === 'ko' && q.options_ko) {
+      try { displayOpts = JSON.parse(q.options_ko); } catch(e) { displayOpts = rawOpts; }
+    }
+
+    var choices = q.choices || {};
+    var total = Object.values(choices).reduce(function(a,b){return a+b;},0);
+
+    var optsEl = document.getElementById('voteOptions');
+    optsEl.innerHTML = displayOpts.map(function(opt, idx) {
+      var rawOpt = rawOpts[idx] || opt;
+      var cnt = choices[rawOpt] || 0;
+      var pct = total > 0 ? Math.round(cnt / total * 100) : 0;
+      return '<div class="vote-opt-btn" data-raw="' + rawOpt.replace(/"/g,'&quot;') + '" onclick="selectVoteOpt(this)">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+        + '<span style="font-weight:600;font-size:14px">' + opt + '</span>'
+        + '<span style="font-size:12px;color:var(--gray-500)">' + (total>0 ? pct+'%' : '-') + ' (' + cnt + '명)</span>'
+        + '</div>'
+        + '<div style="background:var(--gray-100);border-radius:100px;height:6px">'
+        + '<div style="background:var(--blue);border-radius:100px;height:6px;width:' + pct + '%;transition:width 0.4s"></div>'
+        + '</div></div>';
+    }).join('');
+
+    document.getElementById('voteResults').style.display = 'none';
+    document.getElementById('voteConfirmBtn').disabled = true;
+    document.getElementById('voteConfirmBtn').textContent = '선택지를 고르세요';
+    modal.classList.add('open');
+  }
+
+  function selectVoteOpt(el) {
+    document.querySelectorAll('.vote-opt-btn').forEach(function(b) { b.classList.remove('selected'); });
+    el.classList.add('selected');
+    _voteSelectedOpt = el.getAttribute('data-raw');
+    var btn = document.getElementById('voteConfirmBtn');
+    btn.disabled = false;
+    btn.textContent = '투표하기 →';
+  }
+
+  async function confirmVote() {
+    if (!_voteSelectedOpt || !_voteCurrentQ) return;
+    var token = localStorage.getItem('foket-token');
+    if (!token) { showToast('로그인이 필요합니다'); return; }
+    var btn = document.getElementById('voteConfirmBtn');
+    btn.disabled = true;
+    btn.textContent = '처리 중...';
+    try {
+      var res = await fetch('/api/participate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ question_id: _voteCurrentQ.question_id, choice: _voteSelectedOpt })
+      });
+      var data = await res.json();
+      if (!res.ok) { showToast(data.error || '오류 발생'); btn.disabled = false; btn.textContent = '투표하기 →'; return; }
+
+      // 잔액 업데이트
+      if (data.balance !== undefined) {
+        var balEl = document.getElementById('userBalance');
+        if (balEl) balEl.textContent = Number(data.balance).toFixed(0) + 'F';
+      }
+
+      // 결과 업데이트
+      _voteCurrentQ.choices = data.choices;
+      var rawOpts = [];
+      try { rawOpts = JSON.parse(_voteCurrentQ.options || '[]'); } catch(e) {}
+      var displayOpts = rawOpts;
+      if (currentLang === 'ko' && _voteCurrentQ.options_ko) {
+        try { displayOpts = JSON.parse(_voteCurrentQ.options_ko); } catch(e) {}
+      }
+      var total = Object.values(data.choices).reduce(function(a,b){return a+b;},0);
+      var optsEl = document.getElementById('voteOptions');
+      optsEl.innerHTML = displayOpts.map(function(opt, idx) {
+        var rawOpt = rawOpts[idx] || opt;
+        var cnt = data.choices[rawOpt] || 0;
+        var pct = total > 0 ? Math.round(cnt / total * 100) : 0;
+        var isSelected = rawOpt === _voteSelectedOpt;
+        return '<div class="vote-opt-btn' + (isSelected ? ' selected' : '') + '">'
+          + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+          + '<span style="font-weight:600;font-size:14px">' + opt + (isSelected ? ' ✓' : '') + '</span>'
+          + '<span style="font-size:12px;color:var(--gray-500)">' + pct + '% (' + cnt + '명)</span>'
+          + '</div>'
+          + '<div style="background:var(--gray-100);border-radius:100px;height:6px">'
+          + '<div style="background:' + (isSelected ? 'var(--green)' : 'var(--blue)') + ';border-radius:100px;height:6px;width:' + pct + '%;transition:width 0.4s"></div>'
+          + '</div></div>';
+      }).join('');
+
+      btn.textContent = '투표 완료! ✓';
+      showToast('투표 완료! 1F 차감되었습니다');
+      // 캐시 업데이트
+      if (_questionsById[_voteCurrentQ.question_id]) _questionsById[_voteCurrentQ.question_id].choices = data.choices;
+    } catch(e) {
+      showToast('오류: ' + e.message);
+      btn.disabled = false; btn.textContent = '투표하기 →';
+    }
+  }
+
+  function closeVote() { document.getElementById('voteModal').classList.remove('open'); }
+  function closeVoteOutside(e) { if (e.target === document.getElementById('voteModal')) closeVote(); }
 
   function selectSide(side) {
     currentSide = side;
@@ -2581,7 +2717,7 @@ const CARD_DATA = {
 
   /* ── Keyboard ── */
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closeModal(); closeTrade(); closeMyPage(); closeViewAll(); }
+    if (e.key === 'Escape') { closeModal(); closeTrade(); closeVote(); closeMyPage(); closeViewAll(); }
   });
 
   /* ── 로그인 상태 관리 ── */
