@@ -505,22 +505,7 @@
 <!-- LIVE TICKER -->
 <div class="ticker-wrap">
   <div class="ticker" id="ticker">
-    <div class="ticker-item"><span class="ticker-dot"></span> S&P 500 above 5,200 today? <strong>67%</strong></div>
-    <div class="ticker-item"><span class="ticker-dot"></span> Bitcoin above <b class="fcur">F</b>80K this week? <strong>52%</strong></div>
-    <div class="ticker-item"><span class="ticker-dot"></span> Fed cuts rates in March? <strong>28%</strong></div>
-    <div class="ticker-item"><span class="ticker-dot"></span> NFL Playoffs: Chiefs to win? <strong>71%</strong></div>
-    <div class="ticker-item"><span class="ticker-dot"></span> Nasdaq 100 up today? <strong>58%</strong></div>
-    <div class="ticker-item"><span class="ticker-dot"></span> CPI below 3% next report? <strong>41%</strong></div>
-    <div class="ticker-item"><span class="ticker-dot"></span> Tesla above <b class="fcur">F</b>300 this week? <strong>34%</strong></div>
-    <div class="ticker-item"><span class="ticker-dot"></span> Gold above <b class="fcur">F</b>2,100 today? <strong>79%</strong></div>
-    <div class="ticker-item"><span class="ticker-dot"></span> S&P 500 above 5,200 today? <strong>67%</strong></div>
-    <div class="ticker-item"><span class="ticker-dot"></span> Bitcoin above <b class="fcur">F</b>80K this week? <strong>52%</strong></div>
-    <div class="ticker-item"><span class="ticker-dot"></span> Fed cuts rates in March? <strong>28%</strong></div>
-    <div class="ticker-item"><span class="ticker-dot"></span> NFL Playoffs: Chiefs to win? <strong>71%</strong></div>
-    <div class="ticker-item"><span class="ticker-dot"></span> Nasdaq 100 up today? <strong>58%</strong></div>
-    <div class="ticker-item"><span class="ticker-dot"></span> CPI below 3% next report? <strong>41%</strong></div>
-    <div class="ticker-item"><span class="ticker-dot"></span> Tesla above <b class="fcur">F</b>300 this week? <strong>34%</strong></div>
-    <div class="ticker-item"><span class="ticker-dot"></span> Gold above <b class="fcur">F</b>2,100 today? <strong>79%</strong></div>
+    <div class="ticker-item"><span class="ticker-dot"></span> 로딩 중...</div>
   </div>
 </div>
 
@@ -2288,7 +2273,32 @@ const CARD_DATA = {
   });
 
   // Init language on load
-  document.addEventListener('DOMContentLoaded', () => { setLang(currentLang); shuffleSections(); loadSectionCards(); });
+  document.addEventListener('DOMContentLoaded', () => { setLang(currentLang); shuffleSections(); loadSectionCards(); loadTicker(); });
+
+  function loadTicker() {
+    fetch('/api/questions')
+      .then(r => r.json())
+      .then(function(data) {
+        var qs = (data.questions || data || [])
+          .filter(function(q) { return q.status === 'APPROVED' && q.end_date; })
+          .sort(function(a, b) { return new Date(a.end_date) - new Date(b.end_date); });
+        if (!qs.length) return;
+        var items = qs.map(function(q) {
+          var title = (q.question_ko || q.question || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+          var prob = parseInt(q.initial_prob) || 50;
+          var endStr = q.end_date ? q.end_date.slice(0,10) : '';
+          return '<div class="ticker-item"><span class="ticker-dot"></span>'
+            + title
+            + ' <strong>' + prob + '%</strong>'
+            + ' <span style="opacity:.7;font-weight:400;font-size:11px">마감 ' + endStr + '</span>'
+            + '</div>';
+        }).join('');
+        // 루프를 위해 2번 반복
+        var el = document.getElementById('ticker');
+        if (el) el.innerHTML = items + items;
+      })
+      .catch(function() {});
+  }
 
   /* ── 섹션 랜덤 순서 ── */
   function shuffleSections() {
