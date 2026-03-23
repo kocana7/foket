@@ -529,6 +529,9 @@
           <button class="lang-option" data-lang="ru" onclick="setLang('ru')"><span class="lang-flag">🇷🇺</span>Русский</button>
         </div>
       </div>
+      <span id="navBalance" style="display:none;align-items:center;gap:4px;background:#eef0ff;border:1px solid #c7d0fd;border-radius:20px;padding:4px 12px;font-size:13px;font-weight:700;color:#334BFA;cursor:pointer" onclick="openMyPage()" title="나의 포인트">
+        <b style="font-size:12px">F</b><span id="userBalance">0</span>
+      </span>
       <button class="btn btn-ghost btn-sm" data-i18n="nav.mypage" onclick="openMyPage()">마이페이지 및 질문등록</button>
       <a href="/faq.html" class="btn btn-ghost btn-sm" style="text-decoration:none">FAQ</a>
       <span id="navGuest">
@@ -3075,8 +3078,21 @@ const CARD_DATA = {
     const token = localStorage.getItem('foket-token');
     const guest = document.getElementById('navGuest');
     const user  = document.getElementById('navUser');
-    if (token) { guest.style.display = 'none'; user.style.display = ''; }
-    else        { guest.style.display = ''; user.style.display = 'none'; }
+    const balBadge = document.getElementById('navBalance');
+    if (token) {
+      guest.style.display = 'none';
+      user.style.display = '';
+      if (balBadge) balBadge.style.display = 'inline-flex';
+      try {
+        var bal = parseFloat(JSON.parse(localStorage.getItem('foket-user') || '{}').balance) || 0;
+        var balEl = document.getElementById('userBalance');
+        if (balEl) balEl.textContent = bal.toLocaleString();
+      } catch(e) {}
+    } else {
+      guest.style.display = '';
+      user.style.display = 'none';
+      if (balBadge) balBadge.style.display = 'none';
+    }
   }
 
   function logout() {
