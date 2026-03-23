@@ -962,11 +962,11 @@
     <div class="trade-label">포인트</div>
     <div class="trade-input-wrap">
       <span class="dollar">F</span>
-      <input class="trade-input" id="tradeAmount" type="number" value="2" min="2" oninput="updateTrade()" />
+      <input class="trade-input" id="tradeAmount" type="number" value="10" min="10" oninput="updateTrade()" />
     </div>
     <div class="trade-amounts">
-      <button class="trade-amt" onclick="setAmount(2)"><b class="fcur">F</b>2</button>
       <button class="trade-amt" onclick="setAmount(10)"><b class="fcur">F</b>10</button>
+      <button class="trade-amt" onclick="setAmount(30)"><b class="fcur">F</b>30</button>
       <button class="trade-amt" onclick="setAmount(50)"><b class="fcur">F</b>50</button>
       <button class="trade-amt" onclick="setAmount(100)"><b class="fcur">F</b>100</button>
       <button class="trade-amt" onclick="setAmount(500)"><b class="fcur">F</b>500</button>
@@ -2683,7 +2683,7 @@ const CARD_DATA = {
     currentSide = 'yes';
     document.getElementById('tradeYesBtn').className = 'trade-yes active';
     document.getElementById('tradeNoBtn').className = 'trade-no';
-    document.getElementById('tradeAmount').value = 2;
+    document.getElementById('tradeAmount').value = 10;
     document.getElementById('tradeModal').classList.add('open');
     updateTrade();
 
@@ -2869,7 +2869,7 @@ const CARD_DATA = {
   async function confirmTrade() {
     var token = localStorage.getItem('foket-token');
     if (!token) { showToast('로그인이 필요합니다'); return; }
-    var amount = Math.max(2, Math.floor(parseFloat(document.getElementById('tradeAmount').value) || 2));
+    var amount = Math.max(10, Math.floor(parseFloat(document.getElementById('tradeAmount').value) || 10));
     var choice = currentSide === 'yes' ? 'YES' : 'NO';
     var btn = document.querySelector('#tradeModal .btn-primary');
     if (btn) { btn.disabled = true; btn.textContent = '처리 중...'; }

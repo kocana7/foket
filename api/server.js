@@ -481,7 +481,7 @@ app.post('/api/participate', authMiddleware, async (req, res) => {
     if (q.end_date && new Date(q.end_date) < new Date()) return res.status(400).json({ error: '종료된 질문입니다' });
 
     // 차감 금액: 내기는 입력 금액(최소 2F), 투표는 1F
-    const cost = q.type === 'bet' ? Math.max(2, Math.floor(Number(amount) || 2)) : 1;
+    const cost = q.type === 'bet' ? Math.max(10, Math.floor(Number(amount) || 10)) : 1;
 
     const [userRows] = await db.execute('SELECT balance FROM Users WHERE user_id = ?', [req.user.userId]);
     if (!userRows.length) return res.status(404).json({ error: '회원 정보를 찾을 수 없습니다' });
@@ -1546,9 +1546,9 @@ async function initBotUser() {
     // 봇 참여: 30초 후 첫 참여, 이후 매 5분마다 랜덤 투표/베팅
     setTimeout(botParticipate, 30 * 1000);
     setInterval(botParticipate, 5 * 60 * 1000);
-    // 스포츠 경기 자동 등록: 1분 후 첫 실행, 이후 매 10분마다
+    // 스포츠 경기 자동 등록: 1분 후 첫 실행, 이후 매 5분마다
     setTimeout(runSportsScheduler, 60 * 1000);
-    setInterval(runSportsScheduler, 10 * 60 * 1000);
+    setInterval(runSportsScheduler, 5 * 60 * 1000);
 
     // 만료 데이터 정리: 마감일 30일 경과한 참여 기록 삭제 (매일 실행)
     async function cleanupExpiredParticipations() {
