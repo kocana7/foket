@@ -1562,7 +1562,7 @@ async function initBotUser() {
     setInterval(botParticipate, 5 * 60 * 1000);
     // 스포츠 경기 자동 등록: 1분 후 첫 실행, 이후 매 5분마다
     setTimeout(runSportsScheduler, 60 * 1000);
-    setInterval(runSportsScheduler, 5 * 60 * 1000);
+    setInterval(runSportsScheduler, 3 * 60 * 60 * 1000);
 
     // 만료 데이터 정리: 마감일 30일 경과한 참여 기록 삭제 (매일 실행)
     async function cleanupExpiredParticipations() {
@@ -1847,7 +1847,7 @@ async function runSportsScheduler() {
       console.log(`[스포츠봇] 신규 미등록 경기 없음 (총 ${matches.length}개 이미 처리됨)`);
       return;
     }
-    const toPost = unposted.slice(0, 2);
+    const toPost = unposted.slice(0, 1);
     for (const match of toPost) {
       await postSportsMatchQuestions(match);
     }
