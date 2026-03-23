@@ -5,6 +5,7 @@ const bcrypt  = require('bcryptjs');
 const jwt     = require('jsonwebtoken');
 const mysql   = require('mysql2/promise');
 const path    = require('path');
+const https   = require('https');
 const { OAuth2Client } = require('google-auth-library');
 
 const app = express();
@@ -1545,6 +1546,10 @@ async function initBotUser() {
     // 봇 참여: 30초 후 첫 참여, 이후 매 5분마다 랜덤 투표/베팅
     setTimeout(botParticipate, 30 * 1000);
     setInterval(botParticipate, 5 * 60 * 1000);
+    // 스포츠 경기 자동 등록: 1분 후 첫 실행, 이후 매 10분마다
+    setTimeout(runSportsScheduler, 60 * 1000);
+    setInterval(runSportsScheduler, 10 * 60 * 1000);
+
     // 만료 데이터 정리: 마감일 30일 경과한 참여 기록 삭제 (매일 실행)
     async function cleanupExpiredParticipations() {
       try {
@@ -1673,6 +1678,166 @@ async function botParticipate() {
       console.log(`[수퍼포켓 봇] ${questions.length}개 질문에 참여 완료`);
   } catch (err) {
     console.error('[수퍼포켓 봇] 참여 실패:', err.message);
+  }
+}
+
+// ── 스포츠 자동 질문 봇 ─────────────────────────────────────
+// TheSportsDB 무료 API (key=3)로 실시간 경기 일정 조회
+function fetchJsonHttps(url) {
+  return new Promise((resolve, reject) => {
+    const req = https.get(url, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try { resolve(JSON.parse(data)); }
+        catch (e) { reject(new Error('JSON parse error: ' + e.message)); }
+      });
+    });
+    req.on('error', reject);
+    req.setTimeout(12000, () => {
+      req.destroy();
+      reject(new Error('request timeout'));
+    });
+  });
+}
+
+// 등록 완료된 이벤트 ID Set (재시작 시 DB에서도 중복 체크)
+const _postedSportsEventIds = new Set();
+
+// 지원 스포츠 목록 (TheSportsDB sport 이름 기준)
+const SPORTS_FETCH_LIST = [
+  { sport: 'Soccer',         emoji: '⚽' },
+  { sport: 'Basketball',     emoji: '🏀' },
+  { sport: 'Ice Hockey',     emoji: '🏒' },
+  { sport: 'American Football', emoji: '🏈' },
+  { sport: 'Baseball',       emoji: '⚾' },
+  { sport: 'Tennis',         emoji: '🎾' },
+];
+
+function formatKstTime(d) {
+  return d.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+async function fetchUpcomingSportsMatches() {
+  const now = new Date();
+  const today = now.toISOString().split('T')[0];
+  const tomorrow = new Date(now.getTime() + 86400000).toISOString().split('T')[0];
+  const dates = [today, tomorrow];
+
+  const events = [];
+  for (const { sport, emoji } of SPORTS_FETCH_LIST) {
+    for (const date of dates) {
+      try {
+        const url = `https://www.thesportsdb.com/api/v1/json/3/eventsday.php?d=${date}&s=${encodeURIComponent(sport)}`;
+        const data = await fetchJsonHttps(url);
+        if (!data || !data.events) continue;
+        for (const ev of data.events) {
+          if (!ev.strHomeTeam || !ev.strAwayTeam) continue;
+          // 시간 파싱: "21:00:00+00:00" 또는 "21:00:00"
+          const rawTime = (ev.strTime || '00:00:00').replace(/\+.*$/, '').replace(/Z$/, '');
+          const startTime = new Date(`${ev.dateEvent}T${rawTime}Z`);
+          if (isNaN(startTime.getTime())) continue;
+          // 이미 시작된 경기는 스킵 (5분 여유)
+          if (startTime <= new Date(now.getTime() + 5 * 60 * 1000)) continue;
+          events.push({
+            id:        ev.idEvent || `${ev.dateEvent}_${ev.strHomeTeam}_${ev.strAwayTeam}`,
+            home:      ev.strHomeTeam,
+            away:      ev.strAwayTeam,
+            league:    ev.strLeague || sport,
+            sport,
+            emoji,
+            startTime,
+          });
+        }
+      } catch (e) {
+        // 개별 fetch 실패는 무시하고 계속
+      }
+    }
+  }
+
+  // 중복 제거 (같은 idEvent)
+  const seen = new Set();
+  const unique = events.filter(e => {
+    if (seen.has(e.id)) return false;
+    seen.add(e.id);
+    return true;
+  });
+
+  // 시작 시간 오름차순 (가장 빠른 경기 먼저)
+  unique.sort((a, b) => a.startTime - b.startTime);
+  return unique;
+}
+
+async function postSportsMatchQuestions(match) {
+  if (!_botUserId) return;
+  if (_postedSportsEventIds.has(match.id)) return;
+
+  try {
+    const db = await getPool();
+    const kst = formatKstTime(match.startTime);
+    const betQ  = `${match.emoji} [${match.league}] ${match.home} vs ${match.away} — ${match.home}이(가) 승리할까요? (${kst} KST)`;
+    const voteQ = `${match.emoji} [${match.league}] ${match.home} vs ${match.away} 최종 결과 예측 (${kst} KST)`;
+
+    // DB 중복 체크 (서버 재시작 후에도 안전)
+    const [dup] = await db.execute(
+      'SELECT question_id FROM Questions WHERE question = ? OR question = ? LIMIT 1',
+      [betQ, voteQ]
+    );
+    if (dup.length > 0) {
+      _postedSportsEventIds.add(match.id);
+      return;
+    }
+
+    const nick = genBotNick('ko');
+    await db.execute('UPDATE Users SET nickname = ? WHERE user_id = ?', [nick, _botUserId]);
+
+    // 종료 시간 = 경기 시작 후 3시간
+    const endDate = new Date(match.startTime.getTime() + 3 * 60 * 60 * 1000);
+
+    const voteOpts   = JSON.stringify([`${match.home} 승리`, '무승부', `${match.away} 승리`]);
+    const voteOptsKo = voteOpts;
+
+    // 내기 (bet): YES = 홈팀 승리
+    await db.execute(
+      'INSERT INTO Questions (user_id, type, question, question_ko, poster_nickname, category, options, options_ko, initial_prob, end_date, status) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+      [_botUserId, 'bet', betQ, betQ, nick, 'sports', null, null, 50, endDate, 'APPROVED']
+    );
+
+    // 투표 (vote): 승/무/패 3지선다
+    await db.execute(
+      'INSERT INTO Questions (user_id, type, question, question_ko, poster_nickname, category, options, options_ko, initial_prob, end_date, status) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+      [_botUserId, 'vote', voteQ, voteQ, nick, 'sports', voteOpts, voteOptsKo, null, endDate, 'APPROVED']
+    );
+
+    _postedSportsEventIds.add(match.id);
+    console.log(`[스포츠봇] 등록: ${match.emoji} ${match.home} vs ${match.away} (${kst} KST) — bet+vote`);
+  } catch (err) {
+    console.error('[스포츠봇] 등록 실패:', err.message);
+  }
+}
+
+async function runSportsScheduler() {
+  if (!_botUserId) return;
+  console.log('[스포츠봇] 경기 일정 조회 중...');
+  try {
+    const matches = await fetchUpcomingSportsMatches();
+    if (!matches.length) {
+      console.log('[스포츠봇] 예정 경기 없음');
+      return;
+    }
+    // 아직 등록 안 된 경기만 필터 후 가장 빠른 2개 등록
+    const unposted = matches.filter(m => !_postedSportsEventIds.has(m.id));
+    if (!unposted.length) {
+      console.log(`[스포츠봇] 신규 미등록 경기 없음 (총 ${matches.length}개 이미 처리됨)`);
+      return;
+    }
+    const toPost = unposted.slice(0, 2);
+    for (const match of toPost) {
+      await postSportsMatchQuestions(match);
+    }
+    console.log(`[스포츠봇] ${toPost.length}개 경기 처리 완료 (잔여 미등록: ${unposted.length - toPost.length}개)`);
+  } catch (err) {
+    console.error('[스포츠봇] 스케줄러 오류:', err.message);
   }
 }
 
