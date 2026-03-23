@@ -1515,8 +1515,22 @@ const BOT_NICK_PARTS = {
 
 function genBotNick(lang) {
   const P = BOT_NICK_PARTS[lang] || BOT_NICK_PARTS.ko;
-  return P.a[Math.floor(Math.random() * P.a.length)]
-       + P.b[Math.floor(Math.random() * P.b.length)];
+  const ra = () => P.a[Math.floor(Math.random() * P.a.length)];
+  const rb = () => P.b[Math.floor(Math.random() * P.b.length)];
+
+  if (lang === 'ko') {
+    const r = Math.random();
+    if      (r < 0.10) return ra();                        // 2~3자: "달빛"
+    else if (r < 0.20) return rb();                        // 2~5자: "탐험가"
+    else if (r < 0.35) return ra() + ra();                 // 4~6자: "달빛새벽"
+    else if (r < 0.52) return ra() + rb();                 // 4~8자: "달빛탐험가" (기존)
+    else if (r < 0.65) return ra() + '의 ' + rb();         // 6~10자: "달빛의 탐험가"
+    else if (r < 0.75) return ra() + ra() + rb();          // 6~11자: "달빛새벽탐험가"
+    else if (r < 0.85) return rb() + ' ' + ra();           // 5~9자: "탐험가 달빛"
+    else               return ra() + ' ' + ra() + rb();    // 5~11자: "달빛 새벽나그네"
+  }
+
+  return ra() + rb();
 }
 
 let _botUserId = null;
