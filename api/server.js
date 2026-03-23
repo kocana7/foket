@@ -1682,10 +1682,10 @@ async function botParticipate() {
 }
 
 // ── 스포츠 자동 질문 봇 ─────────────────────────────────────
-// TheSportsDB 무료 API (key=3)로 실시간 경기 일정 조회
+// ESPN 비공개 API로 실시간 경기 일정 조회 (API키 불필요)
 function fetchJsonHttps(url) {
   return new Promise((resolve, reject) => {
-    const req = https.get(url, (res) => {
+    const req = https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (res) => {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
@@ -1694,24 +1694,25 @@ function fetchJsonHttps(url) {
       });
     });
     req.on('error', reject);
-    req.setTimeout(12000, () => {
-      req.destroy();
-      reject(new Error('request timeout'));
-    });
+    req.setTimeout(12000, () => { req.destroy(); reject(new Error('timeout')); });
   });
 }
 
-// 등록 완료된 이벤트 ID Set (재시작 시 DB에서도 중복 체크)
+// 등록 완료된 이벤트 ID Set
 const _postedSportsEventIds = new Set();
 
-// 지원 스포츠 목록 (TheSportsDB sport 이름 기준)
-const SPORTS_FETCH_LIST = [
-  { sport: 'Soccer',         emoji: '⚽' },
-  { sport: 'Basketball',     emoji: '🏀' },
-  { sport: 'Ice Hockey',     emoji: '🏒' },
-  { sport: 'American Football', emoji: '🏈' },
-  { sport: 'Baseball',       emoji: '⚾' },
-  { sport: 'Tennis',         emoji: '🎾' },
+// ESPN API 엔드포인트 목록 (오늘 경기 기준)
+const ESPN_ENDPOINTS = [
+  { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard',      league: 'EPL',          emoji: '⚽' },
+  { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/esp.1/scoreboard',      league: 'La Liga',      emoji: '⚽' },
+  { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/ger.1/scoreboard',      league: 'Bundesliga',   emoji: '⚽' },
+  { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/ita.1/scoreboard',      league: 'Serie A',      emoji: '⚽' },
+  { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/fra.1/scoreboard',      league: 'Ligue 1',      emoji: '⚽' },
+  { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/uefa.champions/scoreboard', league: 'UEFA CL', emoji: '⚽' },
+  { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/kor.1/scoreboard',      league: 'K리그',        emoji: '⚽' },
+  { url: 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard',    league: 'NBA',          emoji: '🏀' },
+  { url: 'https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard',        league: 'NHL',          emoji: '🏒' },
+  { url: 'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard',      league: 'MLB',          emoji: '⚾' },
 ];
 
 function formatKstTime(d) {
@@ -1720,50 +1721,51 @@ function formatKstTime(d) {
 
 async function fetchUpcomingSportsMatches() {
   const now = new Date();
-  const today = now.toISOString().split('T')[0];
-  const tomorrow = new Date(now.getTime() + 86400000).toISOString().split('T')[0];
-  const dates = [today, tomorrow];
-
   const events = [];
-  for (const { sport, emoji } of SPORTS_FETCH_LIST) {
+
+  // 오늘 + 내일 날짜 (YYYYMMDD 형식)
+  const fmtDate = d => d.toISOString().split('T')[0].replace(/-/g, '');
+  const dates = [fmtDate(now), fmtDate(new Date(now.getTime() + 86400000))];
+
+  for (const ep of ESPN_ENDPOINTS) {
     for (const date of dates) {
       try {
-        const url = `https://www.thesportsdb.com/api/v1/json/3/eventsday.php?d=${date}&s=${encodeURIComponent(sport)}`;
+        const url = ep.url + `?dates=${date}`;
         const data = await fetchJsonHttps(url);
         if (!data || !data.events) continue;
         for (const ev of data.events) {
-          if (!ev.strHomeTeam || !ev.strAwayTeam) continue;
-          // 시간 파싱: "21:00:00+00:00" 또는 "21:00:00"
-          const rawTime = (ev.strTime || '00:00:00').replace(/\+.*$/, '').replace(/Z$/, '');
-          const startTime = new Date(`${ev.dateEvent}T${rawTime}Z`);
+          const comp = ev.competitions && ev.competitions[0];
+          if (!comp) continue;
+          const state = comp.status && comp.status.type && comp.status.type.state;
+          if (state === 'post') continue; // 종료된 경기 스킵
+          const startTime = new Date(ev.date);
           if (isNaN(startTime.getTime())) continue;
           // 이미 시작된 경기는 스킵 (5분 여유)
           if (startTime <= new Date(now.getTime() + 5 * 60 * 1000)) continue;
+          const competitors = comp.competitors || [];
+          // ESPN: index 0 = home, index 1 = away
+          const home = (competitors[0] && competitors[0].team && competitors[0].team.displayName) || '';
+          const away = (competitors[1] && competitors[1].team && competitors[1].team.displayName) || '';
+          if (!home || !away) continue;
           events.push({
-            id:        ev.idEvent || `${ev.dateEvent}_${ev.strHomeTeam}_${ev.strAwayTeam}`,
-            home:      ev.strHomeTeam,
-            away:      ev.strAwayTeam,
-            league:    ev.strLeague || sport,
-            sport,
-            emoji,
+            id:        `espn_${ev.id}`,
+            home,
+            away,
+            league:    ep.league,
+            emoji:     ep.emoji,
             startTime,
           });
         }
       } catch (e) {
-        // 개별 fetch 실패는 무시하고 계속
+        // 개별 fetch 실패 무시
       }
     }
   }
 
-  // 중복 제거 (같은 idEvent)
+  // 중복 제거
   const seen = new Set();
-  const unique = events.filter(e => {
-    if (seen.has(e.id)) return false;
-    seen.add(e.id);
-    return true;
-  });
-
-  // 시작 시간 오름차순 (가장 빠른 경기 먼저)
+  const unique = events.filter(e => { if (seen.has(e.id)) return false; seen.add(e.id); return true; });
+  // 시작 시간 오름차순
   unique.sort((a, b) => a.startTime - b.startTime);
   return unique;
 }
