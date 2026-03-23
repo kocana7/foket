@@ -3114,6 +3114,21 @@ const CARD_DATA = {
   }
 
   updateNavAuth();
+  // 페이지 로드 시 서버에서 최신 잔액 가져오기
+  (async function fetchBalance() {
+    const token = localStorage.getItem('foket-token');
+    if (!token) return;
+    try {
+      const res = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + token } });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.balance !== undefined) {
+        const balEl = document.getElementById('userBalance');
+        if (balEl) balEl.textContent = Number(data.balance).toLocaleString();
+        try { var u = JSON.parse(localStorage.getItem('foket-user') || '{}'); u.balance = data.balance; localStorage.setItem('foket-user', JSON.stringify(u)); } catch(e) {}
+      }
+    } catch(e) {}
+  })();
   sendHeartbeat();
   setInterval(sendHeartbeat, 30000);
 
