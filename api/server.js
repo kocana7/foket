@@ -1683,9 +1683,13 @@ async function botParticipate() {
       } else {
         choice = Math.random() < 0.5 ? 'YES' : 'NO';
       }
+      // 내기: 10~500F 랜덤, 투표: 1F 고정
+      const amount = q.type === 'bet'
+        ? Math.floor(Math.random() * 491) + 10   // 10~500
+        : 1;
       await db.execute(
-        'INSERT INTO Participations (question_id, user_id, choice) VALUES (?,?,?)',
-        [q.question_id, _botUserId, choice]
+        'INSERT INTO Participations (question_id, user_id, choice, amount) VALUES (?,?,?,?)',
+        [q.question_id, _botUserId, choice, amount]
       );
     }
     if (questions.length > 0)
