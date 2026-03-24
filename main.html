@@ -2948,7 +2948,8 @@ const CARD_DATA = {
     document.body.style.overflow = 'hidden';
     try {
       var url = '/api/questions' + (category ? '?category=' + encodeURIComponent(category) : '');
-      var res = await fetch(url);
+      var vaToken = localStorage.getItem('foket-token');
+      var res = await fetch(url, vaToken ? { headers: { 'Authorization': 'Bearer ' + vaToken } } : {});
       var data = await res.json();
       var questions = data.questions || [];
       // 정렬: 내 질문 1순위, 참여자수 많은순 2순위, 최대 30개
@@ -3017,6 +3018,7 @@ const CARD_DATA = {
           + '<div class="va-card-q">' + displayQ + '</div>'
           + statsHtml
           + (q.nickname ? '<div class="va-card-meta" style="margin-top:6px">등록자: ' + q.nickname + (endDate ? ' · 마감: ' + endDate : '') + '</div>' : '')
+          + (q.is_mine && q.type === 'bet' ? '<button class="btn-cancel-bet" onclick="event.stopPropagation();closeViewAll();cancelBet(' + q.question_id + ')">내기 취소 · 전액 환불</button>' : '')
           + '</div>';
       }).join('');
     } catch(e) {
