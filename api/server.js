@@ -1614,8 +1614,9 @@ async function initBotUser() {
     }
     // 시작 시 BOT_LANG_DATA 전체 질문 일괄 등록
     await seedAllBotQuestions();
-    // 봇 질문 게시: 매 1시간마다 신규 질문 1개
-    setInterval(postBotQuestion, 60 * 60 * 1000);
+    // 봇 질문 게시: 투표 5시간마다, 내기(스포츠 제외) 5시간마다
+    setInterval(() => postBotQuestion('vote'), 5 * 60 * 60 * 1000);
+    setInterval(() => postBotQuestion('bet'),  5 * 60 * 60 * 1000);
     // 봇 참여: 30초 후 첫 참여, 이후 매 5분마다 랜덤 투표/베팅
     setTimeout(botParticipate, 30 * 1000);
     setInterval(botParticipate, 5 * 60 * 1000);
@@ -1688,27 +1689,29 @@ async function seedAllBotQuestions() {
   }
 }
 
-async function postBotQuestion() {
+async function postBotQuestion(typeFilter) {
   if (!_botUserId) return;
   try {
     const db = await getPool();
-    // 랜덤 언어 선택 (닉네임 언어 = 질문 언어)
     const langs = Object.keys(BOT_LANG_DATA);
     const lang = langs[Math.floor(Math.random() * langs.length)];
     const langData = BOT_LANG_DATA[lang];
 
-    // 해당 언어 닉네임 랜덤 생성 (20,000 조합 풀)
     const nick = genBotNick(lang);
 
-    // 해당 언어 질문 중 중복 방지 후 랜덤 선택
     const [posted] = await db.execute('SELECT question FROM Questions WHERE user_id = ?', [_botUserId]);
     const postedSet = new Set(posted.map(r => r.question));
-    let pool = langData.questions.filter(q => !postedSet.has(q.question));
-    if (pool.length === 0) pool = langData.questions; // 전부 소진 시 재사용
+    // typeFilter 가 있으면 해당 타입만, 없으면 전체
+    let pool = langData.questions.filter(q =>
+      (!typeFilter || q.type === typeFilter) && !postedSet.has(q.question)
+    );
+    if (pool.length === 0) {
+      pool = langData.questions.filter(q => !typeFilter || q.type === typeFilter);
+    }
+    if (pool.length === 0) return;
 
     const q = pool[Math.floor(Math.random() * pool.length)];
 
-    // 닉네임 변경 후 질문 등록 (자동 승인)
     await db.execute('UPDATE Users SET nickname = ? WHERE user_id = ?', [nick, _botUserId]);
     const endDate = new Date();
     endDate.setDate(endDate.getDate() + (q.days || 30));
@@ -1719,7 +1722,7 @@ async function postBotQuestion() {
       'INSERT INTO Questions (user_id, type, question, question_ko, poster_nickname, category, options, options_ko, initial_prob, end_date, status) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
       [_botUserId, q.type, q.question, question_ko, nick, q.category, options, options_ko, q.initial_prob || null, endDate, 'APPROVED']
     );
-    console.log(`[수퍼포켓 봇] [${lang}] "${nick}" 게시: [${q.category}] ${q.question.slice(0,40)}...`);
+    console.log(`[수퍼포켓 봇] [${lang}][${q.type}] "${nick}" 게시: [${q.category}] ${q.question.slice(0,40)}...`);
   } catch (err) {
     console.error('[수퍼포켓 봇] 게시 실패:', err.message);
   }
