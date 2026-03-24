@@ -837,16 +837,33 @@ app.post('/api/admin/questions/:id/cancel-bet', adminMiddleware, async (req, res
   try {
     const db = await getPool();
     const [qRows] = await db.execute(
-      'SELECT q.type, q.status, q.user_id, u.email FROM Questions q JOIN Users u ON q.user_id = u.user_id WHERE q.question_id = ?',
+      'SELECT q.type, q.status, q.user_id, q.settle_poster_fee, u.email FROM Questions q JOIN Users u ON q.user_id = u.user_id WHERE q.question_id = ?',
       [qId]
     );
     if (!qRows.length) return res.status(404).json({ error: '질문 없음' });
     const q = qRows[0];
     if (q.type !== 'bet') return res.status(400).json({ error: '내기 질문만 취소할 수 있습니다' });
-    if (!['APPROVED', 'PENDING'].includes(q.status))
-      return res.status(400).json({ error: '이미 정산됐거나 취소된 질문입니다' });
+    if (q.status === 'CANCELLED') return res.status(400).json({ error: '이미 취소된 질문입니다' });
 
-    // 베팅 참여자별 금액 전액 환불
+    // SETTLED 상태라면 이미 지급된 payout 먼저 회수
+    if (q.status === 'SETTLED') {
+      const [winners] = await db.execute(
+        "SELECT user_id, SUM(payout) AS total_payout FROM Participations WHERE question_id=? AND settle_result='WIN' GROUP BY user_id",
+        [qId]
+      );
+      for (const w of winners) {
+        const take = parseFloat(w.total_payout) || 0;
+        if (take > 0) await db.execute('UPDATE Users SET balance = GREATEST(0, balance - ?) WHERE user_id = ?', [take, w.user_id]);
+      }
+      // 게시자 수수료 회수
+      const posterFee = parseFloat(q.settle_poster_fee) || 0;
+      if (posterFee > 0 && q.user_id) {
+        await db.execute('UPDATE Users SET balance = GREATEST(0, balance - ?) WHERE user_id = ?', [posterFee, q.user_id]);
+      }
+      await db.execute("UPDATE Participations SET payout=NULL, settle_result=NULL WHERE question_id=?", [qId]);
+    }
+
+    // 베팅 참여자별 원래 베팅금 전액 환불
     const [parts] = await db.execute(
       'SELECT user_id, SUM(amount) AS total FROM Participations WHERE question_id = ? GROUP BY user_id',
       [qId]
@@ -864,7 +881,7 @@ app.post('/api/admin/questions/:id/cancel-bet', adminMiddleware, async (req, res
     if (q.email !== BOT_EMAIL_CONST) {
       await db.execute('UPDATE Users SET balance = balance + 2 WHERE user_id = ?', [q.user_id]);
     }
-    await db.execute("UPDATE Questions SET status = 'CANCELLED' WHERE question_id = ?", [qId]);
+    await db.execute("UPDATE Questions SET status = 'CANCELLED', settle_winner=NULL, settle_poster_fee=NULL, settle_admin_fee=NULL WHERE question_id = ?", [qId]);
     console.log(`[관리자] 내기 취소: question_id=${qId}, 참여자 ${refundedCount}명 총 ${refundedTotal}F 환불`);
     res.json({ ok: true, refundedCount, refundedTotal });
   } catch (err) {

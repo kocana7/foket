@@ -1342,7 +1342,7 @@
         + '<td>' + statusBadge + '</td>'
         + '<td><div class="action-btns">'
         + '<button class="action-btn" style="background:#6366f1;color:white;border-color:#6366f1" onclick="event.stopPropagation();openEditQModal(' + q.question_id + ')">수정</button>'
-        + (q.type === 'bet' && ['APPROVED','PENDING'].includes(q.status)
+        + (q.type === 'bet' && q.status !== 'CANCELLED'
             ? '<button class="action-btn" style="background:#ef4444;color:white;border-color:#ef4444" onclick="event.stopPropagation();openBetCancelModal(' + q.question_id + ')">취소·환불</button>'
             : '')
         + '<button class="action-btn danger" onclick="event.stopPropagation();confirmDeleteQ(' + q.question_id + ')">삭제</button>'
