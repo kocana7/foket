@@ -1421,15 +1421,20 @@
     }
     var endDate = q.end_date ? new Date(q.end_date).toLocaleDateString('ko-KR') : '-';
     var submitter = '@' + (q.poster_nickname || q.nickname || q.email || '-');
+    var cancelBtn = (q.type === 'bet' && q.status !== 'CANCELLED')
+      ? '<button class="action-btn" style="background:#ef4444;color:white;border-color:#ef4444" onclick="event.stopPropagation();openBetCancelModal(' + q.question_id + ')">취소·환불</button>'
+      : '';
     var actionBtns = q.status === 'PENDING'
       ? '<div class="action-btns">'
         + '<button class="action-btn primary" onclick="event.stopPropagation();adminApproveQ(' + q.question_id + ')">승인</button>'
         + '<button class="action-btn danger" onclick="event.stopPropagation();adminRejectQ(' + q.question_id + ')">반려</button>'
         + '<button class="action-btn" style="background:#6366f1;color:white;border-color:#6366f1" onclick="event.stopPropagation();openEditQModal(' + q.question_id + ')">수정</button>'
+        + cancelBtn
         + '<button class="action-btn danger" onclick="event.stopPropagation();confirmDeleteQ(' + q.question_id + ')">삭제</button>'
         + '</div>'
       : '<div class="action-btns">'
         + '<button class="action-btn" style="background:#6366f1;color:white;border-color:#6366f1" onclick="event.stopPropagation();openEditQModal(' + q.question_id + ')">수정</button>'
+        + cancelBtn
         + '<button class="action-btn danger" onclick="event.stopPropagation();confirmDeleteQ(' + q.question_id + ')">삭제</button>'
         + '</div>';
     var displayQ2 = escHtml(q.question_ko || q.question);
