@@ -2240,6 +2240,7 @@ const CARD_DATA = {
     } else {
       translateAllCards(lang);
       translateTickerItems(lang);
+      translateAllCardOptions(lang);
     }
     // 전체보기 링크 텍스트 업데이트
     document.querySelectorAll('.section-link').forEach(function(el) {
@@ -2578,6 +2579,7 @@ const CARD_DATA = {
       }
       // 카드 렌더 완료 후 현재 언어로 번역
       translateAllCards(currentLang);
+      translateAllCardOptions(currentLang);
     } catch(e) {
       console.error('[loadSectionCards]', e);
     }
@@ -2656,6 +2658,24 @@ const CARD_DATA = {
     }
   }
 
+  async function translateAllCardOptions(lang) {
+    if (lang === 'ko') return;
+    var els = Array.from(document.querySelectorAll('.vote-opt-label[data-rawopt]'));
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      var rawOpt = el.getAttribute('data-rawopt');
+      if (!rawOpt || !/[가-힣]/.test(rawOpt)) continue; // 한국어 아닌 것은 스킵
+      var key = lang + ':' + rawOpt.slice(0, 120);
+      if (_transCache[key]) { el.textContent = _transCache[key]; el.title = _transCache[key]; continue; }
+      try {
+        var translated = await translateIfNeeded(rawOpt, lang);
+        el.textContent = translated;
+        el.title = translated;
+      } catch(e) {}
+      if (i > 0 && i % 5 === 0) await new Promise(function(r) { setTimeout(r, 300); });
+    }
+  }
+
   async function translateTickerItems(lang) {
     if (lang === 'ko') return;
     var els = Array.from(document.querySelectorAll('.ticker-item[data-rawq] .ticker-q-text'));
@@ -2718,6 +2738,10 @@ const CARD_DATA = {
     var displayOpts = rawOpts;
     if (currentLang === 'ko' && q.options_ko) {
       try { displayOpts = JSON.parse(q.options_ko); } catch(e) { displayOpts = rawOpts; }
+    } else if (currentLang !== 'ko') {
+      displayOpts = await Promise.all(rawOpts.map(function(opt) {
+        return /[가-힣]/.test(opt) ? translateIfNeeded(opt, currentLang) : Promise.resolve(opt);
+      }));
     }
 
     var choices = q.choices || {};
@@ -2967,7 +2991,7 @@ const CARD_DATA = {
             var pct = voteTotal > 0 ? Math.round(cnt / voteTotal * 100) : 0;
             var isTop = rawOpt === topRaw && voteTotal > 0;
             return '<div class="vote-opt-row">'
-              + '<span class="vote-opt-label" title="' + opt + '" style="max-width:140px">' + opt + '</span>'
+              + '<span class="vote-opt-label" data-rawopt="' + rawOpt.replace(/"/g,'&quot;') + '" title="' + opt + '" style="max-width:140px">' + opt + '</span>'
               + '<div class="vote-opt-bar-wrap"><div class="vote-opt-bar' + (isTop ? ' top' : '') + '" style="width:' + pct + '%"></div></div>'
               + '<span class="vote-opt-pct">' + (voteTotal > 0 ? pct + '%' + ' (' + cnt + ')' : '-') + '</span>'
               + '</div>';
