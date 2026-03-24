@@ -1342,6 +1342,9 @@
         + '<td>' + statusBadge + '</td>'
         + '<td><div class="action-btns">'
         + '<button class="action-btn" style="background:#6366f1;color:white;border-color:#6366f1" onclick="event.stopPropagation();openEditQModal(' + q.question_id + ')">수정</button>'
+        + (q.type === 'bet' && ['APPROVED','PENDING'].includes(q.status)
+            ? '<button class="action-btn" style="background:#ef4444;color:white;border-color:#ef4444" onclick="event.stopPropagation();openBetCancelModal(' + q.question_id + ')">취소·환불</button>'
+            : '')
         + '<button class="action-btn danger" onclick="event.stopPropagation();confirmDeleteQ(' + q.question_id + ')">삭제</button>'
         + '</div></td>'
         + '</tr>';
@@ -1551,6 +1554,48 @@
     yBtn.style.cssText = 'flex:1;padding:14px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;transition:all .15s;border:2px solid ' + (side==='YES' ? '#16a34a;background:#dcfce7;color:#16a34a' : 'var(--gray-200);background:white;color:#16a34a');
     nBtn.style.cssText = 'flex:1;padding:14px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;transition:all .15s;border:2px solid ' + (side==='NO'  ? '#dc2626;background:#fee2e2;color:#dc2626' : 'var(--gray-200);background:white;color:#dc2626');
     document.getElementById('settleConfirmBtn').disabled = false;
+  }
+
+  /* ── 내기 취소·환불 모달 ── */
+  var _betCancelTargetId = null;
+
+  function openBetCancelModal(id) {
+    var q = _qDetailMap[id];
+    if (!q) return;
+    _betCancelTargetId = id;
+    document.getElementById('betCancelQText').textContent = q.question_ko || q.question || '';
+    var totalBet = parseFloat(q.total_bet) || 0;
+    var partCount = parseInt(q.participant_count) || 0;
+    document.getElementById('betCancelInfo').innerHTML =
+      '현재 베팅 참여자: <b>' + partCount + '명</b> &nbsp;|&nbsp; 총 베팅 금액: <b>' + totalBet.toFixed(0) + 'F</b><br>'
+      + '등록자 등록비 <b>2F</b> + 참여자 베팅금 전액이 각각 환불됩니다.<br>'
+      + '<span style="color:#b91c1c;font-size:12px">⚠ 이 작업은 되돌릴 수 없습니다.</span>';
+    document.getElementById('betCancelConfirmBtn').disabled = false;
+    document.getElementById('betCancelConfirmBtn').textContent = '취소 확인 · 환불';
+    document.getElementById('betCancelModal').style.display = 'flex';
+  }
+
+  function closeBetCancelModal() {
+    document.getElementById('betCancelModal').style.display = 'none';
+    _betCancelTargetId = null;
+  }
+
+  async function confirmBetCancel() {
+    if (!_betCancelTargetId) return;
+    var btn = document.getElementById('betCancelConfirmBtn');
+    btn.disabled = true;
+    btn.textContent = '처리 중...';
+    try {
+      var res = await fetch(ADMIN_API + '/api/admin/questions/' + _betCancelTargetId + '/cancel-bet', {
+        method: 'POST',
+        headers: { 'x-admin-key': ADMIN_KEY }
+      });
+      var data = await res.json();
+      if (!res.ok) { showToast('취소 실패: ' + (data.error || '오류')); btn.disabled = false; btn.textContent = '취소 확인 · 환불'; return; }
+      closeBetCancelModal();
+      showToast('내기 취소 완료! 참여자 ' + data.refundedCount + '명에게 총 ' + data.refundedTotal.toFixed(0) + 'F 환불됐습니다.');
+      loadAdminQuestions();
+    } catch(e) { showToast('오류: ' + e.message); btn.disabled = false; btn.textContent = '취소 확인 · 환불'; }
   }
 
   /* ── 정산 취소 모달 ── */
@@ -2107,6 +2152,19 @@ document.addEventListener('DOMContentLoaded', () => {
     <div style="display:flex;gap:10px">
       <button onclick="closeDeleteModal()" style="flex:1;padding:11px;border-radius:12px;border:1px solid var(--gray-300);background:var(--white);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font)">취소</button>
       <button onclick="deleteUser()" style="flex:1;padding:11px;border-radius:12px;border:none;background:var(--red);color:var(--white);font-size:14px;font-weight:800;cursor:pointer;font-family:var(--font)">강제탈퇴 확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- 내기 취소·환불 모달 -->
+<div id="betCancelModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9100;align-items:center;justify-content:center;">
+  <div style="background:var(--white);border-radius:20px;padding:32px 28px;max-width:440px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+    <div style="font-size:17px;font-weight:800;color:#dc2626;margin-bottom:8px">⚠ 내기 취소 · 전액 환불</div>
+    <div id="betCancelQText" style="font-size:14px;font-weight:600;color:var(--gray-900);margin-bottom:12px;line-height:1.5"></div>
+    <div id="betCancelInfo" style="font-size:13px;color:var(--gray-600);margin-bottom:20px;background:#FEE2E2;border-radius:10px;padding:12px;line-height:1.6"></div>
+    <div style="display:flex;gap:10px">
+      <button onclick="closeBetCancelModal()" style="flex:1;padding:11px;border-radius:12px;border:1px solid var(--gray-300);background:var(--white);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font)">닫기</button>
+      <button id="betCancelConfirmBtn" onclick="confirmBetCancel()" style="flex:1;padding:11px;border-radius:12px;border:none;background:#dc2626;color:white;font-size:14px;font-weight:800;cursor:pointer;font-family:var(--font)">취소 확인 · 환불</button>
     </div>
   </div>
 </div>
