@@ -1623,16 +1623,20 @@ async function initBotUser() {
     setTimeout(runSportsScheduler, 60 * 1000);
     setInterval(runSportsScheduler, 3 * 60 * 60 * 1000);
 
-    // 만료 데이터 정리: 마감일 30일 경과한 참여 기록 삭제 (매일 실행)
+    // 만료 데이터 정리: 마감일 30일 경과한 참여 기록 + 질문 삭제 (매일 실행)
     async function cleanupExpiredParticipations() {
       try {
         const db = await getPool();
-        const [r] = await db.execute(
+        const [r1] = await db.execute(
           `DELETE p FROM Participations p
            JOIN Questions q ON p.question_id = q.question_id
            WHERE q.end_date < DATE_SUB(NOW(), INTERVAL 30 DAY)`
         );
-        if (r.affectedRows > 0) console.log(`[정리] 만료 참여 데이터 ${r.affectedRows}건 삭제`);
+        if (r1.affectedRows > 0) console.log(`[정리] 만료 참여 데이터 ${r1.affectedRows}건 삭제`);
+        const [r2] = await db.execute(
+          `DELETE FROM Questions WHERE end_date < DATE_SUB(NOW(), INTERVAL 30 DAY)`
+        );
+        if (r2.affectedRows > 0) console.log(`[정리] 만료 질문 ${r2.affectedRows}건 삭제`);
       } catch (e) { console.error('[cleanup]', e.message); }
     }
     setInterval(cleanupExpiredParticipations, 24 * 60 * 60 * 1000);
