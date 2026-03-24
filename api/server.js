@@ -831,6 +831,50 @@ app.post('/api/admin/questions/:id/settle', adminMiddleware, async (req, res) =>
   }
 });
 
+// ── 내기 취소 (질문 등록자) ───────────────────────────────
+app.post('/api/questions/:id/cancel', authMiddleware, async (req, res) => {
+  const qId = req.params.id;
+  try {
+    const db = await getPool();
+    const [qRows] = await db.execute(
+      'SELECT q.type, q.status, q.user_id, u.email FROM Questions q JOIN Users u ON q.user_id = u.user_id WHERE q.question_id = ?',
+      [qId]
+    );
+    if (!qRows.length) return res.status(404).json({ error: '질문을 찾을 수 없습니다' });
+    const q = qRows[0];
+
+    if (String(q.user_id) !== String(req.user.userId))
+      return res.status(403).json({ error: '본인의 내기만 취소할 수 있습니다' });
+    if (q.type !== 'bet')
+      return res.status(400).json({ error: '내기 질문만 취소할 수 있습니다' });
+    if (!['APPROVED', 'PENDING'].includes(q.status))
+      return res.status(400).json({ error: '이미 정산됐거나 취소된 질문입니다' });
+
+    // 베팅 참여자별 금액 환불
+    const [parts] = await db.execute(
+      'SELECT user_id, SUM(amount) AS total FROM Participations WHERE question_id = ? GROUP BY user_id',
+      [qId]
+    );
+    for (const p of parts) {
+      const amt = parseFloat(p.total) || 0;
+      if (amt > 0) await db.execute('UPDATE Users SET balance = balance + ? WHERE user_id = ?', [amt, p.user_id]);
+    }
+
+    // 등록자 질문 등록비 환불 (봇 제외, 내기 등록비 2F)
+    if (q.email !== BOT_EMAIL_CONST) {
+      await db.execute('UPDATE Users SET balance = balance + 2 WHERE user_id = ?', [q.user_id]);
+    }
+
+    await db.execute("UPDATE Questions SET status = 'CANCELLED' WHERE question_id = ?", [qId]);
+
+    const [newUser] = await db.execute('SELECT balance FROM Users WHERE user_id = ?', [req.user.userId]);
+    res.json({ ok: true, refundedParticipants: parts.length, balance: newUser[0].balance });
+  } catch (err) {
+    console.error('[cancel bet]', err.message);
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
 // ── 관리자: 정산 취소 ─────────────────────────────────────
 app.post('/api/admin/questions/:id/settle-cancel', adminMiddleware, async (req, res) => {
   const qId = req.params.id;

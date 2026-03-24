@@ -202,6 +202,8 @@
     .part-count { font-size: 11px; color: var(--gray-400); font-weight: 500; margin-top: 2px; }
     .bet-stats { display: flex; gap: 10px; align-items: flex-start; width: 100%; flex-direction: column; }
     .card-sparkline { width: 100%; height: 64px; margin-top: 8px; border-radius: 8px; overflow: hidden; }
+    .btn-cancel-bet { margin-top: 10px; width: 100%; padding: 7px 0; border: 1px solid #fca5a5; border-radius: 8px; background: #fff5f5; color: #dc2626; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+    .btn-cancel-bet:hover { background: #fee2e2; }
     .card-sparkline svg { display: block; width: 100%; height: 100%; }
     .bet-stat-row { display: flex; align-items: center; gap: 8px; width: 100%; }
     .bet-stat-bar-wrap { flex: 1; background: var(--gray-100); border-radius: 4px; height: 6px; overflow: hidden; }
@@ -2412,6 +2414,7 @@ const CARD_DATA = {
       + '</div></div>'
       + statsHtml
       + '<div class="card-sparkline" id="sparkline-' + q.question_id + '"></div>'
+      + (q.is_mine && q.type === 'bet' ? '<button class="btn-cancel-bet" onclick="event.stopPropagation();cancelBet(' + q.question_id + ')">내기 취소 · 전액 환불</button>' : '')
       + '</div>';
   }
 
@@ -2892,6 +2895,37 @@ const CARD_DATA = {
       }
     } catch(e) { showToast('오류: ' + e.message); }
     finally { if (btn) { btn.disabled = false; btn.textContent = '거래 확인 →'; } }
+  }
+
+  /* ── 내기 취소 ── */
+  async function cancelBet(questionId) {
+    if (!confirm('이 내기를 취소하시겠습니까?\n등록비와 모든 베팅 포인트가 각 참여자에게 환불됩니다.')) return;
+    const token = localStorage.getItem('foket-token');
+    if (!token) { showToast('로그인이 필요합니다.'); return; }
+    try {
+      const res = await fetch('/api/questions/' + questionId + '/cancel', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const data = await res.json();
+      if (!res.ok) { showToast(data.error || '취소 실패'); return; }
+      showToast('내기가 취소되었습니다. ' + data.refundedParticipants + '명에게 베팅 포인트가 환불됐습니다.');
+      // 잔액 갱신
+      if (data.balance !== undefined) {
+        var user = JSON.parse(localStorage.getItem('foket-user') || '{}');
+        user.balance = data.balance;
+        localStorage.setItem('foket-user', JSON.stringify(user));
+        var el = document.getElementById('userBalance');
+        if (el) el.textContent = data.balance;
+        var el2 = document.getElementById('mpBalance');
+        if (el2) el2.textContent = data.balance;
+      }
+      // 카드 제거
+      var card = document.querySelector('[data-qid="' + questionId + '"]');
+      if (card) card.remove();
+    } catch (e) {
+      showToast('오류가 발생했습니다.');
+    }
   }
 
   /* ── Toast ── */
