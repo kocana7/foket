@@ -1619,9 +1619,12 @@ async function initBotUser() {
     // 봇 참여: 30초 후 첫 참여, 이후 매 5분마다 랜덤 투표/베팅
     setTimeout(botParticipate, 30 * 1000);
     setInterval(botParticipate, 5 * 60 * 1000);
-    // 스포츠 경기 자동 등록: 1분 후 첫 실행, 이후 매 5분마다
+    // 스포츠 경기 자동 등록: 1분 후 첫 실행, 이후 매 3시간마다
     setTimeout(runSportsScheduler, 60 * 1000);
     setInterval(runSportsScheduler, 3 * 60 * 60 * 1000);
+    // 스포츠 내기 자동 정산: 10분 후 첫 실행, 이후 매 30분마다
+    setTimeout(autoSettleSportsBets, 10 * 60 * 1000);
+    setInterval(autoSettleSportsBets, 30 * 60 * 1000);
 
     // 만료 데이터 정리: 마감일 30일 경과한 참여 기록 + 질문 삭제 (매일 실행)
     async function cleanupExpiredParticipations() {
@@ -1921,6 +1924,161 @@ async function runSportsScheduler() {
     console.log(`[스포츠봇] ${toPost.length}개 경기 처리 완료 (잔여 미등록: ${unposted.length - toPost.length}개)`);
   } catch (err) {
     console.error('[스포츠봇] 스케줄러 오류:', err.message);
+  }
+}
+
+// ── 스포츠 내기 자동 정산 ──────────────────────────────────
+const _settledSportsBetIds = new Set();
+
+// ESPN 완료 경기에서 home vs away 결과 조회
+// 반환: 'HOME_WIN' | 'AWAY_WIN' | 'DRAW' | null(아직 미확인)
+async function findMatchResult(ep, home, away) {
+  const now = new Date();
+  const fmtDate = d => d.toISOString().split('T')[0].replace(/-/g, '');
+  // 어제 + 오늘 + 내일 날짜 범위 검색 (시간대 차이 보정)
+  const dates = [
+    fmtDate(new Date(now.getTime() - 86400000)),
+    fmtDate(now),
+    fmtDate(new Date(now.getTime() + 86400000)),
+  ];
+  const normalize = s => String(s).trim().toLowerCase();
+  for (const date of dates) {
+    try {
+      const data = await fetchJsonHttps(ep.url + `?dates=${date}`);
+      if (!data || !data.events) continue;
+      for (const ev of data.events) {
+        const comp = ev.competitions && ev.competitions[0];
+        if (!comp) continue;
+        const state = comp.status && comp.status.type && comp.status.type.state;
+        if (state !== 'post') continue; // 종료 경기만
+        const competitors = comp.competitors || [];
+        const evHome = normalize((competitors[0] && competitors[0].team && competitors[0].team.displayName) || '');
+        const evAway = normalize((competitors[1] && competitors[1].team && competitors[1].team.displayName) || '');
+        if (evHome !== normalize(home) || evAway !== normalize(away)) continue;
+        const homeScore = parseFloat(competitors[0].score) || 0;
+        const awayScore = parseFloat(competitors[1].score) || 0;
+        if (homeScore > awayScore) return 'HOME_WIN';
+        if (awayScore > homeScore) return 'AWAY_WIN';
+        return 'DRAW';
+      }
+    } catch (e) { /* 개별 fetch 실패 무시 */ }
+  }
+  return null;
+}
+
+// 내기 정산 (승자 있을 때)
+async function settleSportsBetInternal(db, qId, winning, home, away) {
+  const [cfgRows] = await db.execute("SELECT key_name, val FROM Settings WHERE key_name IN ('settle_admin_pct','settle_poster_pct')");
+  const cfgMap = {};
+  cfgRows.forEach(r => { cfgMap[r.key_name] = parseFloat(r.val); });
+  const adminPct  = (cfgMap['settle_admin_pct']  ?? 5) / 100;
+  const posterPct = (cfgMap['settle_poster_pct'] ?? 5) / 100;
+
+  const losing = winning === 'YES' ? 'NO' : 'YES';
+  const [loserTot] = await db.execute(
+    'SELECT COALESCE(SUM(amount),0) AS total FROM Participations WHERE question_id = ? AND choice = ?',
+    [qId, losing]
+  );
+  const loserPool = parseFloat(loserTot[0].total) || 0;
+  const adminFee  = Math.floor(loserPool * adminPct);
+  const posterFee = Math.floor(loserPool * posterPct);
+  const winnerDist = loserPool - adminFee - posterFee;
+
+  if (posterFee > 0 && _botUserId) {
+    await db.execute('UPDATE Users SET balance = balance + ? WHERE user_id = ?', [posterFee, _botUserId]);
+  }
+
+  const [winnerRows] = await db.execute(
+    'SELECT id, user_id, amount FROM Participations WHERE question_id = ? AND choice = ?',
+    [qId, winning]
+  );
+  const winnerTotal = winnerRows.reduce((s, w) => s + parseFloat(w.amount), 0);
+  const userPayoutMap = {};
+  for (const w of winnerRows) {
+    const bet = parseFloat(w.amount);
+    const winnings = winnerTotal > 0 ? Math.floor((bet / winnerTotal) * winnerDist) : 0;
+    const payout = bet + winnings;
+    await db.execute("UPDATE Participations SET payout = ?, settle_result = 'WIN' WHERE id = ?", [payout, w.id]);
+    userPayoutMap[w.user_id] = (userPayoutMap[w.user_id] || 0) + payout;
+  }
+  for (const [uid, total] of Object.entries(userPayoutMap)) {
+    await db.execute('UPDATE Users SET balance = balance + ? WHERE user_id = ?', [total, uid]);
+  }
+  await db.execute(
+    "UPDATE Participations SET payout = 0, settle_result = 'LOSE' WHERE question_id = ? AND choice = ?",
+    [qId, losing]
+  );
+  await db.execute(
+    "UPDATE Questions SET status='SETTLED', settle_winner=?, settle_poster_fee=?, settle_admin_fee=? WHERE question_id=?",
+    [winning, posterFee, adminFee, qId]
+  );
+  const winnerTeam = winning === 'YES' ? home : away;
+  console.log(`[자동정산] ✅ 정산 완료: ${home} vs ${away} → ${winnerTeam} 승리 (${winning}), 배당 ${winnerDist}F 분배`);
+}
+
+// 내기 취소 (무승부일 때 전액 환불)
+async function cancelSportsBetInternal(db, qId, home, away) {
+  const [parts] = await db.execute(
+    'SELECT user_id, SUM(amount) AS total FROM Participations WHERE question_id = ? GROUP BY user_id',
+    [qId]
+  );
+  let refundedTotal = 0;
+  for (const p of parts) {
+    const amt = parseFloat(p.total) || 0;
+    if (amt > 0) {
+      await db.execute('UPDATE Users SET balance = balance + ? WHERE user_id = ?', [amt, p.user_id]);
+      refundedTotal += amt;
+    }
+  }
+  await db.execute(
+    "UPDATE Questions SET status = 'CANCELLED', settle_winner=NULL, settle_poster_fee=NULL, settle_admin_fee=NULL WHERE question_id = ?",
+    [qId]
+  );
+  console.log(`[자동정산] 🔄 무승부 취소: ${home} vs ${away} — 총 ${refundedTotal}F 환불 완료`);
+}
+
+// 메인 자동 정산 스케줄러 (30분마다 실행)
+async function autoSettleSportsBets() {
+  if (!_botUserId) return;
+  try {
+    const db = await getPool();
+    // 경기 시작 후 5시간(end_date+2h) 경과한 APPROVED 스포츠 내기만 대상
+    const [pendingBets] = await db.execute(
+      `SELECT question_id, question FROM Questions
+       WHERE user_id = ? AND type = 'bet' AND status = 'APPROVED' AND category = 'sports'
+       AND end_date < DATE_SUB(NOW(), INTERVAL 2 HOUR)`,
+      [_botUserId]
+    );
+    if (!pendingBets.length) return;
+    console.log(`[자동정산] 정산 대상 ${pendingBets.length}건 처리 시작`);
+
+    for (const bet of pendingBets) {
+      if (_settledSportsBetIds.has(bet.question_id)) continue;
+      // 제목 파싱: "emoji [League] Home vs Away — Home이(가) 승리할까요? (HH:MM KST)"
+      const m = bet.question.match(/\[(.+?)\] (.+?) vs (.+?) —/);
+      if (!m) { _settledSportsBetIds.add(bet.question_id); continue; }
+      const [, league, home, away] = m;
+      const ep = ESPN_ENDPOINTS.find(e => e.league === league);
+      if (!ep) {
+        console.log(`[자동정산] 리그 '${league}' ESPN 엔드포인트 없음 — 스킵`);
+        _settledSportsBetIds.add(bet.question_id);
+        continue;
+      }
+      const result = await findMatchResult(ep, home, away);
+      if (!result) {
+        console.log(`[자동정산] ${home} vs ${away} 결과 미확인 — 다음 주기 재시도`);
+        continue; // 다음 30분 후 재시도
+      }
+      if (result === 'DRAW') {
+        await cancelSportsBetInternal(db, bet.question_id, home, away);
+      } else {
+        const winning = result === 'HOME_WIN' ? 'YES' : 'NO';
+        await settleSportsBetInternal(db, bet.question_id, winning, home, away);
+      }
+      _settledSportsBetIds.add(bet.question_id);
+    }
+  } catch (err) {
+    console.error('[자동정산] 오류:', err.message);
   }
 }
 
