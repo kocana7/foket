@@ -2628,7 +2628,7 @@ const CARD_DATA = {
     var key = targetLang + ':' + text.slice(0, 120);
     if (_transCache[key]) return _transCache[key];
     try {
-      var pair = 'ko|' + (_LANG_PAIR_MAP[targetLang] || 'en');
+      var pair = 'autodetect|' + (_LANG_PAIR_MAP[targetLang] || 'en');
       var res = await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text) + '&langpair=' + pair);
       var data = await res.json();
       if (data.responseStatus === 200) {
@@ -2664,7 +2664,7 @@ const CARD_DATA = {
     for (var i = 0; i < els.length; i++) {
       var el = els[i];
       var rawOpt = el.getAttribute('data-rawopt');
-      if (!rawOpt || !/[가-힣]/.test(rawOpt)) continue; // 한국어 아닌 것은 스킵
+      if (!rawOpt || !/[^\x00-\x7F]/.test(rawOpt)) continue; // ASCII 전용 옵션은 번역 불필요
       var key = lang + ':' + rawOpt.slice(0, 120);
       if (_transCache[key]) { el.textContent = _transCache[key]; el.title = _transCache[key]; continue; }
       try {
@@ -2740,7 +2740,7 @@ const CARD_DATA = {
       try { displayOpts = JSON.parse(q.options_ko); } catch(e) { displayOpts = rawOpts; }
     } else if (currentLang !== 'ko') {
       displayOpts = await Promise.all(rawOpts.map(function(opt) {
-        return /[가-힣]/.test(opt) ? translateIfNeeded(opt, currentLang) : Promise.resolve(opt);
+        return /[^\x00-\x7F]/.test(opt) ? translateIfNeeded(opt, currentLang) : Promise.resolve(opt);
       }));
     }
 
