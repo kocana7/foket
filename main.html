@@ -2578,8 +2578,9 @@ const CARD_DATA = {
       // ── ticker: 마감 임박순 ──
       var tickerEl = document.getElementById('ticker');
       if (tickerEl) {
+        var now = new Date();
         var tickerQs = questions
-          .filter(function(q) { return q.end_date; })
+          .filter(function(q) { return q.end_date && new Date(q.end_date) > now; })
           .sort(function(a, b) { return new Date(a.end_date) - new Date(b.end_date); });
         if (tickerQs.length) {
           // 미리보기 모달에서 사용할 수 있도록 캐시에 저장
