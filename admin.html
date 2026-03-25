@@ -236,6 +236,10 @@
       질문
       <span class="badge-count">1,024</span>
     </button>
+    <button class="sidebar-link" onclick="showPage('results', this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+      결과
+    </button>
     <button class="sidebar-link" onclick="showPage('users', this)">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
       회원
@@ -1049,6 +1053,45 @@
 
   </div>
 
+    <!-- 결과 관리 -->
+    <div class="page" id="page-results">
+      <div class="page-header">
+        <div><h1>결과</h1><p>마감된 투표 및 내기의 결과를 확인합니다 (마감 후 30일 이내)</p></div>
+        <button class="btn-primary" onclick="loadAdminResults()">새로고침</button>
+      </div>
+      <div class="page-content">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">마감된 질문 결과</div>
+            <div style="display:flex;gap:8px">
+              <button class="btn-outline" id="result-filter-all" onclick="filterResults('all',this)" style="font-size:12px;padding:5px 12px;border-radius:8px;border:1px solid var(--gray-200);background:var(--blue);color:white;cursor:pointer;font-weight:600">전체</button>
+              <button class="btn-outline" id="result-filter-vote" onclick="filterResults('vote',this)" style="font-size:12px;padding:5px 12px;border-radius:8px;border:1px solid var(--gray-200);background:var(--white);color:var(--gray-600);cursor:pointer;font-weight:600">투표</button>
+              <button class="btn-outline" id="result-filter-bet" onclick="filterResults('bet',this)" style="font-size:12px;padding:5px 12px;border-radius:8px;border:1px solid var(--gray-200);background:var(--white);color:var(--gray-600);cursor:pointer;font-weight:600">내기</button>
+            </div>
+          </div>
+          <div class="card-body" style="padding:0">
+            <table class="data-table" style="width:100%">
+              <thead>
+                <tr>
+                  <th style="width:60px">유형</th>
+                  <th>질문</th>
+                  <th style="width:80px">카테고리</th>
+                  <th style="width:80px">참여자</th>
+                  <th style="width:160px">결과</th>
+                  <th style="width:100px">마감일</th>
+                  <th style="width:110px">상태</th>
+                  <th style="width:90px">정산</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-results">
+                <tr><td colspan="8" style="text-align:center;color:var(--gray-400);padding:32px">불러오는 중...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- FAQ 관리 -->
     <div class="page" id="page-faq">
       <div class="page-header">
@@ -1209,9 +1252,10 @@
       var btn = document.querySelector('.sidebar-link[onclick*="showPage(\'' + id + '\'"]');
       if (btn) btn.classList.add('active');
     }
-    const titles = { dashboard:'대시보드', analytics:'분석', markets:'질문', users:'회원', trades:'거래', payouts:'출금', compliance:'컴플라이언스', reports:'보고서', settings:'설정', faq:'FAQ 관리' };
+    const titles = { dashboard:'대시보드', analytics:'분석', markets:'질문', results:'결과', users:'회원', trades:'거래', payouts:'출금', compliance:'컴플라이언스', reports:'보고서', settings:'설정', faq:'FAQ 관리' };
     document.getElementById('topbarTitle').textContent = titles[id] || id;
     if (id === 'markets') loadAdminQuestions();
+    if (id === 'results') loadAdminResults();
     if (id === 'settings') loadSettleConfig();
     if (id === 'faq') loadFaqAdmin();
     location.hash = id;
@@ -1220,7 +1264,7 @@
   /* ── 새로고침 시 마지막 페이지 복원 ── */
   document.addEventListener('DOMContentLoaded', function() {
     var hash = location.hash.replace('#', '');
-    var valid = ['dashboard','analytics','markets','users','trades','payouts','compliance','reports','settings'];
+    var valid = ['dashboard','analytics','markets','results','users','trades','payouts','compliance','reports','settings'];
     if (hash && valid.includes(hash)) {
       showPage(hash, null);
     }
@@ -1460,6 +1504,109 @@
 
       addSampleDeleteBtns();
     } catch(e) { console.error('질문 로드 실패:', e); }
+  }
+
+  /* ── 결과 페이지 ── */
+  var _resultsCache = [];
+  var _resultsFilter = 'all';
+
+  function buildResultRow(q) {
+    var typeTag = q.type === 'vote'
+      ? '<span class="type-tag vote">투표</span>'
+      : '<span class="type-tag bet">내기</span>';
+    var catLabel = CAT_LABELS[q.category] || q.category || '기타';
+    var submitter = '@' + (q.poster_nickname || q.nickname || q.email || '-');
+    var displayQ = escHtml(q.question_ko || q.question);
+    var endDate = q.end_date ? new Date(q.end_date).toLocaleDateString('ko-KR') : '-';
+    var pc = parseInt(q.participant_count) || 0;
+    var choices = q.choices || {};
+    var ca = q.choice_amounts || {};
+
+    // 결과 셀
+    var resultCell = '<span style="color:var(--gray-300)">-</span>';
+    if (q.type === 'bet') {
+      var yes = choices['YES'] || 0;
+      var no  = choices['NO']  || 0;
+      var yesAmt = parseFloat(ca['YES'] || 0);
+      var noAmt  = parseFloat(ca['NO']  || 0);
+      var tb = parseFloat(q.total_bet) || 0;
+      resultCell = '<span style="font-size:12px">YES <b style="color:var(--green)">' + yes + '</b>명 / NO <b style="color:var(--red)">' + no + '</b>명</span>'
+        + '<br><span style="font-size:11px;color:var(--blue);font-weight:700">총 ' + tb.toLocaleString() + 'F</span>';
+    } else {
+      try {
+        var opts = JSON.parse(q.options || '[]');
+        var voteTotal = Object.values(choices).reduce(function(a,b){return a+b;},0);
+        var topOpt = '', topCnt = 0;
+        opts.forEach(function(o){ if((choices[o]||0)>topCnt){topOpt=o;topCnt=choices[o];} });
+        if (topOpt && voteTotal > 0) {
+          var pct = Math.round(topCnt / voteTotal * 100);
+          resultCell = '<span style="font-size:12px;font-weight:700;color:var(--blue)">' + escHtml(topOpt.length > 10 ? topOpt.slice(0,10)+'…' : topOpt) + '</span>'
+            + '<br><span style="font-size:11px;color:var(--gray-500)">' + pct + '% (' + topCnt + '/' + voteTotal + '명)</span>';
+        }
+      } catch(e) {}
+    }
+
+    // 상태 및 정산 셀
+    var statusBadge, settleCell;
+    if (q.status === 'SETTLED') {
+      var winner = q.settle_winner === 'YES' ? '🟢 YES 승리' : '🔴 NO 승리';
+      var posterFee = parseFloat(q.settle_poster_fee || 0).toLocaleString();
+      statusBadge = '<span class="badge badge-blue">✓ 정산완료</span>';
+      settleCell = '<span style="font-size:12px;font-weight:700">' + winner + '</span>'
+        + '<br><span style="font-size:11px;color:var(--gray-500)">수수료 ' + posterFee + 'F</span>';
+    } else if (q.status === 'CANCELLED') {
+      statusBadge = '<span class="badge badge-red">⊘ 취소됨</span>';
+      settleCell = '<span style="font-size:12px;color:var(--gray-400)">환불 처리됨</span>';
+    } else {
+      statusBadge = '<span class="badge badge-yellow">⏳ 미정산</span>';
+      settleCell = q.type === 'bet'
+        ? '<button class="action-btn" style="background:#f59e0b;color:white;border-color:#f59e0b;padding:5px 10px;font-size:11px;font-weight:700;border-radius:8px;cursor:pointer" onclick="event.stopPropagation();openSettleModal(' + q.question_id + ')">정산하기</button>'
+        : '<span style="font-size:12px;color:var(--gray-400)">-</span>';
+    }
+
+    return '<tr class="db-q-row" data-qid="' + q.question_id + '" onclick="openQuestionDetail(' + q.question_id + ')" style="cursor:pointer">'
+      + '<td>' + typeTag + '</td>'
+      + '<td class="td-bold">' + displayQ + '<br><span style="font-size:11px;color:var(--gray-400)">' + escHtml(submitter) + '</span></td>'
+      + '<td style="font-size:12px;white-space:nowrap">' + catLabel + '</td>'
+      + '<td><strong style="color:var(--blue)">' + pc + '</strong><span style="font-size:11px;color:var(--gray-400)"> 명</span></td>'
+      + '<td>' + resultCell + '</td>'
+      + '<td style="font-size:12px">' + endDate + '</td>'
+      + '<td>' + statusBadge + '</td>'
+      + '<td>' + settleCell + '</td>'
+      + '</tr>';
+  }
+
+  function filterResults(type, el) {
+    _resultsFilter = type;
+    document.querySelectorAll('[id^="result-filter-"]').forEach(function(b) {
+      b.style.background = 'var(--white)'; b.style.color = 'var(--gray-600)';
+    });
+    el.style.background = 'var(--blue)'; el.style.color = 'white';
+    renderResultsTable();
+  }
+
+  function renderResultsTable() {
+    var tbody = document.getElementById('tbody-results');
+    if (!tbody) return;
+    var rows = _resultsFilter === 'all' ? _resultsCache : _resultsCache.filter(function(q){ return q.type === _resultsFilter; });
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--gray-400);padding:32px">마감된 질문이 없습니다.</td></tr>';
+      return;
+    }
+    rows.forEach(function(q) { _qDetailMap[q.question_id] = q; });
+    tbody.innerHTML = rows.map(buildResultRow).join('');
+  }
+
+  async function loadAdminResults() {
+    var tbody = document.getElementById('tbody-results');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--gray-400);padding:32px">불러오는 중...</td></tr>';
+    try {
+      var res = await fetch(ADMIN_API + '/api/admin/results', { headers: { 'x-admin-key': ADMIN_KEY } });
+      if (!res.ok) { console.error('결과 API 오류:', res.status); return; }
+      var data = await res.json();
+      _resultsCache = data.results || [];
+      renderResultsTable();
+    } catch(e) { console.error('결과 로드 실패:', e); }
   }
 
   async function adminApproveQ(id) {

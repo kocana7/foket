@@ -724,6 +724,47 @@ app.get('/api/admin/questions', adminMiddleware, async (req, res) => {
   }
 });
 
+// ── 관리자: 마감 결과 목록 (end_date 지났고 30일 이내) ────
+app.get('/api/admin/results', adminMiddleware, async (req, res) => {
+  try {
+    const db = await getPool();
+    const [rows] = await db.execute(
+      `SELECT q.question_id, q.user_id, q.type, q.question, q.question_ko,
+              q.poster_nickname, q.category, q.options, q.options_ko, q.initial_prob,
+              q.end_date, q.status, q.created_at,
+              q.settle_winner, q.settle_poster_fee, q.settle_admin_fee,
+              u.email, u.nickname, u.full_name,
+              (SELECT COUNT(*) FROM Participations p WHERE p.question_id = q.question_id) AS participant_count,
+              (SELECT COALESCE(SUM(p.amount),0) FROM Participations p WHERE p.question_id = q.question_id) AS total_bet
+       FROM Questions q
+       LEFT JOIN Users u ON q.user_id = u.user_id
+       WHERE q.end_date < NOW()
+         AND q.end_date >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+       ORDER BY q.end_date DESC`
+    );
+    if (rows.length > 0) {
+      const ids = rows.map(r => r.question_id);
+      const placeholders = ids.map(() => '?').join(',');
+      const [choiceRows] = await db.execute(
+        `SELECT question_id, choice, COUNT(*) AS cnt, COALESCE(SUM(amount),0) AS total_amount FROM Participations WHERE question_id IN (${placeholders}) GROUP BY question_id, choice`,
+        ids
+      );
+      const choiceMap = {}, amountMap = {};
+      choiceRows.forEach(r => {
+        if (!choiceMap[r.question_id]) choiceMap[r.question_id] = {};
+        if (!amountMap[r.question_id]) amountMap[r.question_id] = {};
+        choiceMap[r.question_id][r.choice] = Number(r.cnt);
+        amountMap[r.question_id][r.choice] = Number(r.total_amount);
+      });
+      rows.forEach(r => { r.choices = choiceMap[r.question_id] || {}; r.choice_amounts = amountMap[r.question_id] || {}; });
+    }
+    res.json({ results: rows });
+  } catch (err) {
+    console.error('[admin/results GET]', err.message);
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
 // ── 관리자: 질문 상태 변경 ────────────────────────────────
 app.patch('/api/admin/questions/:id/status', adminMiddleware, async (req, res) => {
   const { status } = req.body;
