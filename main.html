@@ -2582,6 +2582,8 @@ const CARD_DATA = {
           .filter(function(q) { return q.end_date; })
           .sort(function(a, b) { return new Date(a.end_date) - new Date(b.end_date); });
         if (tickerQs.length) {
+          // 미리보기 모달에서 사용할 수 있도록 캐시에 저장
+          tickerQs.forEach(function(q) { _questionsById[q.question_id] = q; });
           var urgentLabel = currentLang === 'ko' ? '마감임박!!' : (UI_LABELS[currentLang] || UI_LABELS.en).deadline + '!!';
           var urgentTag = '<div class="ticker-item" style="color:#FFD700;font-weight:900;letter-spacing:1px"><span class="ticker-dot" style="background:#FFD700"></span>' + urgentLabel + '</div>';
           var deadlineLabel = ul('deadline');
