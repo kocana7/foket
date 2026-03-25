@@ -165,7 +165,7 @@ app.post('/api/register', async (req, res) => {
       [email, hash, full_name, nickname.trim(), 'PENDING', 'ACTIVE']
     );
 
-    const user = { user_id: result.insertId, email, full_name, nickname: nickname.trim() };
+    const user = { user_id: result.insertId, email, full_name, nickname: nickname.trim(), balance: 0 };
     const token = makeToken(user);
     res.json({ token, user });
   } catch (err) {
@@ -183,7 +183,7 @@ app.post('/api/login', async (req, res) => {
   try {
     const db = await getPool();
     const [rows] = await db.execute(
-      'SELECT user_id, email, full_name, nickname, password_hash, status FROM Users WHERE email = ?',
+      'SELECT user_id, email, full_name, nickname, password_hash, status, balance FROM Users WHERE email = ?',
       [email]
     );
 
@@ -202,7 +202,7 @@ app.post('/api/login', async (req, res) => {
     await db.execute('UPDATE Users SET last_login_at = NOW(), last_login_ip = ? WHERE user_id = ?', [loginIp, user.user_id]);
 
     const token = makeToken(user);
-    res.json({ token, user: { user_id: user.user_id, email: user.email, full_name: user.full_name, nickname: user.nickname } });
+    res.json({ token, user: { user_id: user.user_id, email: user.email, full_name: user.full_name, nickname: user.nickname, balance: user.balance || 0 } });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: '서버 오류' });
@@ -224,7 +224,7 @@ app.post('/api/google-auth', async (req, res) => {
 
     const db = await getPool();
     const [existing] = await db.execute(
-      'SELECT user_id, email, full_name, nickname, status FROM Users WHERE email = ?', [email]
+      'SELECT user_id, email, full_name, nickname, status, balance FROM Users WHERE email = ?', [email]
     );
 
     let user;
@@ -243,7 +243,7 @@ app.post('/api/google-auth', async (req, res) => {
     }
 
     const token = makeToken(user);
-    res.json({ token, user: { user_id: user.user_id, email: user.email, full_name: user.full_name, nickname: user.nickname }, isNew: !existing.length });
+    res.json({ token, user: { user_id: user.user_id, email: user.email, full_name: user.full_name, nickname: user.nickname, balance: user.balance || 0 }, isNew: !existing.length });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Google 인증 실패' });

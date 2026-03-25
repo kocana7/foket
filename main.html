@@ -2898,7 +2898,7 @@ const CARD_DATA = {
       // 잔액 업데이트
       if (data.balance !== undefined) {
         var balEl = document.getElementById('userBalance');
-        if (balEl) balEl.textContent = Number(data.balance).toFixed(0) + 'F';
+        if (balEl) balEl.textContent = Number(data.balance).toLocaleString();
         try { var u = JSON.parse(localStorage.getItem('foket-user') || '{}'); u.balance = data.balance; localStorage.setItem('foket-user', JSON.stringify(u)); } catch(e) {}
       }
 
@@ -3011,7 +3011,7 @@ const CARD_DATA = {
       else {
         if (data.balance !== undefined) {
           var balEl = document.getElementById('userBalance');
-          if (balEl) balEl.textContent = Number(data.balance).toFixed(0) + 'F';
+          if (balEl) balEl.textContent = Number(data.balance).toLocaleString();
           try { var u = JSON.parse(localStorage.getItem('foket-user') || '{}'); u.balance = data.balance; localStorage.setItem('foket-user', JSON.stringify(u)); } catch(e) {}
         }
         showToast(amount + 'F 베팅 완료! (' + choice + ')');
