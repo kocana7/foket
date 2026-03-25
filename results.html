@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>결과 - Foket</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue: #334BFA; --blue-light: #eef0ff;
+      --green: #00C896; --green-bg: #e6fbf5;
+      --red: #F04438; --red-bg: #fee9e7;
+      --gray-50: #F9FAFB; --gray-100: #F2F4F7; --gray-200: #EAECF0;
+      --gray-400: #98A2B3; --gray-500: #667085; --gray-600: #475467;
+      --gray-800: #1D2939; --gray-900: #101828;
+      --white: #FFFFFF; --font: 'Noto Sans KR', sans-serif;
+    }
+    body { font-family: var(--font); background: var(--gray-50); color: var(--gray-900); min-height: 100vh; }
+
+    .navbar { background: var(--white); border-bottom: 1px solid var(--gray-200); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .nav-logo { font-size: 17px; font-weight: 900; letter-spacing: -0.5px; color: var(--blue); text-decoration: none; }
+    .nav-back { font-size: 13px; font-weight: 600; color: var(--gray-600); text-decoration: none; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--gray-200); background: var(--white); transition: background 0.15s; }
+    .nav-back:hover { background: var(--gray-100); }
+
+    .hero { text-align: center; padding: 56px 24px 36px; background: linear-gradient(135deg, #eef0ff 0%, #f9fafb 100%); }
+    .hero h1 { font-size: 30px; font-weight: 800; color: var(--gray-900); margin-bottom: 10px; }
+    .hero p { font-size: 14px; color: var(--gray-600); max-width: 460px; margin: 0 auto; line-height: 1.7; }
+
+    .filter-bar { max-width: 900px; margin: 24px auto 0; padding: 0 20px; display: flex; gap: 8px; }
+    .filter-btn { padding: 7px 18px; border-radius: 100px; border: 1px solid var(--gray-200); background: var(--white); font-size: 13px; font-weight: 600; color: var(--gray-600); cursor: pointer; transition: all 0.15s; }
+    .filter-btn.active { background: var(--blue); color: var(--white); border-color: var(--blue); }
+    .filter-btn:hover:not(.active) { background: var(--gray-100); }
+
+    .results-wrap { max-width: 900px; margin: 20px auto 80px; padding: 0 20px; }
+    .loading { text-align: center; padding: 60px; color: var(--gray-400); font-size: 14px; }
+    .empty { text-align: center; padding: 60px; color: var(--gray-400); font-size: 14px; }
+
+    .result-card { background: var(--white); border: 1px solid var(--gray-200); border-radius: 14px; margin-bottom: 12px; overflow: hidden; transition: box-shadow 0.15s; }
+    .result-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+    .result-card.settled { border-left: 4px solid var(--blue); }
+    .result-card.cancelled { border-left: 4px solid var(--gray-400); }
+    .result-card.ended { border-left: 4px solid var(--green); }
+
+    .card-top { padding: 18px 20px 14px; }
+    .card-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+    .type-badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
+    .type-badge.bet { background: #fef3c7; color: #b45309; }
+    .type-badge.vote { background: var(--blue-light); color: var(--blue); }
+    .cat-badge { font-size: 11px; color: var(--gray-500); background: var(--gray-100); padding: 3px 8px; border-radius: 6px; }
+    .status-badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
+    .status-badge.settled { background: var(--blue-light); color: var(--blue); }
+    .status-badge.cancelled { background: var(--gray-100); color: var(--gray-500); }
+    .status-badge.ended { background: var(--green-bg); color: var(--green); }
+    .end-date { font-size: 11px; color: var(--gray-400); margin-left: auto; }
+
+    .card-question { font-size: 15px; font-weight: 700; color: var(--gray-900); line-height: 1.5; margin-bottom: 14px; }
+    .card-poster { font-size: 12px; color: var(--gray-400); margin-bottom: 14px; }
+
+    .card-body { padding: 0 20px 18px; }
+
+    /* 내기 결과 */
+    .bet-result { display: flex; gap: 10px; margin-bottom: 12px; }
+    .bet-side { flex: 1; border-radius: 10px; padding: 12px 14px; }
+    .bet-side.yes { background: var(--green-bg); }
+    .bet-side.no { background: var(--red-bg); }
+    .bet-side.yes.winner { border: 2px solid var(--green); }
+    .bet-side.no.winner { border: 2px solid var(--red); }
+    .bet-side-label { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+    .bet-side.yes .bet-side-label { color: var(--green); }
+    .bet-side.no .bet-side-label { color: var(--red); }
+    .bet-side-count { font-size: 20px; font-weight: 800; color: var(--gray-900); }
+    .bet-side-amt { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
+    .winner-tag { font-size: 10px; font-weight: 700; background: var(--green); color: white; padding: 2px 6px; border-radius: 4px; margin-left: 6px; }
+    .winner-tag.no { background: var(--red); }
+
+    /* 투표 결과 */
+    .vote-opts { display: flex; flex-direction: column; gap: 8px; }
+    .vote-opt-row { display: flex; align-items: center; gap: 10px; }
+    .vote-opt-label { font-size: 13px; font-weight: 600; color: var(--gray-800); min-width: 100px; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .vote-opt-label.top { color: var(--blue); }
+    .vote-bar-wrap { flex: 1; height: 8px; background: var(--gray-100); border-radius: 100px; overflow: hidden; }
+    .vote-bar { height: 100%; background: var(--blue); border-radius: 100px; transition: width 0.5s; }
+    .vote-bar.top { background: var(--blue); }
+    .vote-bar.other { background: var(--gray-300); }
+    .vote-pct { font-size: 12px; font-weight: 700; color: var(--gray-600); min-width: 40px; text-align: right; }
+    .vote-cnt { font-size: 11px; color: var(--gray-400); min-width: 36px; text-align: right; }
+
+    .card-stats { display: flex; gap: 16px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--gray-100); }
+    .stat-item { font-size: 12px; color: var(--gray-500); }
+    .stat-item b { color: var(--gray-800); font-weight: 700; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/" class="nav-logo">FOKET.COM</a>
+  <a href="/" class="nav-back">← 메인으로</a>
+</nav>
+
+<div class="hero">
+  <h1>결과</h1>
+  <p>마감된 투표와 내기의 최종 결과를 확인하세요. (최근 30일 이내)</p>
+</div>
+
+<div class="filter-bar">
+  <button class="filter-btn active" onclick="setFilter('all', this)">전체</button>
+  <button class="filter-btn" onclick="setFilter('bet', this)">내기</button>
+  <button class="filter-btn" onclick="setFilter('vote', this)">투표</button>
+</div>
+
+<div class="results-wrap">
+  <div id="resultList" class="loading">불러오는 중...</div>
+</div>
+
+<script>
+  var _allResults = [];
+  var _currentFilter = 'all';
+  var CAT_LABELS = {
+    politics:'🗳️ 정치', sports:'🏆 스포츠', culture:'🎭 문화',
+    trading:'📈 트레이딩', weather:'🌡️ 날씨', economy:'💹 경제',
+    statement:'💬 발언', science:'🔬 과학&기술', neighbor:'🏘️ 나의 이웃', etc:'기타'
+  };
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function setFilter(type, el) {
+    _currentFilter = type;
+    document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+    el.classList.add('active');
+    renderResults();
+  }
+
+  function renderResults() {
+    var list = document.getElementById('resultList');
+    var data = _currentFilter === 'all' ? _allResults : _allResults.filter(function(r) { return r.type === _currentFilter; });
+    if (!data.length) {
+      list.className = 'empty';
+      list.innerHTML = '마감된 항목이 없습니다.';
+      return;
+    }
+    list.className = '';
+    list.innerHTML = data.map(buildCard).join('');
+  }
+
+  function buildCard(q) {
+    var catLabel = CAT_LABELS[q.category] || q.category || '기타';
+    var displayQ = escHtml(q.question_ko || q.question);
+    var poster = '@' + escHtml(q.poster_nickname || '-');
+    var endDate = q.end_date ? new Date(q.end_date).toLocaleDateString('ko-KR') : '-';
+    var pc = parseInt(q.participant_count) || 0;
+    var choices = q.choices || {};
+    var ca = q.choice_amounts || {};
+    var tb = parseFloat(q.total_bet) || 0;
+
+    var typeBadge = q.type === 'bet'
+      ? '<span class="type-badge bet">내기</span>'
+      : '<span class="type-badge vote">투표</span>';
+
+    var statusClass, statusLabel;
+    if (q.status === 'SETTLED') { statusClass = 'settled'; statusLabel = '✓ 정산완료'; }
+    else if (q.status === 'CANCELLED') { statusClass = 'cancelled'; statusLabel = '⊘ 취소'; }
+    else { statusClass = 'ended'; statusLabel = '● 마감'; }
+
+    var bodyHtml = '';
+    if (q.type === 'bet') {
+      var yes = choices['YES'] || 0;
+      var no  = choices['NO']  || 0;
+      var yesAmt = parseFloat(ca['YES'] || 0);
+      var noAmt  = parseFloat(ca['NO']  || 0);
+      var total = yes + no;
+      var yesPct = total > 0 ? Math.round(yes / total * 100) : 50;
+      var noPct = 100 - yesPct;
+      var winner = q.settle_winner; // 'YES' or 'NO' or null
+      bodyHtml = '<div class="bet-result">'
+        + '<div class="bet-side yes' + (winner === 'YES' ? ' winner' : '') + '">'
+        + '<div class="bet-side-label">YES' + (winner === 'YES' ? '<span class="winner-tag">승리</span>' : '') + '</div>'
+        + '<div class="bet-side-count">' + yesPct + '%</div>'
+        + '<div class="bet-side-amt">' + yes + '명 · ' + yesAmt.toLocaleString() + 'F</div>'
+        + '</div>'
+        + '<div class="bet-side no' + (winner === 'NO' ? ' winner' : '') + '">'
+        + '<div class="bet-side-label">NO' + (winner === 'NO' ? '<span class="winner-tag no">승리</span>' : '') + '</div>'
+        + '<div class="bet-side-count">' + noPct + '%</div>'
+        + '<div class="bet-side-amt">' + no + '명 · ' + noAmt.toLocaleString() + 'F</div>'
+        + '</div>'
+        + '</div>';
+    } else {
+      try {
+        var opts = JSON.parse(q.options || '[]');
+        var voteTotal = Object.values(choices).reduce(function(a, b) { return a + b; }, 0);
+        var topOpt = '';
+        var topCnt = 0;
+        opts.forEach(function(o) { if ((choices[o] || 0) > topCnt) { topOpt = o; topCnt = choices[o]; } });
+        bodyHtml = '<div class="vote-opts">'
+          + opts.map(function(o) {
+              var cnt = choices[o] || 0;
+              var pct = voteTotal > 0 ? Math.round(cnt / voteTotal * 100) : 0;
+              var isTop = o === topOpt && voteTotal > 0;
+              return '<div class="vote-opt-row">'
+                + '<span class="vote-opt-label' + (isTop ? ' top' : '') + '" title="' + escHtml(o) + '">' + escHtml(o.length > 14 ? o.slice(0,14)+'…' : o) + (isTop ? ' 🏆' : '') + '</span>'
+                + '<div class="vote-bar-wrap"><div class="vote-bar ' + (isTop ? 'top' : 'other') + '" style="width:' + pct + '%"></div></div>'
+                + '<span class="vote-pct">' + pct + '%</span>'
+                + '<span class="vote-cnt">(' + cnt + ')</span>'
+                + '</div>';
+            }).join('')
+          + '</div>';
+      } catch(e) { bodyHtml = ''; }
+    }
+
+    var statsHtml = '<div class="card-stats">'
+      + '<span class="stat-item">참여자 <b>' + pc + '명</b></span>'
+      + (q.type === 'bet' ? '<span class="stat-item">총 베팅 <b>' + tb.toLocaleString() + 'F</b></span>' : '')
+      + '<span class="stat-item">마감 <b>' + endDate + '</b></span>'
+      + '</div>';
+
+    return '<div class="result-card ' + statusClass + '">'
+      + '<div class="card-top">'
+      + '<div class="card-meta">'
+      + typeBadge
+      + '<span class="cat-badge">' + escHtml(catLabel) + '</span>'
+      + '<span class="status-badge ' + statusClass + '">' + statusLabel + '</span>'
+      + '<span class="end-date">' + endDate + '</span>'
+      + '</div>'
+      + '<div class="card-question">' + displayQ + '</div>'
+      + '<div class="card-poster">' + poster + '</div>'
+      + '</div>'
+      + '<div class="card-body">' + bodyHtml + statsHtml + '</div>'
+      + '</div>';
+  }
+
+  async function loadResults() {
+    try {
+      var res = await fetch('/api/results');
+      var data = await res.json();
+      _allResults = data.results || [];
+      renderResults();
+    } catch(e) {
+      document.getElementById('resultList').className = 'empty';
+      document.getElementById('resultList').textContent = '데이터를 불러올 수 없습니다.';
+    }
+  }
+
+  loadResults();
+</script>
+</body>
+</html>

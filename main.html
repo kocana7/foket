@@ -534,6 +534,7 @@
       </span>
       <button class="btn btn-ghost btn-sm" data-i18n="nav.mypage" onclick="openMyPage()">마이페이지 및 질문등록</button>
       <a href="/faq.html" class="btn btn-ghost btn-sm" style="text-decoration:none">FAQ</a>
+      <a href="/results.html" class="btn btn-ghost btn-sm" style="text-decoration:none" data-i18n="nav.results">결과</a>
       <span id="navGuest">
         <button class="btn btn-ghost btn-sm" data-i18n="nav.login" onclick="openModal('login')">로그인</button>
         <button class="btn btn-primary btn-sm" data-i18n="nav.signup" onclick="openModal('signup')">회원가입</button>
@@ -1025,7 +1026,7 @@
       'nav.home':'홈','nav.hot':'Hot 이슈','nav.politics':'정치','nav.sports':'스포츠',
       'nav.culture':'문화','nav.trading':'트레이딩','nav.weather':'날씨',
       'nav.economy':'경제','nav.statement':'발언','nav.neighbor':'나의 이웃','nav.science':'과학 & 기술',
-      'nav.mypage':'마이페이지 및 질문등록','nav.login':'로그인','nav.signup':'회원가입',
+      'nav.mypage':'마이페이지 및 질문등록','nav.login':'로그인','nav.signup':'회원가입','nav.results':'결과',
       'hero.badge':'CFTC 공인 거래소','hero.h1':'모든 것에<br/><span>거래하세요</span>',
       'hero.sub':'스포츠, 금융, 정치 등 실제 사건의 결과에 대한 계약을 사고팔 수 있습니다.',
       'hero.start':'거래 시작 →','hero.explore':'마켓 탐색',
@@ -1064,7 +1065,7 @@
       'nav.home':'Home','nav.hot':'Hot Issues','nav.politics':'Politics','nav.sports':'Sports',
       'nav.culture':'Culture','nav.trading':'Trading','nav.weather':'Weather',
       'nav.economy':'Economy','nav.statement':'Statements','nav.neighbor':'My Neighbors','nav.science':'Science & Tech',
-      'nav.mypage':'My Page & Post Question','nav.login':'Log in','nav.signup':'Sign up',
+      'nav.mypage':'My Page & Post Question','nav.login':'Log in','nav.signup':'Sign up','nav.results':'Results',
       'hero.badge':'CFTC Regulated Exchange','hero.h1':'Trade on <span>anything</span><br/>that matters',
       'hero.sub':'Buy and sell contracts on the outcomes of real-world events across sports, finance, politics, and more.',
       'hero.start':'Start Trading →','hero.explore':'Explore Markets',
@@ -1103,7 +1104,7 @@
       'nav.home':'ホーム','nav.hot':'ホット','nav.politics':'政治','nav.sports':'スポーツ',
       'nav.culture':'文化','nav.trading':'トレーディング','nav.weather':'天気',
       'nav.economy':'経済','nav.statement':'発言','nav.neighbor':'近所の人','nav.science':'科学・技術',
-      'nav.mypage':'マイページ・質問登録','nav.login':'ログイン','nav.signup':'新規登録',
+      'nav.mypage':'マイページ・質問登録','nav.login':'ログイン','nav.signup':'新規登録','nav.results':'結果',
       'hero.badge':'CFTC認定取引所','hero.h1':'重要なことすべてに<br/><span>取引しよう</span>',
       'hero.sub':'スポーツ、金融、政治など実際の出来事の結果に基づく契約を売買できます。',
       'hero.start':'取引を始める →','hero.explore':'マーケットを探す',
@@ -1142,7 +1143,7 @@
       'nav.home':'首页','nav.hot':'热点话题','nav.politics':'政治','nav.sports':'体育',
       'nav.culture':'文化','nav.trading':'交易','nav.weather':'天气',
       'nav.economy':'经济','nav.statement':'声明','nav.neighbor':'我的邻居','nav.science':'科学技术',
-      'nav.mypage':'我的页面及提问','nav.login':'登录','nav.signup':'注册',
+      'nav.mypage':'我的页面及提问','nav.login':'登录','nav.signup':'注册','nav.results':'结果',
       'hero.badge':'CFTC认证交易所','hero.h1':'交易<span>任何重要</span><br/>的事情',
       'hero.sub':'在体育、金融、政治等真实世界事件的结果上买卖合约。',
       'hero.start':'开始交易 →','hero.explore':'探索市场',
@@ -1181,7 +1182,7 @@
       'nav.home':'Accueil','nav.hot':'Tendances','nav.politics':'Politique','nav.sports':'Sports',
       'nav.culture':'Culture','nav.trading':'Trading','nav.weather':'Météo',
       'nav.economy':'Économie','nav.statement':'Déclarations','nav.neighbor':'Mon Quartier','nav.science':'Science & Tech',
-      'nav.mypage':'Mon espace & Question','nav.login':'Connexion','nav.signup':'S\'inscrire',
+      'nav.mypage':'Mon espace & Question','nav.login':'Connexion','nav.signup':'S\'inscrire','nav.results':'Résultats',
       'hero.badge':'Bourse régulée CFTC','hero.h1':'Tradez sur <span>n\'importe quoi</span><br/>qui compte',
       'hero.sub':'Achetez et vendez des contrats sur les résultats d\'événements réels dans les sports, la finance, la politique et plus encore.',
       'hero.start':'Commencer →','hero.explore':'Explorer',
@@ -1220,7 +1221,7 @@
       'nav.home':'Startseite','nav.hot':'Trending','nav.politics':'Politik','nav.sports':'Sport',
       'nav.culture':'Kultur','nav.trading':'Handel','nav.weather':'Wetter',
       'nav.economy':'Wirtschaft','nav.statement':'Aussagen','nav.neighbor':'Meine Nachbarn','nav.science':'Wissenschaft & Tech',
-      'nav.mypage':'Mein Bereich & Frage','nav.login':'Anmelden','nav.signup':'Registrieren',
+      'nav.mypage':'Mein Bereich & Frage','nav.login':'Anmelden','nav.signup':'Registrieren','nav.results':'Ergebnisse',
       'hero.badge':'CFTC-regulierte Börse','hero.h1':'Handel auf <span>alles</span><br/>was wichtig ist',
       'hero.sub':'Kaufen und verkaufen Sie Kontrakte auf die Ergebnisse realer Ereignisse in Sport, Finanzen, Politik und mehr.',
       'hero.start':'Jetzt handeln →','hero.explore':'Märkte entdecken',
@@ -1259,7 +1260,7 @@
       'nav.home':'Inicio','nav.hot':'Tendencias','nav.politics':'Política','nav.sports':'Deportes',
       'nav.culture':'Cultura','nav.trading':'Trading','nav.weather':'Clima',
       'nav.economy':'Economía','nav.statement':'Declaraciones','nav.neighbor':'Mi Barrio','nav.science':'Ciencia & Tech',
-      'nav.mypage':'Mi página & Pregunta','nav.login':'Iniciar sesión','nav.signup':'Registrarse',
+      'nav.mypage':'Mi página & Pregunta','nav.login':'Iniciar sesión','nav.signup':'Registrarse','nav.results':'Resultados',
       'hero.badge':'Bolsa regulada por CFTC','hero.h1':'Opera en <span>cualquier cosa</span><br/>que importa',
       'hero.sub':'Compra y vende contratos sobre los resultados de eventos del mundo real en deportes, finanzas, política y más.',
       'hero.start':'Empezar →','hero.explore':'Explorar mercados',
@@ -1298,7 +1299,7 @@
       'nav.home':'Главная','nav.hot':'Горячее','nav.politics':'Политика','nav.sports':'Спорт',
       'nav.culture':'Культура','nav.trading':'Трейдинг','nav.weather':'Погода',
       'nav.economy':'Экономика','nav.statement':'Заявления','nav.neighbor':'Мои соседи','nav.science':'Наука и Тех',
-      'nav.mypage':'Мой профиль и вопрос','nav.login':'Войти','nav.signup':'Регистрация',
+      'nav.mypage':'Мой профиль и вопрос','nav.login':'Войти','nav.signup':'Регистрация','nav.results':'Результаты',
       'hero.badge':'Биржа под надзором CFTC','hero.h1':'Торгуй на <span>всём важном</span><br/>в мире',
       'hero.sub':'Покупайте и продавайте контракты на исходы реальных событий: спорт, финансы, политика и многое другое.',
       'hero.start':'Начать торговлю →','hero.explore':'Исследовать рынки',
