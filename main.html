@@ -268,6 +268,8 @@
     .ticker-wrap { overflow: hidden; background: var(--blue); padding: 10px 0; position: sticky; top: 64px; z-index: 999; }
     .ticker { display: flex; animation: ticker 1500s linear infinite; width: max-content; }
     .ticker-item { display: flex; align-items: center; gap: 8px; padding: 0 24px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9); white-space: nowrap; }
+    .ticker-item[data-qid] { cursor: pointer; }
+    .ticker-item[data-qid]:hover { background: rgba(255,255,255,0.1); }
     .ticker-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); }
     @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
@@ -2560,7 +2562,8 @@ const CARD_DATA = {
             var rawKo = q.question_ko || q.question || '';
             var endStr = q.end_date ? q.end_date.slice(0,10) : '';
             var prob = parseInt(q.initial_prob) || 50;
-            return '<div class="ticker-item" data-rawq="' + rawKo.replace(/"/g,'&quot;') + '"><span class="ticker-dot"></span>'
+            return '<div class="ticker-item" data-rawq="' + rawKo.replace(/"/g,'&quot;') + '" data-qid="' + q.question_id + '" onclick="openTrade(' + q.question_id + ',' + prob + ')">'
+              + '<span class="ticker-dot"></span>'
               + '<span class="ticker-q-text">' + rawKo.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</span>'
               + ' <strong>' + prob + '%</strong>'
               + ' <span style="opacity:.7;font-weight:400;font-size:11px">' + deadlineLabel + ' ' + endStr + '</span>'
