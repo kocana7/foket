@@ -1905,13 +1905,12 @@ async function postSportsMatchQuestions(match) {
   try {
     const db = await getPool();
     const kst = formatKstTime(match.startTime);
-    const betQ  = `${match.emoji} [${match.league}] ${match.home} vs ${match.away} — ${match.home}이(가) 승리할까요? (${kst} KST)`;
-    const voteQ = `${match.emoji} [${match.league}] ${match.home} vs ${match.away} 최종 결과 예측 (${kst} KST)`;
+    const betQ = `${match.emoji} [${match.league}] ${match.home} vs ${match.away} — ${match.home}이(가) 승리할까요? (${kst} KST)`;
 
     // DB 중복 체크 (서버 재시작 후에도 안전)
     const [dup] = await db.execute(
-      'SELECT question_id FROM Questions WHERE question = ? OR question = ? LIMIT 1',
-      [betQ, voteQ]
+      'SELECT question_id FROM Questions WHERE question = ? LIMIT 1',
+      [betQ]
     );
     if (dup.length > 0) {
       _postedSportsEventIds.add(match.id);
@@ -1924,23 +1923,14 @@ async function postSportsMatchQuestions(match) {
     // 종료 시간 = 경기 시작 후 3시간
     const endDate = new Date(match.startTime.getTime() + 3 * 60 * 60 * 1000);
 
-    const voteOpts   = JSON.stringify([`${match.home} 승리`, '무승부', `${match.away} 승리`]);
-    const voteOptsKo = voteOpts;
-
     // 내기 (bet): YES = 홈팀 승리
     await db.execute(
       'INSERT INTO Questions (user_id, type, question, question_ko, poster_nickname, category, options, options_ko, initial_prob, end_date, status) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
       [_botUserId, 'bet', betQ, betQ, nick, 'sports', null, null, 50, endDate, 'APPROVED']
     );
 
-    // 투표 (vote): 승/무/패 3지선다
-    await db.execute(
-      'INSERT INTO Questions (user_id, type, question, question_ko, poster_nickname, category, options, options_ko, initial_prob, end_date, status) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
-      [_botUserId, 'vote', voteQ, voteQ, nick, 'sports', voteOpts, voteOptsKo, null, endDate, 'APPROVED']
-    );
-
     _postedSportsEventIds.add(match.id);
-    console.log(`[스포츠봇] 등록: ${match.emoji} ${match.home} vs ${match.away} (${kst} KST) — bet+vote`);
+    console.log(`[스포츠봇] 등록: ${match.emoji} ${match.home} vs ${match.away} (${kst} KST) — bet`);
   } catch (err) {
     console.error('[스포츠봇] 등록 실패:', err.message);
   }
