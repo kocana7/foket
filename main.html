@@ -2375,14 +2375,14 @@ const CARD_DATA = {
 
   // UI 라벨 다국어
   var UI_LABELS = {
-    ko: { bet:'내기', vote:'투표', participants:'명 참여', totalBet:'총 F 베팅', more:'개 더', deadline:'마감', betLabel:'베팅', viewAll:'전체보기 →' },
-    en: { bet:'Bet', vote:'Vote', participants:' participants', totalBet:' F bet', more:' more', deadline:'Ends', betLabel:'Bet', viewAll:'View All →' },
-    ja: { bet:'賭け', vote:'投票', participants:'名参加', totalBet:'F ベット', more:'件以上', deadline:'締切', betLabel:'ベット', viewAll:'すべて見る →' },
-    zh: { bet:'投注', vote:'投票', participants:'人参与', totalBet:'F 投注', more:'个更多', deadline:'截止', betLabel:'投注', viewAll:'查看全部 →' },
-    fr: { bet:'Pari', vote:'Vote', participants:' participants', totalBet:' F pariés', more:' de plus', deadline:'Fin', betLabel:'Miser', viewAll:'Voir tout →' },
-    de: { bet:'Wette', vote:'Abstimmung', participants:' Teilnehmer', totalBet:' F gesetzt', more:' mehr', deadline:'Ende', betLabel:'Wetten', viewAll:'Alle →' },
-    es: { bet:'Apuesta', vote:'Voto', participants:' participantes', totalBet:' F apostados', more:' más', deadline:'Vence', betLabel:'Apostar', viewAll:'Ver todo →' },
-    ru: { bet:'Ставка', vote:'Голос', participants:' участников', totalBet:' F ставок', more:' ещё', deadline:'Конец', betLabel:'Ставка', viewAll:'Все →' },
+    ko: { bet:'내기', vote:'투표', participants:'명 참여', totalBetPre:'총 ', totalBet:'F 베팅', more:'개 더', deadline:'마감', betLabel:'베팅', viewAll:'전체보기 →' },
+    en: { bet:'Bet', vote:'Vote', participants:' participants', totalBetPre:'', totalBet:' F bet', more:' more', deadline:'Ends', betLabel:'Bet', viewAll:'View All →' },
+    ja: { bet:'賭け', vote:'投票', participants:'名参加', totalBetPre:'', totalBet:'F ベット', more:'件以上', deadline:'締切', betLabel:'ベット', viewAll:'すべて見る →' },
+    zh: { bet:'投注', vote:'投票', participants:'人参与', totalBetPre:'', totalBet:'F 投注', more:'个更多', deadline:'截止', betLabel:'投注', viewAll:'查看全部 →' },
+    fr: { bet:'Pari', vote:'Vote', participants:' participants', totalBetPre:'', totalBet:' F pariés', more:' de plus', deadline:'Fin', betLabel:'Miser', viewAll:'Voir tout →' },
+    de: { bet:'Wette', vote:'Abstimmung', participants:' Teilnehmer', totalBetPre:'', totalBet:' F gesetzt', more:' mehr', deadline:'Ende', betLabel:'Wetten', viewAll:'Alle →' },
+    es: { bet:'Apuesta', vote:'Voto', participants:' participantes', totalBetPre:'', totalBet:' F apostados', more:' más', deadline:'Vence', betLabel:'Apostar', viewAll:'Ver todo →' },
+    ru: { bet:'Ставка', vote:'Голос', participants:' участников', totalBetPre:'', totalBet:' F ставок', more:' ещё', deadline:'Конец', betLabel:'Ставка', viewAll:'Все →' },
   };
   function ul(key) { return (UI_LABELS[currentLang] || UI_LABELS.en)[key] || UI_LABELS.ko[key] || ''; }
 
@@ -2408,7 +2408,7 @@ const CARD_DATA = {
         + '<div class="bet-stat-row"><span class="bet-stat-no">No ' + noPct + '%</span><div class="bet-stat-bar-wrap"><div class="bet-stat-bar-no" style="width:' + noPct + '%"></div></div></div>'
         + '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">'
         + '<span class="part-count">👥 ' + totalCount + ul('participants') + '</span>'
-        + '<span style="font-size:11px;color:var(--blue);font-weight:700">' + totalBetAmt.toLocaleString() + ul('totalBet') + '</span>'
+        + '<span style="font-size:11px;color:var(--blue);font-weight:700">' + ul('totalBetPre') + totalBetAmt.toLocaleString() + ul('totalBet') + '</span>'
         + '</div>'
         + '</div>';
     } else {
