@@ -270,6 +270,26 @@
     .ticker-item { display: flex; align-items: center; gap: 8px; padding: 0 24px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9); white-space: nowrap; }
     .ticker-item[data-qid] { cursor: pointer; }
     .ticker-item[data-qid]:hover { background: rgba(255,255,255,0.1); }
+    /* 질문 미리보기 모달 */
+    .qpreview-modal { background: var(--white); border-radius: 20px; padding: 28px 24px 24px; max-width: 480px; width: 100%; position: relative; max-height: 90vh; overflow-y: auto; }
+    .qpreview-cat { font-size: 11px; font-weight: 700; color: var(--blue); background: var(--blue-light); padding: 3px 10px; border-radius: 100px; display: inline-block; margin-bottom: 12px; }
+    .qpreview-q { font-size: 17px; font-weight: 800; color: var(--gray-900); line-height: 1.55; margin-bottom: 8px; }
+    .qpreview-meta { font-size: 12px; color: var(--gray-400); margin-bottom: 20px; }
+    .qpreview-stats { background: var(--gray-50); border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; }
+    .qpreview-stat-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+    .qpreview-stat-row:last-child { margin-bottom: 0; }
+    .qpreview-stat-label { color: var(--gray-500); }
+    .qpreview-stat-val { font-weight: 700; color: var(--gray-900); }
+    .qpreview-bar-wrap { height: 8px; background: var(--gray-200); border-radius: 100px; overflow: hidden; margin-bottom: 16px; }
+    .qpreview-bar-yes { height: 100%; background: var(--green); border-radius: 100px; transition: width 0.4s; display: inline-block; }
+    .qpreview-vote-opts { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+    .qpreview-vote-row { display: flex; align-items: center; gap: 10px; }
+    .qpreview-vote-label { font-size: 13px; font-weight: 600; color: var(--gray-800); min-width: 90px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .qpreview-vote-bar-wrap { flex: 1; height: 8px; background: var(--gray-100); border-radius: 100px; overflow: hidden; }
+    .qpreview-vote-bar { height: 100%; background: var(--blue); border-radius: 100px; }
+    .qpreview-vote-pct { font-size: 12px; font-weight: 700; color: var(--gray-600); min-width: 36px; text-align: right; }
+    .qpreview-action-btn { width: 100%; padding: 14px; border-radius: 12px; border: none; font-size: 15px; font-weight: 700; cursor: pointer; background: var(--blue); color: white; transition: background 0.15s; }
+    .qpreview-action-btn:hover { background: #2438e0; }
     .ticker-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); }
     @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
@@ -995,6 +1015,13 @@
     <div id="vmOptions" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px"></div>
     <div style="font-size:12px;color:var(--gray-400);margin-bottom:14px">참여 시 <b>1F</b> 차감됩니다</div>
     <button class="btn btn-primary btn-md" style="width:100%" id="vmConfirmBtn" onclick="confirmVote()">투표하기 →</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="qPreviewModal" onclick="closeQPreviewOutside(event)">
+  <div class="qpreview-modal">
+    <button class="modal-close" onclick="closeQPreview()">✕</button>
+    <div id="qPreviewContent"></div>
   </div>
 </div>
 
@@ -2562,7 +2589,7 @@ const CARD_DATA = {
             var rawKo = q.question_ko || q.question || '';
             var endStr = q.end_date ? q.end_date.slice(0,10) : '';
             var prob = parseInt(q.initial_prob) || 50;
-            return '<div class="ticker-item" data-rawq="' + rawKo.replace(/"/g,'&quot;') + '" data-qid="' + q.question_id + '" onclick="openTrade(' + q.question_id + ',' + prob + ')">'
+            return '<div class="ticker-item" data-rawq="' + rawKo.replace(/"/g,'&quot;') + '" data-qid="' + q.question_id + '" onclick="openQPreview(' + q.question_id + ',' + prob + ')">'
               + '<span class="ticker-dot"></span>'
               + '<span class="ticker-q-text">' + rawKo.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</span>'
               + ' <strong>' + prob + '%</strong>'
@@ -2721,6 +2748,76 @@ const CARD_DATA = {
     document.getElementById('tradeQuestion').textContent = displayText;
   }
   function closeTrade() { document.getElementById('tradeModal').classList.remove('open'); }
+
+  /* ── 질문 미리보기 모달 (ticker 클릭용) ── */
+  function closeQPreview() { document.getElementById('qPreviewModal').classList.remove('open'); }
+  function closeQPreviewOutside(e) { if (e.target === document.getElementById('qPreviewModal')) closeQPreview(); }
+
+  async function openQPreview(questionId, prob) {
+    var q = _questionsById[questionId];
+    if (!q) { openTrade(questionId, prob); return; } // 캐시 없으면 바로 모달
+
+    var choices = q.choices || {};
+    var ca = q.choice_amounts || {};
+    var pc = parseInt(q.participant_count) || 0;
+    var tb = parseFloat(q.total_bet) || 0;
+    var endDate = q.end_date ? new Date(q.end_date).toLocaleDateString('ko-KR') : '-';
+    var poster = '@' + (q.poster_nickname || q.nickname || '-');
+
+    // 질문 텍스트 (번역 적용)
+    var rawText = q.question_ko || q.question || '';
+    var displayQ = currentLang !== 'ko' ? await translateIfNeeded(rawText, currentLang) : rawText;
+
+    var catMap = { politics:'🗳️ 정치', sports:'🏆 스포츠', culture:'🎭 문화', trading:'📈 트레이딩', weather:'🌡️ 날씨', economy:'💹 경제', statement:'💬 발언', science:'🔬 과학&기술', neighbor:'🏘️ 나의 이웃', etc:'기타' };
+    var catLabel = catMap[q.category] || q.category || '기타';
+    var typeLabel = q.type === 'bet' ? '내기' : '투표';
+
+    var contentHtml = '<span class="qpreview-cat">' + catLabel + ' · ' + typeLabel + '</span>'
+      + '<div class="qpreview-q">' + displayQ.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>'
+      + '<div class="qpreview-meta">' + poster + ' · 마감 ' + endDate + '</div>';
+
+    if (q.type === 'bet') {
+      var yes = choices['YES'] || 0;
+      var no  = choices['NO']  || 0;
+      var total = yes + no;
+      var yesPct = total > 0 ? Math.round(yes / total * 100) : parseInt(q.initial_prob) || 50;
+      var noPct = 100 - yesPct;
+      var yesAmt = parseFloat(ca['YES'] || 0);
+      var noAmt  = parseFloat(ca['NO']  || 0);
+      contentHtml += '<div class="qpreview-stats">'
+        + '<div class="qpreview-stat-row"><span class="qpreview-stat-label">YES</span><span class="qpreview-stat-val" style="color:var(--green)">' + yesPct + '% (' + yes + '명 · ' + yesAmt.toLocaleString() + 'F)</span></div>'
+        + '<div class="qpreview-stat-row"><span class="qpreview-stat-label">NO</span><span class="qpreview-stat-val" style="color:var(--red)">' + noPct + '% (' + no + '명 · ' + noAmt.toLocaleString() + 'F)</span></div>'
+        + '<div class="qpreview-stat-row"><span class="qpreview-stat-label">총 베팅</span><span class="qpreview-stat-val">' + tb.toLocaleString() + 'F</span></div>'
+        + '</div>'
+        + '<div class="qpreview-bar-wrap"><div style="height:100%;display:flex"><div style="width:' + yesPct + '%;background:var(--green);border-radius:100px 0 0 100px"></div><div style="width:' + noPct + '%;background:var(--red);border-radius:0 100px 100px 0"></div></div></div>'
+        + '<button class="qpreview-action-btn" onclick="closeQPreview();openTrade(' + questionId + ',' + (parseInt(q.initial_prob)||50) + ')">베팅하기 →</button>';
+    } else {
+      try {
+        var opts = JSON.parse(q.options || '[]');
+        var voteTotal = Object.values(choices).reduce(function(a,b){return a+b;},0);
+        var topOpt = '';
+        var topCnt = 0;
+        opts.forEach(function(o){ if((choices[o]||0)>topCnt){topOpt=o;topCnt=choices[o];} });
+        contentHtml += '<div class="qpreview-vote-opts">';
+        contentHtml += opts.map(function(o) {
+          var cnt = choices[o] || 0;
+          var pct = voteTotal > 0 ? Math.round(cnt / voteTotal * 100) : 0;
+          var isTop = o === topOpt && voteTotal > 0;
+          return '<div class="qpreview-vote-row">'
+            + '<span class="qpreview-vote-label" style="' + (isTop ? 'color:var(--blue)' : '') + '">' + o.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</span>'
+            + '<div class="qpreview-vote-bar-wrap"><div class="qpreview-vote-bar" style="width:' + pct + '%;background:' + (isTop ? 'var(--blue)' : 'var(--gray-300)') + '"></div></div>'
+            + '<span class="qpreview-vote-pct">' + pct + '%</span>'
+            + '</div>';
+        }).join('');
+        contentHtml += '</div>'
+          + '<div class="qpreview-stats" style="margin-bottom:16px"><div class="qpreview-stat-row"><span class="qpreview-stat-label">참여자</span><span class="qpreview-stat-val">' + pc + '명</span></div></div>';
+      } catch(e) {}
+      contentHtml += '<button class="qpreview-action-btn" onclick="closeQPreview();openTrade(' + questionId + ',' + (parseInt(q.initial_prob)||50) + ')">투표하기 →</button>';
+    }
+
+    document.getElementById('qPreviewContent').innerHTML = contentHtml;
+    document.getElementById('qPreviewModal').classList.add('open');
+  }
   function closeTradeOutside(e) { if (e.target === document.getElementById('tradeModal')) closeTrade(); }
 
   /* ── Vote modal ── */
